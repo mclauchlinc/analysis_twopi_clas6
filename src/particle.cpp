@@ -1,0 +1,237 @@
+#include "particle.hpp"
+
+//Initialize the particle by filling it with everything we want
+Particle::Particle(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_, bool thrown_){
+	_idx = idx_; 
+	_run = flags_->Flags::Run();
+	_thrown = thrown_;
+	_sim = flags_->Flags::Sim();
+	if(_sim){
+		_weight = data_->Branches::weight();
+	}else{
+		_weight = 1.0;
+	}
+	if(_thrown){
+		Particle::PID_Thrown(idx_,data_);
+	}else{
+		Particle::PID_Recon(idx_,data_,flags_);
+	}
+}
+
+void Particle::PID_Thrown(int idx_, std::shared_ptr<Branches> data_){
+	_p = data_->Branches::mcp(_idx);
+	_theta = data_->Branches::mctheta(_idx);
+	_phi = data_->Branches::mcphi(_idx);
+	switch(data_->Branches::mcid(_idx)){
+		case _ELECTRON_:
+			_pid[0] = true;
+		break;
+		case _PROTON_:
+			_pid[1] = true;
+		break;
+		case _PION_:
+			_pid[2] = true;
+		break;
+		case -_PION_:
+			_pid[3] = true;
+		break;
+		default:
+			std::cout<<"Unrecognized Particle ID for Thrown Particle\n";
+		break;
+	}
+}
+
+void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
+	//Kinematic Quantities
+	_p = data_->Branches::p(idx_);
+	_theta = physics::get_theta(data_->Branches::cz(idx_));
+	_phi = physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_));
+	_q = data_->Branches::q(idx_);
+
+	//Particle ID
+	_pid = pid::pid(idx_,data_,flags_);
+	_ided = true;
+	if(idx_ == 0){//_Electron_
+		//Detector Quantities
+		_etot = data_->Branches::etot(idx_);
+		_sf = (_etot/_p);
+		_nphe = data_->Branches::nphe(idx_);
+		_cc_seg = data_->Branches::cc_segm(idx_);
+		_cc_lrc = detect::cc_lrc(_cc_seg);
+		if(_pid[0]){
+			_sf_pass = true;
+			_min_ec_pass = true;
+			_cc_pass = true;
+			_sanity_pass[0] = true;
+			_dt_pass[0] = true;
+			_fid_pass[0] = true;
+			//_beta_pass[0] = true;
+		}else{
+			_sanity_pass[0] = pid::sanity_ele(idx_,data_,flags_);
+			if(_sanity_pass[0]){
+				_sf_pass = pid::sf(idx_,data_,flags_);
+				_min_ec_pass = pid::min_ec(idx_,data_,flags_);
+				_cc_pass = pid::min_cc(idx_,data_,flags_);
+				_sanity_pass[0] = pid::sanity_ele(idx_,data_,flags_);
+				//_dt_pass[0] = pid::delta_t_ele(idx_,data_,flags_);//Maybe implement later
+				_fid_pass[0] = pid::fid_ele(idx_,data_,flags_);
+				//_beta_pass[0] = pid::
+			}
+		}
+	}else{//Hadron
+		if(_q > 0){
+			if(_pid[1]){//Proton
+				_sanity_pass[1] = true;
+				_dt_pass[1] = true;
+				_fid_pass[1] = true;
+			}else{
+				_sanity_pass[1] = pid::sanity_pro(idx_,data_,flags_);
+				if(_sanity_pass[1]){
+					_dt_pass[1] = pid::delta_t_pro(idx_,data_,flags_);
+					_fid_pass[1] = pid::fid_pro(idx_,data_,flags_);
+				}
+			}
+			if(_pid[2]){//Pip
+				_sanity_pass[2] = true;
+				_dt_pass[2] = true;
+				_fid_pass[2] = true;
+			}else{
+				_sanity_pass[2] = pid::sanity_pip(idx_,data_,flags_);
+				if(_sanity_pass[2]){
+					_dt_pass[2] = pid::delta_t_pip(idx_,data_,flags_);
+					_fid_pass[2] = pid::fid_pip(idx_,data_,flags_);
+				}
+			}
+		}else if(_q < 0){
+			if(_pid[3]){//Pim
+				_sanity_pass[3] = true;
+				_dt_pass[3] = true;
+				_fid_pass[3] = true;
+			}else{
+				_sanity_pass[3] = pid::sanity_pim(idx_,data_,flags_);
+				if(_sanity_pass[3]){
+					_dt_pass[3] = pid::delta_t_pim(idx_,data_,flags_);
+					_fid_pass[3] = pid::fid_pim(idx_,data_,flags_);
+				}
+			}
+		}
+	}
+}
+
+bool Particle::Pass_Sanity(int i){
+	return _sanity_pass[i];
+}
+bool Particle::Pass_ec(){
+	return _min_ec_pass;
+}
+bool Particle::Pass_fid(int i){
+	return _fid_pass[i];
+}
+bool Particle::Pass_sf(){
+	return _sf_pass;
+}
+bool Particle::Pass_cc(){
+	return _cc_pass;
+}
+bool Particle::Pass_dt(int i){
+	return _dt_pass[i];
+}
+bool Particle::Pass_pid(int i){
+	return _pid[i];
+}
+bool Particle::Corr_p(){
+	return _p_corr; 
+}
+int Particle::ID_crisis(){
+	return _id_crisis; 
+}
+bool Particle::IDed(){
+	return _ided;
+}
+bool Particle::Is_Sim(){
+	return _sim;
+}
+
+bool Particle::Is_Thrown(){
+	return _thrown;
+}
+
+
+bool Particle::Is_Elec(){
+	return _pid[0];
+}
+bool Particle::Is_Pro(){
+	return _pid[1];
+}
+bool Particle::Is_Pip(){
+	return _pid[2];
+}
+bool Particle::Is_Pim(){
+	return _pid[3];
+}
+
+float Particle::Get_p(){
+	return _p; 
+}
+float Particle::Get_theta(){
+	return _theta; 
+}
+float Particle::Get_phi(){
+	return _phi; 
+}
+
+int Particle::Get_run(){
+	return _run;
+}
+
+int Particle::Get_idx(){
+	return _idx;
+}
+
+float Particle::Get_Weight(){
+	return _weight;
+}
+
+int Particle::Get_q(){
+	return _q;
+}
+
+float Particle::W(){//Will assume whatever particle is there is an electron
+	TLorentzVector k_mu_prime = physics::Make_4Vector(true, _p, _theta, _phi, _me_);
+	return physics::W(k_mu_prime,_run);
+}
+
+float Particle::Q2(){
+	TLorentzVector k_mu_prime = physics::Make_4Vector(true, _p, _theta, _phi, _me_);
+	return physics::Q2(k_mu_prime,_run);
+}
+
+int Particle::Sector(){
+	return physics::get_sector(_phi);
+}
+
+TLorentzVector Particle::Get_4Vec(int i){
+	TLorentzVector output; 
+	if(_pid[i]){
+		switch(i){
+			case 0:
+				output = physics::Make_4Vector(true, _p, _theta, _phi, _me_);
+			break;
+			case 1:
+				output = physics::Make_4Vector(true, _p, _theta, _phi, _mp_);
+			break;
+			case 2:
+				output = physics::Make_4Vector(true, _p, _theta, _phi, _mpi_);
+			break;
+			case 3:
+				output = physics::Make_4Vector(true, _p, _theta, _phi, _mpi_);
+			break;
+			default:
+				std::cout<<"Called for bad particle idx\n";
+			break;
+		}
+	}else{
+		std::cout<<"Called for a bad Particle 4Vec\tidx: "<<i <<"\n";
+	}
+	return output;
+}
