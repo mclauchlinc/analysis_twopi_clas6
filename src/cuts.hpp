@@ -304,6 +304,7 @@ namespace cuts{
 	//Putting together the e_sanity cuts based on environment we set
 	//In Analysis W Q2 regiem
 	bool in_range(float W_, float Q2_);
+	bool in_range(float W_);
 	//Sanity Cuts
 	bool e_sanity(int dc_, int sc_, int ec_, int cc_, int stat_);
 	bool pro_sanity(int dc_, int sc_, int stat_);

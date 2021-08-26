@@ -74,9 +74,9 @@ void plot::plot_no_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 		//hist_->Fill_SF();
 		//hist_->Fill_CC();
 		//hist_->Fill_EC();
-		hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_none_,_cut_[0],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+		hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_none_,_cut_[0],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 	}
-	hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_none_,_sector_[particle_.Particle::Sector()-1],_cut_[0],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+	hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_none_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,flags_,particle_.Particle::Get_Weight());
 	//hist_->Fill_Delta();
 }
 void plot::plot_sanity_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
@@ -85,18 +85,18 @@ void plot::plot_sanity_cut(Particle particle_, std::shared_ptr<Histogram> hist_,
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sanity_,_cut_[0],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sanity_,_cut_[0],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
-		hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sanity_,_sector_[particle_.Particle::Sector()-1],_cut_[0],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sanity_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,flags_,particle_.Particle::Get_Weight());
 		//hist_->Fill_Delta();
 	}else{
 		if(par_ == 0){
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sanity_,_cut_[1],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sanity_,_cut_[1],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
-		hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sanity_,_sector_[particle_.Particle::Sector()-1],_cut_[1],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sanity_,_sector_[particle_.Particle::Sector()-1],_cut_[1],_mnone_,flags_,particle_.Particle::Get_Weight());
 		//hist_->Fill_Delta();
 	}
 }
@@ -106,18 +106,18 @@ void plot::plot_fid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, st
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_fid_cut_,_cut_[0],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_fid_cut_,_cut_[0],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
-		hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_fid_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_fid_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,flags_,particle_.Particle::Get_Weight());
 		//hist_->Fill_Delta();
 	}else{
 		if(par_ == 0){
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_fid_cut_,_cut_[1],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_fid_cut_,_cut_[1],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
-		hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_fid_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_fid_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],_mnone_,flags_,particle_.Particle::Get_Weight());
 		//hist_->Fill_Delta();
 	}
 }
@@ -127,18 +127,18 @@ void plot::plot_delta_cut(Particle particle_, std::shared_ptr<Histogram> hist_, 
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_delta_cut_,_cut_[0],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_delta_cut_,_cut_[0],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
-		hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_delta_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_delta_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,flags_,particle_.Particle::Get_Weight());
 		//hist_->Fill_Delta();
 	}else{
 		if(par_ == 0){
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_delta_cut_,_cut_[1],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_delta_cut_,_cut_[1],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
-		hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_delta_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_delta_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],_mnone_,flags_,particle_.Particle::Get_Weight());
 		//hist_->Fill_Delta();
 	}
 }
@@ -148,16 +148,16 @@ void plot::plot_sf_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sf_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sf_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,flags_,particle_.Particle::Get_Weight());
 			//hist_->Fill_Delta();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sf_cut_,_cut_[0],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sf_cut_,_cut_[0],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}else{
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sf_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sf_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],_mnone_,flags_,particle_.Particle::Get_Weight());
 			//hist_->Fill_Delta();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sf_cut_,_cut_[1],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sf_cut_,_cut_[1],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
 	}
 }
@@ -167,16 +167,16 @@ void plot::plot_cc_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,flags_,particle_.Particle::Get_Weight());
 			//hist_->Fill_Delta();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_cc_cut_,_cut_[0],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_cc_cut_,_cut_[0],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}else{
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],_mnone_,flags_,particle_.Particle::Get_Weight());
 			//hist_->Fill_Delta();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_cc_cut_,_cut_[1],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_cc_cut_,_cut_[1],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
 	}
 }
@@ -186,16 +186,16 @@ void plot::plot_ec_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_ec_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_ec_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,flags_,particle_.Particle::Get_Weight());
 			//hist_->Fill_Delta();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_ec_cut_,_cut_[0],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_ec_cut_,_cut_[0],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}else{
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_ec_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_ec_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[1],_mnone_,flags_,particle_.Particle::Get_Weight());
 			//hist_->Fill_Delta();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_ec_cut_,_cut_[1],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_ec_cut_,_cut_[1],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
 	}
 }
@@ -224,18 +224,18 @@ void plot::plot_pid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, st
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_pid_,_cut_[0],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_pid_,_cut_[0],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
-		hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),particle_.Particle::Get_phi(),_pid_,_sector_[particle_.Particle::Sector()-1],_cut_[0],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),particle_.Particle::Get_phi(),_pid_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,flags_,particle_.Particle::Get_Weight());
 		//hist_->Fill_Delta();
 	}else{
 		if(par_ == 0){
 			//hist_->Fill_SF();
 			//hist_->Fill_CC();
 			//hist_->Fill_EC();
-			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_pid_,_cut_[1],fun::top_idx(_mnone_),false,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_pid_,_cut_[1],_mnone_,false,flags_,particle_.Particle::Get_Weight());
 		}
-		hist_->Histogram::Fid_Fill(par_,particle_.Particle::Get_theta(),particle_.Particle::Get_phi(),_pid_,_sector_[particle_.Particle::Sector()-1],_cut_[1],fun::top_idx(_mnone_),flags_,particle_.Particle::Get_Weight());
+		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),particle_.Particle::Get_phi(),_pid_,_sector_[particle_.Particle::Sector()-1],_cut_[1],_mnone_,flags_,particle_.Particle::Get_Weight());
 		//hist_->Fill_Delta();
 	}
 }
@@ -248,7 +248,7 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 	if(thrown_){
 
 	}else{
-		std::cout<<"Plotting Event: " <<_top_[event_.Event::Top()] <<"\n";
+		//std::cout<<"Plotting Event: " <<_top_[event_.Event::Top()] <<"\n";
 		for(int i=0; i<4; i++){//Topology
 			if(event_.Event::Top()==i){
 				if(event_.Event::Pass()){
@@ -259,12 +259,12 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 							//hist_->Fill_CC();
 							//hist_->Fill_EC();
 						}
-						hist_->Histogram::Fid_Fill(j,event_.Event::Theta(j),event_.Event::Phi(j),_event_,_sector_[event_.Event::Sector(j)-1],_cut_[0],i,flags_,event_.Event::Weight());
+						hist_->Histogram::Fid_Fill(_species_[j],event_.Event::Theta(j),event_.Event::Phi(j),_event_,_sector_[event_.Event::Sector(j)-1],_cut_[0],_top_[i],flags_,event_.Event::Weight());
 						//hist_->Fill_Delta();
 					}
 					hist_->Histogram::MM_Fill(_top_[i],_cut_applied_,_clean_,event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
 					//hist_->Fill_MM(i);
-					hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_[0],event_.Event::Top(),thrown_,flags_,event_.Event::Weight());
+					hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_[0],_top_[event_.Event::Top()],thrown_,flags_,event_.Event::Weight());
 				}else{
 					//PID Plots with Event Selection
 					for(int j=0; j<4; j++){//Particle
@@ -274,12 +274,12 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 							//hist_->Fill_EC();
 						}
 						
-						hist_->Histogram::Fid_Fill(j,event_.Event::Theta(j),event_.Event::Phi(j),_event_,_sector_[event_.Event::Sector(j)-1],_cut_[1],i,flags_,event_.Event::Weight());
+						hist_->Histogram::Fid_Fill(_species_[j],event_.Event::Theta(j),event_.Event::Phi(j),_event_,_sector_[event_.Event::Sector(j)-1],_cut_[1],_top_[i],flags_,event_.Event::Weight());
 						//hist_->Fill_Delta();
 					}
 					hist_->Histogram::MM_Fill(_top_[i],_anti_cut_,_clean_,event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
 					//hist_->Fill_MM(i);
-					hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_[1],event_.Event::Top(),thrown_,flags_,event_.Event::Weight());
+					hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_[1],_top_[event_.Event::Top()],thrown_,flags_,event_.Event::Weight());
 				}
 				hist_->Histogram::MM_Fill(_top_[i],_no_cut_,_clean_,event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
 			}
@@ -289,7 +289,7 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 
 void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
 	int top = event_.Event::Top();
-	std::cout<<"Plotting Clean Event: " <<_top_[event_.Event::Top()] <<"\n";
+	//std::cout<<"Plotting Clean Event: " <<_top_[event_.Event::Top()] <<"\n";
 	for(int j=0; j<4; j++){//Particle
 		if(j == 0){//Electron
 			//hist_->Fill_SF();
@@ -329,8 +329,8 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 			}
 			//hist_->Fill_MM(i);
 			//std::cout<<"\ttop: " <<_top_[i] <<"  cut: " <<_cut_applied_ <<"   MM^2: " <<event_.Event::MM2() <<"   W: " <<event_.Event::W() <<"\n";
-			hist_->Histogram::MM_Fill(_top_[i],_cut_applied_,_isolated_,event_.Event::MM(),event_.Event::W(),event_.Event::Weight(),flags_);
-			hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_[0],fun::top_idx(_mall_),false,flags_,event_.Event::Weight());
+			//hist_->Histogram::MM_Fill(_top_[i],_cut_applied_,_isolated_,event_.Event::MM(),event_.Event::W(),event_.Event::Weight(),flags_);
+			hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mall_,false,flags_,event_.Event::Weight());
 		}
 	}
 	

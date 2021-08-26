@@ -79,6 +79,7 @@ bool pcut_perform(const char * species_, const char* pcut_, std::shared_ptr<Flag
 int pcut_offset(const char * species_, const char * pcut_, std::shared_ptr<Flags> flags_);
 int clean_idx(const char * clean_);
 int sim_idx(bool sim_);
+bool top_perform(const char* top_, std::shared_ptr<Flags> flags_);
 //int array_size(char* array_[]);
 //int array_size(const char* array_[]);
 }

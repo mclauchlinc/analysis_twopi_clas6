@@ -257,6 +257,9 @@ protected:
 	TH1F_ptr_4d _MM_hist;
 	Bool_4d _MM_made;
 
+	TH2F_ptr_5d _SF_hist;
+	Bool_5d _SF_made;
+
 
 	//TH2F_ptr_5d _Made_Fid_hist;//[7][4][11][30][26][6][2][2];//sector, species, cut, W binning, p binning, topology, anti, weight
 	/*TH2F_ptr _SF_hist[10][30][7][6][2];//cuts, W Binning, Sector, topology, anti, weight
@@ -350,7 +353,7 @@ public:
 	void WQ2_Make(std::shared_ptr<Flags> flags_);
 	std::vector<int> WQ2_cut_idx(const char* ecut_, const char * cut_, const char * top_, const char * weight_, const char * recon_, std::shared_ptr<Flags> flags_);
 	bool Made_WQ2_idx(const char* ecut_, const char * cut_, const char* top_, const char * weight_, const char * recon_);
-	void WQ2_Fill(float W_, float Q2_,const char* ecut_,const  char *cut_, int top_, bool thrown_, std::shared_ptr<Flags> flags_, float weight_);
+	void WQ2_Fill(float W_, float Q2_,const char* ecut_,const  char *cut_, const char * top_, bool thrown_, std::shared_ptr<Flags> flags_, float weight_);
 	void WQ2_Write(std::shared_ptr<Flags> flags_);
 	 //*--------------------------------End W Q2 Plot----------------------------*
 
@@ -361,11 +364,28 @@ public:
 	int hcut_idx(const char * hcut_, int hadron_, std::shared_ptr<Flags> flags_);
 	bool Made_Fid_idx(const char* species_, const char* pcut_,const char * sector_, const char * cut_, const char * top_, const char * weight_);
 	std::vector<int> Fid_cut_idx(const char* species_, const char* pcut_,const char * sector_, const char * cut_, const char * top_, const char * weight_, std::shared_ptr<Flags> flags_);
-	void Fid_Fill(int species_, float theta_, float phi_,const char* pcut_,const char * sector_,const char *cut_, int top_, std::shared_ptr<Flags> flags_, float weight_);
+	void Fid_Fill(const char * species_, float theta_, float phi_,const char* pcut_,const char * sector_,const char *cut_, const char* top_, std::shared_ptr<Flags> flags_, float weight_);
 	void Fid_Write(std::shared_ptr<Flags> flags_);
 	 //*--------------------------------End Fid Plot----------------------------*
 
-	 //*-------------------------------Start MM Plot----------------------------*
+	//*--------------------------------End SF Plot----------------------------*
+	void SF_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> SF_idx(const char* ecut_, const char* cut_, const char* top_, const char* sector_, const char * W_dep_, std::shared_ptr<Flags> flags_, float W_=NAN);
+	void SF_Fill(float p_, float sf_, float W_, const char* ecut_, const char* cut_, const char* top_, int sector_, float weight_, std::shared_ptr<Flags> flags_);
+	void SF_Write(std::shared_ptr<Flags> flags_);
+	//*--------------------------------End SF Plot----------------------------*
+	//*-------------------------------Start CC Plot----------------------------*
+ 	//*-------------------------------End CC Plot-----------------------------*
+
+ 	//*-------------------------------Start EC Plot----------------------------*
+ 	//*-------------------------------End EC Plot------------------------------*
+
+ 	//*-------------------------------Start Vertex Plot----------------------------*
+ 	//*-------------------------------End Vertex Plot------------------------------*
+
+ 	//*-------------------------------Start Delta T Plot----------------------------*
+ 	//*-------------------------------End Delta T Plot------------------------------*
+	//*-------------------------------Start MM Plot----------------------------*
 	void MM_Make(std::shared_ptr<Flags> flags_);
 	void MM_Fill(const char* top_, const char* cut_, const char * clean_, float MM_, float W_, float weight_, std::shared_ptr<Flags> flags_);
 	void MM_Write(std::shared_ptr<Flags> flags_);

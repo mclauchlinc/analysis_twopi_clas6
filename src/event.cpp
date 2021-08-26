@@ -11,7 +11,7 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, std::shared_ptr
 		_weight = weight_;
 		_top[top_] = true;
 		if(cuts::MM_cut(top_,_MM,_W,flags_)){
-			std::cout<<"\tPassed " <<_top_[top_] <<"\n";
+			//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
 			_pass[top_] = true;
 			_pass_top = top_;
 			_hel = hel_; 
@@ -31,7 +31,7 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, s
 		_weight = weight_;
 		_top[top_] = true;
 		if(cuts::MM_cut(top_,_MM,_W,flags_) && _MM != 0.0){
-			std::cout<<"\tPassed " <<_top_[top_] <<"\n";
+			//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
 			_pass[top_] = true;
 			_pass_top = top_;
 			_hel = hel_; 

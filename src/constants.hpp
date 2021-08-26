@@ -8,7 +8,7 @@
 //static int num_mixed_p_pip = 0; 
 
 static const inline  int MAX_PARTS = 20; 
-static const inline  int _NUM_THREADS_ = 1;//6;//4;
+static const inline  int _NUM_THREADS_ = 6;//4;
 
 static const inline  float _c_special_ = 29.9792458; //speed of light in cm/ns
 static const inline  float _c_convert_ = 10000000; //Convert c_special to m/s
@@ -157,6 +157,11 @@ static const inline  char * _thrown_ = "thrown";
 static const inline  char * _dirty_ = "dirty";
 static const inline  char * _clean_ = "clean";
 static const inline  char * _isolated_ = "isolated";
+
+static const inline  char * _W_var_ = "W_Dep";
+static const inline  char * _W_range_ = "in_range";
+static const inline  char * _W_all_ = "all";
+static const inline  char * _W_dep_[] = {_W_var_,_W_range_,_W_all_};
 
 //Parsing Out PID Cuts
 static const inline  char* _ecuts_[] = {_none_,_sanity_, _fid_cut_, _sf_cut_, _cc_cut_, _ec_cut_, _vertex_cut_,_pid_,_event_};//Be sure to add statements for flags if modified

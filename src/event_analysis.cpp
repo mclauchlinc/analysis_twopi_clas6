@@ -41,7 +41,7 @@ Analysis::Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> h
 		if(thread_id_==0){
 			//std::cout<<"Isolating Event\n";
 		}
-		Analysis::Isolate_Event(hist_, flags_);//Isolate Definitive Event and Plot Accordingly
+		//Analysis::Isolate_Event(hist_, flags_);//Isolate Definitive Event and Plot Accordingly
 		Analysis::Plot_Events(hist_,flags_);
 	}
 }

@@ -310,7 +310,7 @@ bool cuts::MM_cut(int top_, float mm_, float W_, std::shared_ptr<Flags> flags_){
 		pass = true;
 	}
 	if(pass){
-		std::cout<<"Top: " <<_top_[top_] <<" MM: " <<mm_ <<" bounds: " <<_mm_bounds_[flags_->Flags::Run()][sim_idx][top_][0] <<" - " <<_mm_bounds_[flags_->Flags::Run()][sim_idx][top_][1] <<"  Pass:" <<pass <<"\n";
+		//std::cout<<"Top: " <<_top_[top_] <<" MM: " <<mm_ <<" bounds: " <<_mm_bounds_[flags_->Flags::Run()][sim_idx][top_][0] <<" - " <<_mm_bounds_[flags_->Flags::Run()][sim_idx][top_][1] <<"  Pass:" <<pass <<"\n";
 	}
 
 	//Future W Dependent Method
@@ -327,6 +327,14 @@ bool cuts::in_range(float W_, float Q2_){
 		if(Q2_ >= _Q2minAna_ && Q2_ <= _Q2maxAna_){
 			pass = true;
 		}
+	}
+	return pass; 
+}
+
+bool cuts::in_range(float W_){
+	bool pass = false;
+	if(W_ >= _WminAna_ && W_ <= _WmaxAna_ ){//Checking to see if the particle is in the relevant W Q2 region 
+		pass = true;
 	}
 	return pass; 
 }

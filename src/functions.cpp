@@ -734,6 +734,16 @@ int fun::sim_idx(bool sim_){
   return sim_idx;
 }
 
+bool fun::top_perform(const char* top_, std::shared_ptr<Flags> flags_){
+  bool pass = false;
+  if(top_ == _mall_ || top_==_mnone_){
+    pass = true;
+  }else if(flags_->Flags::MM_Cut(fun::top_idx(top_))){
+    pass = true;
+  }
+  return pass; 
+}
+
 /*
 int fun::array_size(char * array_[]){
   return std::distance(std::begin(array_), std::end(array_));
