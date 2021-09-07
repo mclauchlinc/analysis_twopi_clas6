@@ -549,6 +549,14 @@ void fun::print_vector_idx(std::vector<int> vec_){
   std::cout<<"\n";
 }
 
+void fun::print_vector_idx(std::vector<long> vec_){
+  std::cout<<"\tIndex: ";
+  for(int i=0; i<vec_.size(); i++){
+    std::cout<<vec_[i] <<" ";
+  }
+  std::cout<<"\n";
+}
+
 int fun::top_idx(const char* top_){
   int top_idx = -1;
   for(int i = 0; i<std::distance(std::begin(_top_), std::end(_top_)); i++){
@@ -742,6 +750,29 @@ bool fun::top_perform(const char* top_, std::shared_ptr<Flags> flags_){
     pass = true;
   }
   return pass; 
+}
+
+int fun::truth_idx(bool pass_){
+  if(pass_){
+    return 1;
+  }else{
+    return 0;
+  }
+}
+
+int fun::top_offset(const char * top_, std::shared_ptr<Flags> flags_){
+  int top_idx = fun::top_idx(top_);
+  int idx = 0; 
+  if(top_ == _mnone_){
+    return -top_idx;
+  }else{
+    for(int i=0; i<top_idx; i++){
+      if(!flags_->Flags::MM_Cut(i)){
+        idx -= 1; 
+      }
+    }
+    return idx; 
+  }
 }
 
 /*

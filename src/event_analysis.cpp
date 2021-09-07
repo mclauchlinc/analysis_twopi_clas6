@@ -41,7 +41,7 @@ Analysis::Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> h
 		if(thread_id_==0){
 			//std::cout<<"Isolating Event\n";
 		}
-		//Analysis::Isolate_Event(hist_, flags_);//Isolate Definitive Event and Plot Accordingly
+		Analysis::Isolate_Event(hist_, flags_);//Isolate Definitive Event and Plot Accordingly
 		Analysis::Plot_Events(hist_,flags_);
 	}
 }
@@ -50,6 +50,7 @@ void Analysis::Num_top(){
 	//Pro Missing
 	if(_rParticle.size()>0){
 		if(_rParticle[0].Particle::Is_Elec()){
+			//Proton Missing
 			if(_pip_idx.size() > 0 && _pim_idx.size() > 0){
 				std::vector<int> pro_tmp;
 				_ntop[0] = _pip_idx.size() * _pim_idx.size();
@@ -92,6 +93,7 @@ void Analysis::Num_top(){
 			}
 			//Zero Missing
 			if(_pro_idx.size() > 0 && _pip_idx.size() > 0 && _pim_idx.size() > 0){
+				//std::cout<<"Looking at a Potential Exclusive topology\t";
 				std::vector<int> zero_tmp;
 				for(int i=0; i<_pip_idx.size(); i++){
 					for(int j=0; j<_pro_idx.size(); j++){
@@ -108,6 +110,7 @@ void Analysis::Num_top(){
 					}
 				}
 				_ntop[3] = _ntop[3]*_pim_idx.size();
+				//std::cout<<"Found: " <<_ntop[3] <<" possibilities\n";
 			}
 			//std::cout<<"\tNum Possible Topoogies: " <<_ntop[0] <<_ntop[1] <<_ntop[2] <<_ntop[3] <<"\n";
 		}
@@ -178,9 +181,9 @@ void Analysis::Event_ID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogr
 	for(int j=0; j<4; j++){
 		if(_ntop[j]>0){
 			for(int k=0; k<_ntop[j]; k++){
+				//plot::plot_event(_rEvent[idx],hist_,flags_);
 				if(_rEvent[idx].Event::Pass()){
 					_gEvent.push_back(_rEvent[idx]);
-					plot::plot_event(_rEvent[idx],hist_,flags_);
 					_gevts+=1;
 					_gevt_idx.push_back(idx);
 					_gtop[j]+=1;
@@ -195,6 +198,7 @@ void Analysis::Event_ID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogr
 
 void Analysis::Isolate_Event(std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
 	if(_gevts>0){
+		//std::cout<<"Isolating Events: "<<_gtop[0] <<" " <<_gtop[1] <<" " <<_gtop[2] <<" " <<_gtop[3] <<"\n";
 		//std::cout<<"Isolating Events with " <<_gevts <<" good events => " <<_gtop[0] <<_gtop[1] <<_gtop[2] <<_gtop[3]  <<"\n";
 		if(_gtop[3]>0){
 			if(_gtop[3]>1){
@@ -320,10 +324,16 @@ void Analysis::Plot_Events(std::shared_ptr<Histogram> hist_, std::shared_ptr<Fla
 	if(_rEvent.size() == 1){
 		//std::cout<<"\nPlot Clean event\n";
 		plot::plot_clean_event(_rEvent[0],hist_,flags_);
+		plot::plot_event(_rEvent[0],hist_,flags_);
 	}else{
 		for(int i=0; i<_rEvent.size(); i++){
 			//std::cout<<"\nPlot dirty events\n";
 			plot::plot_event(_rEvent[i],hist_,flags_);
+			if(_top_[_rEvent[i].Event::Top()]==_mzero_){
+				if(_ntop[3]==1){
+					plot::plot_clean_event(_rEvent[i],hist_,flags_);
+				}
+			}
 		}
 	}
 	if(flags_->Flags::Sim()){

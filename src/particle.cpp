@@ -235,3 +235,19 @@ TLorentzVector Particle::Get_4Vec(int i){
 	}
 	return output;
 }
+
+float Particle::Get_sf(){
+	return _sf;
+}
+float Particle::Get_etot(){
+	return _etot;
+}
+int Particle::Get_cc_seg(){
+	return _cc_seg;
+}
+int Particle::Get_cc_lrc(){
+	return _cc_lrc;
+}
+int Particle::Get_nphe(){
+	return _nphe;
+}

@@ -63,11 +63,12 @@ float extract_run_number_float(std::string file_name, bool cluster);
 
 bool good_idx(int idx_);
 void print_vector_idx(std::vector<int> vec_);
+void print_vector_idx(std::vector<long> vec_);
 int top_idx(const char* top_);
 int ecut_idx(const char* ecut_);
 int hcut_idx(const char* hcut_);
 int weight_idx(const char* hcut_);
-int recon_idx(const char* hcut_);
+int recon_idx(const char* recon_);
 int cut_idx(const char* cut_);
 int species_idx(const char* species_);
 int sector_idx(const char* sector_);
@@ -80,6 +81,8 @@ int pcut_offset(const char * species_, const char * pcut_, std::shared_ptr<Flags
 int clean_idx(const char * clean_);
 int sim_idx(bool sim_);
 bool top_perform(const char* top_, std::shared_ptr<Flags> flags_);
+int truth_idx(bool pass_);
+int top_offset(const char * top_, std::shared_ptr<Flags> flags_);
 //int array_size(char* array_[]);
 //int array_size(const char* array_[]);
 }

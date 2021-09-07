@@ -6,7 +6,7 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	//def = new TCanvas("def");
 	Histogram::WQ2_Make(flags_);
 	Histogram::Fid_Make(flags_);
-	//Histogram::SF_Make(flags_);
+	Histogram::SF_Make(flags_);
 	//Histogram::DT_Make(flags_);
 	//Histogram::CC_Make(flags_);
 	Histogram::MM_Make(flags_);
@@ -41,7 +41,7 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	Histogram::WQ2_Write(flags_);
 	std::cout<<"Writing Fid Histograms\n";
 	Histogram::Fid_Write(flags_);
-	//Histogram::SF_Write( _envi);
+	Histogram::SF_Write(flags_);
 	//Histogram::DT_Write( _envi);
 	//Histogram::CC_Write( _envi);
 	std::cout<<"Writing MM Histograms\n";
@@ -112,7 +112,9 @@ int Histogram::W_bins(){
 	int W_bins = 0; 
 	while(W_top < _W_max_){
 		W_top += _W_res_;
-		W_bins++;
+		if(W_top < _W_max_){
+			W_bins++;
+		}
 	}
 	return W_bins;
 }
@@ -120,8 +122,9 @@ int Histogram::W_bins(){
 int Histogram::W_bin(float W_){
 	float W_bot = _W_min_;
 	int W_bin = -1; 
+	//std::cout<<"W_bot: " <<W_bot <<" W: " <<W_ <<"  W_top: "
 	for(int i=0; i<Histogram::W_bins(); i++){
-		if(W_ >= W_bot && W_ < W_bot+_W_res_){
+		if(W_ >= (W_bot+i*_W_res_) && W_ < W_bot+((1+i)*_W_res_)){
 			W_bin = i;
 		}
 	}
@@ -333,11 +336,11 @@ void Histogram::WQ2_Make(std::shared_ptr<Flags> flags_){
 		Bool_2d made_2d;
 		Bool_1d made_1d;
 		std::vector<long> space_dims(5);
-		space_dims[4] = _len_ecuts_;//std::distance(std::begin(_ecuts_), std::end(_ecuts_));//Electron Cuts
-		space_dims[3] = _len_cut_;//std::distance(std::begin(_cut_), std::end(_cut_));//Cut and anti cut
-		space_dims[2] = _len_top_;//std::distance(std::begin(_top_), std::end(_top_));//{Topologies  + all combined + None}
-		space_dims[1] = _len_weight_;//std::distance(std::begin(_weight_), std::end(_weight_));//Not Weight vs. Weighted
-		space_dims[0] = _len_recon_;//std::distance(std::begin(_recon_), std::end(_recon_));//Reconstructed vs. Thrown
+		space_dims[4] = std::distance(std::begin(_ecuts_), std::end(_ecuts_));//Electron Cuts
+		space_dims[3] = std::distance(std::begin(_cut_), std::end(_cut_));//Cut and anti cut
+		space_dims[2] = std::distance(std::begin(_top_), std::end(_top_));//{Topologies  + all combined + None}
+		space_dims[1] = std::distance(std::begin(_weight_), std::end(_weight_));//Not Weight vs. Weighted
+		space_dims[0] = std::distance(std::begin(_recon_), std::end(_recon_));//Reconstructed vs. Thrown
 		CartesianGenerator cart(space_dims);
 		CartesianGenerator cart2(space_dims);
 		/*
@@ -373,7 +376,7 @@ void Histogram::WQ2_Make(std::shared_ptr<Flags> flags_){
 			}
 			if(cart2[3]==space_dims[3]-1 && made_4d.size()>0 && cart2[1]==space_dims[1]-1 && cart2[0]==space_dims[0]-1 && cart2[2]==space_dims[2]-1){
 				_WQ2_made.push_back(made_4d);
-			//	std::cout<<"\tLength of made_4d: " <<made_4d.size() <<"\n";
+				//std::cout<<"\tLength of made_4d: " <<made_4d.size() <<"\n";
 				made_4d.clear();
 			}
 			if(cart2[4]==space_dims[4]-1 ){
@@ -387,77 +390,85 @@ void Histogram::WQ2_Make(std::shared_ptr<Flags> flags_){
 			}
 			std::cout<<"\n";*/
 			//std::cout<<"Index: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<"\n";
-			if(_cut_[cart[3]]!= _no_cut_ && (flags_->Flags::Sim() || _weight_[cart[1]]==_nweighted_)){
-				if(cart[0]==1){//Thrown 
+			if((flags_->Flags::Sim() || _weight_[cart[1]]==_nweighted_)){
+				if(_recon_[cart[0]]==_thrown_){//Thrown Stuff
 					if(flags_->Flags::Sim()){
-						if(_ecuts_[cart[4]] == _none_ && _cut_[cart[3]] == _cut_[0] && _top_[cart[2]] == _mzero_){
-							//std::cout<<"\t\tMaking Thrown WQ2\n";
+						if(_ecuts_[cart[4]] == _event_ && _cut_[cart[3]] == _cut_applied_ && _top_[cart[2]] == _mzero_){
+							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 							sprintf(hname,"W_Q2_%s_%s",_recon_[1],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
-							//std::cout<<"\tWQ2 Idx for Thrown: " <<Histogram::WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],)
-							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 						}
 					}
-				}else{
-					if(_ecuts_[cart[4]]== _event_ && _top_[cart[2]]!=_mnone_){//Event Selection
+				}else{//Reconstructed Stuff
+					if(_ecuts_[cart[4]]== _event_ && _top_[cart[2]]!=_mnone_ && _cut_[cart[3]]!=_no_cut_){//Event Selection
 						//std::cout<<"\t\tMaking Event Selection WQ2\n";
+						//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 						sprintf(hname,"W_Q2_%s_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]]);
 						plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 						_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
+						//fun::print_vector_idx(cart);
 						//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
-					}else if(_ecuts_[cart[4]] != _event_ && _top_[cart[2]]==_mnone_){//No Event Selection
+					}else if(_ecuts_[cart[4]] != _event_ && _top_[cart[2]]==_mnone_){//Electron ID
 						//std::cout<<"\t\tMaking PID WQ2\n";
-						if(_ecuts_[cart[4]]== _none_ ){
+						if(_ecuts_[cart[4]]== _none_ && _cut_[cart[3]]==_no_cut_){//&& _cut_[cart[3]]==_no_cut_
+							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 						}
-						if(_ecuts_[cart[4]]== _sanity_ ){
+						if(_ecuts_[cart[4]]== _sanity_ && _cut_[cart[3]]!=_no_cut_){
 							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 						}
-						if(_ecuts_[cart[4]]== _fid_cut_ && flags_->Flags::Fid_Cut(0)){
+						if(_ecuts_[cart[4]]== _fid_cut_ && flags_->Flags::Fid_Cut(0) && _cut_[cart[3]]!=_no_cut_){
 							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 						}
-						if(_ecuts_[cart[4]]== _sf_cut_ && flags_->Flags::SF_Cut()){
+						if(_ecuts_[cart[4]]== _sf_cut_ && flags_->Flags::SF_Cut() && _cut_[cart[3]]!=_no_cut_){
 							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 						}
-						if(_ecuts_[cart[4]]== _cc_cut_ && flags_->Flags::CC_Cut()){
+						if(_ecuts_[cart[4]]== _cc_cut_ && flags_->Flags::CC_Cut() && _cut_[cart[3]]!=_no_cut_){
 							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 						}
-						if(_ecuts_[cart[4]]== _ec_cut_ && flags_->Flags::EC_Cut()){
+						if(_ecuts_[cart[4]]== _ec_cut_ && flags_->Flags::EC_Cut() && _cut_[cart[3]]!=_no_cut_){
 							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 						}
-						if(_ecuts_[cart[4]]== _vertex_cut_ && flags_->Flags::Vertex_Cut()){
+						if(_ecuts_[cart[4]]== _vertex_cut_ && flags_->Flags::Vertex_Cut() && _cut_[cart[3]]!=_no_cut_){
 							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: " <<_WQ2_hist.size() <<" " <<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 						}
-						if(_ecuts_[cart[4]]== _pid_){
+						if(_ecuts_[cart[4]]== _pid_ && _cut_[cart[3]]!=_no_cut_){
 							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
@@ -501,12 +512,12 @@ std::vector<int> Histogram::WQ2_cut_idx(const char* ecut_, const char * cut_, co
 	std::vector<int> idx;
 	int ecut_idx = -1; 
 	int cut_idx = -1; 
-	//std::cout<<"input to WQ2 Cut idx: " <<ecut_ <<"\n\t" <<cut_ <<"\n\t" <<top_ <<"\n\t" <<weight_ <<"\n\t" <<thrown_  <<"\n";
-	if(cut_!=_no_cut_){
+	//std::cout<<"input to WQ2 Cut idx: " <<ecut_ <<"\n\t" <<cut_ <<"\n\t" <<top_ <<"\n\t" <<weight_ <<"\n\t" <<recon_  <<"\n";
+	//if(cut_!=_no_cut_){
 		if(recon_==_thrown_ && flags_->Flags::Sim()){
-			if(ecut_ == _none_ && cut_ == _cut_applied_ && top_==_mzero_){//Thrown 
-				idx.push_back(fun::ecut_idx(ecut_)+fun::ecut_offset(ecut_,flags_));
-				idx.push_back(fun::cut_idx(cut_));
+			if(ecut_ == _event_ && cut_ == _cut_applied_ && top_==_mzero_){//Thrown 
+				idx.push_back(0);
+				idx.push_back(0);
 				idx.push_back(0);
 				idx.push_back(fun::weight_idx(weight_));
 				idx.push_back(fun::recon_idx(recon_));
@@ -518,15 +529,21 @@ std::vector<int> Histogram::WQ2_cut_idx(const char* ecut_, const char * cut_, co
 				idx.push_back(-1);
 			}
 		}else if(recon_==_nthrown_){//Reconstructed
-			if(ecut_==_event_ && top_!=_mnone_){
+			if(ecut_==_event_ && top_!=_mnone_ && cut_!=_no_cut_){
 				idx.push_back(fun::ecut_idx(ecut_)+fun::ecut_offset(ecut_,flags_));
 				idx.push_back(fun::cut_idx(cut_));
-				idx.push_back(fun::top_idx(top_));
-			}else if(ecut_!=_event_ && top_==_mnone_){
-				idx.push_back(fun::ecut_idx(ecut_));
+				idx.push_back(fun::top_idx(top_)+ fun::top_offset(top_,flags_));
+			}else if(ecut_!=_event_ && top_==_mnone_ && cut_!=_no_cut_){
+				idx.push_back(fun::ecut_idx(ecut_)+fun::ecut_offset(ecut_,flags_));
 				idx.push_back(fun::cut_idx(cut_));
 				idx.push_back(0);
+			}else if(ecut_==_none_ && cut_==_no_cut_ && top_==_mnone_){
+				idx.push_back(fun::ecut_idx(ecut_));
+				idx.push_back(0);
+				idx.push_back(0);
 			}else{
+				idx.push_back(-1);
+				idx.push_back(-1);
 				idx.push_back(-1);
 			}
 			if(flags_->Sim() || weight_==_nweighted_){
@@ -542,13 +559,15 @@ std::vector<int> Histogram::WQ2_cut_idx(const char* ecut_, const char * cut_, co
 			idx.push_back(-1);
 			idx.push_back(-1);
 		}
-	}else{
+	/*}else{
 		idx.push_back(-1);
 		idx.push_back(-1);
 		idx.push_back(-1);
 		idx.push_back(-1);
 		idx.push_back(-1);
-	}
+	}*/
+	//std::cout<<"WQ2 idx: ";
+	//fun::print_vector_idx(idx);
 	return idx;
 }
 
@@ -580,33 +599,31 @@ bool Histogram::Made_WQ2_idx(const char* ecut_, const char * cut_, const char* t
 	
 }
 
-void Histogram::WQ2_Fill(float W_, float Q2_, const char* ecut_, const char *cut_, const char * top_, bool thrown_, std::shared_ptr<Flags> flags_, float weight_){
+void Histogram::WQ2_Fill(float W_, float Q2_, const char* ecut_, const char *cut_, const char * top_, const char * thrown_, std::shared_ptr<Flags> flags_, float weight_){
 	if(flags_->Plot_WQ2()){
-		int recon_idx = -1;
-		if(thrown_){
-			recon_idx = 1;
-		}else{
-			recon_idx = 0; 
-		}
+		//std::cout<<"Trying to fill WQ2: " <<ecut_ <<" " <<cut_ <<" " <<top_ <<" " <<thrown_ <<"\n";
 		std::vector<int> idx;
 		if(flags_->Flags::Sim()){//Weighted
-			idx = Histogram::WQ2_cut_idx(ecut_,cut_,top_,_weighted_,_recon_[recon_idx],flags_);
-			//if(Histogram::OK_Idx(idx)){
-			if(Made_WQ2_idx(ecut_,cut_,top_,_nweighted_,_recon_[recon_idx])){	
-			//if(Histogram::Good_WQ2_idx(ecut_,cut_,top_,_nweighted_,_recon_[recon_idx],flags_)){
-				_WQ2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(W_,Q2_,weight_);
+			idx = Histogram::WQ2_cut_idx(ecut_,cut_,top_,_weighted_,thrown_,flags_);
+			if(Histogram::OK_Idx(idx)){
+				if(Made_WQ2_idx(ecut_,cut_,top_,_nweighted_,thrown_)){	
+				//if(Histogram::Good_WQ2_idx(ecut_,cut_,top_,_nweighted_,_recon_[fun::truth_idx(thrown_)],flags_)){
+					_WQ2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(W_,Q2_,weight_);
+				}
 			}
 			idx.clear();
 		}
-		idx = Histogram::WQ2_cut_idx(ecut_,cut_,top_,_nweighted_,_recon_[recon_idx],flags_);
 		//if(Histogram::OK_Idx(idx)){
-		if(Made_WQ2_idx(ecut_,cut_,top_,_nweighted_,_recon_[recon_idx])){
-		//if(Histogram::Good_WQ2_idx(ecut_,cut_,top_,_nweighted_,_recon_[recon_idx],flags_)){
-			_WQ2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(W_,Q2_,1.0);
+		if(Made_WQ2_idx(ecut_,cut_,top_,_nweighted_,thrown_)){
+			idx = Histogram::WQ2_cut_idx(ecut_,cut_,top_,_nweighted_,thrown_,flags_);
+			if(Histogram::OK_Idx(idx)){
+				_WQ2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(W_,Q2_,1.0);
+			}
+			idx.clear();
 		}
-		idx.clear();
-		//std::cout<<"input to WQ2 Filling: " <<ecut_ <<"\n\t" <<cut_ <<"\n\t" <<top_ <<"\n\t" <<weight_ <<"\n\t" <<thrown_  <<"\n";
-		//std::cout<<"Trying to fill WQ2:" <<ecut_ <<" " <<cut_ <<" " <<top_ <<" " <<thrown_ <<"\n";
+		
+		//std::cout<<"input to WQ2 Filling: " <<ecut_ <<"\n\t" <<cut_ <<"\n\t" <<top_ <<"\n\t" <<weight_ <<"\n\t" <<_recon_[fun::truth_idx(thrown_)]  <<"\n";
+		//std::cout<<"Trying to fill WQ2:" <<ecut_ <<" " <<cut_ <<" " <<top_ <<" " <<_recon_[fun::truth_idx(thrown_)] <<"\n";
 		
 	}
 }
@@ -784,90 +801,105 @@ void Histogram::Fid_Make(std::shared_ptr<Flags> flags_){
 				std::cout<<cart[i];
 			}
 			std::cout<<"\n";*/
-			if(_cut_[cart[2]]!= _no_cut_ && flags_->Plot_Fid(cart[5]) && (flags_->Flags::Sim() || _weight_[cart[0]]==_nweighted_)){
+			if(flags_->Plot_Fid(cart[5]) && (flags_->Flags::Sim() || _weight_[cart[0]]==_nweighted_)){
 				if(_species_[cart[5]] == _ele_){
 					//std::cout<<"\tFid for Electrons\n";
-					if(_ecuts_[cart[4]] == _event_ && _top_[cart[1]]!=_mnone_){
+					if(_ecuts_[cart[4]] == _event_ && _top_[cart[1]]!=_mnone_ && _cut_[cart[2]]!=_no_cut_){
+						//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n"; 
 						sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]],_top_[cart[1]]);
 						plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 						_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 					}else if(_ecuts_[cart[4]] != _event_ && _top_[cart[1]]==_mnone_){//No Event Selection
-						if(_ecuts_[cart[4]]== _none_){
+						if(_ecuts_[cart[4]]== _none_ && _cut_[cart[2]]==_no_cut_){// && _cut_[cart[2]]==_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}
-						if(_ecuts_[cart[4]]== _sanity_){
+						if(_ecuts_[cart[4]]== _sanity_ && _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}
-						if(_ecuts_[cart[4]]== _fid_cut_ && flags_->Flags::Fid_Cut(0)){
+						if(_ecuts_[cart[4]]== _fid_cut_ && flags_->Flags::Fid_Cut(0)&& _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}
-						if(_ecuts_[cart[4]]== _sf_cut_ && flags_->Flags::SF_Cut()){
+						if(_ecuts_[cart[4]]== _sf_cut_ && flags_->Flags::SF_Cut()&& _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}
-						if(_ecuts_[cart[4]]== _cc_cut_ && flags_->Flags::CC_Cut()){
+						if(_ecuts_[cart[4]]== _cc_cut_ && flags_->Flags::CC_Cut()&& _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}
-						if(_ecuts_[cart[4]]== _ec_cut_ && flags_->Flags::EC_Cut()){
+						if(_ecuts_[cart[4]]== _ec_cut_ && flags_->Flags::EC_Cut()&& _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}
-						if(_ecuts_[cart[4]]== _vertex_cut_ && flags_->Flags::Vertex_Cut()){
+						if(_ecuts_[cart[4]]== _vertex_cut_ && flags_->Flags::Vertex_Cut()&& _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}
-						if(_ecuts_[cart[4]]== _pid_){
+						if(_ecuts_[cart[4]]== _pid_ && _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}
 					}
 				}else{
-					if(cart[4]<(std::distance(std::begin(_hcuts_), std::end(_hcuts_))-1)){
+					if(cart[4]<(std::distance(std::begin(_hcuts_), std::end(_hcuts_)))){//Make sure we aren't going over hcuts
 						//std::cout<<"\tFid for Hadrons\n";
-						if(_hcuts_[cart[4]] == _event_ && _top_[cart[1]]!=_mnone_){
+						if(_hcuts_[cart[4]] == _event_ && _top_[cart[1]]!=_mnone_ && _cut_[cart[2]]!=_no_cut_){
 							//std::cout<<"\tFid Event for Hadrons\n";
+							//std::cout<<"*Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]],_top_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}else if(_hcuts_[cart[4]] != _event_ && _top_[cart[1]]==_mnone_){//No Event Selection
 							//std::cout<<"\tFid PID Hadrons\n";
-							if(_hcuts_[cart[4]]== _none_){
+							if(_hcuts_[cart[4]]== _none_ && _cut_[cart[2]]==_no_cut_ ){
 							//	std::cout<<"\t\tFid None Hadrons\n";
+								//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 								_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 							}
-							if(_hcuts_[cart[4]]== _sanity_){
+							if(_hcuts_[cart[4]]== _sanity_ && _cut_[cart[2]]!=_no_cut_){
 								//std::cout<<"\t\tFid Sanity Hadrons\n";
+								//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 								_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 							}
-							if(_hcuts_[cart[4]]== _fid_cut_ && flags_->Flags::Fid_Cut(cart[5])){
+							if(_hcuts_[cart[4]]== _fid_cut_ && flags_->Flags::Fid_Cut(cart[5]) && _cut_[cart[2]]!=_no_cut_){
 								//std::cout<<"\t\tFid Fid Hadrons\n";
+								//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 								_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 							}
-							if(_hcuts_[cart[4]]== _delta_cut_ && flags_->Flags::Delta_Cut(cart[5])){
+							if(_hcuts_[cart[4]]== _delta_cut_ && flags_->Flags::Delta_Cut(cart[5]) && _cut_[cart[2]]!=_no_cut_){
 								//std::cout<<"\t\tFid delta Hadrons\n";
+								//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 								_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 							}
-							if(_hcuts_[cart[4]]== _pid_ ){
+							if(_hcuts_[cart[4]]== _pid_  && _cut_[cart[2]]!=_no_cut_){
+								//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
 								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 								_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
@@ -997,9 +1029,11 @@ std::vector<int> Histogram::Fid_cut_idx(const char* species_, const char* pcut_,
 		//Species
 		idx.push_back(species_idx);
 		//PID Cut
-		if(pcut_ == _event_ && top_!=_mnone_){
+		if(pcut_ == _event_ && top_!=_mnone_ && cut_!=_no_cut_){
 			idx.push_back(pcut_idx);
-		}else if(pcut_ != _event_ && top_==_mnone_){
+		}else if(pcut_ != _event_ && top_==_mnone_ && cut_!=_no_cut_){
+			idx.push_back(pcut_idx);
+		}else if(pcut_ == _none_ && cut_==_no_cut_){
 			idx.push_back(pcut_idx);
 		}else{
 			idx.push_back(-1);
@@ -1007,7 +1041,14 @@ std::vector<int> Histogram::Fid_cut_idx(const char* species_, const char* pcut_,
 		//Sector
 		idx.push_back(fun::sector_idx(sector_));
 		//Cut or Anti
-		idx.push_back(fun::cut_idx(cut_));
+		if(pcut_!=_none_ && cut_!=_no_cut_){
+			idx.push_back(fun::cut_idx(cut_));
+		}else if(pcut_==_none_ && cut_==_no_cut_){
+			idx.push_back(0);
+		}else{
+			idx.push_back(-1);
+		}
+		
 		//Topology
 		if(pcut_==_event_ && top_!=_mnone_){
 			idx.push_back(fun::top_idx(top_));
@@ -1030,12 +1071,14 @@ std::vector<int> Histogram::Fid_cut_idx(const char* species_, const char* pcut_,
 		idx.push_back(-1);
 		idx.push_back(-1);
 	}
+	//std::cout<<"Fid idx";
+	//fun::print_vector_idx(idx);
 	return idx;
 }
 
 void Histogram::Fid_Fill(const char * species_, float theta_, float phi_, const char* pcut_, const char* sector_, const char *cut_, const char * top_, std::shared_ptr<Flags> flags_, float weight_){
 	if(flags_->Plot_Fid(fun::species_idx(species_))){
-		//std::cout<<"Trying to fill Fid:" <<species_ <<" " <<pcut_ <<" " <<cut_ <<" " <<_top_[top_] <<" " <<weight_ <<"\n";
+		//std::cout<<"Trying to fill Fid:" <<species_ <<" " <<pcut_ <<" "<<sector_ <<" " <<cut_ <<" " <<top_ <<" " <<weight_ <<"\n";
 		int w_idx = -1;
 		if(weight_!=1.0){
 			w_idx = 1;
@@ -1043,7 +1086,7 @@ void Histogram::Fid_Fill(const char * species_, float theta_, float phi_, const 
 			w_idx = 0;
 		}
 		std::vector<int> idx;
-		if(flags_->Flags::Sim()){
+		if(flags_->Flags::Sim()){//Weighted Fiducial Plots
 			idx = Histogram::Fid_cut_idx(species_,pcut_,sector_,cut_,top_,_weighted_,flags_);;
 			if(Histogram::OK_Idx(idx)){
 				if(Histogram::Made_Fid_idx(species_,pcut_,sector_,cut_,top_,_weighted_)){
@@ -1204,6 +1247,37 @@ void Histogram::SF_Make(std::shared_ptr<Flags> flags_){
 		//Make Actual Histograms
 		while(cart.GetNextCombination()){
 			if(_ecuts_[cart[4]]==_event_ && _top_[cart[2]]!=_mnone_){//Event Selection
+				if(_ecuts_[cart[4]]==_none_ && _cut_[cart[3]]==_no_cut_){
+					if(cart[0] < Histogram::W_bins()){//W Dependence
+						sprintf(hname,"SF_%s_%s_%s_%s_W:%f-%f",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],Histogram::W_bot(cart[0]),Histogram::W_top(cart[0]));
+						plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
+						_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
+					}else if(cart[0] == Histogram::W_bins()){//Experimental W range
+						sprintf(hname,"SF_%s_%s_%s_%s_W:%s",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],"in_range");
+						plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
+						_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
+					}else{//Full W range
+						sprintf(hname,"SF_%s_%s_%s_%s_W:%s",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],"all");
+						plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
+						_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
+					}
+				}else if(_ecuts_[cart[4]]!=_none_ && _cut_[cart[3]]!=_no_cut_){
+					if(cart[0] < Histogram::W_bins()){//W Dependence
+						sprintf(hname,"SF_%s_%s_%s_%s_W:%f-%f",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],Histogram::W_bot(cart[0]),Histogram::W_top(cart[0]));
+						plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
+						_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
+					}else if(cart[0] == Histogram::W_bins()){//Experimental W range
+						sprintf(hname,"SF_%s_%s_%s_%s_W:%s",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],"in_range");
+						plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
+						_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
+					}else{//Full W range
+						sprintf(hname,"SF_%s_%s_%s_%s_W:%s",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],"all");
+						plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
+						_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
+					}
+				}
+				
+			}else if(_ecuts_[cart[4]]!=_event_ && _top_[cart[2]]==_mnone_ && _cut_[cart[2]]!=_no_cut_){//Electron ID Cuts
 				if(cart[0] < Histogram::W_bins()){//W Dependence
 					sprintf(hname,"SF_%s_%s_%s_%s_W:%f-%f",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],Histogram::W_bot(cart[0]),Histogram::W_top(cart[0]));
 					plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
@@ -1213,24 +1287,27 @@ void Histogram::SF_Make(std::shared_ptr<Flags> flags_){
 					plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
 					_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 				}else{//Full W range
+					std::cout<<"SF idx: " <<_SF_hist.size(); 
 					sprintf(hname,"SF_%s_%s_%s_%s_W:%s",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],"all");
 					plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
 					_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 				}
-			}else if(_ecuts_[cart[4]]!=_event_ && _top_[cart[2]]==_mnone_){//Electron ID Cuts
-				if(cart[0] < Histogram::W_bins()){//W Dependence
-					sprintf(hname,"SF_%s_%s_%s_%s_W:%f-%f",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],Histogram::W_bot(cart[0]),Histogram::W_top(cart[0]));
-					plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
-					_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
-				}else if(cart[0] == Histogram::W_bins()){//Experimental W range
-					sprintf(hname,"SF_%s_%s_%s_%s_W:%s",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],"in_range");
-					plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
-					_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
-				}else{//Full W range
-					sprintf(hname,"SF_%s_%s_%s_%s_W:%s",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],"all");
-					plot_1d.push_back(new TH2F(hname,hname,_sf_xbin_,_sf_xmin_,_sf_xmax_,_sf_ybin_,_sf_ymin_,_sf_ymax_));
-					_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
-				}
+			}
+			if(cart[0]==space_dims[0]-1 && plot_1d.size()>0){
+				plot_2d.push_back(plot_1d);
+				plot_1d.clear();
+			}
+			if(cart[1]==space_dims[1]-1 && plot_2d.size()>0 && cart[0]==space_dims[0]-1){
+				plot_3d.push_back(plot_2d);
+				plot_2d.clear();
+			}
+			if(cart[2]==space_dims[2]-1 && plot_3d.size()>0 && cart[0]==space_dims[0]-1 && cart[1]==space_dims[1]-1){
+				plot_4d.push_back(plot_3d);
+				plot_3d.clear();
+			}
+			if(cart[3]==space_dims[3]-1 && plot_4d.size()>0 && cart[0]==space_dims[0]-1 && cart[1]==space_dims[1]-1 && cart[2]==space_dims[2]-1){
+				_SF_hist.push_back(plot_4d);
+				plot_4d.clear();
 			}
 		}
 	}
@@ -1261,26 +1338,50 @@ std::vector<int> Histogram::SF_idx(const char* ecut_, const char* cut_, const ch
 			idx.push_back(-1);
 		}
 	}
+	//std::cout<<"SF idx: ";
+	//fun::print_vector_idx(idx);
 	return idx; 
 }
 
-void Histogram::SF_Fill(float p_, float sf_, float W_, const char* ecut_, const char* cut_, const char* top_, int sector_, float weight_, std::shared_ptr<Flags> flags_){
+void Histogram::SF_Fill(float p_, float sf_, float W_, const char* ecut_, const char* cut_, const char* top_, const char* sector_, float weight_, std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Plot_SF()){
-		std::vector<int> idx = Histogram::SF_idx(ecut_,cut_,top_,_sector_[sector_],flags_);
-		std::vector<int> idx2 = Histogram::SF_idx(ecut_,cut_,top_,_sec_all_,flags_);
+		std::vector<int> idx = Histogram::SF_idx(ecut_,cut_,top_,sector_,_W_var_,flags_);
+		std::vector<int> idx2 = Histogram::SF_idx(ecut_,cut_,top_,_sec_all_,_W_var_,flags_);
 		if(Histogram::W_bin(W_) >=0){
-			if(_SF_made[fun::ecut_idx(ecut_)][fun::cut_idx(cut_)][fun::top_idx(top_)][sector_-1][Histogram::W_bin(W_)]){
-				_SF_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(p_,sf_,weight_);
-				_SF_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]]->Fill(p_,sf_,weight_);
+			if(_SF_made[fun::ecut_idx(ecut_)][fun::cut_idx(cut_)][fun::top_idx(top_)][fun::sector_idx(sector_)][Histogram::W_bin(W_)]){
+				if(Histogram::OK_Idx(idx)){
+					_SF_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(p_,sf_,weight_);
+				}
+				if(Histogram::OK_Idx(idx2)){
+					_SF_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]]->Fill(p_,sf_,weight_);
+				}
 			}
 		}else{
-			if(_SF_made[fun::ecut_idx(ecut_)][fun::cut_idx(cut_)][fun::top_idx(top_)][sector_-1][Histogram::W_bins()] && cuts::in_range(W_)){
-				_SF_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(p_,sf_,weight_);
-				_SF_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]]->Fill(p_,sf_,weight_);
+			idx.clear();
+			idx2.clear();
+			if(_SF_made[fun::ecut_idx(ecut_)][fun::cut_idx(cut_)][fun::top_idx(top_)][fun::sector_idx(sector_)][Histogram::W_bins()] && cuts::in_range(W_)){
+				idx = Histogram::SF_idx(ecut_,cut_,top_,sector_,_W_range_,flags_);
+				idx2 = Histogram::SF_idx(ecut_,cut_,top_,_sec_all_,_W_range_,flags_);
+				if(Histogram::OK_Idx(idx)){
+					_SF_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(p_,sf_,weight_);
+				}
+				if(Histogram::OK_Idx(idx2)){
+					_SF_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]]->Fill(p_,sf_,weight_);
+				}
+				idx.clear();
+				idx2.clear();
 			}
-			if(_SF_made[fun::ecut_idx(ecut_)][fun::cut_idx(cut_)][fun::top_idx(top_)][sector_-1][Histogram::W_bins()+1] && W_>0){
-				_SF_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(p_,sf_,weight_);
-				_SF_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]]->Fill(p_,sf_,weight_);
+			if(_SF_made[fun::ecut_idx(ecut_)][fun::cut_idx(cut_)][fun::top_idx(top_)][fun::sector_idx(sector_)][Histogram::W_bins()+1] && W_>0){
+				idx = Histogram::SF_idx(ecut_,cut_,top_,sector_,_W_all_,flags_);
+				idx2 = Histogram::SF_idx(ecut_,cut_,top_,_sec_all_,_W_all_,flags_);
+				if(Histogram::OK_Idx(idx)){
+					_SF_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(p_,sf_,weight_);
+				}
+				if(Histogram::OK_Idx(idx2)){
+					_SF_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]]->Fill(p_,sf_,weight_);
+				}
+				idx.clear();
+				idx2.clear();
 			}
 		}
 	}
@@ -1323,9 +1424,9 @@ void Histogram::SF_Write(std::shared_ptr<Flags> flags_){
 		space_dims[0] = Histogram::W_bins()+2;//W Dependence + exp range + full range
 		CartesianGenerator cart(space_dims);
 		std::vector<int> idx;
-		while(car.GetNextCombination()){
+		while(cart.GetNextCombination()){
 			if(_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]){
-				idx = Histogram::SF_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],_W_dep_[cart[0]]);
+				idx = Histogram::SF_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],_W_dep_[cart[0]],flags_);
 				if(_W_dep_[cart[0]]==_W_var_){
 					dir_sf_sub[cart[4]][cart[3]+1][cart[2]+1][cart[1]+1][1]->cd();
 					_SF_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->SetXTitle("Momentum (GeV)");
@@ -1345,7 +1446,18 @@ void Histogram::SF_Write(std::shared_ptr<Flags> flags_){
  //*-------------------------------End SF Plot------------------------------*
 
  //*-------------------------------Start CC Plot----------------------------*
- //*-------------------------------End CC Plot----------------------------v*
+/*void Histogram::CC_Make(std::shared_ptr<Flags> flags_){
+
+	std::vector<long> space(5); {ecut,top,sector,side,segment}
+	space_dims[4] = std::distance(std::begin(_ecuts_), std::end(_ecuts_));
+	space_dims[3] = std::distance(std::begin(_top_), std::end(_top_));
+	space_dims[2] = std::distance(std::begin(_sector_), std::end(_sector_));
+	space_dims[1] = std::distance(std::begin(_cc_sides_), std::end(_cc_sides_));
+	space_dims[0] = std::distance(std::begin(_cc_segments_), std::end(_cc_segments_));
+}
+
+std::vector<int> CC_idx()*/
+ //*-------------------------------End CC Plot----------------------------*
 
  //*-------------------------------Start EC Plot----------------------------*
  //*-------------------------------End EC Plot------------------------------*
@@ -1367,17 +1479,18 @@ void Histogram::MM_Make(std::shared_ptr<Flags> flags_){
 		TH1F_ptr_2d plot_2d;
 		TH1F_ptr_1d plot_1d;
 
-		std::vector<long> space_dims(4);
+		std::vector<long> space_dims(5);
 		space_dims[3] = std::distance(std::begin(_top_), std::end(_top_));//{ele,pro,pip,pim}
 		space_dims[2] = std::distance(std::begin(_cut_), std::end(_cut_));//Electron Cuts (electrons have more cuts than hadrons)
 		space_dims[1] = std::distance(std::begin(_clean_event_),std::end(_clean_event_));//Clean event or not
-		space_dims[0]	= Histogram::W_bins()+2;//W Binning + All in range + All period  
-		CartesianGenerator cart(space_dims);
+		space_dims[0]	= (Histogram::W_bins()+2);//W Binning + All in range + All period
+		//std::cout<<"W bins+2: " <<space_dims[0];
+ 		CartesianGenerator cart(space_dims);
 		CartesianGenerator cart2(space_dims);
 		char hname[100];//For naming histograms
-
+		//std::cout<<"W Bins: " <<Histogram::W_bins() <<"\n";
 		while(cart2.GetNextCombination()){
-			if(_top_[cart2[3]]!=_mnone_ || _top_[cart2[3]]!=_mall_){
+			//if(_top_[cart2[3]]!=_mnone_ || _top_[cart2[3]]!=_mall_){
 				made_1d.push_back(false);
 				if(cart2[0]== space_dims[0]-1 && made_1d.size()>0){
 					made_2d.push_back(made_1d);
@@ -1391,48 +1504,99 @@ void Histogram::MM_Make(std::shared_ptr<Flags> flags_){
 						_MM_made.push_back(made_3d);
 						made_3d.clear();
 				}
-			}
+			//}
 		}
 		while(cart.GetNextCombination()){
-			if(_top_[cart[3]]!=_mnone_ && _top_[cart[3]]!=_mall_){
+			if(_top_[cart[3]]!=_mnone_ && _top_[cart[3]]!=_mall_ && _clean_event_[cart[1]]!=_isolated_){
 				if(cart[0]< Histogram::W_bins()){
+					//std::cout<<"MM idx: " <<_MM_hist.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 					sprintf(hname,"MM_%s_%s_%s_W:%f-%f",_top_[cart[3]],_cut_[cart[2]],_clean_event_[cart[1]],Histogram::W_bot(cart[0]),Histogram::W_top(cart[0]));
-					plot_1d.push_back(new TH1F(hname,hname,_mm_bin_[cart[3]],_mm_min_[cart[3]],_mm_max_[cart[3]]));
+					plot_1d.push_back(new TH1F(hname,hname,_mm2_bin_[cart[3]],_mm2_min_[cart[3]],_mm2_max_[cart[3]]));
 					_MM_made[cart[3]][cart[2]][cart[1]][cart[0]]=true;
 				}else if(cart[0] == Histogram::W_bins()){
+					//std::cout<<"MM idx: " <<_MM_hist.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 					sprintf(hname,"MM_%s_%s_%s_W:%s",_top_[cart[3]],_cut_[cart[2]],_clean_event_[cart[1]],"in_range");
-					plot_1d.push_back(new TH1F(hname,hname,_mm_bin_[cart[3]],_mm_min_[cart[3]],_mm_max_[cart[3]]));
+					plot_1d.push_back(new TH1F(hname,hname,_mm2_bin_[cart[3]],_mm2_min_[cart[3]],_mm2_max_[cart[3]]));
 					_MM_made[cart[3]][cart[2]][cart[1]][cart[0]]=true;
 				}else if(cart[0] == Histogram::W_bins()+1){
+					//std::cout<<"MM idx: " <<_MM_hist.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 					sprintf(hname,"MM_%s_%s_%s_W:%s",_top_[cart[3]],_cut_[cart[2]],_clean_event_[cart[1]],"all");
-					plot_1d.push_back(new TH1F(hname,hname,_mm_bin_[cart[3]],_mm_min_[cart[3]],_mm_max_[cart[3]]));
+					plot_1d.push_back(new TH1F(hname,hname,_mm2_bin_[cart[3]],_mm2_min_[cart[3]],_mm2_max_[cart[3]]));
 					_MM_made[cart[3]][cart[2]][cart[1]][cart[0]]=true;
 				}
-				if(cart[0] == space_dims[0]-1 && plot_1d.size()>0){
-					plot_2d.push_back(plot_1d);
-					plot_1d.clear();
-				}
-				if(cart[1] == space_dims[1]-1 && cart[0] == space_dims[0]-1 && plot_2d.size()>0){
-					plot_3d.push_back(plot_2d);
-					plot_2d.clear();
-				}
-				if(cart[2] == space_dims[2]-1 && cart[0] == space_dims[0]-1 && plot_3d.size()>0 && cart[1] == space_dims[1]-1){
-					_MM_hist.push_back(plot_3d);
-					plot_3d.clear();
-				}
+			}
+			if(cart[0] == space_dims[0]-1 && plot_1d.size()>0){
+				plot_2d.push_back(plot_1d);
+				plot_1d.clear();
+			}
+			if(cart[1] == space_dims[1]-1 && cart[0] == space_dims[0]-1 && plot_2d.size()>0){
+				plot_3d.push_back(plot_2d);
+				plot_2d.clear();
+			}
+			if(cart[2] == space_dims[2]-1 && cart[0] == space_dims[0]-1 && plot_3d.size()>0 && cart[1] == space_dims[1]-1){
+				_MM_hist.push_back(plot_3d);
+				plot_3d.clear();
 			}
 		}
 	}
 }
 
+std::vector<int> Histogram::MM_idx(const char* top_, const char* cut_, const char * clean_, const char * W_dep_, float W_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx; 
+	if(top_!=_mnone_ &&  top_!=_mall_){
+		idx.push_back(fun::top_idx(top_)+fun::top_offset(top_,flags_));
+		idx.push_back(fun::cut_idx(cut_));
+		idx.push_back(fun::clean_idx(clean_));
+		if(W_dep_ == _W_var_){
+			idx.push_back(Histogram::W_bin(W_));
+		}else if(W_dep_ == _W_range_){
+			idx.push_back(Histogram::W_bins());
+		}else if(W_dep_ == _W_all_){
+			idx.push_back(Histogram::W_bins()+1);
+		}else{
+			idx.push_back(-1);
+		}
+	}else{
+		idx.push_back(-1);
+		idx.push_back(-1);
+		idx.push_back(-1);
+		idx.push_back(-1);
+	}
+	//std::cout<<"MM idx: ";
+	//fun::print_vector_idx(idx);
+	return idx; 
+}
+
 void Histogram::MM_Fill(const char* top_, const char* cut_, const char * clean_,float MM_, float W_, float weight_, std::shared_ptr<Flags> flags_){
 	//std::cout<<"\tTrying to fill MM top:" <<top_ <<" cut:" <<cut_ <<" clean:" <<clean_ <<" MM:" <<MM_ <<" W:" <<W_ <<"\n";
-	if(top_ != _mnone_ && top_ != _mall_ && flags_->Flags::Plot_MM(fun::top_idx(top_))){
-		if(Histogram::W_bin(W_)>=0){
-			_MM_hist[fun::top_idx(top_)][fun::cut_idx(cut_)][fun::clean_idx(clean_)][Histogram::W_bin(W_)]->Fill(MM_,weight_);
-			_MM_hist[fun::top_idx(top_)][fun::cut_idx(cut_)][fun::clean_idx(clean_)][Histogram::W_bins()]->Fill(MM_,weight_);
+	std::vector<int> idx; 
+	if(flags_->Flags::Plot_MM(fun::top_idx(top_))){
+		if(top_ != _mnone_ && top_ != _mall_ && clean_!=_isolated_){
+			//std::cout<<"W: " <<W_ <<"  => W Bin: " <<Histogram::W_bin(W_) <<"\n";
+			if(Histogram::W_bin(W_)>=0){
+				if(_MM_made[fun::top_idx(top_)][fun::cut_idx(cut_)][fun::clean_idx(clean_)][Histogram::W_bin(W_)]){//W Binning
+					idx = Histogram::MM_idx(top_,cut_,clean_,_W_var_,W_,flags_);
+					if(Histogram::OK_Idx(idx)){
+						_MM_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Fill(MM_,weight_);
+					}
+					idx.clear();
+				}
+			}
+			if(_MM_made[fun::top_idx(top_)][fun::cut_idx(cut_)][fun::clean_idx(clean_)][Histogram::W_bins()]){//W in range
+				idx = Histogram::MM_idx(top_,cut_,clean_,_W_range_,W_,flags_);
+				if(Histogram::OK_Idx(idx)){
+					_MM_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Fill(MM_,weight_);
+				}
+				idx.clear();
+			}
+			if(_MM_made[fun::top_idx(top_)][fun::cut_idx(cut_)][fun::clean_idx(clean_)][Histogram::W_bins()+1]){//All W
+				idx = Histogram::MM_idx(top_,cut_,clean_,_W_all_,W_,flags_);
+				if(Histogram::OK_Idx(idx)){
+					_MM_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Fill(MM_,weight_);
+				}
+				idx.clear();
+			}
 		}
-		_MM_hist[fun::top_idx(top_)][fun::cut_idx(cut_)][fun::clean_idx(clean_)][Histogram::W_bins()+1]->Fill(MM_,weight_);
 	}
 }
 
@@ -1441,14 +1605,14 @@ void Histogram::MM_Write(std::shared_ptr<Flags> flags_){
 		char dir_name[100];
 		TDirectory* dir_mm = RootOutputFile->mkdir("MM");
 		dir_mm->cd();
-		TDirectory* dir_mm_sub[4][std::distance(std::begin(_cut_), std::end(_cut_))+1][3+1][2+1];//Topology,cut,clean event, W dependence 
+		TDirectory* dir_mm_sub[4][std::distance(std::begin(_cut_), std::end(_cut_))+1][2+1][2+1];//Topology,cut,clean event, W dependence 
 		for(int i=0; i<4; i++){
 			sprintf(dir_name,"MM_%s",_top_[i]);
 			dir_mm_sub[i][0][0][0] = dir_mm->mkdir(dir_name);
 			for(int j=0; j<std::distance(std::begin(_cut_), std::end(_cut_)); j++){
 				sprintf(dir_name,"MM_%s_%s",_top_[i],_cut_[j]);
 				dir_mm_sub[i][1+j][0][0] = dir_mm_sub[i][0][0][0]->mkdir(dir_name);
-				for(int k=0; k<std::distance(std::begin(_clean_event_),std::end(_clean_event_)); k++){
+				for(int k=0; k<(std::distance(std::begin(_clean_event_),std::end(_clean_event_))-1); k++){
 					sprintf(dir_name,"MM_%s_%s_%s",_top_[i],_cut_[j],_clean_event_[k]);
 					dir_mm_sub[i][j+1][k+1][0] = dir_mm_sub[i][j+1][0][0]->mkdir(dir_name); 
 					sprintf(dir_name,"MM_%s_%s_W_dep",_top_[i],_cut_[j]);
@@ -1468,7 +1632,7 @@ void Histogram::MM_Write(std::shared_ptr<Flags> flags_){
 		CartesianGenerator cart(space_dims);
 
 		while(cart.GetNextCombination()){
-			if(_top_[cart[3]]!=_mnone_ && _top_[cart[3]]!=_mall_){
+			if(_top_[cart[3]]!=_mnone_ && _top_[cart[3]]!=_mall_ && _clean_event_[cart[1]]!=_isolated_){
 				if(cart[0] >= Histogram::W_bins() && _MM_made[cart[3]][cart[2]][cart[1]][cart[0]]){
 					dir_mm_sub[cart[3]][cart[2]+1][cart[1]+1][2]->cd();
 					_MM_hist[cart[3]][cart[2]][cart[1]][cart[0]]->SetXTitle("MM (GeV^{2})");

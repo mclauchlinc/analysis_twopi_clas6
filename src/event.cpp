@@ -108,28 +108,32 @@ bool Event::Check_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, 
 }
 
 void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, std::shared_ptr<Flags> flags_){
-	_k1_lab = physics::Make_4Vector(_beam_energy_[_run],0.0,0.0,1.0,_me_);
+	_k1_lab = physics::Make_4Vector(_beam_energy_[flags_->Flags::Run()],0.0,0.0,1.0,_me_);
+	_sf = p0_.Particle::Get_sf();
+	_etot = p0_.Particle::Get_etot();
+	_cc_lrc = p0_.Particle::Get_cc_lrc();
+	_cc_seg = p0_.Particle::Get_cc_seg();
 	switch(top_){
 			case 0:
 				_vec_lab[0] = p0_.Particle::Get_4Vec(0);
 				_vec_lab[2] = p1_.Particle::Get_4Vec(2);
 				_vec_lab[3] = p2_.Particle::Get_4Vec(3);
 				_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[2],_vec_lab[3]);
-				_MM2 = _MM*_MM;
+				_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[2],_vec_lab[3]);
 			break;
 			case 1:
 				_vec_lab[0] = p0_.Particle::Get_4Vec(0);
 				_vec_lab[1] = p1_.Particle::Get_4Vec(1);
 				_vec_lab[3] = p2_.Particle::Get_4Vec(3);
 				_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[3]);
-				_MM2 = _MM*_MM;
+				_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[1],_vec_lab[3]);
 			break;
 			case 2:
 				_vec_lab[0] = p0_.Particle::Get_4Vec(0);
 				_vec_lab[1] = p1_.Particle::Get_4Vec(1);
 				_vec_lab[2] = p2_.Particle::Get_4Vec(2);
 				_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[2]);
-				_MM2 = _MM*_MM;
+				_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[1],_vec_lab[2]);
 			break;
 			default:
 				std::cout<<"You've entered the wrong topology\n";
@@ -139,12 +143,17 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 }
 void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, std::shared_ptr<Flags> flags_){
 	_k1_lab = physics::Make_4Vector(_beam_energy_[_run],0.0,0.0,1.0,_me_);
+	_sf = p0_.Particle::Get_sf();
+	_etot = p0_.Particle::Get_etot();
+	_cc_lrc = p0_.Particle::Get_cc_lrc();
+	_cc_seg = p0_.Particle::Get_cc_seg();
 	if(top_==3){
 		_vec_lab[0] = p0_.Particle::Get_4Vec(0);
 		_vec_lab[1] = p1_.Particle::Get_4Vec(1);
 		_vec_lab[2] = p2_.Particle::Get_4Vec(2);
 		_vec_lab[3] = p3_.Particle::Get_4Vec(3);
 		_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
+		_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 	}
 	Event::Get_Angles();
 }
@@ -200,6 +209,16 @@ float Event::Q2(){
 	return _Q2;
 }
 
+float Event::SF(){
+	return _sf;
+}
+float Event::P(int particle_, bool COM_){
+	if(COM_){
+		return _p[particle_];
+	}else{
+		return _p_lab[particle_];
+	}
+}
 float Event::MMb(int i){
 	return _MMb[i];
 }

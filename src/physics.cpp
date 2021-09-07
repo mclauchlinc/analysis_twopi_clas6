@@ -83,17 +83,27 @@ float physics::beta_calc(float m, std::shared_ptr<Branches> data, int i){
 
 float physics::MM_event(int set, int squared, TLorentzVector k1_mu, TLorentzVector k2_mu, TLorentzVector k3_mu, TLorentzVector k4_mu){
 	TLorentzVector k_mu = physics::Set_k_mu(set);
-	float MM = NAN; 
+	float MM = NAN;
+	/*if(k4_mu[3]>0){
+		Print_4Vec(k1_mu);
+		Print_4Vec(k2_mu);
+		Print_4Vec(k3_mu);
+		Print_4Vec(k4_mu);
+	}*/
+	
 	if(squared == 0 ){
 		MM = (k_mu + _p_mu_ - k1_mu - k2_mu - k3_mu - k4_mu).Mag();
 	} else{
 		MM = (k_mu + _p_mu_ - k1_mu - k2_mu - k3_mu - k4_mu).Mag2();
 	}
+	/*if(k4_mu[3]>0){
+		std::cout<<"\tMM: " <<MM <<"\n";
+	}*/
 	return  MM;
 }
 
 float physics::MM_event(int squared, TLorentzVector k0_mu, TLorentzVector k1_mu, TLorentzVector k2_mu, TLorentzVector k3_mu, TLorentzVector k4_mu){
-	float MM = NAN; 
+	float MM = NAN;   
 	if(squared == 0 ){
 		MM = (k0_mu + _p_mu_ - k1_mu - k2_mu - k3_mu - k4_mu).Mag();
 	} else{

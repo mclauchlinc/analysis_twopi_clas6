@@ -100,6 +100,12 @@ public:
 
 	int Sector();
 
+	float Get_sf();
+	float Get_etot();
+	int Get_cc_seg();
+	int Get_cc_lrc();
+	int Get_nphe();
+
 	TLorentzVector Get_4Vec(int i);//Which assumed mass (needed due to dual id of proton and pip)
 
 	//void Fill_Par_Event(std::shared_ptr<Environment> envi_, std::shared_ptr<Histogram> hist_, float W_, int top_, int par_, bool pass_);

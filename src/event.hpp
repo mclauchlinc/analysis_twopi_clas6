@@ -38,6 +38,11 @@ private:
 	float _p[4] = {NAN,NAN,NAN,NAN};//Particle momentum in COM frame
 	float _theta[4] = {NAN,NAN,NAN,NAN};//Particle theta in COM frame
 	float _phi[4] = {NAN,NAN,NAN,NAN}; //Particle phi in COM frame
+	float _sf = NAN;//Sampling Fraction of Electron;
+	float _etot = NAN; //Energy deposited in EC by electron
+	int _nphe = -99; //Number photo electrons put in CC
+	int _cc_seg = -99; //CC segment
+	int _cc_lrc = -99; //CC side
 
 	TLorentzVector _k1_lab = physics::Make_4Vector(_energy_e16_,0.0,0.0,1.0,_me_);//{NAN,NAN,NAN,NAN};
 	TLorentzVector _k1 = {NAN,NAN,NAN,NAN};//beam
@@ -72,6 +77,8 @@ public:
 	float MM2();
 	float Theta(int particle_);
 	float Phi(int particle_);
+	float SF();
+	float P(int particle_, bool COM_=false);
 	float W();
 	float Q2();
 	float MMb(int i);

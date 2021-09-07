@@ -7,6 +7,9 @@
 #include "constants.hpp"
 
 
+const static inline int _num_cc_segments_ = 18;
+
+
 namespace detect{
 	//float Acc = -0.000785;
 	//float Bcc = 0.0;

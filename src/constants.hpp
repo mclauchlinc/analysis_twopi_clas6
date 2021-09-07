@@ -163,6 +163,11 @@ static const inline  char * _W_range_ = "in_range";
 static const inline  char * _W_all_ = "all";
 static const inline  char * _W_dep_[] = {_W_var_,_W_range_,_W_all_};
 
+
+static const inline  char * _true_ = "true";
+static const inline  char * _false_ = "false";
+static const inline  char * _truth_[] = {_false_,_true_};
+
 //Parsing Out PID Cuts
 static const inline  char* _ecuts_[] = {_none_,_sanity_, _fid_cut_, _sf_cut_, _cc_cut_, _ec_cut_, _vertex_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
 static const inline  char* _hcuts_[] = {_none_,_sanity_, _fid_cut_, _delta_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
@@ -182,9 +187,14 @@ static const inline  char* _sec6_ = "sec6";
 static const inline  char* _sec_all_ = "all";
 static const inline  char* _sector_[] = {_sec1_,_sec2_,_sec3_,_sec4_,_sec5_,_sec6_,_sec_all_};
 
+static const inline  char* _left_ = "left";
+static const inline  char* _right_ = "right";
+static const inline  char* _coinc_ = "coinc";
+static const inline  char* _cc_sides_[] = {_left_,_right_,_coinc_};
 
 
-static const inline  char * species[] = {"ele","pro","pip","pim"};//4
+
+static const inline  char * species[] = {_ele_,_pro_,_pip_,_pim_};//4
 static const inline  char * eid_cut[] = {"pre","sanity","fid","sf","min_cc","fid+sf","fid+cc","sf+cc","eid","bank","event"}; //11"min_cc","min_ec","eid","bank","event"};//"fid+sf","fid+cc","sf+cc","eid","bank","event"}; //11
 static const inline  char * cut_ver[] = {"cut","anticut"};
 static const inline  char * hid_cut[] = {"pre","sanity","fid","dt","hid","bank","event"};//,"pWQ2"}; //7

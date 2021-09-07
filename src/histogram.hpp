@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include "TGraph.h"
 #include <iterator>
+#include "cuts.hpp"
 //#include <unistd.h>//to allow us to use chdir
 //#include "TImage.h"
 //#include "particle.hpp"
@@ -69,8 +70,8 @@ static float _mm_min_[4] = {0.0,0.0,0.0,-0.2};
 static float _mm_max_[4] = {1.5,0.3,0.3,0.2};
 static int _mm_bin_[4] = {200,200,200,200};
 //MM2
-static float _mm2_min_[4] = {0.0,0.0,0.0,-0.2};
-static float _mm2_max_[4] = {1.5,0.3,0.3,0.2};
+static float _mm2_min_[4] = {0.0,0.0,0.0,-0.04};
+static float _mm2_max_[4] = {1.5,0.09,0.09,0.04};
 static int _mm2_bin_[4] = {100,100,100,100};
 
 //Detector Plots
@@ -101,7 +102,7 @@ static int _n_sec_ = 6;
 //THnSparse Binning
 static float _W_min_ = 1.4;
 static float _W_max_ = 2.125;
-static float _W_res_ = 0.0125;
+static float _W_res_ = 0.025;
 static float _Q2_min_ = 2.0;
 static float _Q2_max_ = 5.0;
 static float _Q2_bins_[6] = {2.0,2.4,3.0,3.5,4.2,5.0};
@@ -350,10 +351,11 @@ public:
 	char Part_cut(int species, int cut);
 	int ecut_idx(char * ecut_, std::shared_ptr<Flags> flags_);
 	int ecut_idx(const char * ecut_, std::shared_ptr<Flags> flags_);
+	 //*--------------------------------Begin W Q2 Plot----------------------------*
 	void WQ2_Make(std::shared_ptr<Flags> flags_);
 	std::vector<int> WQ2_cut_idx(const char* ecut_, const char * cut_, const char * top_, const char * weight_, const char * recon_, std::shared_ptr<Flags> flags_);
 	bool Made_WQ2_idx(const char* ecut_, const char * cut_, const char* top_, const char * weight_, const char * recon_);
-	void WQ2_Fill(float W_, float Q2_,const char* ecut_,const  char *cut_, const char * top_, bool thrown_, std::shared_ptr<Flags> flags_, float weight_);
+	void WQ2_Fill(float W_, float Q2_,const char* ecut_,const  char *cut_, const char * top_, const char * thrown_, std::shared_ptr<Flags> flags_, float weight_);
 	void WQ2_Write(std::shared_ptr<Flags> flags_);
 	 //*--------------------------------End W Q2 Plot----------------------------*
 
@@ -371,7 +373,7 @@ public:
 	//*--------------------------------End SF Plot----------------------------*
 	void SF_Make(std::shared_ptr<Flags> flags_);
 	std::vector<int> SF_idx(const char* ecut_, const char* cut_, const char* top_, const char* sector_, const char * W_dep_, std::shared_ptr<Flags> flags_, float W_=NAN);
-	void SF_Fill(float p_, float sf_, float W_, const char* ecut_, const char* cut_, const char* top_, int sector_, float weight_, std::shared_ptr<Flags> flags_);
+	void SF_Fill(float p_, float sf_, float W_, const char* ecut_, const char* cut_, const char* top_, const char * sector_, float weight_, std::shared_ptr<Flags> flags_);
 	void SF_Write(std::shared_ptr<Flags> flags_);
 	//*--------------------------------End SF Plot----------------------------*
 	//*-------------------------------Start CC Plot----------------------------*
@@ -387,6 +389,7 @@ public:
  	//*-------------------------------End Delta T Plot------------------------------*
 	//*-------------------------------Start MM Plot----------------------------*
 	void MM_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> MM_idx(const char* top_, const char* cut_, const char * clean_, const char * W_dep_, float W_, std::shared_ptr<Flags> flags_);
 	void MM_Fill(const char* top_, const char* cut_, const char * clean_, float MM_, float W_, float weight_, std::shared_ptr<Flags> flags_);
 	void MM_Write(std::shared_ptr<Flags> flags_);
 };
