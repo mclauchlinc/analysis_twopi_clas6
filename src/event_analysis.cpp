@@ -177,12 +177,37 @@ void Analysis::Event_ID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogr
 			}
 		}
 	}
-	int idx = 0; 
-	for(int j=0; j<4; j++){
-		if(_ntop[j]>0){
-			for(int k=0; k<_ntop[j]; k++){
+	for(int idx=0; idx<_rEvent.size(); idx++){
+		if(_rEvent[idx].Event::Pass()){
+			_gevts+=1;
+			_gevt_idx.push_back(idx);
+			switch(_rEvent[idx].Event::Top()){
+				case 0:
+					_gevt_idx_mpro.push_back(_gEvent.size());
+				break;
+				case 1:
+					_gevt_idx_mpip.push_back(_gEvent.size());
+				break;
+				case 2:
+					_gevt_idx_mpim.push_back(_gEvent.size());
+				break;
+				case 3:
+					_gevt_idx_mzero.push_back(_gEvent.size());
+				break;
+				default:
+					std::cout<<"Invalid Top for Good Event\n";
+				break;
+			}
+			_gEvent.push_back(_rEvent[idx]);
+			_gtop[_rEvent[idx].Event::Top()]+=1;
+		}
+	} 
+	/*
+	for(int j=0; j<4; j++){//Topology
+		if(_ntop[j]>0){//Number of possible in that topology
+			for(int k=0; k<_ntop[j]; k++){//Loop through the number in that topology
 				//plot::plot_event(_rEvent[idx],hist_,flags_);
-				if(_rEvent[idx].Event::Pass()){
+				if(_rEvent[idx].Event::Pass_Top(j)){
 					_gEvent.push_back(_rEvent[idx]);
 					_gevts+=1;
 					_gevt_idx.push_back(idx);
@@ -191,7 +216,7 @@ void Analysis::Event_ID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogr
 				idx++;
 			}
 		}
-	}
+	}*/
 	//std::cout<<"\t\tNum good events: " <<_gtop[0] <<_gtop[1] <<_gtop[2] <<_gtop[3] <<"\n";
 		
 }
@@ -204,28 +229,30 @@ void Analysis::Isolate_Event(std::shared_ptr<Histogram> hist_, std::shared_ptr<F
 			if(_gtop[3]>1){
 				Analysis::Isolate_Top(3,hist_,flags_);
 			}else{
-				_iEvent.push_back(_rEvent[Analysis::Event_idx(3,0)]);
+				if(_gEvent[Analysis::gEvent_idx(3,0)].Event::Pass()){
+					_iEvent.push_back(_rEvent[Analysis::gEvent_idx(3,0)]);
+				}
 			}
 		}else{
 			if(_gtop[2]>0){
 				if(_gtop[2]>1){
 					Analysis::Isolate_Top(2,hist_,flags_);
 				}else{
-					_iEvent.push_back(_rEvent[Analysis::Event_idx(2,0)]);
+					_iEvent.push_back(_gEvent[Analysis::gEvent_idx(2,0)]);
 				}
 			}else{
 				if(_gtop[1]>0){
-					if(_gtop[2]>1){
+					if(_gtop[1]>1){
 						Analysis::Isolate_Top(1,hist_,flags_);
 					}else{
-						_iEvent.push_back(_rEvent[Analysis::Event_idx(1,0)]);
+						_iEvent.push_back(_gEvent[Analysis::gEvent_idx(1,0)]);
 					}
 				}else{
 					if(_gtop[0]>0){
-						if(_gtop[2]>1){
+						if(_gtop[0]>1){
 							Analysis::Isolate_Top(0,hist_,flags_);
 						}else{
-							_iEvent.push_back(_rEvent[Analysis::Event_idx(0,0)]);
+							_iEvent.push_back(_gEvent[Analysis::gEvent_idx(0,0)]);
 						}
 					}
 				}
@@ -240,16 +267,28 @@ void Analysis::Isolate_Event(std::shared_ptr<Histogram> hist_, std::shared_ptr<F
 }
 
 void Analysis::Isolate_Top(int top_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
+	//std::cout<<"Isolating Topology: "<<_top_[top_] <<" " <<_gtop[top_] <<"\n";
 	int idx = -1;
 	if(_gtop[top_]>0){
 		for(int i=1; i<_gtop[top_]; i++){
-			if(_gEvent[Analysis::Event_idx(top_,i-1)].Event::Error() < _gEvent[Analysis::Event_idx(top_,i)].Event::Error()){
-				idx = Analysis::Event_idx(top_,i-1);
+			//std::cout<<"\t"<<i-1<<" event index: " <<Analysis::gEvent_idx(top_,i-1) <<" error: "<<_gEvent[Analysis::gEvent_idx(top_,i-1)].Event::Error() <<"\n";
+			//std::cout<<"\t"<<i<<" event index: " <<Analysis::gEvent_idx(top_,i) <<" error: "<<_gEvent[Analysis::gEvent_idx(top_,i)].Event::Error() <<"\n";
+			if(_gEvent[Analysis::gEvent_idx(top_,i-1)].Event::Error() < _gEvent[Analysis::gEvent_idx(top_,i)].Event::Error()){
+				idx = Analysis::gEvent_idx(top_,i-1);
+				//std::cout<<"\t\tIndex: " <<idx <<"\n";
+			}else if(i==_gtop[top_]-1){
+				idx = Analysis::gEvent_idx(top_,i);
+				//std::cout<<"\t\tIndex: " <<idx <<"\n";
 			}
 		}
-		_iEvent.push_back(_gEvent[idx]);
+		if(idx>=0){
+			_iEvent.push_back(_gEvent[idx]);
+		}else{
+			std::cout<<"Bad Index for Good Event\n";
+		}
+	}else{
+		std::cout<<"Did not have any good events for given topology: " <<_top_[top_] <<"\n"; 
 	}
-	
 }
 
 int Analysis::Event_idx(int top_, int top_idx_){
@@ -258,6 +297,28 @@ int Analysis::Event_idx(int top_, int top_idx_){
 		idx+=_ntop[i];
 	}
 	return idx+top_idx_;
+}
+
+int Analysis::gEvent_idx(int top_, int top_idx_){
+	int idx = -1;
+	switch(top_){
+		case 0:
+			idx = _gevt_idx_mpro[top_idx_];
+		break;
+		case 1:
+			idx = _gevt_idx_mpip[top_idx_];
+		break;
+		case 2:
+			idx = _gevt_idx_mpim[top_idx_];
+		break;
+		case 3:
+			idx = _gevt_idx_mzero[top_idx_];
+		break;
+		default:
+			std::cout<<"Invalid Top for Good Event Index\n";
+		break;
+	}
+	return idx;
 }
 
 //Determine whether half wave plate is in or out

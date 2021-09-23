@@ -685,18 +685,17 @@ int fun::hcut_offset(const char * species_, const char * hcut_, std::shared_ptr<
 
 bool fun::hcut_perform(const char * species_,const char* hcut_, std::shared_ptr<Flags> flags_){
   bool pass = false;
-  if(hcut_ == _none_ || hcut_==_sanity_ || hcut_==_pid_){
-    pass = true;
-  }else{
-    if(hcut_==_fid_cut_ && flags_->Flags::Fid_Cut(fun::species_idx(species_))){
+  if(species_ != _ele_){
+    if(hcut_ == _none_ || hcut_==_sanity_ || hcut_==_pid_){
       pass = true;
-    }else if(hcut_==_delta_cut_ && flags_->Flags::Delta_Cut(fun::species_idx(species_))){
-      pass = true;
-    }else if(hcut_==_event_ ){
-      pass = true;
-    }
-    else if(hcut_==_pid_ ){
-      pass = true;
+    }else{
+      if(hcut_==_fid_cut_ && flags_->Flags::Fid_Cut(fun::species_idx(species_))){
+        pass = true;
+      }else if(hcut_==_delta_cut_ && flags_->Flags::Delta_Cut(fun::species_idx(species_))){
+        pass = true;
+      }else if(hcut_==_event_ ){
+        pass = true;
+      }
     }
   }
   return pass; 
@@ -773,6 +772,18 @@ int fun::top_offset(const char * top_, std::shared_ptr<Flags> flags_){
     }
     return idx; 
   }
+}
+
+int fun::cc_side_idx(const char * side_){
+  int side_idx = -1; 
+  if(side_ == _left_){
+    side_idx = 0;
+  }else if(side_ == _coinc_){
+    side_idx = 1;
+  }else if(side_ == _right_){
+    side_idx = 2;
+  }
+  return side_idx;
 }
 
 /*

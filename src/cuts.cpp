@@ -18,7 +18,7 @@ float cuts::fid_e_del_phi_neg(int run_, int sector_, float p_, float theta_){
 
 bool cuts::fid_e (float p_, float theta_, float phi_, std::shared_ptr<Flags> flags_){
 	bool pass = false;
-	if(flags_->Flags::Fid_Cut(0)){
+	if(flags_->Flags::Fid_Cut(0) && !isnan(phi_) && !isnan(theta_)){
 		//Calculate angles and sector
 		float phi_c = physics::phi_center(phi_);
 		int sector = physics::get_sector(phi_);
@@ -48,7 +48,7 @@ bool cuts::fid_h (int hadron_, float theta_, float phi_, std::shared_ptr<Flags> 
 	int sector = physics::get_sector(phi_);
 
 	//Actual application of the cut
-	if(phi_c>=cuts::phi_min(hadron_, theta_, flags_->Flags::Run(), sector-1) && phi_c<=cuts::phi_max(hadron_, theta_, flags_->Flags::Run(), sector-1))
+	if(phi_c>=cuts::phi_min(hadron_, theta_, flags_->Flags::Run(), sector-1) && phi_c<=cuts::phi_max(hadron_, theta_, flags_->Flags::Run(), sector-1) && !isnan(phi_) && !isnan(theta_))
 	{
 		pass = true;
 	}

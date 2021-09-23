@@ -190,7 +190,7 @@ static const inline  char* _sector_[] = {_sec1_,_sec2_,_sec3_,_sec4_,_sec5_,_sec
 static const inline  char* _left_ = "left";
 static const inline  char* _right_ = "right";
 static const inline  char* _coinc_ = "coinc";
-static const inline  char* _cc_sides_[] = {_left_,_right_,_coinc_};
+static const inline  char* _cc_sides_[] = {_left_,_coinc_,_right_};
 
 
 

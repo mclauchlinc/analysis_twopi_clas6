@@ -96,6 +96,9 @@ float physics::MM_event(int set, int squared, TLorentzVector k1_mu, TLorentzVect
 	} else{
 		MM = (k_mu + _p_mu_ - k1_mu - k2_mu - k3_mu - k4_mu).Mag2();
 	}
+	if(isinf(MM)){
+		MM = NAN;
+	}
 	/*if(k4_mu[3]>0){
 		std::cout<<"\tMM: " <<MM <<"\n";
 	}*/
@@ -109,6 +112,9 @@ float physics::MM_event(int squared, TLorentzVector k0_mu, TLorentzVector k1_mu,
 	} else{
 		MM = (k0_mu + _p_mu_ - k1_mu - k2_mu - k3_mu - k4_mu).Mag2();
 	}
+	if(isinf(MM)){
+		MM = NAN;
+	}
 	return  MM;
 }
 
@@ -118,6 +124,9 @@ float physics::MM_event(int squared, TLorentzVector k0_mu, TLorentzVector k1_mu,
 		MM = (k0_mu + _p_mu_ - k1_mu - k2_mu - k3_mu).Mag();
 	} else{
 		MM = (k0_mu + _p_mu_ - k1_mu - k2_mu - k3_mu).Mag2();
+	}
+	if(isinf(MM)){
+		MM = NAN;
 	}
 	return  MM;
 }

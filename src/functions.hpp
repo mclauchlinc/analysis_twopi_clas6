@@ -83,6 +83,7 @@ int sim_idx(bool sim_);
 bool top_perform(const char* top_, std::shared_ptr<Flags> flags_);
 int truth_idx(bool pass_);
 int top_offset(const char * top_, std::shared_ptr<Flags> flags_);
+int cc_side_idx(const char * side_);
 //int array_size(char* array_[]);
 //int array_size(const char* array_[]);
 }

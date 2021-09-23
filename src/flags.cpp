@@ -257,6 +257,7 @@ Flags::Flags(){}
 			_plot_sc_geo = true;
 			_plot_cc_geo = true;
 			_plot_ec_geo = true;
+			_plot_vertex = true;
 			_plot_all = true;
 		}
 		if(include && !_plot_all){
@@ -306,6 +307,9 @@ Flags::Flags(){}
 			if(str == _plot_ec_geo_){
 				_plot_ec_geo = true;
 			}
+			if(str == _plot_vertex_){
+				_plot_vertex = true;
+			}
 		}
 		if(!include && _plot_all){
 			if(str == _plot_wq2_){
@@ -351,6 +355,9 @@ Flags::Flags(){}
 			}
 			if(str == _plot_ec_geo_){
 				_plot_ec_geo = false;
+			}
+			if(str == _plot_vertex_){
+				_plot_vertex = false;
 			}
 		}
 	}
@@ -541,7 +548,7 @@ Flags::Flags(){}
 	bool Flags::Plot_CC(){
 		return _plot_cc;
 	}
-	bool Flags::Plot_DT(int particle){
+	bool Flags::Plot_Delta(int particle){
 		return _plot_dt[particle];
 	}
 	bool Flags::Plot_CC_Geo(){
@@ -558,6 +565,9 @@ Flags::Flags(){}
 	}
 	bool Flags::Plot_Beta(int particle){
 		return _plot_beta[particle];
+	}
+	bool Flags::Plot_Vertex(){
+		return _plot_vertex;
 	}
 	//Histogram Separation
 

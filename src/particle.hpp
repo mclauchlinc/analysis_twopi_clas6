@@ -37,6 +37,8 @@ private:
 	float _theta = NAN;//In lab frame
 	float _phi = NAN;//In lab frame
 	float _vz = NAN;//In lab frame
+	float _vx = NAN;//In lab frame
+	float _vy = NAN;//In lab frame
 	float _sf = NAN;//In lab frame
 	float _etot = NAN;//Energy deposited in EC
 	int _cc_seg = -1; //Segment of CC hit
@@ -105,6 +107,10 @@ public:
 	int Get_cc_seg();
 	int Get_cc_lrc();
 	int Get_nphe();
+	float Get_vz();
+	float Get_vx();
+	float Get_vy();
+	float Get_delta(int par_);
 
 	TLorentzVector Get_4Vec(int i);//Which assumed mass (needed due to dual id of proton and pip)
 

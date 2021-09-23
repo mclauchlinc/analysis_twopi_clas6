@@ -47,17 +47,22 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 	_theta = physics::get_theta(data_->Branches::cz(idx_));
 	_phi = physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_));
 	_q = data_->Branches::q(idx_);
-
+	for(int i=0; i<4; i++){
+		_dt[i] = physics::delta_t(i,data_, idx_);
+	}
 	//Particle ID
 	_pid = pid::pid(idx_,data_,flags_);
 	_ided = true;
 	if(idx_ == 0){//_Electron_
 		//Detector Quantities
+		_vz = data_->Branches::vz(idx_);
+		_vx = data_->Branches::vx(idx_);
+		_vy = data_->Branches::vy(idx_);
 		_etot = data_->Branches::etot(idx_);
 		_sf = (_etot/_p);
 		_nphe = data_->Branches::nphe(idx_);
-		_cc_seg = data_->Branches::cc_segm(idx_);
-		_cc_lrc = detect::cc_lrc(_cc_seg);
+		_cc_seg = detect::cc_segment(data_->Branches::cc_segm(idx_));
+		_cc_lrc = detect::cc_lrc(data_->Branches::cc_segm(idx_));
 		if(_pid[0]){
 			_sf_pass = true;
 			_min_ec_pass = true;
@@ -250,4 +255,16 @@ int Particle::Get_cc_lrc(){
 }
 int Particle::Get_nphe(){
 	return _nphe;
+}
+float Particle::Get_vz(){
+	return _vz;
+}
+float Particle::Get_vx(){
+	return _vx;
+}
+float Particle::Get_vy(){
+	return _vy;
+}
+float Particle::Get_delta(int par_){
+	return _dt[par_];
 }

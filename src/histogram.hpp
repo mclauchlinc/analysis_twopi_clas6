@@ -19,6 +19,7 @@
 #include "TGraph.h"
 #include <iterator>
 #include "cuts.hpp"
+#include <cmath>
 //#include <unistd.h>//to allow us to use chdir
 //#include "TImage.h"
 //#include "particle.hpp"
@@ -76,8 +77,8 @@ static int _mm2_bin_[4] = {100,100,100,100};
 
 //Detector Plots
 //Vertex
-static float _vertex_min_ = -20.0;
-static float _vertex_max_ = 0.0;
+static float _vertex_min_ = -12.0;
+static float _vertex_max_ = 5.0;
 static int _vertex_bin_ = 200;
 //CC Eff
 	//Momentum vs. Theta
@@ -146,11 +147,14 @@ using TH1F_ptr_1d = std::vector<TH1F*>;
 using TH1F_ptr_2d = std::vector<std::vector<TH1F*>>;
 using TH1F_ptr_3d = std::vector<std::vector<std::vector<TH1F*>>>;
 using TH1F_ptr_4d = std::vector<std::vector<std::vector<std::vector<TH1F*>>>>;
+using TH1F_ptr_5d = std::vector<std::vector<std::vector<std::vector<std::vector<TH1F*>>>>>;
+using TH1F_ptr_6d = std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<TH1F*>>>>>>;
 
 using TDir_ptr_1d = std::vector<TDirectory*>;
 using TDir_ptr_2d = std::vector<std::vector<TDirectory*>>;
 using TDir_ptr_3d = std::vector<std::vector<std::vector<TDirectory*>>>;
 using TDir_ptr_4d = std::vector<std::vector<std::vector<std::vector<TDirectory*>>>>;
+using TDir_ptr_5d = std::vector<std::vector<std::vector<std::vector<std::vector<TDirectory*>>>>>;
 
 //Canvas information
 //const Double_t WQ2_cw = 1200;
@@ -253,6 +257,10 @@ protected:
 	TH2F_ptr_6d _Fid_hist;
 	Bool_6d _Fid_made;
 
+	//CC Histograms
+	Bool_6d _CC_made;
+	TH1F_ptr_6d _CC_hist;
+
 
 	//MM Histograms
 	TH1F_ptr_4d _MM_hist;
@@ -260,6 +268,12 @@ protected:
 
 	TH2F_ptr_5d _SF_hist;
 	Bool_5d _SF_made;
+
+	//Vertex Histograms
+	TH1F_ptr_3d _Vertex_hist;
+
+	//Delta Histograms
+	TH2F_ptr_5d _Delta_hist;
 
 
 	//TH2F_ptr_5d _Made_Fid_hist;//[7][4][11][30][26][6][2][2];//sector, species, cut, W binning, p binning, topology, anti, weight
@@ -346,6 +360,7 @@ public:
 	int W_bin(float W_);
 	float W_bot(int bin_);
 	float W_top(int bin_);
+	float W_center(int bin_);
 	int W_binning(float W_);
 	int p_binning(float p_);
 	char Part_cut(int species, int cut);
@@ -374,18 +389,31 @@ public:
 	void SF_Make(std::shared_ptr<Flags> flags_);
 	std::vector<int> SF_idx(const char* ecut_, const char* cut_, const char* top_, const char* sector_, const char * W_dep_, std::shared_ptr<Flags> flags_, float W_=NAN);
 	void SF_Fill(float p_, float sf_, float W_, const char* ecut_, const char* cut_, const char* top_, const char * sector_, float weight_, std::shared_ptr<Flags> flags_);
+	std::vector<int> SF_dir_idx(const char* ecut_, const char* cut_, const char* top_, const char* sector_, const char* W_dep_, std::shared_ptr<Flags> flags_);
 	void SF_Write(std::shared_ptr<Flags> flags_);
 	//*--------------------------------End SF Plot----------------------------*
 	//*-------------------------------Start CC Plot----------------------------*
+	void CC_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> CC_idx(const char * ecut_, const char * cut_, const char* top_, const char * sector_, const char* side_, int seg_, std::shared_ptr<Flags> flags_);
+	void CC_Fill(int nphe, int seg_, const char * ecut_, const char* cut_, const char* top_, const char * sector_, const char* side_, std::shared_ptr<Flags> flags_);
+	void CC_Write(std::shared_ptr<Flags> flags_);
  	//*-------------------------------End CC Plot-----------------------------*
 
  	//*-------------------------------Start EC Plot----------------------------*
  	//*-------------------------------End EC Plot------------------------------*
 
  	//*-------------------------------Start Vertex Plot----------------------------*
+ 	void Vertex_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> Vertex_idx(const char* ecut_, const char* cut_, const char* top_, std::shared_ptr<Flags> flags_);
+	void Vertex_Fill(float vz_, float weight_, const char* ecut_, const char* cut_, const char* top_, std::shared_ptr<Flags> flags_);
+	void Vertex_Write(std::shared_ptr<Flags> flags_);
  	//*-------------------------------End Vertex Plot------------------------------*
 
  	//*-------------------------------Start Delta T Plot----------------------------*
+ 	void Delta_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> Delta_idx(float W_, const char* species_, const char* pcut_, const char* cut_, const char* top_, const char* W_dep_, std::shared_ptr<Flags> flags_);
+	void Delta_Fill(float p_, float dt_, float weight_, float W_, const char* species_, const char* pcut_, const char* cut_, const char* top_, std::shared_ptr<Flags> flags_ );
+	void Delta_Write(std::shared_ptr<Flags> flags_);
  	//*-------------------------------End Delta T Plot------------------------------*
 	//*-------------------------------Start MM Plot----------------------------*
 	void MM_Make(std::shared_ptr<Flags> flags_);

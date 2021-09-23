@@ -73,6 +73,7 @@ static std::string _plot_sc_geo_ = "sc_geo";
 static std::string _plot_ec_geo_ = "ec_geo";
 static std::string _plot_mm_[4] = {"mm_pro","mm_pip","mm_pim","mm_zero"}; //{pro,pip,pim,zero}
 static std::string _plot_beta_[4] = {"beta_ele","beta_pro","beta_pip","beta_pim"}; //{ele,pro,pip,pim}
+static std::string _plot_vertex_ = "vertex";
 //Histogram Separation
 //Will have space for this
 //THnSparse
@@ -135,6 +136,7 @@ private:
 	bool _plot_sc_eff = false;
 	bool _plot_ec_eff = false;
 	bool _plot_dc_eff = false;
+	bool _plot_vertex = false;
 
 	//Histogram Separation
 		//Will have space for this
@@ -188,12 +190,16 @@ public:
 	bool Plot_Fid(int particle);
 	bool Plot_SF();
 	bool Plot_CC();
-	bool Plot_DT(int particle);
+	bool Plot_Delta(int particle);
 	bool Plot_CC_Geo();
 	bool Plot_EC_Geo();
 	bool Plot_SC_Geo();
 	bool Plot_MM(int topology);
 	bool Plot_Beta(int particle);
+	bool Plot_Vertex();
+	//Portions of Histograms
+	bool Ele_Cut(const char * ecut_);
+
 	//Histogram Separation
 
 	//THnSparse

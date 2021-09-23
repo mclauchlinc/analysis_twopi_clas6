@@ -25,7 +25,7 @@ int main(int argc, char **argv){
 	auto flags = std::make_shared<Flags>();//argc,argv);
 	flags->Flags::Read_Flags(argc,argv);
 
-	std::cout<<"Test for PIM Fid plotting "<<flags->Plot_Fid(3) <<"\n";
+	std::cout<<"Test for Vertex plotting "<<flags->Plot_Vertex() <<"\n";
 	std::cout<<"Test for perform  "<<fun::ecut_perform(_event_,flags) <<"\n";
 
 

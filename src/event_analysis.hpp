@@ -49,6 +49,10 @@ private:
 	std::vector<Event> _iEvent; //Just 1
 
 	std::vector<int> _gevt_idx;
+	std::vector<int> _gevt_idx_mpro;
+	std::vector<int> _gevt_idx_mpip;
+	std::vector<int> _gevt_idx_mpim;
+	std::vector<int> _gevt_idx_mzero;
 
 	int _gevents = 0; 
 
@@ -76,6 +80,7 @@ public:
 	void Isolate_Top(int top_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
 	//Getting the index of an event given its topology and top index
 	int Event_idx(int top_, int top_idx);
+	int gEvent_idx(int top_, int top_idx_);
 	//Number of good events
 	int Gevts();
 	//Number of possible events in given topology

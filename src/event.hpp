@@ -42,7 +42,12 @@ private:
 	float _etot = NAN; //Energy deposited in EC by electron
 	int _nphe = -99; //Number photo electrons put in CC
 	int _cc_seg = -99; //CC segment
-	int _cc_lrc = -99; //CC side
+	int _cc_lrc = -99; //CC side {left,coinc,right}
+	float _dt[4] = {NAN,NAN,NAN,NAN};
+
+	float _vz = NAN;
+	float _vx = NAN;
+	float _vy = NAN;
 
 	TLorentzVector _k1_lab = physics::Make_4Vector(_energy_e16_,0.0,0.0,1.0,_me_);//{NAN,NAN,NAN,NAN};
 	TLorentzVector _k1 = {NAN,NAN,NAN,NAN};//beam
@@ -77,10 +82,17 @@ public:
 	float MM2();
 	float Theta(int particle_);
 	float Phi(int particle_);
-	float SF();
-	float P(int particle_, bool COM_=false);
 	float W();
 	float Q2();
+	float SF();
+	float P(int particle_, bool COM_=false);
+	float Delta(int particle_);
+	float Vz();
+	float Vx();
+	float Vy();
+	int CC_seg();
+	int CC_side();
+	int nphe();
 	float MMb(int i);
 	float MM2b(int i);
 	float Thetab(int i);
