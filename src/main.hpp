@@ -57,7 +57,7 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, st
 		//Update on Progress through Analysis
 		if(thread_id_ == 0 && curr_event%(_num_events[thread_id_]/100) == 0){
 			//curr_file_name = 
-			std::cout<<"\r" <<"\t" <<(100*curr_event/_num_events[thread_id_]) <<" %"  <<std::flush <<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
+			std::cout<<"\r" <<"\t" <<(100*curr_event/_num_events[thread_id_]) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
 		}
 		//Particle ID, Event Selection, and Histogram Filling
 		auto analysis = std::make_shared<Analysis>(data,hists_, forest_, thread_id_, run_num, flags_);

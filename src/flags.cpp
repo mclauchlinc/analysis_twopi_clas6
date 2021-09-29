@@ -548,6 +548,9 @@ Flags::Flags(){}
 	bool Flags::Plot_CC(){
 		return _plot_cc;
 	}
+	bool Flags::Plot_CC_Eff(){
+		return _plot_cc_eff;
+	}
 	bool Flags::Plot_Delta(int particle){
 		return _plot_dt[particle];
 	}

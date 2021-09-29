@@ -11,7 +11,7 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	Histogram::CC_Make(flags_);
 	Histogram::Vertex_Make(flags_);
 	Histogram::MM_Make(flags_);
-
+	Histogram::CC_Eff_Make(flags_);
 	//Histogram::Friend_Make(flags_);
 	//Histogram::Cross_Make(flags_);
 	//Histogram::XY_Make(flags_);
@@ -53,6 +53,7 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	Histogram::Vertex_Write(flags_);
 	std::cout<<"Writing MM Histograms\n";
 	Histogram::MM_Write(flags_);
+	Histogram::CC_Eff_Write(flags_);
 	//Histogram::XY_Write(_envi);
 	//Histogram::Fid_Det_Write(_envi);
 	//Friend_Write(_envi);
@@ -2778,6 +2779,305 @@ void Histogram::MM_Write(std::shared_ptr<Flags> flags_){
 
  //*-------------------------------End MM Plot------------------------------*
 
+ //*-------------------------------Start CC Eff Plot------------------------------*
+void Histogram::CC_Eff_Make(std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Plot_CC_Eff()){
+		std::cout<<"Making CC Efficiency Plots\n";
+		/*
+		Histogram Splits
+		- Electron Cuts
+		- Cut Status
+		- Topology
+		*/
+		TH2F_ptr_1d plot_1d_1;
+		TH2F_ptr_2d plot_2d_1;
+		TH2F_ptr_3d plot_3d_1;
+		TH1F_ptr_1d plot_1d_2;
+		TH1F_ptr_2d plot_2d_2;
+
+		std::vector<long> space_dims(4);
+		space_dims[3] = std::distance(std::begin(_ecuts_), std::end(_ecuts_));
+		space_dims[2] = std::distance(std::begin(_cut_), std::end(_cut_));
+		space_dims[1] = std::distance(std::begin(_sector_),std::end(_sector_));
+		space_dims[0] = std::distance(std::begin(_top_), std::end(_top_));
+		char hname[100];
+		CartesianGenerator cart(space_dims);
+		int ecut_idx;
+		int cut_idx;
+		int sec_idx;
+		int top_idx;
+		while(cart.GetNextCombination()){
+			ecut_idx = cart[3];
+			cut_idx = cart[2];
+			sec_idx = cart[1];
+			top_idx = cart[0];
+			if(_ecuts_[ecut_idx] == _none_ && _cut_[cut_idx] == _no_cut_ && _top_[top_idx]==_none_){
+				std::cout<<"CC Eff1 Idx: " <<_CC_Eff1_hist.size() <<" " <<plot_3d_1.size() <<" " <<plot_2d_1.size() <<" " <<plot_1d_1.size() <<"\n";
+				sprintf(hname,"cc_eff_%s_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx]);
+				plot_1d_1.push_back(new TH2F(hname,hname,_cc_eff1_xbin_,_cc_eff1_xmin_,_cc_eff1_xmax_,_cc_eff1_ybin_,_cc_eff1_ymin_,_cc_eff1_ymax_));
+				if(_sector_[sec_idx]==_sec_all_){
+					std::cout<<"\tCC Eff2 Idx: " <<_CC_Eff2_hist.size() <<" " <<plot_2d_2.size() <<" " <<plot_1d_2.size() <<"\n";
+					sprintf(hname,"cc_eff_sec_yields_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_top_[top_idx]);
+					plot_1d_2.push_back(new TH1F(hname,hname,_cc_eff2_xbin_,_cc_eff2_xmin_,_cc_eff2_xmax_));
+				}
+			}else if(_ecuts_[ecut_idx] != _none_ && _cut_[cut_idx] != _no_cut_){
+				if(_ecuts_[ecut_idx] != _event_ && _top_[top_idx] == _mnone_){
+					std::cout<<"CC Eff1 Idx: " <<_CC_Eff1_hist.size() <<" " <<plot_3d_1.size() <<" " <<plot_2d_1.size() <<" " <<plot_1d_1.size() <<"\n";
+					sprintf(hname,"cc_eff_%s_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx]);
+					plot_1d_1.push_back(new TH2F(hname,hname,_cc_eff1_xbin_,_cc_eff1_xmin_,_cc_eff1_xmax_,_cc_eff1_ybin_,_cc_eff1_ymin_,_cc_eff1_ymax_));
+					if(_sector_[sec_idx]==_sec_all_){
+						std::cout<<"\tCC Eff2 Idx: " <<_CC_Eff2_hist.size() <<" " <<plot_2d_2.size() <<" " <<plot_1d_2.size() <<"\n";
+						sprintf(hname,"cc_eff_sec_yields_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_top_[top_idx]);
+						plot_1d_2.push_back(new TH1F(hname,hname,_cc_eff2_xbin_,_cc_eff2_xmin_,_cc_eff2_xmax_));
+					}
+				}else if(_ecuts_[ecut_idx] == _event_ && _top_[top_idx] != _mnone_){
+					std::cout<<"CC Eff1 Idx: " <<_CC_Eff1_hist.size() <<" " <<plot_3d_1.size() <<" " <<plot_2d_1.size() <<" " <<plot_1d_1.size() <<"\n";
+					sprintf(hname,"cc_eff_%s_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx]);
+					plot_1d_1.push_back(new TH2F(hname,hname,_cc_eff1_xbin_,_cc_eff1_xmin_,_cc_eff1_xmax_,_cc_eff1_ybin_,_cc_eff1_ymin_,_cc_eff1_ymax_));
+					if(_sector_[sec_idx]==_sec_all_){
+						std::cout<<"\tCC Eff2 Idx: " <<_CC_Eff2_hist.size() <<" " <<plot_2d_2.size() <<" " <<plot_1d_2.size() <<"\n";
+						sprintf(hname,"cc_eff_sec_yields_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_top_[top_idx]);
+						plot_1d_2.push_back(new TH1F(hname,hname,_cc_eff2_xbin_,_cc_eff2_xmin_,_cc_eff2_xmax_));
+					}
+				}
+			}
+			if(cart[0] == space_dims[0]-1){
+				if(plot_1d_1.size()>0){
+					plot_2d_1.push_back(plot_1d_1);
+					plot_1d_1.clear();
+				}
+				if(plot_1d_2.size()>0){
+					plot_2d_2.push_back(plot_1d_2);
+					plot_1d_2.clear();
+				}
+				if(cart[1] == space_dims[1]-1){
+					if(plot_2d_1.size()>0){
+						plot_3d_1.push_back(plot_2d_1);
+						plot_2d_1.clear();
+					}
+					if(cart[2] == space_dims[2]-1){
+						if(plot_3d_1.size()>0){
+							_CC_Eff1_hist.push_back(plot_3d_1);
+							plot_3d_1.clear();
+						}
+					}
+				}
+				if(cart[2] == space_dims[2]-1 && plot_2d_2.size()>0 && _sector_[sec_idx]==_sec_all_){
+					_CC_Eff2_hist.push_back(plot_2d_2);
+						plot_2d_2.clear();
+				}
+			}
+		}
+	}
+}
+
+std::vector<int> Histogram::CC_Eff_idx(int which_, const char * ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx;
+	if(fun::ecut_perform(ecut_,flags_)){
+		if(which_==2){//Yield by sector
+			if(ecut_==_none_ && cut_==_no_cut_ && top_==_mnone_){
+				idx.push_back(0);
+				idx.push_back(0);
+				idx.push_back(0);
+			}else if(cut_!=_no_cut_){
+				if(ecut_ != _event_ && top_ == _mnone_){
+					idx.push_back(fun::ecut_idx(ecut_)+fun::ecut_offset(ecut_,flags_));
+					idx.push_back(fun::cut_idx(cut_));
+					idx.push_back(0);
+				}else if(ecut_ == _event_ && top_ != _mnone_){
+					idx.push_back(fun::ecut_idx(ecut_)+fun::ecut_offset(ecut_,flags_));
+					idx.push_back(fun::cut_idx(cut_));
+					idx.push_back(fun::top_idx(top_)+fun::top_offset(top_,flags_));
+				}else{
+					idx.push_back(-1);
+					idx.push_back(-1);
+					idx.push_back(-1);
+				}
+			}else{
+				idx.push_back(-1);
+				idx.push_back(-1);
+				idx.push_back(-1);
+			}
+		}else if(which_==1){//Distribution per sector by p and theta
+			if(ecut_==_none_ && cut_==_no_cut_ && top_==_mnone_){
+				idx.push_back(0);
+				idx.push_back(0);
+				idx.push_back(fun::sector_idx(sector_));
+				idx.push_back(0);
+			}else if(cut_!=_no_cut_){
+				if(ecut_ != _event_ && top_ == _mnone_){
+					idx.push_back(fun::ecut_idx(ecut_)+fun::ecut_offset(ecut_,flags_));
+					idx.push_back(fun::cut_idx(cut_));
+					idx.push_back(fun::sector_idx(sector_));
+					idx.push_back(0);
+				}else if(ecut_ == _event_ && top_ != _mnone_){
+					idx.push_back(fun::ecut_idx(ecut_)+fun::ecut_offset(ecut_,flags_));
+					idx.push_back(fun::cut_idx(cut_));
+					idx.push_back(fun::sector_idx(sector_));
+					idx.push_back(fun::top_idx(top_)+fun::top_offset(top_,flags_));
+				}else{
+					idx.push_back(-1);
+					idx.push_back(-1);
+					idx.push_back(-1);
+					idx.push_back(-1);
+				}
+			}else{
+				idx.push_back(-1);
+				idx.push_back(-1);
+				idx.push_back(-1);
+				idx.push_back(-1);
+			}
+		}
+	}else{ 
+		idx.push_back(-1);
+		idx.push_back(-1);
+		idx.push_back(-1);
+		idx.push_back(-1);
+	}
+	return idx;
+}
+
+void Histogram::CC_Eff_Fill(float p_, float theta_, float weight_, const char* ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Plot_CC_Eff()){
+		std::vector<int> idx1 = Histogram::CC_Eff_idx(1,ecut_,cut_,sector_,top_,flags_);
+		//fun::print_vector_idx(idx1);
+		if(Histogram::OK_Idx(idx1)){
+			_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->Fill(p_,theta_,weight_);
+			idx1 = Histogram::CC_Eff_idx(1,ecut_,cut_,_sec_all_,top_,flags_);
+			idx1.clear();
+			if(Histogram::OK_Idx(idx1)){
+				_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->Fill(p_,theta_,weight_);
+			}
+		}
+		std::vector<int> idx2 = Histogram::CC_Eff_idx(2,ecut_,cut_,sector_,top_,flags_);
+		//fun::print_vector_idx(idx2);
+		if(Histogram::OK_Idx(idx2)){
+			_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->Fill(fun::sector_idx(sector_)+1,weight_);
+		}
+	}
+}
+
+void Histogram::CC_Eff_Write(std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Plot_CC_Eff()){
+		std::cout<<"Writing CC Efficiency\n";
+		char dirname[100];
+		TDirectory* dir_cc_eff = RootOutputFile->mkdir("CC Efficiency");
+		TDirectory* dir_cc_eff_sub[std::distance(std::begin(_ecuts_), std::end(_ecuts_))][std::distance(std::begin(_cut_), std::end(_cut_))+1][std::distance(std::begin(_top_), std::end(_top_))+1];
+		for(int i=0; i<std::distance(std::begin(_ecuts_), std::end(_ecuts_)); i++){
+			if(fun::ecut_perform(_ecuts_[i],flags_)){
+				std::cout<<"making dir at " <<i <<" " <<0 <<" " <<0 <<" putting in dir_cc_eff\n";
+				sprintf(dirname,"cc_eff_%s",_ecuts_[i]);
+				dir_cc_eff_sub[i][0][0] = dir_cc_eff->mkdir(dirname);
+				if(_ecuts_[i]==_event_){
+					for(int j=0; j<std::distance(std::begin(_top_), std::end(_top_)); j++){
+						if(_top_[j]!=_mnone_ && fun::top_perform(_top_[j],flags_)){
+							std::cout<<"\tmaking dir at " <<i <<" " <<0 <<" " <<j+1 <<" in " <<i <<" " <<0 <<" " <<0 <<"\n";
+							sprintf(dirname,"cc_eff_%s_%s",_ecuts_[i],_top_[j]);
+							dir_cc_eff_sub[i][0][j+1] = dir_cc_eff_sub[i][0][0]->mkdir(dirname);
+							for(int k=0; k<std::distance(std::begin(_cut_), std::end(_cut_)); k++){
+								if(_cut_[k]!=_no_cut_){
+									std::cout<<"\t\tmaking dir at " <<i <<" " <<k+1 <<" " <<j+1 <<" in " <<i <<" " <<0 <<" " <<j+1 <<"\n";
+									sprintf(dirname,"cc_eff_%s_%s_%s",_ecuts_[i],_top_[j],_cut_[k]);
+									dir_cc_eff_sub[i][k+1][j+1] = dir_cc_eff_sub[i][0][j+1]->mkdir(dirname);
+								}
+							}
+						}
+					}
+				}else{
+					for(int k=0; k<std::distance(std::begin(_cut_), std::end(_cut_)); k++){
+						if(_cut_[k]!=_no_cut_ && _ecuts_[i]!=_none_){
+							std::cout<<"\tmaking dir at " <<i <<" " <<k+1 <<" " <<0 <<" in " <<i <<" " <<0 <<" " <<0 <<"\n";
+							sprintf(dirname,"cc_eff_%s_%s",_ecuts_[i],_cut_[k]);
+							dir_cc_eff_sub[i][k+1][0] = dir_cc_eff_sub[i][0][0]->mkdir(dirname);
+						}
+					}
+				}
+			}
+		}
+		std::vector<long> space_dims(4);
+		space_dims[3] = std::distance(std::begin(_ecuts_), std::end(_ecuts_));
+		space_dims[2] = std::distance(std::begin(_cut_), std::end(_cut_));
+		space_dims[1] = std::distance(std::begin(_sector_),std::end(_sector_));
+		space_dims[0] = std::distance(std::begin(_top_), std::end(_top_));
+		char hname[100];
+		std::vector<int> idx1;
+		std::vector<int> idx2;
+		int ecut_idx;
+		int cut_idx;
+		int sec_idx;
+		int top_idx;
+		CartesianGenerator cart(space_dims);
+		while(cart.GetNextCombination()){
+			ecut_idx = cart[3];
+			cut_idx = cart[2];
+			sec_idx = cart[1];
+			top_idx = cart[0];
+			std::cout<<"Looking at " <<_ecuts_[ecut_idx] <<" " <<_cut_[cut_idx] <<" " <<_top_[top_idx] <<" " <<_sector_[sec_idx] <<"\n";
+			idx1 = Histogram::CC_Eff_idx(1,_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx],flags_);
+			idx2 = Histogram::CC_Eff_idx(2,_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx],flags_);
+			if(fun::ecut_perform(_ecuts_[ecut_idx],flags_)){
+				if(_ecuts_[ecut_idx] == _none_ && _cut_[cut_idx] == _no_cut_ && _top_[top_idx]==_none_){
+				std::cout<<"Writing In Directory " <<fun::ecut_idx(_ecuts_[ecut_idx]) <<" 0 0\n"; 
+				dir_cc_eff_sub[fun::ecut_idx(_ecuts_[ecut_idx])][0][0]->cd();
+					if(Histogram::OK_Idx(idx1)){
+						fun::print_vector_idx(idx1);
+						_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetXTitle("Momentum (GeV)");
+						_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetYTitle("Theta (Degrees)");
+						_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->Write();
+					}
+					if(_sector_[sec_idx]==_sec_all_){
+						if(Histogram::OK_Idx(idx2)){
+							fun::print_vector_idx(idx2);
+							_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetXTitle("Sector");
+							_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetYTitle("Yield");
+							_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->Write();
+						}
+					}
+				}else if(_ecuts_[ecut_idx] != _none_ && _cut_[cut_idx] != _no_cut_){
+					if(_ecuts_[ecut_idx] != _event_ && _top_[top_idx] == _mnone_){
+						std::cout<<"Writing In Directory " <<fun::ecut_idx(_ecuts_[ecut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" 0\n";
+						dir_cc_eff_sub[fun::ecut_idx(_ecuts_[ecut_idx])][fun::cut_idx(_cut_[cut_idx])+1][0]->cd();
+						if(Histogram::OK_Idx(idx1)){
+							fun::print_vector_idx(idx1);
+							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetXTitle("Momentum (GeV)");
+							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetYTitle("Theta (Degrees)");
+							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->Write();
+						}
+						if(_sector_[sec_idx]==_sec_all_){
+							if(Histogram::OK_Idx(idx2)){
+								fun::print_vector_idx(idx2);
+								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetXTitle("Sector");
+								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetYTitle("Yield");
+								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->Write();
+							}
+						}
+					}else if(_ecuts_[ecut_idx] == _event_ && _top_[top_idx] != _mnone_){
+						std::cout<<"Writing In Directory " <<fun::ecut_idx(_ecuts_[ecut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" " <<fun::top_idx(_top_[top_idx])+1 <<"\n";
+						dir_cc_eff_sub[fun::ecut_idx(_ecuts_[ecut_idx])][fun::cut_idx(_cut_[cut_idx])+1][fun::top_idx(_top_[top_idx])+1]->cd();
+						if(Histogram::OK_Idx(idx1)){
+							fun::print_vector_idx(idx1);
+							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetXTitle("Momentum (GeV)");
+							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetYTitle("Theta (Degrees)");
+							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->Write();
+						}
+						if(_sector_[sec_idx]==_sec_all_){
+							if(Histogram::OK_Idx(idx2)){
+								fun::print_vector_idx(idx1);
+								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetXTitle("Sector");
+								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetYTitle("Yield");
+								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->Write();
+							}
+						}
+					}
+				}
+			}
+			idx1.clear();
+			idx2.clear();
+		}
+	}
+}
+
+//*-------------------------------End CC Eff Plot------------------------------*
 
 /*
 

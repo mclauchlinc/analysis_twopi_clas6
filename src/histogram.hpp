@@ -83,11 +83,11 @@ static int _vertex_bin_ = 200;
 //CC Eff
 	//Momentum vs. Theta
 static float _cc_eff1_xmin_ = 0.0;//GeV
-static float _cc_eff1_xmax_ = 6.0;//GeV
-static int _cc_eff1_xbin_ = 200;
+static float _cc_eff1_xmax_ = 5.0;//GeV
+static int _cc_eff1_xbin_ = 300;
 static float _cc_eff1_ymin_ = 0.0;//Degrees
-static float _cc_eff1_ymax_ = 180.0;//Degrees
-static int _cc_eff1_ybin_ = 200;
+static float _cc_eff1_ymax_ = 80.0;//Degrees
+static int _cc_eff1_ybin_ = 300;
 	//Sector and Segment yields
 static float _cc_eff2_xmin_ = 0.5;//Sector
 static float _cc_eff2_xmax_ = 6.5; //Sector
@@ -260,6 +260,8 @@ protected:
 	//CC Histograms
 	Bool_6d _CC_made;
 	TH1F_ptr_6d _CC_hist;
+	TH1F_ptr_3d _CC_Eff2_hist;
+	TH2F_ptr_4d _CC_Eff1_hist;
 
 
 	//MM Histograms
@@ -274,6 +276,8 @@ protected:
 
 	//Delta Histograms
 	TH2F_ptr_5d _Delta_hist;
+
+
 
 
 	//TH2F_ptr_5d _Made_Fid_hist;//[7][4][11][30][26][6][2][2];//sector, species, cut, W binning, p binning, topology, anti, weight
@@ -420,6 +424,13 @@ public:
 	std::vector<int> MM_idx(const char* top_, const char* cut_, const char * clean_, const char * W_dep_, float W_, std::shared_ptr<Flags> flags_);
 	void MM_Fill(const char* top_, const char* cut_, const char * clean_, float MM_, float W_, float weight_, std::shared_ptr<Flags> flags_);
 	void MM_Write(std::shared_ptr<Flags> flags_);
+	//*-------------------------------End MM Plot----------------------------*
+	//*-------------------------------Start CC Efficiency Plot----------------------------*
+	void CC_Eff_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> CC_Eff_idx(int which_, const char * ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_);
+	void CC_Eff_Fill(float p_, float theta_, float weight_, const char* ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_);
+	void CC_Eff_Write(std::shared_ptr<Flags> flags_);
+	//*-------------------------------End CC Efficiency Plot----------------------------*
 };
 
 

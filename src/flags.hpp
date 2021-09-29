@@ -190,6 +190,7 @@ public:
 	bool Plot_Fid(int particle);
 	bool Plot_SF();
 	bool Plot_CC();
+	bool Plot_CC_Eff();
 	bool Plot_Delta(int particle);
 	bool Plot_CC_Geo();
 	bool Plot_EC_Geo();
