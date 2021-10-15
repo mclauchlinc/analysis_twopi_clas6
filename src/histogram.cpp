@@ -2,7 +2,7 @@
 
 
 Histogram::Histogram(std::shared_ptr<Flags> flags_){
-	//RootOutputFile = fun::Name_File(output_file);
+	//_RootOutputFile = fun::Name_File(output_file);
 	//def = new TCanvas("def");
 	Histogram::WQ2_Make(flags_);
 	Histogram::Fid_Make(flags_);
@@ -12,7 +12,7 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	Histogram::Vertex_Make(flags_);
 	Histogram::MM_Make(flags_);
 	Histogram::CC_Eff_Make(flags_);
-	//Histogram::Friend_Make(flags_);
+	Histogram::Friend_Make(flags_);
 	//Histogram::Cross_Make(flags_);
 	//Histogram::XY_Make(flags_);
 	//Histogram::Fid_Det_Make(flags_);
@@ -35,17 +35,16 @@ bool Histogram::OK_Idx(std::vector<int> idx_){
 
 void Histogram::Write(std::shared_ptr<Flags> flags_){
 	std::cout<<"Writing Histogram\n\tFile Named: "<<flags_->Flags::Output_Name() <<"\n";
-	RootOutputFile = fun::Name_File(flags_->Flags::Output_Name());
+	_RootOutputFile = fun::Name_File(flags_);
 	def = new TCanvas("def");
 	std::cout<< "Writing Plots" <<std::endl;
-	RootOutputFile->cd();
+	_RootOutputFile->cd();
 	std::cout<<"Writing WQ2 Histograms\n";
 	Histogram::WQ2_Write(flags_);
 	std::cout<<"Writing Fid Histograms\n";
 	Histogram::Fid_Write(flags_);
 	std::cout<<"Writing SF Histograms\n";
 	Histogram::SF_Write(flags_);
-	std::cout<<"Writing Delta Histograms\n";
 	Histogram::Delta_Write(flags_);
 	std::cout<<"Writing CC Histograms\n";
 	Histogram::CC_Write(flags_);
@@ -60,18 +59,14 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	//Histogram::Cross_Write(_envi);
 	//Histogram::Charge_Write(_envi);
 	//Histogram::WQ2_sf_Write(_envi);
-	RootOutputFile->Close();
-	/*if(_envi->was_Friend_plot()){
-		std::cout<<"Writing THnSparse Histograms: ";
-		SparseFile = fun::Name_Sparse(output_file, _envi->Environment::was_cluster());
-		SparseFile->cd();
-		Friend_Write(_envi);
-		if(_envi->was_sim()){
-			Thrown_Write(_envi);
-		}
-		SparseFile->Close();
+	_RootOutputFile->Close();
+	if(flags_->Flags::Make_Friend()){
+		std::cout<<"Writing THnSparse Histograms: " <<flags_->Flags::Friend_Name()<<"\n";
+		_SparseFile = fun::Name_Sparse(flags_);
+		Histogram::Friend_Write(flags_);
+		_SparseFile->Close();
 		std::cout<<" Done\n";
-	}*/
+	}
 	std::cout<<"Histograms Done!" <<std::endl;
 }
 
@@ -407,7 +402,7 @@ void Histogram::WQ2_Make(std::shared_ptr<Flags> flags_){
 					if(flags_->Flags::Sim()){
 						if(_ecuts_[cart[4]] == _event_ && _cut_[cart[3]] == _cut_applied_ && _top_[cart[2]] == _mzero_){
 							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
-							sprintf(hname,"W_Q2_%s_%s",_recon_[1],_weight_[cart[1]]);
+							sprintf(hname,"W_Q2_%s_%s",_recon_[cart[0]],_weight_[cart[1]]);
 							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 						}
@@ -528,9 +523,10 @@ std::vector<int> Histogram::WQ2_cut_idx(const char* ecut_, const char * cut_, co
 	//if(cut_!=_no_cut_){
 		if(recon_==_thrown_ && flags_->Flags::Sim()){
 			if(ecut_ == _event_ && cut_ == _cut_applied_ && top_==_mzero_){//Thrown 
+				//std::cout<<"input to WQ2 Thrown Cut idx: " <<ecut_ <<"\n\t" <<cut_ <<"\n\t" <<top_ <<"\n\t" <<weight_ <<"\n\t" <<recon_  <<"\n";
+				idx.push_back(fun::ecut_idx(ecut_)+fun::ecut_offset(ecut_,flags_));
 				idx.push_back(0);
-				idx.push_back(0);
-				idx.push_back(0);
+				idx.push_back(fun::top_idx(top_)+fun::top_offset(top_,flags_));
 				idx.push_back(fun::weight_idx(weight_));
 				idx.push_back(fun::recon_idx(recon_));
 			}else{
@@ -644,7 +640,7 @@ void Histogram::WQ2_Write(std::shared_ptr<Flags> flags_){
 	if(flags_->Plot_WQ2()){
 		std::cout<<"\tinside Writing WQ2\n";
 		char dir_name[100];
-		TDirectory* dir_WQ2 = RootOutputFile->mkdir("W vs. Q^{2}");
+		TDirectory* dir_WQ2 = _RootOutputFile->mkdir("W vs. Q^{2}");
 		dir_WQ2->cd();
 		TDirectory* dir_WQ2_sub[2];
 		sprintf(dir_name,"W Q2 Ele Cuts");
@@ -1153,7 +1149,7 @@ void Histogram::Fid_Write(std::shared_ptr<Flags> flags_){
 	if(flags_->Plot_Fid(0) || flags_->Plot_Fid(1) || flags_->Plot_Fid(2) || flags_->Plot_Fid(3)){
 		std::cout<<"Writing Fiducial Plots\n";
 		char dir_name[100];
-		TDirectory* dir_fid = RootOutputFile->mkdir("Fiducial");
+		TDirectory* dir_fid = _RootOutputFile->mkdir("Fiducial");
 		dir_fid->cd();
 		TDirectory* dir_fid_sub[4][2];
 		for(int i=0; i<std::distance(std::begin(_species_), std::end(_species_)); i++){
@@ -1463,7 +1459,7 @@ std::vector<int> Histogram::SF_dir_idx(const char* ecut_, const char* cut_, cons
 
 void Histogram::SF_Write(std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Plot_SF()){
-		TDirectory* dir_sf = RootOutputFile->mkdir("SF");
+		TDirectory* dir_sf = _RootOutputFile->mkdir("SF");
 		dir_sf->cd();
 		TDirectory* dir_sf_sub[std::distance(std::begin(_ecuts_),std::end(_ecuts_))][std::distance(std::begin(_cut_),std::end(_cut_))+1][std::distance(std::begin(_top_),std::end(_top_))+1][std::distance(std::begin(_sector_),std::end(_sector_))+1][2+1];
 		char dir_name[100];
@@ -1733,7 +1729,7 @@ void Histogram::CC_Write(std::shared_ptr<Flags> flags_){
 		int top_len = std::distance(std::begin(_top_), std::end(_top_));
 		int sec_len = std::distance(std::begin(_sector_), std::end(_sector_));
 		int side_len = std::distance(std::begin(_cc_sides_), std::end(_cc_sides_));
-		TDirectory* dir_cc = RootOutputFile->mkdir("CC");
+		TDirectory* dir_cc = _RootOutputFile->mkdir("CC");
 		dir_cc->cd();
 		TDirectory* dir_cc_sub[ecut_len][cut_len+1][top_len+1][sec_len+1][side_len+1];
 		char dir_name[100];
@@ -1920,7 +1916,7 @@ void Histogram::Vertex_Write(std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Plot_Vertex()){
 		std::cout<<"Writing Vertex Histograms\n";
 		char dir_name[100];
-		TDirectory* dir_vert = RootOutputFile->mkdir("Vertex");
+		TDirectory* dir_vert = _RootOutputFile->mkdir("Vertex");
 		dir_vert->cd();
 		TDirectory* dir_vert_sub[std::distance(std::begin(_ecuts_), std::end(_ecuts_))][std::distance(std::begin(_cut_), std::end(_cut_))+1][std::distance(std::begin(_top_), std::end(_top_))+1];
 		for(int i=0; i<std::distance(std::begin(_ecuts_), std::end(_ecuts_)); i++){
@@ -2241,7 +2237,7 @@ void Histogram::Delta_Write(std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Plot_Delta(0) || flags_->Flags::Plot_Delta(1) || flags_->Flags::Plot_Delta(2) || flags_->Flags::Plot_Delta(3)){
 		std::cout<<"Writing Delta Histograms\n";
 		char dir_name[100];
-		TDirectory* dir_delta = RootOutputFile->mkdir("Delta");
+		TDirectory* dir_delta = _RootOutputFile->mkdir("Delta");
 		dir_delta->cd();
 		TDirectory* dir_delta_sub[std::distance(std::begin(_species_), std::end(_species_))][std::distance(std::begin(_ecuts_), std::end(_ecuts_))+1][std::distance(std::begin(_cut_), std::end(_cut_))+1][std::distance(std::begin(_top_), std::end(_top_))+1][2+1];//Topology,cut,clean event, W dependence 
 		//std::cout<<"\tMaking Directories\n";
@@ -2722,7 +2718,7 @@ void Histogram::MM_Fill(const char* top_, const char* cut_, const char * clean_,
 void Histogram::MM_Write(std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Plot_MM(0) || flags_->Flags::Plot_MM(1) || flags_->Flags::Plot_MM(2) || flags_->Flags::Plot_MM(3)){
 		char dir_name[100];
-		TDirectory* dir_mm = RootOutputFile->mkdir("MM");
+		TDirectory* dir_mm = _RootOutputFile->mkdir("MM");
 		dir_mm->cd();
 		TDirectory* dir_mm_sub[4][std::distance(std::begin(_cut_), std::end(_cut_))+1][2+1][2+1];//Topology,cut,clean event, W dependence 
 		for(int i=0; i<4; i++){
@@ -2812,30 +2808,30 @@ void Histogram::CC_Eff_Make(std::shared_ptr<Flags> flags_){
 			sec_idx = cart[1];
 			top_idx = cart[0];
 			if(_ecuts_[ecut_idx] == _none_ && _cut_[cut_idx] == _no_cut_ && _top_[top_idx]==_none_){
-				std::cout<<"CC Eff1 Idx: " <<_CC_Eff1_hist.size() <<" " <<plot_3d_1.size() <<" " <<plot_2d_1.size() <<" " <<plot_1d_1.size() <<"\n";
+			//	std::cout<<"CC Eff1 Idx: " <<_CC_Eff1_hist.size() <<" " <<plot_3d_1.size() <<" " <<plot_2d_1.size() <<" " <<plot_1d_1.size() <<"\n";
 				sprintf(hname,"cc_eff_%s_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx]);
 				plot_1d_1.push_back(new TH2F(hname,hname,_cc_eff1_xbin_,_cc_eff1_xmin_,_cc_eff1_xmax_,_cc_eff1_ybin_,_cc_eff1_ymin_,_cc_eff1_ymax_));
 				if(_sector_[sec_idx]==_sec_all_){
-					std::cout<<"\tCC Eff2 Idx: " <<_CC_Eff2_hist.size() <<" " <<plot_2d_2.size() <<" " <<plot_1d_2.size() <<"\n";
+					//std::cout<<"\tCC Eff2 Idx: " <<_CC_Eff2_hist.size() <<" " <<plot_2d_2.size() <<" " <<plot_1d_2.size() <<"\n";
 					sprintf(hname,"cc_eff_sec_yields_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_top_[top_idx]);
 					plot_1d_2.push_back(new TH1F(hname,hname,_cc_eff2_xbin_,_cc_eff2_xmin_,_cc_eff2_xmax_));
 				}
 			}else if(_ecuts_[ecut_idx] != _none_ && _cut_[cut_idx] != _no_cut_){
 				if(_ecuts_[ecut_idx] != _event_ && _top_[top_idx] == _mnone_){
-					std::cout<<"CC Eff1 Idx: " <<_CC_Eff1_hist.size() <<" " <<plot_3d_1.size() <<" " <<plot_2d_1.size() <<" " <<plot_1d_1.size() <<"\n";
+					//std::cout<<"CC Eff1 Idx: " <<_CC_Eff1_hist.size() <<" " <<plot_3d_1.size() <<" " <<plot_2d_1.size() <<" " <<plot_1d_1.size() <<"\n";
 					sprintf(hname,"cc_eff_%s_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx]);
 					plot_1d_1.push_back(new TH2F(hname,hname,_cc_eff1_xbin_,_cc_eff1_xmin_,_cc_eff1_xmax_,_cc_eff1_ybin_,_cc_eff1_ymin_,_cc_eff1_ymax_));
 					if(_sector_[sec_idx]==_sec_all_){
-						std::cout<<"\tCC Eff2 Idx: " <<_CC_Eff2_hist.size() <<" " <<plot_2d_2.size() <<" " <<plot_1d_2.size() <<"\n";
+						//std::cout<<"\tCC Eff2 Idx: " <<_CC_Eff2_hist.size() <<" " <<plot_2d_2.size() <<" " <<plot_1d_2.size() <<"\n";
 						sprintf(hname,"cc_eff_sec_yields_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_top_[top_idx]);
 						plot_1d_2.push_back(new TH1F(hname,hname,_cc_eff2_xbin_,_cc_eff2_xmin_,_cc_eff2_xmax_));
 					}
 				}else if(_ecuts_[ecut_idx] == _event_ && _top_[top_idx] != _mnone_){
-					std::cout<<"CC Eff1 Idx: " <<_CC_Eff1_hist.size() <<" " <<plot_3d_1.size() <<" " <<plot_2d_1.size() <<" " <<plot_1d_1.size() <<"\n";
+					//std::cout<<"CC Eff1 Idx: " <<_CC_Eff1_hist.size() <<" " <<plot_3d_1.size() <<" " <<plot_2d_1.size() <<" " <<plot_1d_1.size() <<"\n";
 					sprintf(hname,"cc_eff_%s_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx]);
 					plot_1d_1.push_back(new TH2F(hname,hname,_cc_eff1_xbin_,_cc_eff1_xmin_,_cc_eff1_xmax_,_cc_eff1_ybin_,_cc_eff1_ymin_,_cc_eff1_ymax_));
 					if(_sector_[sec_idx]==_sec_all_){
-						std::cout<<"\tCC Eff2 Idx: " <<_CC_Eff2_hist.size() <<" " <<plot_2d_2.size() <<" " <<plot_1d_2.size() <<"\n";
+						//std::cout<<"\tCC Eff2 Idx: " <<_CC_Eff2_hist.size() <<" " <<plot_2d_2.size() <<" " <<plot_1d_2.size() <<"\n";
 						sprintf(hname,"cc_eff_sec_yields_%s_%s_%s",_ecuts_[ecut_idx],_cut_[cut_idx],_top_[top_idx]);
 						plot_1d_2.push_back(new TH1F(hname,hname,_cc_eff2_xbin_,_cc_eff2_xmin_,_cc_eff2_xmax_));
 					}
@@ -2961,22 +2957,22 @@ void Histogram::CC_Eff_Write(std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Plot_CC_Eff()){
 		std::cout<<"Writing CC Efficiency\n";
 		char dirname[100];
-		TDirectory* dir_cc_eff = RootOutputFile->mkdir("CC Efficiency");
+		TDirectory* dir_cc_eff = _RootOutputFile->mkdir("CC Efficiency");
 		TDirectory* dir_cc_eff_sub[std::distance(std::begin(_ecuts_), std::end(_ecuts_))][std::distance(std::begin(_cut_), std::end(_cut_))+1][std::distance(std::begin(_top_), std::end(_top_))+1];
 		for(int i=0; i<std::distance(std::begin(_ecuts_), std::end(_ecuts_)); i++){
 			if(fun::ecut_perform(_ecuts_[i],flags_)){
-				std::cout<<"making dir at " <<i <<" " <<0 <<" " <<0 <<" putting in dir_cc_eff\n";
+				//std::cout<<"making dir at " <<i <<" " <<0 <<" " <<0 <<" putting in dir_cc_eff\n";
 				sprintf(dirname,"cc_eff_%s",_ecuts_[i]);
 				dir_cc_eff_sub[i][0][0] = dir_cc_eff->mkdir(dirname);
 				if(_ecuts_[i]==_event_){
 					for(int j=0; j<std::distance(std::begin(_top_), std::end(_top_)); j++){
 						if(_top_[j]!=_mnone_ && fun::top_perform(_top_[j],flags_)){
-							std::cout<<"\tmaking dir at " <<i <<" " <<0 <<" " <<j+1 <<" in " <<i <<" " <<0 <<" " <<0 <<"\n";
+							//std::cout<<"\tmaking dir at " <<i <<" " <<0 <<" " <<j+1 <<" in " <<i <<" " <<0 <<" " <<0 <<"\n";
 							sprintf(dirname,"cc_eff_%s_%s",_ecuts_[i],_top_[j]);
 							dir_cc_eff_sub[i][0][j+1] = dir_cc_eff_sub[i][0][0]->mkdir(dirname);
 							for(int k=0; k<std::distance(std::begin(_cut_), std::end(_cut_)); k++){
 								if(_cut_[k]!=_no_cut_){
-									std::cout<<"\t\tmaking dir at " <<i <<" " <<k+1 <<" " <<j+1 <<" in " <<i <<" " <<0 <<" " <<j+1 <<"\n";
+									//std::cout<<"\t\tmaking dir at " <<i <<" " <<k+1 <<" " <<j+1 <<" in " <<i <<" " <<0 <<" " <<j+1 <<"\n";
 									sprintf(dirname,"cc_eff_%s_%s_%s",_ecuts_[i],_top_[j],_cut_[k]);
 									dir_cc_eff_sub[i][k+1][j+1] = dir_cc_eff_sub[i][0][j+1]->mkdir(dirname);
 								}
@@ -2986,7 +2982,7 @@ void Histogram::CC_Eff_Write(std::shared_ptr<Flags> flags_){
 				}else{
 					for(int k=0; k<std::distance(std::begin(_cut_), std::end(_cut_)); k++){
 						if(_cut_[k]!=_no_cut_ && _ecuts_[i]!=_none_){
-							std::cout<<"\tmaking dir at " <<i <<" " <<k+1 <<" " <<0 <<" in " <<i <<" " <<0 <<" " <<0 <<"\n";
+							//std::cout<<"\tmaking dir at " <<i <<" " <<k+1 <<" " <<0 <<" in " <<i <<" " <<0 <<" " <<0 <<"\n";
 							sprintf(dirname,"cc_eff_%s_%s",_ecuts_[i],_cut_[k]);
 							dir_cc_eff_sub[i][k+1][0] = dir_cc_eff_sub[i][0][0]->mkdir(dirname);
 						}
@@ -3012,22 +3008,22 @@ void Histogram::CC_Eff_Write(std::shared_ptr<Flags> flags_){
 			cut_idx = cart[2];
 			sec_idx = cart[1];
 			top_idx = cart[0];
-			std::cout<<"Looking at " <<_ecuts_[ecut_idx] <<" " <<_cut_[cut_idx] <<" " <<_top_[top_idx] <<" " <<_sector_[sec_idx] <<"\n";
+			//std::cout<<"Looking at " <<_ecuts_[ecut_idx] <<" " <<_cut_[cut_idx] <<" " <<_top_[top_idx] <<" " <<_sector_[sec_idx] <<"\n";
 			idx1 = Histogram::CC_Eff_idx(1,_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx],flags_);
 			idx2 = Histogram::CC_Eff_idx(2,_ecuts_[ecut_idx],_cut_[cut_idx],_sector_[sec_idx],_top_[top_idx],flags_);
 			if(fun::ecut_perform(_ecuts_[ecut_idx],flags_)){
 				if(_ecuts_[ecut_idx] == _none_ && _cut_[cut_idx] == _no_cut_ && _top_[top_idx]==_none_){
-				std::cout<<"Writing In Directory " <<fun::ecut_idx(_ecuts_[ecut_idx]) <<" 0 0\n"; 
+				//std::cout<<"Writing In Directory " <<fun::ecut_idx(_ecuts_[ecut_idx]) <<" 0 0\n"; 
 				dir_cc_eff_sub[fun::ecut_idx(_ecuts_[ecut_idx])][0][0]->cd();
 					if(Histogram::OK_Idx(idx1)){
-						fun::print_vector_idx(idx1);
+						//fun::print_vector_idx(idx1);
 						_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetXTitle("Momentum (GeV)");
 						_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetYTitle("Theta (Degrees)");
 						_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->Write();
 					}
 					if(_sector_[sec_idx]==_sec_all_){
 						if(Histogram::OK_Idx(idx2)){
-							fun::print_vector_idx(idx2);
+							//fun::print_vector_idx(idx2);
 							_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetXTitle("Sector");
 							_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetYTitle("Yield");
 							_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->Write();
@@ -3035,34 +3031,34 @@ void Histogram::CC_Eff_Write(std::shared_ptr<Flags> flags_){
 					}
 				}else if(_ecuts_[ecut_idx] != _none_ && _cut_[cut_idx] != _no_cut_){
 					if(_ecuts_[ecut_idx] != _event_ && _top_[top_idx] == _mnone_){
-						std::cout<<"Writing In Directory " <<fun::ecut_idx(_ecuts_[ecut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" 0\n";
+						//std::cout<<"Writing In Directory " <<fun::ecut_idx(_ecuts_[ecut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" 0\n";
 						dir_cc_eff_sub[fun::ecut_idx(_ecuts_[ecut_idx])][fun::cut_idx(_cut_[cut_idx])+1][0]->cd();
 						if(Histogram::OK_Idx(idx1)){
-							fun::print_vector_idx(idx1);
+							//fun::print_vector_idx(idx1);
 							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetXTitle("Momentum (GeV)");
 							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetYTitle("Theta (Degrees)");
 							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->Write();
 						}
 						if(_sector_[sec_idx]==_sec_all_){
 							if(Histogram::OK_Idx(idx2)){
-								fun::print_vector_idx(idx2);
+								//fun::print_vector_idx(idx2);
 								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetXTitle("Sector");
 								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetYTitle("Yield");
 								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->Write();
 							}
 						}
 					}else if(_ecuts_[ecut_idx] == _event_ && _top_[top_idx] != _mnone_){
-						std::cout<<"Writing In Directory " <<fun::ecut_idx(_ecuts_[ecut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" " <<fun::top_idx(_top_[top_idx])+1 <<"\n";
+						//std::cout<<"Writing In Directory " <<fun::ecut_idx(_ecuts_[ecut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" " <<fun::top_idx(_top_[top_idx])+1 <<"\n";
 						dir_cc_eff_sub[fun::ecut_idx(_ecuts_[ecut_idx])][fun::cut_idx(_cut_[cut_idx])+1][fun::top_idx(_top_[top_idx])+1]->cd();
 						if(Histogram::OK_Idx(idx1)){
-							fun::print_vector_idx(idx1);
+							//fun::print_vector_idx(idx1);
 							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetXTitle("Momentum (GeV)");
 							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->SetYTitle("Theta (Degrees)");
 							_CC_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]]->Write();
 						}
 						if(_sector_[sec_idx]==_sec_all_){
 							if(Histogram::OK_Idx(idx2)){
-								fun::print_vector_idx(idx1);
+								//fun::print_vector_idx(idx1);
 								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetXTitle("Sector");
 								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->SetYTitle("Yield");
 								_CC_Eff2_hist[idx2[0]][idx2[1]][idx2[2]]->Write();
@@ -3078,6 +3074,278 @@ void Histogram::CC_Eff_Write(std::shared_ptr<Flags> flags_){
 }
 
 //*-------------------------------End CC Eff Plot------------------------------*
+
+//*------------------------------- Start Friend Plot --------------------------*
+std::vector<int> Histogram::Friend_Bin_Sizes(std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Make_Friend()){
+		std::vector<int> bin_sizes(7);
+		bin_sizes[0] = Histogram::W_bins();
+		bin_sizes[1] = std::distance(std::begin(_Q2_bins_), std::end(_Q2_bins_));
+		bin_sizes[2] = _MM_bins_;
+		bin_sizes[3] = _MM_bins_;
+		bin_sizes[4] = _theta_bins_;
+		bin_sizes[5] = _alpha_bins_;
+		bin_sizes[6] = _phi_bins_;
+		return bin_sizes;
+	}
+}
+
+void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
+	if(flags_->Make_Friend()){
+		char hname[100];
+		Int_t bins[7];
+		std::vector<int> bins_vec = Histogram::Friend_Bin_Sizes(flags_);//A Bit redundant, but I believe it needs to be an Int array rather than a vector
+		for(int k=0; k<7; k++){
+			bins[k] = bins_vec[k];
+		}
+		for(int i=0; i<3; i++){//Topologies
+			Double_t xmin[7] = {_W_min_,_Q2_min_,_MM_min_[i],_MM2_min_[i],_theta_min_,_alpha_min_,_phi_min_};
+			Double_t xmax[7] = {_W_max_,_Q2_max_,_MM_max_[i],_MM2_max_[i],_theta_max_,_alpha_max_,_phi_max_};
+			for(int j=0; j<5; j++){//Variable Sets
+				sprintf(hname,"2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
+				_Friend[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+				_Friend[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+				_Friend[i][j]->Sumw2();//Allow Weights and keep track of error
+				if(flags_->Flags::Sim()){
+					sprintf(hname,"Weight_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
+					_Weight_Sum[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					_Weight_Sum[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					_Weight_Sum[i][j]->Sumw2();
+				}
+			}
+			if(flags_->Flags::Sim()){
+				sprintf(hname,"Thrown_2#pi_off_proton_%s",_var_names_[i]);
+				_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+				_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
+				_Thrown[i]->Sumw2();//Allow Weights and keep track of error
+			}
+		}
+		
+	}
+}
+
+
+int Histogram::Friend_W_idx(float W_){
+	return Histogram::W_bin(W_); 
+}
+
+int Histogram::Friend_Q2_idx(float Q2_){
+  int j = -1;
+  float top, bot; 
+  for(int i = 0; i < std::distance(std::begin(_Q2_bins_), std::end(_Q2_bins_)); i++){//constants.hpp
+    if(Q2_ < _Q2_bins_[i+1] && Q2_ >= _Q2_bins_[i]){
+      j = i; 
+    }
+  }
+  return j; 
+}
+
+int Histogram::Friend_MM_idx(float MM_, int var_){
+  int j = -1;
+  float top, bot; 
+  for(int i = 0; i < _MM_bins_; i++){//constants.hpp
+    top = _MM_min_[var_] + (i+1)*((_MM_max_[var_]-_MM_min_[var_])/_MM_bins_);//constants.hpp
+    bot = top - ((_MM_max_[var_]-_MM_min_[var_])/_MM_bins_); 
+    if(MM_ < top && MM_ >= bot){
+      j = i; 
+    }
+  }
+  return j; 
+}
+
+int Histogram::Friend_MM2_idx(float MM_, int var_){
+  int j = -1;
+  float top, bot; 
+  for(int i = 0; i < _MM_bins_; i++){//constants.hpp
+    top = _MM2_min_[var_] + (i+1)*((_MM2_max_[var_]-_MM2_min_[var_])/_MM_bins_);//constants.hpp
+    bot = top - ((_MM2_max_[var_]-_MM2_min_[var_])/_MM_bins_); 
+    if(MM_ < top && MM_ >= bot){
+      j = i; 
+    }
+  }
+  return j; 
+}
+
+int Histogram::Friend_theta_idx(float theta_){
+  int j = -1;
+  float top, bot; 
+  for(int i = 0; i < _theta_bins_; i++){//constants.hpp
+    top = _theta_min_ + (i+1)*((_theta_max_-_theta_min_)/_theta_bins_);//constants.hpp
+    bot = top - ((_theta_max_-_theta_min_)/_theta_bins_); 
+    if(theta_ < top && theta_ >= bot){
+      j = i; 
+    }
+  }
+  return j; 
+}
+
+int Histogram::Friend_alpha_idx(float alpha_){
+  int j = -1;
+  float top, bot; 
+  for(int i = 0; i < _alpha_bins_; i++){//constants.hpp
+    top = _alpha_min_ + (i+1)*((_alpha_max_-_alpha_min_)/_alpha_bins_);//constants.hpp
+    bot = top - ((_alpha_max_-_alpha_min_)/_alpha_bins_); 
+    if(alpha_ < top && alpha_ >= bot){
+      j = i; 
+    }
+  }
+  return j; 
+}
+
+int Histogram::Friend_phi_idx(float phi_){
+  int j = -1;
+  float top, bot; 
+  for(int i = 0; i < _phi_bins_; i++){//constants.hpp
+    top = _phi_min_ + (i+1)*((_phi_max_-_phi_min_)/_phi_bins_);//constants.hpp
+    bot = top - ((_phi_max_-_phi_min_)/_phi_bins_); 
+    if(phi_ < top && phi_ >= bot){
+      j = i; 
+    }
+  }
+  return j; 
+}
+
+
+std::vector<int>  Histogram::Friend_idx( float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_){
+	std::vector<int> x(7); 
+	int test = 0; 
+	bool in_region = false; 
+	//x[0] = top; //{pmiss,pipmiss,pimmiss,zeromiss,all}
+	x[0] = Histogram::Friend_W_idx(W_);
+	x[1] = Histogram::Friend_Q2_idx(Q2_);
+	x[2] = Histogram::Friend_MM_idx(MM_,var_);
+	x[3] = Histogram::Friend_MM2_idx(MM2_,var_);
+	x[4] = Histogram::Friend_theta_idx(theta_);
+	x[5] = Histogram::Friend_alpha_idx(alpha_);
+	x[6] = Histogram::Friend_phi_idx(phi_);
+	/*std::cout<<std::endl <<"Filling Friend in channel " <<channel <<std::endl; 
+	std::cout<<"top = " <<top <<" bin: " <<x[0] <<std::endl;
+	std::cout<<"W = " <<W_ <<" bin: " <<x[1] <<std::endl;
+	std::cout<<"Q2 = " <<Q2_ <<" bin: " <<x[2] <<std::endl;
+	std::cout<<"MM = " <<MM_ <<" bin: " <<x[3] <<std::endl;
+	std::cout<<"theta = " <<theta_ <<" bin: " <<x[4] <<std::endl;
+	std::cout<<"alpha = " <<alpha_ <<" bin: " <<x[5] <<std::endl;
+	std::cout<<"phi = " <<phi_ <<" bin: " <<x[6] <<std::endl;
+	*/
+	return x; 
+}
+
+void Histogram::Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_, int var_){
+	std::cout<<std::endl <<"--Printing Friend idx--" <<std::endl;
+	std::cout<<"W: " <<W_ <<" in bin: " <<Histogram::Friend_W_idx(W_) <<std::endl;
+	std::cout<<"Q2: " <<Q2_ <<" in bin: " <<Histogram::Friend_Q2_idx(Q2_) <<std::endl;
+	std::cout<<"MM: " <<MM_ <<" in bin: " <<Histogram::Friend_MM_idx(MM_,var_) <<std::endl;
+	std::cout<<"MM2: " <<MM2_ <<" in bin: " <<Histogram::Friend_MM2_idx(MM2_,var_) <<std::endl;
+	std::cout<<"Theta: " <<theta_ <<" in bin: " <<Histogram::Friend_theta_idx(theta_) <<std::endl;
+	std::cout<<"Alpha: " <<alpha_ <<" in bin: " <<Histogram::Friend_alpha_idx(alpha_) <<std::endl;
+	std::cout<<"Phi: " <<phi_ <<" in bin: " <<Histogram::Friend_phi_idx(phi_) <<std::endl;
+	//std::cout<<"Total Bin: " <<Histogram::Friend_idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_) <<std::endl;
+}
+
+
+void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Make_Friend() && fun::top_perform(top_,flags_)){
+		//std::cout<<"W:" <<W_ <<" Q2:" <<Q2_ <<" MM:" <<MM_ <<" MM2:" <<MM2_ <<" theta:" <<theta_ <<" alpha:" <<alpha_ <<" phi:" <<phi_ <<" weight:" <<weight_ <<" thrown:" <<thrown_ <<"\n";
+		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_) && !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
+			if(Histogram::OK_Idx(Histogram::Friend_idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_))){
+			//int *y = Friend_binning(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
+			//std::cout<<std::endl <<"Y binning: " <<y;
+				//Histogram::Print_Friend_Bin(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
+				Double_t x[7] = { (double)W_, (double)Q2_, (double)MM_, (double)MM2_, (double)theta_, (double)alpha_, (double)phi_};
+			//if(y[0]>=0){
+				if(thrown_){
+					_Thrown[var_]->Fill(x,weight_);
+				}else{
+					_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
+					if(flags_->Flags::Sim()){
+						_Weight_Sum[var_][fun::top_idx(top_)]->Fill(x,weight_*weight_);
+					}
+				}
+				//std::cout<<std::endl <<"Filling Friend with " <<x <<" with weight " <<weight_;
+			}
+		}
+	}
+}
+
+void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Make_Friend()){
+		std::cout<<"Writing Friend\n";
+		_SparseFile->cd();
+		for(int i = 0; i < 3; i++){
+			for(int j = 0; j < 5; j++){
+				if(fun::top_perform(_top_[j],flags_)){
+					_Friend[i][j]->Write();
+					if(flags_->Flags::Sim()){
+						_Weight_Sum[i][j]->Write();
+					}
+				}
+			}
+			if(flags_->Flags::Sim()){
+				_Thrown[i]->Write();
+
+			}
+		}
+	}
+}
+
+/*float Histogram::Friend_bin_reverse(int variable_, int bin_, int var_){//This only works for equally spaced bins. Will need rework when bins have varied sizes
+	float val = NAN;
+	float max = NAN;
+	float min = NAN;
+	int bins = -1; 
+	switch(var_){
+		/*case 0: 
+			max = 4.5;
+			min = -0.5;
+			bins = _Friend_bins[var_]; 
+		break;*/ //Top
+		/*case 0:
+			max = _W_max;
+			min = _W_min;
+			bins = _Friend_bins[var_] ; 
+		break;//W
+		case 1: 
+			max = _Q2_max;
+			min = _Q2_min;
+			bins = _Friend_bins[var_]; 
+		break;//Q2
+		case 2: 
+			max = _MM_max[channel_];
+			min = _MM_min[channel_];
+			bins = _Friend_bins[var_]; 
+		break;//MM
+		case 3: 
+			max = _MM2_max[channel_];
+			min = _MM2_min[channel_];
+			bins = _Friend_bins[var_]; 
+		break;//MM
+		case 4: 
+			max = _theta_max;
+			min = _theta_min;
+			bins = _Friend_bins[var_]; 
+		break;//Theta
+		case 5: 
+			max = _alpha_max;
+			min = _alpha_min;
+			bins = _Friend_bins[var_]; 
+		break;//Alpha
+		case 6: 
+			max = _phi_max;
+			min = _phi_min;
+			bins = _Friend_bins[var_]; 
+		break;//phi
+	}
+	for(int i = 0; i < bins; i++){
+		if(bin_ == i){
+			val = ((max - min)/bins)*(i + 0.5) + min; 
+		}
+	}
+	return val;
+}*/
+
+
+
+
 
 /*
 
@@ -3136,7 +3404,7 @@ void Histogram::SF_Fill(std::shared_ptr<Environment> _envi,int top, float p, flo
 void Histogram::SF_Write(std::shared_ptr<Environment> _envi){
 	if(_envi->was_sf_plot()){
 		std::cout<<"SF Plots: "; 
-		TDirectory* dir_SF = RootOutputFile->mkdir("SF Plots");
+		TDirectory* dir_SF = _RootOutputFile->mkdir("SF Plots");
 		dir_SF->cd();
 		TDirectory* sf_dir[11];//Cut
 		TDirectory* sf_dir_w[11];
@@ -3334,7 +3602,7 @@ void Histogram::DT_Write(std::shared_ptr<Environment> _envi){
 	if(do_dt_plots){
 		std::cout <<"Writing DT Plots: ";
 		char dir_name[100]; 
-		TDirectory* DT_plot = RootOutputFile->mkdir("DT_plots");
+		TDirectory* DT_plot = _RootOutputFile->mkdir("DT_plots");
 		TDirectory* par_dt[4][9][2][8][6];//Particle, cut, W-dep, sector, topology
 		//std::cout<<"Did I get here?" <<std::endl; 
 		DT_plot->cd(); 
@@ -3543,7 +3811,7 @@ void Histogram::CC_Fill(std::shared_ptr<Environment> _envi,int top, int sec, int
 void Histogram::CC_Write(std::shared_ptr<Environment> _envi){
 	if(_envi->was_cc_plot() && !(_envi->was_sim())){
 		char dir_name[100]; 
-		TDirectory* CC_plot = RootOutputFile->mkdir("CC_plots");
+		TDirectory* CC_plot = _RootOutputFile->mkdir("CC_plots");
 		TDirectory* par_cc[6][12][5][6];
 		for(int i = 0; i< 6; i++){//Sectors
 			sprintf(dir_name,"CC_%s",sec_list[i+1]);
@@ -3663,7 +3931,7 @@ void Histogram::MM_Write(std::shared_ptr<Environment> _envi){
 	}
 	if(do_mm_plots){
 		char dir_name[100];
-		TDirectory * MM_plot = RootOutputFile->mkdir("MM plots");
+		TDirectory * MM_plot = _RootOutputFile->mkdir("MM plots");
 		MM_plot->cd();
 		TDirectory * MM_dir[4][3][2];//top, cut, fit
 		for(int k = 0; k<2; k++){
@@ -3736,7 +4004,7 @@ void Histogram::XY_Fill(std::shared_ptr<Environment> envi_, int species_, float 
 void Histogram::XY_Write(std::shared_ptr<Environment> envi_){
 	if(envi_->was_xy_plot()){
 		char dir_name[100];
-		TDirectory * XY_plot = RootOutputFile->mkdir("XY plots");
+		TDirectory * XY_plot = _RootOutputFile->mkdir("XY plots");
 		XY_plot->cd();
 		for(int l = 0; l < 4; l++){
 			for(int k = 0; k<3; k++){
@@ -3798,7 +4066,7 @@ void Histogram::Fid_Det_Fill(std::shared_ptr<Environment> envi_, int species_, f
 void Histogram::Fid_Det_Write(std::shared_ptr<Environment> envi_){
 	char dir_name[100];
 	if(envi_->was_fid_det_plot()){
-		TDirectory * FidD_plot = RootOutputFile->mkdir("Fid Detector plots");
+		TDirectory * FidD_plot = _RootOutputFile->mkdir("Fid Detector plots");
 		FidD_plot->cd();
 		TDirectory * FidD_dir[4][4];
 		for(int spe = 0; spe < 4; spe++){
@@ -4022,7 +4290,7 @@ void Histogram::Friend_Fill(std::shared_ptr<Environment> _envi, int top_, float 
 void Histogram::Friend_Write(std::shared_ptr<Environment> _envi){
 	/*if(_envi->Environment::was_Friend_plot()){
 		char dir_name[100];
-		TDirectory * Friend_plot = RootOutputFile->mkdir("Friend plots");
+		TDirectory * Friend_plot = _RootOutputFile->mkdir("Friend plots");
 		Friend_plot->cd();
 		TH1D* MM_proj[3]; 
 		TH1D* alpha_proj[3];
@@ -4205,7 +4473,7 @@ void Histogram::Cross_Write(std::shared_ptr<Environment> envi_){
 	//char dir_name[100];
 	if(envi_->was_cross_plot()){
 		std::cout<<"Cross Plots: ";
-		TDirectory * Cross_plot = RootOutputFile->mkdir("Cross Plots");
+		TDirectory * Cross_plot = _RootOutputFile->mkdir("Cross Plots");
 		Cross_plot->cd();
 		Cross_hist[0]->SetXTitle("Event Topology Mixing");
 		Cross_hist[0]->SetYTitle("Events");
@@ -4452,7 +4720,7 @@ void Histogram::Charge_Fill(std::shared_ptr<Environment> envi_, int run_num_, fl
 
 void Histogram::Charge_Write(std::shared_ptr<Environment> envi_){
 	std::cout<<"Faraday Plot: ";
-	TDirectory* Charge_plot = RootOutputFile->mkdir("Faraday Cup");
+	TDirectory* Charge_plot = _RootOutputFile->mkdir("Faraday Cup");
 	Charge_plot->cd();
 	Charge_hist->SetXTitle("Run Number");
 	Charge_hist->SetYTitle("Faraday Cup Charge Normalized by Num Events");
@@ -4480,7 +4748,7 @@ void Histogram::WQ2_sf_Fill(std::shared_ptr<Environment> envi_, float W_, float 
 }
 void Histogram::WQ2_sf_Write(std::shared_ptr<Environment> envi_){
 	char dir_name[100];
-	TDirectory* dir_WQ2_sf = RootOutputFile->mkdir("W vs. Q2 for simSF");
+	TDirectory* dir_WQ2_sf = _RootOutputFile->mkdir("W vs. Q2 for simSF");
 	dir_WQ2_sf->cd();
 	for(int i = 0; i < 2; i++){
 		WQ2_hist_sf[i]->SetXTitle("W (GeV)");

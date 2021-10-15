@@ -5,6 +5,7 @@
 #include "particle.hpp"
 #include "event.hpp"
 #include "flags.hpp"
+#include "forest.hpp"
 
 namespace plot{
 	//Plotting Particle ID
@@ -14,6 +15,7 @@ namespace plot{
 	void plot_pip(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
 	void plot_pim(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
 	//Individual Plotting
+	void plot_thrown(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
 	void plot_no_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_);
 	void plot_sanity_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_);
 	void plot_vertex_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_);

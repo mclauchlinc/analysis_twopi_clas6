@@ -66,7 +66,7 @@ private:
 
 
 public:
-	Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Forest> forest_, int thread_id_, int run_num_, std::shared_ptr<Flags> flags_);
+	Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, int thread_id_, int run_num_, std::shared_ptr<Flags> flags_);
 	//(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Environment> envi_, int run_type_, std::shared_ptr<forest> a_forest_, int thread_id_, int run_num_);
 	//Number of potential events given identified particles
 	void Num_top();

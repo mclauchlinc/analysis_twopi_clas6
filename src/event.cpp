@@ -7,15 +7,21 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, std::shared_ptr
 		if(_sim){
 			_thrown = thrown_;
 		}
-		Event::Extract_Particles(top_,p0_,p1_,p2_,flags_);
-		_weight = weight_;
-		_top[top_] = true;
-		if(cuts::MM_cut(top_,_MM,_W,flags_)){
-			//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
-			_pass[top_] = true;
-			_pass_top = top_;
-			_hel = hel_; 
-			Event::Calc_Error();
+		if(!thrown_){
+			Event::Extract_Particles(top_,p0_,p1_,p2_,flags_);
+			_weight = weight_;
+			_top[top_] = true;
+			if(cuts::MM_cut(top_,_MM,_W,flags_)){
+				//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
+				_pass[top_] = true;
+				_pass_top = top_;
+				_hel = hel_; 
+				Event::COM();
+				Event::Vars();
+				Event::Calc_Error();
+			}
+		}else{
+			std::cout<<"Didn't include enough particles for thrown\n";
 		}
 	}
 }
@@ -27,15 +33,42 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, s
 		if(_sim){
 			_thrown = thrown_;
 		}
-		Event::Extract_Particles(top_,p0_,p1_,p2_,p3_,flags_);
-		_weight = weight_;
-		_top[top_] = true;
-		if(cuts::MM_cut(top_,_MM,_W,flags_) && _MM != 0.0){
-			//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
-			_pass[top_] = true;
+		if(thrown_ && top_ == fun::top_idx(_mzero_)){
+			_top[top_] = true;
 			_pass_top = top_;
 			_hel = hel_; 
-			Event::Calc_Error();
+			_vec_lab[0] = p0_.Particle::Get_4Vec(0);
+			_p_lab[0] = p0_.Particle::Get_p();
+			_phi_lab[0] = p0_.Particle::Get_phi();
+			_theta_lab[0] = p0_.Particle::Get_theta();
+			_vec_lab[1] = p1_.Particle::Get_4Vec(1);
+			_p_lab[1] = p1_.Particle::Get_p();
+			_phi_lab[1] = p1_.Particle::Get_phi();
+			_theta_lab[1] = p1_.Particle::Get_theta();
+			_vec_lab[2] = p2_.Particle::Get_4Vec(2);
+			_p_lab[2] = p2_.Particle::Get_p();
+			_phi_lab[2] = p2_.Particle::Get_phi();
+			_theta_lab[2] = p2_.Particle::Get_theta();
+			_vec_lab[3] = p3_.Particle::Get_4Vec(3);
+			_p_lab[3] = p3_.Particle::Get_p();
+			_phi_lab[3] = p3_.Particle::Get_phi();
+			_theta_lab[3] = p3_.Particle::Get_theta();
+			Event::COM();
+			Event::Vars();
+			_weight = weight_;
+		}else{
+			Event::Extract_Particles(top_,p0_,p1_,p2_,p3_,flags_);
+			_weight = weight_;
+			_top[top_] = true;
+			if(cuts::MM_cut(top_,_MM,_W,flags_) && _MM != 0.0){
+				//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
+				_pass[top_] = true;
+				_pass_top = top_;
+				_hel = hel_; 
+				Event::COM();
+				Event::Vars();
+				Event::Calc_Error();
+			}
 		}
 	}
 }
@@ -97,7 +130,7 @@ bool Event::Check_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, 
 }
 bool Event::Check_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, std::shared_ptr<Flags> flags_){
 	bool pass = false;
-	if(top_ == 3){
+	if(top_ == fun::top_idx(_mzero_)){
 		if(p0_.Particle::Is_Elec() && p1_.Particle::Is_Pro() && p2_.Particle::Is_Pip() && p3_.Particle::Is_Pim()){
 			_W = physics::W(p0_.Particle::Get_4Vec(0),flags_->Flags::Run());
 			_Q2 = physics::Q2(p0_.Particle::Get_4Vec(0),flags_->Flags::Run());
@@ -244,6 +277,9 @@ float Event::Weight(){
 	return _weight;
 }
 float Event::MM(){
+	if(std::isnan(_MM)){
+		//_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
+	}
 	return _MM;
 }
 
@@ -259,6 +295,9 @@ float Event::Phi(int particle_){
 }
 
 float Event::W(){
+	if(std::isnan(_W)){
+
+	}
 	return _W;
 }
 
@@ -305,6 +344,9 @@ int Event::nphe(){
 }
 
 float Event::MMb(int i){
+	if(std::isnan(_MMb[i])){
+
+	}
 	return _MMb[i];
 }
 
@@ -348,31 +390,38 @@ void Event::Missing_Hadron(){
 
 
 void Event::COM(){
+	Event::Missing_Hadron();
 	if(_full_event){
 			  //physics::COM_gp(0,_k1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
-		_vec[0] = physics::COM_gp(0,_k1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
+		_vec[0] = physics::COM_gp(0,_k1_lab,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 		_p[0] = physics::Vec3_Mag(_vec[0]);
-		_vec[1] = physics::COM_gp(1,_k1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
+		_vec[1] = physics::COM_gp(1,_k1_lab,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 		_p[1] = physics::Vec3_Mag(_vec[1]);
-		_vec[2] = physics::COM_gp(2,_k1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
+		_vec[2] = physics::COM_gp(2,_k1_lab,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 		_p[2] = physics::Vec3_Mag(_vec[2]);
-		_vec[3] = physics::COM_gp(3,_k1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
+		_vec[3] = physics::COM_gp(3,_k1_lab,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 		_p[3] = physics::Vec3_Mag(_vec[3]);
-		_k1 = physics::COM_gp(4,_k1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
-		_p1 = physics::COM_gp(5,_k1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
+		_k1 = physics::COM_gp(4,_k1_lab,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
+		_p1 = physics::COM_gp(5,_k1_lab,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 		_COM = true;
 	}
 	Event::Get_Angles(_COM);
 }
 
 void Event::Vars(){
+	//std::cout<<"Doing Vars\n";
 	for(int i = 0; i<3; i++){
 		if(_COM){
 			_alphab[i] = physics::alpha(i, _k1, _vec[0], _vec[1], _vec[2], _vec[3], true);
+			//std::cout<<"Alpha: " <<i <<"  " <<_alphab[i];
 			_thetab[i] = physics::Ev_Theta(i, _k1, _vec[0], _vec[1], _vec[2], _vec[3], true);
+			//std::cout<<"\ttheta: " <<i <<"  " <<_thetab[i];
 			_MMb[i] = physics::Ev_MM(i, _k1, _vec[0], _vec[1], _vec[2], _vec[3], true);
+			//std::cout<<"\tMM1: " <<i <<"  " <<_MMb[i];
 			_MM2b[i] = physics::Ev_MM2(i, _k1, _vec[0], _vec[1], _vec[2], _vec[3], true);
+			//std::cout<<"\tMM2: " <<i <<"  " <<_MM2b[i];
 			_phib[i] = physics::Ev_Phi(i, _k1, _vec[0], _vec[1], _vec[2], _vec[3], true);
+			//std::cout<<"\tPhi: " <<i <<"  " <<_phib[i] <<"\n";
 		}else{
 			std::cout<<"You need to get your 4-Momenta into center of mass" <<std::endl;
 		}
@@ -470,3 +519,7 @@ int Event::Run(){
 int Event::Sector(int particle_){
 	return physics::get_sector(_phi_lab[particle_]);
 }
+
+//void Event::Calculate_All(){
+
+//}

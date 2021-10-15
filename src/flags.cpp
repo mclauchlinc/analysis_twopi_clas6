@@ -111,14 +111,11 @@ Flags::Flags(){}
 			}else if(str.substr(0,6) == _plot_){
 				std::cout<<"Info on the plotting\n";
 				Flags::Plot_Flag(str.substr(6,str_len),true);
-			}else if(str == _make_friend_){
-				//std::cout<<"Info on the friend\n";
-				_make_friend = true;
 			}else if(str.substr(0,6) == _output_name_){
 				//std::cout<<"Info on the output name\n";
 				_output_name = str.substr(6,str_len);
 			}
-		}else if(str_len > 7){
+		}if(str_len > 7){
 			//std::cout<<"Checking Length 7 "<<str.substr(0,7) <<"\n";
 			if(str.substr(0,7) == _ncorr_){
 				//std::cout<<"Info on the NOT Corrections\n";
@@ -126,6 +123,16 @@ Flags::Flags(){}
 			}else if(str.substr(0,7) == _nplot_){
 				//std::cout<<"Info on the NOT plot\n";
 				Flags::Plot_Flag(str.substr(7,str_len),true);
+			}else if(str.substr(0,7) == _make_image_){
+				//std::cout<<"Info on the image name\n";
+				_make_image = true;
+				_image_name = str.substr(7,str_len);
+			}
+		}if(str_len > 8){
+			if(str.substr(0,8) == _make_friend_){
+				_make_friend = true;
+				_friend_name = str.substr(8,str_len);
+				std::cout<<"\tName friend: " <<_friend_name <<"\n";
 			}
 		}
 	}
@@ -579,7 +586,18 @@ Flags::Flags(){}
 		return _make_friend;
 	}
 
+	bool Flags::Make_Image(){
+		return _make_image;
+	}
+
 	std::string Flags::Output_Name(){
 		return _output_name;
+	}
+	std::string Flags::Friend_Name(){
+		return _friend_name;
+	}
+
+	std::string Flags::Image_Name(){
+		return _image_name;
 	}
 

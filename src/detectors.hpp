@@ -7,7 +7,7 @@
 #include "constants.hpp"
 
 
-const static inline int _num_cc_segments_ = 18;
+const static int _num_cc_segments_ = 18;
 
 
 namespace detect{

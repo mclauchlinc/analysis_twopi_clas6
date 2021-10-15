@@ -1,128 +1,131 @@
 #include "forest.hpp"
 
-
+/*
 Forest::Forest(std::shared_ptr<Flags> flags_){
-	//The main Tree that will be made into a root file
-	char tree_name[100];
+	if(flags_->Make_Friend()){
+		//The main Tree that will be made into a root file
+		char tree_name[100];
 
-	_the_tree = new TTree("r10","Tree to hold Event Fourvectors");//
-	//_the_tree->Branch("EventBranch",&the_event,"evnt/I:apart/I:px/F:py/F:pz/F:p0/F:pid/I:hel/I:top/I");
-	_the_tree->Branch("evnt",&_evnt[0],"evnt/I");
-	_the_tree->Branch("apart",&_apart[0],"apart/I");
-	_the_tree->Branch("bpart",&_bpart[0],"bpart/I");
-	_the_tree->Branch("px",&_px[0],"px[apart]/F");
-	_the_tree->Branch("py",&_py[0],"py[apart]/F");
-	_the_tree->Branch("pz",&_pz[0],"pz[apart]/F");
-	_the_tree->Branch("p0",&_p0[0],"p0[apart]/F");
-	_the_tree->Branch("pid",&_pid[0],"pid[apart]/I");
-	_the_tree->Branch("hel",&_hel[0],"hel/I");
-	_the_tree->Branch("top",&_top[0],"top/I");
-	_the_tree->Branch("fc_tot",&_fc_tot[0],"fc_tot/I");
-	_the_tree->Branch("MM",&_MM[0],"MM[bpart]/F");
-	_the_tree->Branch("theta",&_theta[0],"theta[bpart]/F");
-	_the_tree->Branch("alpha",&_alpha[0],"alpha[bpart]/F");
-	_the_tree->Branch("run_type",&_run_type[0],"run_type/I");
-	_the_tree->Branch("weight",&_weight[0],"weight/F");
-	_the_tree->Branch("COM",&_COM[0],"COM/I");
-	//Float_t _MM_sp[3]= {NAN,NAN,NAN};//{p/pip,p/pim,pip/pim}
-	//Float_t _theta_sp[3]{NAN,NAN,NAN};//{p,pip,pim}
-	//Float_t _alpha_sp[3]{NAN,NAN,NAN};//[{pim,p},{pp,pip}],[{p,pp},{pip,pim}],[{pip,p},{pp,pim}]
-	//Int_t _run_type= 0;//{1,2,3,4}->{e16,e1f,e16sim,e1f sim} 
-	//The individual thread trees that will be merged
-	for(int thread_id = 0; thread_id < _NUM_THREADS_; thread_id++){
-		sprintf(tree_name,"r10",thread_id);//Changed from %d to have different indexed pieces
-		_a_tree[thread_id] = new TTree(tree_name,"Tree to hold Thread Event Fourvectors");//
-		//_a_tree[thread_id]->Branch("EventBranch",&the_eventb,"evntb/I:apartb/I:pxb/F:pyb/F:pzb/F:p0b/F:pidb/I:helb/I:topb/I");
-		_a_tree[thread_id]->Branch("evnt",&(_evntb[thread_id][0]),"evnt/I");
-		_a_tree[thread_id]->Branch("apart",&(_apartb[thread_id][0]),"apart/I");
-		_a_tree[thread_id]->Branch("bpart",&(_bpartb[thread_id][0]),"bpart/I");
-		_a_tree[thread_id]->Branch("px",&(_pxb[thread_id][0]),"px[apart]/F");
-		_a_tree[thread_id]->Branch("py",&(_pyb[thread_id][0]),"py[apart]/F");
-		_a_tree[thread_id]->Branch("pz",&(_pzb[thread_id][0]),"pz[apart]/F");
-		_a_tree[thread_id]->Branch("p0",&(_p0b[thread_id][0]),"p0[apart]/F");
-		_a_tree[thread_id]->Branch("pid",&(_pidb[thread_id][0]),"pid[apart]/I");
-		_a_tree[thread_id]->Branch("hel",&(_helb[thread_id][0]),"hel/I");
-		_a_tree[thread_id]->Branch("top",&(_topb[thread_id][0]),"top/I");
-		_a_tree[thread_id]->Branch("fc_tot",&(_fc_totb[thread_id][0]),"fc_tot/I");
-		_a_tree[thread_id]->Branch("MM",&_MMb[thread_id][0],"MM[bpart]/F");
-		_a_tree[thread_id]->Branch("theta",&_thetab[thread_id][0],"theta[bpart]/F");
-		_a_tree[thread_id]->Branch("alpha",&_alphab[thread_id][0],"alpha[bpart]/F");
-		_a_tree[thread_id]->Branch("run_type",&_run_typeb[thread_id][0],"run_type/I");
-		_a_tree[thread_id]->Branch("weight",&_weightb[thread_id][0],"weight/F");
-		_a_tree[thread_id]->Branch("COM",&_COMb[thread_id][0],"COM/I");
-	}
-	if(flags_->Flags::Sim()){
-		_thrown_tree = new TTree("t10","Tree to hold Event Fourvectors");//
-		//_thrown_tree->Branch("EventBranch",&the_event,"evnt/I:apart/I:px/F:py/F:pz/F:p0/F:pid/I:hel/I:top/I");
-		_thrown_tree->Branch("evnt",&_evnt[1],"evnt/I");
-		_thrown_tree->Branch("apart",&_apart[1],"apart/I");
-		_thrown_tree->Branch("bpart",&_bpart[1],"bpart/I");
-		_thrown_tree->Branch("px",&_px[1],"px[apart]/F");
-		_thrown_tree->Branch("py",&_py[1],"py[apart]/F");
-		_thrown_tree->Branch("pz",&_pz[1],"pz[apart]/F");
-		_thrown_tree->Branch("p0",&_p0[1],"p0[apart]/F");
-		_thrown_tree->Branch("pid",&_pid[1],"pid[apart]/I");
-		_thrown_tree->Branch("hel",&_hel[1],"hel/I");
-		_thrown_tree->Branch("top",&_top[1],"top/I");
-		_thrown_tree->Branch("fc_tot",&_fc_tot[1],"fc_tot/I");
-		_thrown_tree->Branch("MM",&_MM[1],"MM[bpart]/F");
-		_thrown_tree->Branch("theta",&_theta[1],"theta[bpart]/F");
-		_thrown_tree->Branch("alpha",&_alpha[1],"alpha[bpart]/F");
-		_thrown_tree->Branch("run_type",&_run_type[1],"run_type/I");
-		_thrown_tree->Branch("weight",&_weight[1],"weight/F");
-		_thrown_tree->Branch("COM",&_COM[1],"COM/I");
+		_the_tree = new TTree("r10","Tree to hold Event Fourvectors");//
+		//_the_tree->Branch("EventBranch",&the_event,"evnt/I:apart/I:px/F:py/F:pz/F:p0/F:pid/I:hel/I:top/I");
+		_the_tree->Branch("evnt",&_evnt[0],"evnt/I");
+		_the_tree->Branch("apart",&_apart[0],"apart/I");
+		_the_tree->Branch("bpart",&_bpart[0],"bpart/I");
+		_the_tree->Branch("px",&_px[0],"px[apart]/F");
+		_the_tree->Branch("py",&_py[0],"py[apart]/F");
+		_the_tree->Branch("pz",&_pz[0],"pz[apart]/F");
+		_the_tree->Branch("p0",&_p0[0],"p0[apart]/F");
+		_the_tree->Branch("pid",&_pid[0],"pid[apart]/I");
+		_the_tree->Branch("hel",&_hel[0],"hel/I");
+		_the_tree->Branch("top",&_top[0],"top/I");
+		_the_tree->Branch("fc_tot",&_fc_tot[0],"fc_tot/I");
+		_the_tree->Branch("MM",&_MM[0],"MM[bpart]/F");
+		_the_tree->Branch("theta",&_theta[0],"theta[bpart]/F");
+		_the_tree->Branch("alpha",&_alpha[0],"alpha[bpart]/F");
+		_the_tree->Branch("run_type",&_run_type[0],"run_type/I");
+		_the_tree->Branch("weight",&_weight[0],"weight/F");
+		_the_tree->Branch("COM",&_COM[0],"COM/I");
 		//Float_t _MM_sp[3]= {NAN,NAN,NAN};//{p/pip,p/pim,pip/pim}
 		//Float_t _theta_sp[3]{NAN,NAN,NAN};//{p,pip,pim}
 		//Float_t _alpha_sp[3]{NAN,NAN,NAN};//[{pim,p},{pp,pip}],[{p,pp},{pip,pim}],[{pip,p},{pp,pim}]
 		//Int_t _run_type= 0;//{1,2,3,4}->{e16,e1f,e16sim,e1f sim} 
 		//The individual thread trees that will be merged
 		for(int thread_id = 0; thread_id < _NUM_THREADS_; thread_id++){
-			sprintf(tree_name,"t10",thread_id);
-			_athrown_tree[thread_id] = new TTree(tree_name,"Tree to hold Thread Event Fourvectors");//
-			//_athrown_tree[thread_id]->Branch("EventBranch",&the_eventb,"evntb/I:apartb/I:pxb/F:pyb/F:pzb/F:p0b/F:pidb/I:helb/I:topb/I");
-			_athrown_tree[thread_id]->Branch("evnt",&(_evntb[thread_id][1]),"evnt/I");
-			_athrown_tree[thread_id]->Branch("apart",&(_apartb[thread_id][1]),"apart/I");
-			_athrown_tree[thread_id]->Branch("bpart",&(_bpartb[thread_id][1]),"bpart/I");
-			_athrown_tree[thread_id]->Branch("px",&(_pxb[thread_id][1]),"px[apart]/F");
-			_athrown_tree[thread_id]->Branch("py",&(_pyb[thread_id][1]),"py[apart]/F");
-			_athrown_tree[thread_id]->Branch("pz",&(_pzb[thread_id][1]),"pz[apart]/F");
-			_athrown_tree[thread_id]->Branch("p0",&(_p0b[thread_id][1]),"p0[apart]/F");
-			_athrown_tree[thread_id]->Branch("pid",&(_pidb[thread_id][1]),"pid[apart]/I");
-			_athrown_tree[thread_id]->Branch("hel",&(_helb[thread_id][1]),"hel/I");
-			_athrown_tree[thread_id]->Branch("top",&(_topb[thread_id][1]),"top/I");
-			_athrown_tree[thread_id]->Branch("fc_tot",&(_fc_totb[thread_id][1]),"fc_tot/I");
-			_athrown_tree[thread_id]->Branch("MM",&_MMb[thread_id][1],"MM[bpart]/F");
-			_athrown_tree[thread_id]->Branch("theta",&_thetab[thread_id][1],"theta[bpart]/F");
-			_athrown_tree[thread_id]->Branch("alpha",&_alphab[thread_id][1],"alpha[bpart]/F");
-			_athrown_tree[thread_id]->Branch("run_type",&_run_typeb[thread_id][1],"run_type/I");
-			_athrown_tree[thread_id]->Branch("weight",&_weightb[thread_id][1],"weight/F");
-			_athrown_tree[thread_id]->Branch("COM",&_COMb[thread_id][1],"COM/I");
+			sprintf(tree_name,"r10",thread_id);//Changed from %d to have different indexed pieces
+			_a_tree[thread_id] = new TTree(tree_name,"Tree to hold Thread Event Fourvectors");//
+			//_a_tree[thread_id]->Branch("EventBranch",&the_eventb,"evntb/I:apartb/I:pxb/F:pyb/F:pzb/F:p0b/F:pidb/I:helb/I:topb/I");
+			_a_tree[thread_id]->Branch("evnt",&(_evntb[thread_id][0]),"evnt/I");
+			_a_tree[thread_id]->Branch("apart",&(_apartb[thread_id][0]),"apart/I");
+			_a_tree[thread_id]->Branch("bpart",&(_bpartb[thread_id][0]),"bpart/I");
+			_a_tree[thread_id]->Branch("px",&(_pxb[thread_id][0]),"px[apart]/F");
+			_a_tree[thread_id]->Branch("py",&(_pyb[thread_id][0]),"py[apart]/F");
+			_a_tree[thread_id]->Branch("pz",&(_pzb[thread_id][0]),"pz[apart]/F");
+			_a_tree[thread_id]->Branch("p0",&(_p0b[thread_id][0]),"p0[apart]/F");
+			_a_tree[thread_id]->Branch("pid",&(_pidb[thread_id][0]),"pid[apart]/I");
+			_a_tree[thread_id]->Branch("hel",&(_helb[thread_id][0]),"hel/I");
+			_a_tree[thread_id]->Branch("top",&(_topb[thread_id][0]),"top/I");
+			_a_tree[thread_id]->Branch("fc_tot",&(_fc_totb[thread_id][0]),"fc_tot/I");
+			_a_tree[thread_id]->Branch("MM",&_MMb[thread_id][0],"MM[bpart]/F");
+			_a_tree[thread_id]->Branch("theta",&_thetab[thread_id][0],"theta[bpart]/F");
+			_a_tree[thread_id]->Branch("alpha",&_alphab[thread_id][0],"alpha[bpart]/F");
+			_a_tree[thread_id]->Branch("run_type",&_run_typeb[thread_id][0],"run_type/I");
+			_a_tree[thread_id]->Branch("weight",&_weightb[thread_id][0],"weight/F");
+			_a_tree[thread_id]->Branch("COM",&_COMb[thread_id][0],"COM/I");
 		}
+		if(flags_->Flags::Sim()){
+			_thrown_tree = new TTree("t10","Tree to hold Event Fourvectors");//
+			//_thrown_tree->Branch("EventBranch",&the_event,"evnt/I:apart/I:px/F:py/F:pz/F:p0/F:pid/I:hel/I:top/I");
+			_thrown_tree->Branch("evnt",&_evnt[1],"evnt/I");
+			_thrown_tree->Branch("apart",&_apart[1],"apart/I");
+			_thrown_tree->Branch("bpart",&_bpart[1],"bpart/I");
+			_thrown_tree->Branch("px",&_px[1],"px[apart]/F");
+			_thrown_tree->Branch("py",&_py[1],"py[apart]/F");
+			_thrown_tree->Branch("pz",&_pz[1],"pz[apart]/F");
+			_thrown_tree->Branch("p0",&_p0[1],"p0[apart]/F");
+			_thrown_tree->Branch("pid",&_pid[1],"pid[apart]/I");
+			_thrown_tree->Branch("hel",&_hel[1],"hel/I");
+			_thrown_tree->Branch("top",&_top[1],"top/I");
+			_thrown_tree->Branch("fc_tot",&_fc_tot[1],"fc_tot/I");
+			_thrown_tree->Branch("MM",&_MM[1],"MM[bpart]/F");
+			_thrown_tree->Branch("theta",&_theta[1],"theta[bpart]/F");
+			_thrown_tree->Branch("alpha",&_alpha[1],"alpha[bpart]/F");
+			_thrown_tree->Branch("run_type",&_run_type[1],"run_type/I");
+			_thrown_tree->Branch("weight",&_weight[1],"weight/F");
+			_thrown_tree->Branch("COM",&_COM[1],"COM/I");
+			//Float_t _MM_sp[3]= {NAN,NAN,NAN};//{p/pip,p/pim,pip/pim}
+			//Float_t _theta_sp[3]{NAN,NAN,NAN};//{p,pip,pim}
+			//Float_t _alpha_sp[3]{NAN,NAN,NAN};//[{pim,p},{pp,pip}],[{p,pp},{pip,pim}],[{pip,p},{pp,pim}]
+			//Int_t _run_type= 0;//{1,2,3,4}->{e16,e1f,e16sim,e1f sim} 
+			//The individual thread trees that will be merged
+			for(int thread_id = 0; thread_id < _NUM_THREADS_; thread_id++){
+				sprintf(tree_name,"t10",thread_id);
+				_athrown_tree[thread_id] = new TTree(tree_name,"Tree to hold Thread Event Fourvectors");//
+				//_athrown_tree[thread_id]->Branch("EventBranch",&the_eventb,"evntb/I:apartb/I:pxb/F:pyb/F:pzb/F:p0b/F:pidb/I:helb/I:topb/I");
+				_athrown_tree[thread_id]->Branch("evnt",&(_evntb[thread_id][1]),"evnt/I");
+				_athrown_tree[thread_id]->Branch("apart",&(_apartb[thread_id][1]),"apart/I");
+				_athrown_tree[thread_id]->Branch("bpart",&(_bpartb[thread_id][1]),"bpart/I");
+				_athrown_tree[thread_id]->Branch("px",&(_pxb[thread_id][1]),"px[apart]/F");
+				_athrown_tree[thread_id]->Branch("py",&(_pyb[thread_id][1]),"py[apart]/F");
+				_athrown_tree[thread_id]->Branch("pz",&(_pzb[thread_id][1]),"pz[apart]/F");
+				_athrown_tree[thread_id]->Branch("p0",&(_p0b[thread_id][1]),"p0[apart]/F");
+				_athrown_tree[thread_id]->Branch("pid",&(_pidb[thread_id][1]),"pid[apart]/I");
+				_athrown_tree[thread_id]->Branch("hel",&(_helb[thread_id][1]),"hel/I");
+				_athrown_tree[thread_id]->Branch("top",&(_topb[thread_id][1]),"top/I");
+				_athrown_tree[thread_id]->Branch("fc_tot",&(_fc_totb[thread_id][1]),"fc_tot/I");
+				_athrown_tree[thread_id]->Branch("MM",&_MMb[thread_id][1],"MM[bpart]/F");
+				_athrown_tree[thread_id]->Branch("theta",&_thetab[thread_id][1],"theta[bpart]/F");
+				_athrown_tree[thread_id]->Branch("alpha",&_alphab[thread_id][1],"alpha[bpart]/F");
+				_athrown_tree[thread_id]->Branch("run_type",&_run_typeb[thread_id][1],"run_type/I");
+				_athrown_tree[thread_id]->Branch("weight",&_weightb[thread_id][1],"weight/F");
+				_athrown_tree[thread_id]->Branch("COM",&_COMb[thread_id][1],"COM/I");
+			}
+		}
+		
+		alive = 1; 
 	}
-	
-	alive = 1; 
 }
 
 //Forest::~forest(){ this->Write();}//Including this and the Forest::Write() are necessary for properly writing the TTree to the TFile 
 
 
-void Forest::Write(bool sim_){
-	std::cout<<"Writing Event Tree\n";
-	_tree_file->cd();
-	TDirectory* _almanac1 = _tree_file->mkdir("r10");
-	_almanac1->cd();
-	_the_tree->Write();
-	std::cout<<"Reconstructed Tree Written\n";
-	if(sim_){
-		TDirectory* _almanac2 = _tree_file->mkdir("t10");
-		_almanac2->cd();
-		_thrown_tree->Write();
-		std::cout<<"Thrown Tree Written\n";
+void Forest::Write(bool sim_, std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Make_Friend()){
+		std::cout<<"Writing Event Tree\n";
+		_tree_file->cd();
+		TDirectory* _almanac1 = _tree_file->mkdir("r10");
+		_almanac1->cd();
+		_the_tree->Write();
+		std::cout<<"Reconstructed Tree Written\n";
+		if(sim_){
+			TDirectory* _almanac2 = _tree_file->mkdir("t10");
+			_almanac2->cd();
+			_thrown_tree->Write();
+			std::cout<<"Thrown Tree Written\n";
 
+		}
+		_tree_file->Close();//It seems that if there are multiple forests that closing this one closes other ones too? But if I don't close then it all gets very weird 
+		std::cout<<"Event Tree Closed\n";
 	}
-	_tree_file->Close();//It seems that if there are multiple forests that closing this one closes other ones too? But if I don't close then it all gets very weird 
-	std::cout<<"Event Tree Closed\n";
-	
 }
 
 /*
@@ -141,12 +144,12 @@ void Forest::mktree(int thread_id){
 	_the_tree->Branch("hel",&_hel,"hel/I");
 	_the_tree->Branch("top",&_top,"top/I");	
 }*/
-
-void Forest::mkfile(std::string tree_file_name, bool thrown_){
+/*
+void Forest::mkfile(std::shared_ptr<Flags> flags_, bool thrown_){
 	if(thrown_){
-		_thr_tree_file = fun::Name_Tree_File(tree_file_name, thrown_);
+		_thr_tree_file = fun::Name_Tree_File(flags_, thrown_);
 	}else{
-		_tree_file = fun::Name_Tree_File(tree_file_name, thrown_);
+		_tree_file = fun::Name_Tree_File(flags_, thrown_);
 	}
 	//The output rootfile containng the tree
 }
@@ -181,69 +184,71 @@ void Forest::mkfile(std::string tree_file_name, bool thrown_){
 		//std::cout<<"   successfully filled?"; 
 	//}
 }*/
-
-void Forest::Fill_Thread_Tree(Event event_, int event_n, int thread_id, bool thrown_){
+/*
+void Forest::Fill_Thread_Tree(Event event_, int event_n, int thread_id, bool thrown_, std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Make_Friend()){
 		//std::cout<<"Filling tree: " <<event_n <<std::endl;
-	int thr = 0; 
-	if(thrown_){
-		thr = 1;
-	}	
-		//TLorentzVector k[6]; 
-		_evntb[thread_id][thr] = event_n; 
-		_apartb[thread_id][thr] = 6;
-		_bpartb[thread_id][thr] = 3; 
-	
-	
+		int thr = 0; 
+		if(thrown_){
+			thr = 1;
+		}	
+			//TLorentzVector k[6]; 
+			_evntb[thread_id][thr] = event_n; 
+			_apartb[thread_id][thr] = 6;
+			_bpartb[thread_id][thr] = 3; 
+		
+		
 
-		bool want_COM = true;//Do you want things in Center of Mass Frame?
+			bool want_COM = true;//Do you want things in Center of Mass Frame?
 
-		for(int i = 0; i<6; i++){
-			if(i > 1){
-				_pxb[thread_id][thr][i] = event_.Event::Get_Px(i-2,want_COM);
-				_pyb[thread_id][thr][i] = event_.Event::Get_Py(i-2,want_COM);
-				_pzb[thread_id][thr][i] = event_.Event::Get_Pz(i-2,want_COM);
-				_p0b[thread_id][thr][i] = event_.Event::Get_P0(i-2,want_COM);
-				_pidb[thread_id][thr][i] = event_.Event::Get_PID(i-2);
-				//k[i] = {_pxb[thread_id][thr][i],_pyb[thread_id][thr][i],_pzb[thread_id][thr][i],_p0b[thread_id][thr][i]};
-			}else{
-				if(i == 0){//beam
-					_pxb[thread_id][thr][i] = event_.Event::Get_Beam_Comp(0,true);
-					_pyb[thread_id][thr][i] = event_.Event::Get_Beam_Comp(1,true);
-					_pzb[thread_id][thr][i] = event_.Event::Get_Beam_Comp(2,true);
-					_p0b[thread_id][thr][i] = event_.Event::Get_Beam_Comp(3,true);
-					_pidb[thread_id][thr][i] = _ELECTRON_;
-				}else if(i ==1){ //Target
-					_pxb[thread_id][thr][i] = event_.Event::Get_Target_Comp(0,true);
-					_pyb[thread_id][thr][i] = event_.Event::Get_Target_Comp(1,true);
-					_pzb[thread_id][thr][i] = event_.Event::Get_Target_Comp(2,true);
-					_p0b[thread_id][thr][i] = event_.Event::Get_Target_Comp(3,true);
-					_pidb[thread_id][thr][i] = _PROTON_;
+			for(int i = 0; i<6; i++){
+				if(i > 1){
+					_pxb[thread_id][thr][i] = event_.Event::Get_Px(i-2,want_COM);
+					_pyb[thread_id][thr][i] = event_.Event::Get_Py(i-2,want_COM);
+					_pzb[thread_id][thr][i] = event_.Event::Get_Pz(i-2,want_COM);
+					_p0b[thread_id][thr][i] = event_.Event::Get_P0(i-2,want_COM);
+					_pidb[thread_id][thr][i] = event_.Event::Get_PID(i-2);
+					//k[i] = {_pxb[thread_id][thr][i],_pyb[thread_id][thr][i],_pzb[thread_id][thr][i],_p0b[thread_id][thr][i]};
+				}else{
+					if(i == 0){//beam
+						_pxb[thread_id][thr][i] = event_.Event::Get_Beam_Comp(0,true);
+						_pyb[thread_id][thr][i] = event_.Event::Get_Beam_Comp(1,true);
+						_pzb[thread_id][thr][i] = event_.Event::Get_Beam_Comp(2,true);
+						_p0b[thread_id][thr][i] = event_.Event::Get_Beam_Comp(3,true);
+						_pidb[thread_id][thr][i] = _ELECTRON_;
+					}else if(i ==1){ //Target
+						_pxb[thread_id][thr][i] = event_.Event::Get_Target_Comp(0,true);
+						_pyb[thread_id][thr][i] = event_.Event::Get_Target_Comp(1,true);
+						_pzb[thread_id][thr][i] = event_.Event::Get_Target_Comp(2,true);
+						_p0b[thread_id][thr][i] = event_.Event::Get_Target_Comp(3,true);
+						_pidb[thread_id][thr][i] = _PROTON_;
+					}
 				}
 			}
-		}
-		_helb[thread_id][thr] = event_.Event::Helicity();
-		_topb[thread_id][thr] = event_.Event::Top();
-		_run_typeb[thread_id][thr] = event_.Event::Run();//{1,0}.{e16,e1f}
-		for(int j = 0; j< 3; j++){
-			_MMb[thread_id][thr][j] = event_.Event::MMb(j);
-			_thetab[thread_id][thr][j] = event_.Event::Thetab(j);
-			_alphab[thread_id][thr][j] = event_.Event::Alphab(j);
-		}
-		_weightb[thread_id][thr] = event_.Event::Weight();
-		//std::cout<<"In Tree thread " <<thread_id <<" the weight is: " <<_weightb[thread_id] <<std::endl;
-		if(event_.Event::Was_COM()){
-			_COMb[thread_id][thr] = 1;
-		}else{
-			_COMb[thread_id][thr] = 0; 
-		}
-		if(thrown_){
-			_athrown_tree[thread_id]->TTree::Fill();
-		}else{
-			_a_tree[thread_id]->TTree::Fill();
-		}
-		
-		//std::cout<<"   successfully filled?"; 
-	//}
+			_helb[thread_id][thr] = event_.Event::Helicity();
+			_topb[thread_id][thr] = event_.Event::Top();
+			_run_typeb[thread_id][thr] = event_.Event::Run();//{1,0}.{e16,e1f}
+			for(int j = 0; j< 3; j++){
+				_MMb[thread_id][thr][j] = event_.Event::MMb(j);
+				_thetab[thread_id][thr][j] = event_.Event::Thetab(j);
+				_alphab[thread_id][thr][j] = event_.Event::Alphab(j);
+			}
+			_weightb[thread_id][thr] = event_.Event::Weight();
+			//std::cout<<"In Tree thread " <<thread_id <<" the weight is: " <<_weightb[thread_id] <<std::endl;
+			if(event_.Event::Was_COM()){
+				_COMb[thread_id][thr] = 1;
+			}else{
+				_COMb[thread_id][thr] = 0; 
+			}
+			if(thrown_){
+				_athrown_tree[thread_id]->TTree::Fill();
+			}else{
+				_a_tree[thread_id]->TTree::Fill();
+			}
+			
+			//std::cout<<"   successfully filled?"; 
+		//}
+	}
 }
 
 void Forest::scan_thread_tree(int thread_id, bool thrown_ ){
@@ -355,7 +360,7 @@ void Forest::move_forest_indoors(){
 		_b_tree[thread_id]->TTree::Fill();	
 	}
 }*/
-
+/*
 void Forest::Grow_Forest(bool thrown_){
 	std::cout<<"Growing a Forest\n";
 	TList the_forest; 
@@ -376,8 +381,8 @@ void Forest::Grow_Forest(bool thrown_){
 	}
 }
 
-void Forest::Grow_Write_Forest(std::string tree_file_name, bool thrown_){
-	Forest::mkfile(tree_file_name, false);
+void Forest::Grow_Write_Forest(std::shared_ptr<Flags> flags_, bool thrown_){
+	Forest::mkfile(flags_, false);
 	std::cout<<"Growing and Writing Forest:\n";
 	TList the_forest; 
 	TList thr_forest;
@@ -398,7 +403,7 @@ void Forest::Grow_Write_Forest(std::string tree_file_name, bool thrown_){
 	//_new_tree1->Write();
 	std::cout<<"	Reconstructed Tree Written\n";
 	if(thrown_){
-		Forest::mkfile(tree_file_name, thrown_);
+		Forest::mkfile(flags_, thrown_);
 		TDirectory* _almanac2 = _thr_tree_file->mkdir("t10");
 		_almanac2->cd();
 		for(int j = 0; j<_NUM_THREADS_ ; j++){

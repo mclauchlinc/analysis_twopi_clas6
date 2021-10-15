@@ -13,71 +13,23 @@ bool fun::replace(std::string& str, const std::string& from, const std::string& 
     return true;
 }
 
-std::shared_ptr<TFile> fun::Name_File(std::string file_name_){
-  std::cout<<std::endl <<"Named File: " <<file_name_;
-  return std::make_shared<TFile>(file_name_.c_str(),"RECREATE");
+std::shared_ptr<TFile> fun::Name_File(std::shared_ptr<Flags> flags_){
+  return std::make_shared<TFile>(flags_->Flags::Output_Name().c_str(),"RECREATE");
 }
 
-std::shared_ptr<TFile> fun::Name_File(std::string file_name_, std::shared_ptr<Flags> flag_){
-  return fun::Name_File(file_name_);//Need to fix this later
-}
-
-/*std::shared_ptr<TFile> fun::Name_File(std::string file_name_, bool cluster)
-{
-  std::string file_name;
-  if(cluster){
-    std::string path = fs::current_path().string();
-    //file_name = "/home/mclauchc/analysis/bin/analysis_runs/$name/$name.root";
-    file_name = "$boop/$name.root";
-    replace(file_name,"$boop",path);
-    replace(file_name, "$name", file_name_);
-  }else{
-    file_name = "/Users/cmc/Desktop/analysis/analysis_clas6/bin/$name/$name.root";
-    //file_name = "$name.root";
-    replace(file_name, "$name", file_name_);
-    replace(file_name, "$name", file_name_);
+std::shared_ptr<TFile> fun::Name_Image(std::shared_ptr<Flags> flags_){
+  if(flags_->Flags::Make_Image()){
+    std::cout<<std::endl <<"Named Image File: " <<flags_->Flags::Image_Name().c_str();
+    return std::make_shared<TFile>(flags_->Flags::Image_Name().c_str(),"RECREATE");
   }
-	
-  std::cout<<std::endl <<"Named File: " <<file_name;
-	return std::make_shared<TFile>(file_name.c_str(),"RECREATE");
-}*/
-
-std::shared_ptr<TFile> fun::Name_Image_File(std::string file_name_)
-{
-  std::string file_name = "$name_pics.root";
-  replace(file_name, "$name", file_name_);
-  return std::make_shared<TFile>(file_name.c_str(),"RECREATE");
 }
 
-std::shared_ptr<TFile> fun::Name_Tree_File(std::string file_name_, bool thrown_, bool cluster)
-{
-  std::string file_name;
-  if(cluster){
-    std::string path = fs::current_path().string();
-    if(thrown_){
-      //file_name = "/home/mclauchc/analysis/bin/analysis_runs/$name/$name_thr_tree.root";
-      file_name = "$boop/$name_thrown.root";
-    }else{
-      //file_name = "/home/mclauchc/analysis/bin/analysis_runs/$name/$name_evnt_tree.root";
-      file_name = "$boop/$name_recon.root";
-    }
-    replace(file_name, "$boop", path);
-    replace(file_name, "$name", file_name_);
-  }else{
-    if(thrown_){
-      file_name = "/Users/cmc/Desktop/analysis/analysis_clas6/bin/$name/$name_thr_tree.root";
-    }else{
-      file_name = "/Users/cmc/Desktop/analysis/analysis_clas6/bin/$name/$name_evnt_tree.root";
-    }
-    replace(file_name, "$name", file_name_);
-    replace(file_name, "$name", file_name_);
+std::shared_ptr<TFile> fun::Name_Sparse(std::shared_ptr<Flags> flags_){
+  if(flags_->Flags::Make_Friend()){
+    std::cout<<"Named Sparse File: " <<flags_->Flags::Friend_Name() <<"\n";
+    return std::make_shared<TFile>(flags_->Flags::Friend_Name().c_str(),"RECREATE");
   }
-
-
-	std::cout<<std::endl <<"Named Tree File: " <<file_name;
-	return std::make_shared<TFile>(file_name.c_str(),"RECREATE");
 }
-
 
 std::vector<std::string> fun::read_file_list(std::string path, int thread_num){
   std::ifstream infile(path.c_str()); // in file stream
@@ -93,7 +45,6 @@ std::vector<std::string> fun::read_file_list(std::string path, int thread_num){
   return result;
 }
 void fun::removeTree(std::string file_name){
-
   TFile *file=new TFile((file_name).c_str(),"update");
   std::string object_to_remove="h10;1";
   //the object can be a tree, a histogram, etc, in this case "test1" is a TTree
@@ -126,7 +77,7 @@ void fun::loadChain(std::shared_ptr<TChain> chain_, std::string file_, int threa
   }
 }
 
-char* fun::appendCharToCharArray(char* array, char a)
+/*char* fun::appendCharToCharArray(char* array, char a)
 {
     size_t len = strlen(array);
 
@@ -149,39 +100,8 @@ bool fun::no_pro_pip_match(int idx1, int idx2[20]){//Designed to check to see if
   return pass; 
 }
 
-bool fun::hist_fitting(int species_, int cut_, int Wbin_, int pbin_, int fit_){
-  bool pass = false; 
-  //std::cout<<fit_;
-  if(fit_ >= 0){
-    if(fit_ == 1){
-      if(species_==0){
-        if(cut_ == 5 || cut_ == 6 || cut_ == 7){
-          pass = true;
-        }
-      }else{
-        if(cut_== 2 || cut_ == 3){
-          pass = true;
-        }
-      }
-    }else{
-      pass = true;
-    }
-  }else if(fit_==-1 && Wbin_== 0 && pbin_ == 0){
-    if(species_==0){
-        if(cut_ != 5 && cut_ != 6 && cut_ != 7){
-          pass = true;
-        }
-      }else{
-        if(cut_!= 2 && cut_ != 3){
-          pass = true;
-        }
-      }
-  }
-  return pass; 
-}
 
-int fun::Make_Dir(std::string a_dir_name)
-{
+int fun::Make_Dir(std::string a_dir_name){
   std::string dir_name = "$name";
   if(fun::IsPathExist(a_dir_name)){
     return 0;
@@ -190,40 +110,13 @@ int fun::Make_Dir(std::string a_dir_name)
     return mkdir(dir_name.c_str(),0777);
   }
 }
-
-std::string fun::get_current_dir(){
-   return fs::current_path().string();
-}
-
-
-std::shared_ptr<TFile> fun::Name_Sparse(std::string a_file_name, bool cluster){
-  std::string file_name;
-  if(cluster){
-    std::string path = fs::current_path().string();
-    file_name = "$boop/$name_friend.root";
-    replace(file_name,"$boop",path);
-    replace(file_name,"$name",a_file_name);
-  }else{
-    file_name = "/Users/cmc/Desktop/analysis/analysis_clas6/bin/$name/$name_friend.root";
-    //file_name = "$name_friend.root";
-    replace(file_name, "$name", a_file_name);
-    replace(file_name, "$name", a_file_name);
-  } 
-  
-  std::cout<<std::endl <<"Spare File Named: " <<file_name;
-  return std::make_shared<TFile>(file_name.c_str(),"RECREATE");
-}
+*/
 
 int fun::extract_run_number(std::string file_name, bool cluster){
   int result = 0;
-  //std::string 
-  //std::string result_string = "";
-  //std::cout<<std::endl <<"File name: "<<file_name;
   if(cluster){
-    //fun::replace("","/Users/cmc/Desktop/analysis/Skim_from_nick/e16_run_",file_name);
     std::stringstream boop(file_name.std::string::substr(48,5));//Changed to 74 
     boop >> result;
-    //std::cout<<" | file number: " <<result;
   }else{
     std::stringstream boop(file_name.std::string::substr(51,5));
     boop >> result;
@@ -235,310 +128,20 @@ float fun::extract_run_number_float(std::string file_name, bool cluster){
   float result;
   std::string inter_1 = file_name;
   std::string inter_2 = file_name;
-  //std::string 
-  //std::string result_string = "";
-  //std::cout<<std::endl <<"File name: "<<file_name;
   if(cluster){
-    //fun::replace("","/Users/cmc/Desktop/analysis/Skim_from_nick/e16_run_",file_name);
-    //std::stringstream boop(inter_1.std::string::substr(48,5) + "." + inter_2.std::string::substr(61,2));//Changed to 74 
     std::string intermediary1 = inter_1.std::string::substr(48,5);
     std::string intermediary2 = inter_2.std::string::substr(61,2);
-    //std::cout<<"\nintermediary2:" <<intermediary2;
     float par1 = 100.0*std::stof(intermediary1);
     float par2 = std::stof(intermediary2);
     result = (par1+ par2);
-    //result = inter_1.std::string::substr(48,5) + "." + inter_2.std::string::substr(61,2);//Changed to 74 
-    //boop >> result;
-    //std::cout<<" | file number: " <<result;
   }else{
     std::string intermediary1 = inter_1.std::string::substr(51,5);
     std::string intermediary2 = inter_2.std::string::substr(64,2);
-    //std::cout<<"\nintermediary2:" <<intermediary2;
     float par1 = 100.0*std::stof(intermediary1);
     float par2 = std::stof(intermediary2);
-    //std::cout<<"\npar2:" <<par2;
-    //if(par2 == 0){
-     // par2=std::stof(file_name.std::string::substr(65,1)+".0");
-     // std::cout<<"\npar2:" <<par2;
-     
-    //}
-    //std::cout<<"\nrun_num1: " <<par1 <<"+" <<par2;
-    //std::stringstream boop(intermediary);
     result = (par1+ par2);
-    //boop >> result;
-    //std::cout<<"\nrun num: " <<result <<"\n";
-    //result = inter_1.std::string::substr(51,5) + "_" + inter_2.std::string::substr(63,3);
-    //boop >> result;
   }
   return result;
-}
-/*
-bool fun::extract_hex(int hex_, int pow_, int row_, int max_pow_){
-  int rows[4] = {1,2,4,8};
-  int val=row_*(16**pow_);
-  bool out = false; 
-  for(int i=0; i<(max_pow_-pow_); i++){
-    for(int j=0; j<4; j++){
-      //if(hex_>(rows[j]*pow(16,max_pow-i))){
-        hex_ = hex_%(rows[j]*pow(16,max_pow-i));
-      //}
-    }
-  }
-  for(int k=0; k<(4-row_); k++){
-    hex_ = hex%(row_*pow(16,pow_));
-  }
-  if((hex_/val) == 1){
-    out = true;
-  }
-  return out
-}
-
-bool fun::hex_01(std::string var){
-  bool out=false;
-  switch(var):
-  {
-    case 1:
-    out=true;
-    break;
-    case 3:
-    out=true;
-    break;
-    case 5:
-    out=true;
-    break;
-    case 7:
-    out=true;
-    break;
-    case 9:
-    out=true;
-    break;
-    case b:
-    out=true;
-    break;
-    case d:
-    out=true;
-    break;
-    case f:
-    out=true;
-    break;
-  }
-  return out;
-}
-
-int main ()
-{
-  char str[]="ffff";
-  long int number;
-  if (isxdigit(str[0]))
-  {
-    number = strtol (str,NULL,16);
-    printf ("The hexadecimal number %lx is %ld.\n",number,number);
-  }
-  return 0;
-}
-
-bool fun::hex_02(std::string var){
-  bool out=false;
-  switch(var):
-  {
-    case "2":
-    out=true;
-    break;
-    case "6":
-    out=true;
-    break;
-    case "7":
-    out=true;
-    break;
-    case a:
-    out=true;
-    break;
-    case b:
-    out=true;
-    break;
-    case e:
-    out=true;
-    break;
-    case f:
-    out=true;
-    break;
-  }
-  return out;
-}
-
-bool fun::check_hex01(char digit_){
-  bool out=false;
-  switch(digit_):
-  {
-    case '1':
-    out=true;
-    break;
-    case '3':
-    out=true;
-    break;
-    case '5':
-    out=true;
-    break;
-    case '7':
-    out=true;
-    break;
-    case '9':
-    out=true;
-    break;
-    case 'b':
-    out=true;
-    break;
-    case 'd':
-    out=true;
-    break;
-    case 'f':
-    out=true;
-    break;
-  }
-  return out;
-}
-
-bool fun::check_hex02(char digit_){
-  bool out=false;
-  switch(digit_):
-  {
-    case '2':
-    out=true;
-    break;
-    case '6':
-    out=true;
-    break;
-    case 'a':
-    out=true;
-    break;
-    case 'b':
-    out=true;
-    break;
-    case 'e':
-    out=true;
-    break;
-    case 'f':
-    out=true;
-    break;
-  }
-  return out;
-}
-
-bool fun::check_hex04(char digit_){
-  bool out=false;
-  switch(digit_):
-  {
-    case '4':
-    out=true;
-    break;
-    case '5':
-    out=true;
-    break;
-    case '6':
-    out=true;
-    break;
-    case '7':
-    out=true;
-    break;
-    case 'c':
-    out=true;
-    break;
-    case 'd':
-    out=true;
-    break;
-    case 'e':
-    out=true;
-    break;
-    case 'f':
-    out=true;
-    break;
-  }
-  return out;
-}
-
-bool fun::check_hex08(char digit_){
-  bool out=false;
-  switch(digit_):
-  {
-    case '8':
-    out=true;
-    break;
-    case '9':
-    out=true;
-    break;
-    case 'a':
-    out=true;
-    break;
-    case 'b':
-    out=true;
-    break;
-    case 'c':
-    out=true;
-    break;
-    case 'd':
-    out=true;
-    break;
-    case 'e':
-    out=true;
-    break;
-    case 'f':
-    out=true;
-    break;
-  }
-  return out;
-}
-
-bool fun::check_hex(char digit_, int row_){
-  bool out = false;
-  switch(row_){
-    case 1:
-      out = fun::check_hex01(digit_);
-    break;
-    case 2:
-      out = fun::check_hex02(digit_);
-    break;
-    case 4:
-      out = fun::check_hex04(digit_);
-    break;
-    case 8:
-      out = fun::check_hex08(digit_);
-    break;
-    default:
-      std::cout<<"Improper row: 1,2,4,8\n";
-    break;
-  }
-  return out;
-}
-
-
-bool fun::extract_hex(char hex_, int pow_, int row_){
-  bool output = false;
-  int hex_size=std::strlen(hex_);
-  if(row_ != 1 || row_ != 3 || row_ != 4 || row_ != 8 ){
-    std::cout<<"Improper input. Need 1, 2, 4, or 8 for row\nbool fun::extract_hex(std::string hex_, int pow_, int row_)\n";
-    return output;
-  }
-  if(hex_size < pow_){
-    std::cout<<"Improper input. Exceeded range of Hex: " <<hex_size <<"\n";
-    return output;
-  }
-  int idx = hex_size - pow_;
-  char digit = hex_[idx];
-  output = check_hex(digit,row_);
-  return output;
-}
-
-void fun::print(auto s, int indent){
-  if(indent>0){
-    for(int i=0; i<indent ; i++){
-      std::cout<<"\t";
-    }
-  }
-  std::cout<<s <<std::endl;
-}*/
-
-bool fun::good_idx(int idx_){
-
 }
 
 void fun::print_vector_idx(std::vector<int> vec_){

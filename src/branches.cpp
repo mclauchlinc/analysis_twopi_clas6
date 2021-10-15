@@ -712,17 +712,25 @@ float Branches::weight(){
 }
 
 float Branches::mcp(int i){
-  return _mcp[i];
+  if(_MC){
+    return _mcp[i];
+  }
 }
 float Branches::mctheta(int i){
-  return _mctheta[i];
+  if(_MC){
+    return _mctheta[i];
+  }
 }
 float Branches::mcphi(int i){
-  return _mcphi[i];
+  if(_MC){
+    return _mcphi[i];
+  }
 }
 
 int Branches::mcid(int i){
-  return _mcid[i];
+  if(_MC){
+    return _mcid[i];
+  }
 }
 
 

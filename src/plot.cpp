@@ -71,6 +71,16 @@ void plot::plot_pim(Particle particle_, std::shared_ptr<Histogram> hist_, std::s
 	plot::plot_pid_cut(particle_, hist_, flags_, 3);
 }
 
+void plot::plot_thrown(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
+	//std::cout<<"Trying to plot a thrown particle\n";
+	if(flags_->Flags::Sim() && particle_.Particle::Is_Thrown()){
+		if(particle_.Particle::Is_Elec()){
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_event_,_cut_applied_,_mzero_,_thrown_,flags_,particle_.Particle::Get_Weight());
+		}
+	}
+}
+
+
 void plot::plot_no_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
 	if(par_ == 0){
 		hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _none_, _no_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
@@ -304,6 +314,9 @@ void plot::plot_pid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, st
 void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, bool thrown_){
 	if(thrown_){
 		hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mzero_,_thrown_,flags_,event_.Event::Weight());
+		for(int j=0; j<3; j++){
+			hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), flags_);
+		}
 	}else{
 		//if(event_.Event::Top()==3){
 			//std::cout<<"Plotting Event: " <<_top_[event_.Event::Top()] <<" w/ MM^2: " <<event_.Event::MM2() <<" Pass: " <<_truth_[fun::truth_idx(event_.Event::Pass())] <<"\n";// <<"\n";
@@ -349,6 +362,9 @@ void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std:
 	int top = event_.Event::Top();
 	//std::cout<<"Plotting Clean Event: " <<_top_[event_.Event::Top()] <<"\n";
 	if(event_.Event::Pass()){
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Friend_Fill(_top_[event_.Event::Top()], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), flags_);
+		}
 		for(int j=0; j<4; j++){//Particle
 			if(j == 0){//Electron
 				hist_->Histogram::SF_Fill(event_.Event::P(j), event_.Event::SF(), event_.Event::W(), _event_, _cut_applied_, _top_[event_.Event::Top()], _sector_[event_.Event::Sector(j)-1], event_.Event::Weight(), flags_);
@@ -387,8 +403,11 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 	//std::cout<<"\tPlotting Isolated event " <<_top_[event_.Event::Top()] <<" " <<_truth_[event_.Event::Pass()] <<"\n";
 	//int top_idx = -1; 
 	hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mall_,_nthrown_,flags_,event_.Event::Weight());
-	for(int i=0; i<4; i++){//Species Loop
-		if(event_.Event::Pass()){
+	if(event_.Event::Pass()){
+		for(int j=0; j<3; j++){
+			hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), flags_);
+		}
+		for(int i=0; i<4; i++){//Species Loop
 			if(_species_[i]==_ele_){
 				hist_->Histogram::Vertex_Fill(event_.Event::Vz(), event_.Event::Weight(), _event_, _cut_applied_, _mall_,flags_);
 				hist_->Histogram::Fid_Fill(_species_[i],event_.Event::Theta(i),physics::phi_center(event_.Event::Phi(i)),_event_,_sector_[event_.Event::Sector(i)-1],_cut_applied_,_mall_,flags_,event_.Event::Weight());

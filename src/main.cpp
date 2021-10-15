@@ -27,6 +27,7 @@ int main(int argc, char **argv){
 
 	std::cout<<"Test for Vertex plotting "<<flags->Plot_Vertex() <<"\n";
 	std::cout<<"Test for perform  "<<fun::ecut_perform(_event_,flags) <<"\n";
+	std::cout<<"Test for Friend" <<flags->Make_Friend() <<"\n";
 
 
 	int num_files = flags->Flags::Num_Files();
@@ -47,8 +48,8 @@ int main(int argc, char **argv){
 	auto hists = std::make_shared<Histogram>(flags);//Check on this
 
 	//Make relevant TTrees and Event Rootfile
-	std::cout<<"Making TTree\n";
-	auto forest = std::make_shared<Forest>(flags); 
+	//std::cout<<"Making TTree\n";
+	//auto forest = std::make_shared<Forest>(flags); 
 
 	std::future<bool> fut;
 
@@ -58,7 +59,7 @@ int main(int argc, char **argv){
 		//Set the thread to run asynchronously
 		//The function running is the first argument
 		//The functions arguments are all remaining arguments
-		threads[i] = std::async(run_files, infilenames.at(i), hists, forest, i, file_num, flags);//, num_mixed_p_pip[i]);
+		threads[i] = std::async(run_files, infilenames.at(i), hists, i, file_num, flags);//, num_mixed_p_pip[i]);
 	}
 	for(int j = 0; j<_NUM_THREADS_; j++){
 		threads[j].wait(); //Wait until all threads are complete to move on

@@ -77,7 +77,8 @@ static std::string _plot_vertex_ = "vertex";
 //Histogram Separation
 //Will have space for this
 //THnSparse
-static std::string _make_friend_ = "-friend";
+static std::string _make_friend_ = "-friend=";
+static std::string _make_image_ = "-image=";
 //Other Flags
 static std::string _output_name_ = "-name=";
 static std::string _num_files_ = "-n=";
@@ -142,7 +143,10 @@ private:
 		//Will have space for this
 	//THnSparse
 	bool _make_friend = false;
+	bool _make_image = false;
 	std::string _output_name = "";
+	std::string _friend_name = "";
+	std::string _image_name = "";
 public:
 	Flags();
 	void Help();
@@ -205,9 +209,12 @@ public:
 
 	//THnSparse
 	bool Make_Friend();
+	bool Make_Image();
 
 	//Output File
 	std::string Output_Name();
+	std::string Friend_Name();
+	std::string Image_Name();
 
 };
 

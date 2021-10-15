@@ -1,21 +1,33 @@
 #include "event_analysis.hpp"
 		  
 //Analysis::Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Environment> envi_, int run_type_,std::shared_ptr<Forest> a_Forest_, int thread_id_, int run_num_){
-Analysis::Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Forest> forest_, int thread_id_, int run_num_, std::shared_ptr<Flags> flags_){
+Analysis::Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, int thread_id_, int run_num_, std::shared_ptr<Flags> flags_){
 	if(thread_id_==0){
 		//std::cout<<"Starting Event Analysis\n";
 	}
 	//int npart = 0; //# of Detected Particles
 	if(flags_->Flags::Sim()){
+		//std::cout<<"looking at Thrown particles\n";
 		_npart = data_->Branches::npart();
 		_hel = 1; 
 		_weight = data_->Branches::weight();
 		//Thrown Particle
+		int thr_idx[4] = {-1,-1,-1,-1};
 		for(int i=0; i<4; i++){
 			_tParticle.push_back(Particle(i,data_,flags_,true));
+			plot::plot_thrown(_tParticle[i],hist_,flags_);
+			if(_tParticle[i].Particle::Is_Elec()){
+				thr_idx[0] = i;
+			}else if(_tParticle[i].Particle::Is_Pro()){
+				thr_idx[1] = i;
+			}else if(_tParticle[i].Particle::Is_Pip()){
+				thr_idx[2] = i;
+			}else if(_tParticle[i].Particle::Is_Pim()){
+				thr_idx[3] = i;
+			}
 		}
 		//Thrown Event
-		_tEvent.push_back(Event(3,_tParticle[0],_tParticle[1],_tParticle[2],_tParticle[3],flags_,_weight,1,true));
+		_tEvent.push_back(Event(fun::top_idx(_mzero_),_tParticle[thr_idx[0]],_tParticle[thr_idx[1]],_tParticle[thr_idx[2]],_tParticle[thr_idx[3]],flags_,_weight,1,true));
 		plot::plot_event(_tEvent[0],hist_,flags_,true);
 	}else{
 		_npart = data_->Branches::gpart();

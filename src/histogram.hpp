@@ -11,7 +11,6 @@
 #include "CartesianGenerator.hpp"
 #include "physics.hpp"
 #include "detectors.hpp"
-//#include "environment.hpp"
 #include "THnSparse.h"
 #include <sys/stat.h>
 #include <stdio.h>
@@ -20,6 +19,7 @@
 #include <iterator>
 #include "cuts.hpp"
 #include <cmath>
+#include "TLatex.h"
 //#include <unistd.h>//to allow us to use chdir
 //#include "TImage.h"
 //#include "particle.hpp"
@@ -101,6 +101,7 @@ static int _n_cc_lrc_ = 3;
 static int _n_sec_ = 6; 
 
 //THnSparse Binning
+static int _n_var_ = 3; //Number of variable sets
 static float _W_min_ = 1.4;
 static float _W_max_ = 2.125;
 static float _W_res_ = 0.025;
@@ -109,12 +110,16 @@ static float _Q2_max_ = 5.0;
 static float _Q2_bins_[6] = {2.0,2.4,3.0,3.5,4.2,5.0};
 static float _MM_min_[3] = {1.1,0.3,1.1};
 static float _MM_max_[3] = {2.0,1.1,2.0};
+static int _MM_bins_ = 14;
 static float _MM2_min_[3] = {0.3,1.1,1.1};
 static float _MM2_max_[3] = {1.1,2.0,2.0};
+static int _theta_bins_ = 10;
 static float _theta_min_ = 0.0;
 static float _theta_max_ = 180.0;
+static int _alpha_bins_ = 10;
 static float _alpha_min_ = 0.0;
 static float _alpha_max_ = 360.;
+static int _phi_bins_ = 10;
 static float _phi_min_ = 0.0; 
 static float _phi_max_ = 360.0;
 
@@ -172,9 +177,9 @@ const static int _len_species_ = std::distance(std::begin(_species_), std::end(_
 class Histogram {
 protected:
 	
-	std::shared_ptr<TFile> RootOutputFile;
-	std::shared_ptr<TFile> SparseFile;
-	std::shared_ptr<TFile> HistImageFile;
+	std::shared_ptr<TFile> _RootOutputFile;
+	std::shared_ptr<TFile> _SparseFile;
+	std::shared_ptr<TFile> _HistImageFile;
 
 	TCanvas* def;
 
@@ -276,6 +281,11 @@ protected:
 
 	//Delta Histograms
 	TH2F_ptr_5d _Delta_hist;
+
+	//THnSparse Friend Histograms
+	THnSparseD* _Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Thrown[3];//Variable Sets
+	THnSparseD* _Weight_Sum[3][5];
 
 
 
@@ -431,6 +441,21 @@ public:
 	void CC_Eff_Fill(float p_, float theta_, float weight_, const char* ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_);
 	void CC_Eff_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End CC Efficiency Plot----------------------------*
+	//*-------------------------------Start Friend Plot----------------------------*
+	std::vector<int> Friend_Bin_Sizes(std::shared_ptr<Flags> flags_);
+	void Friend_Make(std::shared_ptr<Flags> flags_);
+	int Friend_W_idx(float W_);
+	int Friend_Q2_idx(float Q2_);
+	int Friend_MM_idx(float MM_, int var_);
+	int Friend_MM2_idx(float MM_, int var_);
+	int Friend_theta_idx(float theta_);
+	int Friend_alpha_idx(float alpha_);
+	int Friend_phi_idx(float phi_);
+	std::vector<int>  Friend_idx( float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_);
+	void Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_, int var_);
+	void Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, std::shared_ptr<Flags> flags_);
+	void Friend_Write(std::shared_ptr<Flags> flags_);
+	//*-------------------------------End Friend Plot----------------------------*
 };
 
 

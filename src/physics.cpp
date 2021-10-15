@@ -432,6 +432,8 @@ void COM_gp(TLorentzVector &k0, TLorentzVector &p0, TLorentzVector &p1, TLorentz
 }
 
 TLorentzVector physics::COM_gp(int par, TLorentzVector k0, TLorentzVector p0, TLorentzVector p1, TLorentzVector p2, TLorentzVector p3){
+	//std::cout<<"\tMoving " <<_species_[par] <<" to the COM\n";
+	//std::cout<<"Beam 4_vec: " <<k0[0] <<" " <<k0[1] <<" " <<k0[2] <<" " <<k0[3] <<"\n";
 	TLorentzVector output;
 	TLorentzVector q_mu = k0 - p0;//Four vector for virtual particle
 	TLorentzVector nstar_mu = _p_mu_ + q_mu; //Combined photon-target system
@@ -443,6 +445,7 @@ TLorentzVector physics::COM_gp(int par, TLorentzVector k0, TLorentzVector p0, TL
 		case 4: output = k0; break;
 		case 5: output = _p_mu_; break;
 	}
+	//physics::Print_4Vec(output);
 	float phigp = TMath::ATan2(nstar_mu[1],nstar_mu[0]);//Phi angle out of the x-plane
 	nstar_mu.RotateZ(-phigp);//Get all horizontal momentum on x axis by roating around z axis
 	float thgp = TMath::ATan2(nstar_mu[0],nstar_mu[2]); //Theta angle away from z-axis
@@ -451,11 +454,18 @@ TLorentzVector physics::COM_gp(int par, TLorentzVector k0, TLorentzVector p0, TL
 	nstar_mu.Boost(0.0,0.0,-b);
 	float phie = physics::Get_phie(k0,output);//Get the angle for the scattering plane of the electrons just to have a consistent definition of phi 
 	physics::Rotate_4Vec(thgp,phigp,phie,output);
+	//physics::Print_4Vec(output);
 	physics::Boost_4Vec(-b,output);
+	//physics::Print_4Vec(output);
+	//std::cout<<"Finished COM for " <<_species_[par] <<"\n";
 	return output;
 }
 
 float physics::alpha(int top, TLorentzVector p1, TLorentzVector p2, TLorentzVector p3, TLorentzVector p4, int set){
+	//physics::Print_4Vec(p1);
+	//physics::Print_4Vec(p2);
+	//physics::Print_4Vec(p3);
+	//physics::Print_4Vec(p4);
 	float dotpro;
 	float alph; 
 	float sin, cos; 
@@ -539,6 +549,10 @@ float physics::alpha(int top, TLorentzVector p1, TLorentzVector p2, TLorentzVect
 } //Alpha angle between scattering planes
 
 float physics::alpha(int top, TLorentzVector k0, TLorentzVector p1, TLorentzVector p2, TLorentzVector p3, TLorentzVector p4, bool COM){
+	//physics::Print_4Vec(p1);
+	//physics::Print_4Vec(p2);
+	//physics::Print_4Vec(p3);
+	//physics::Print_4Vec(p4);
 	float dotpro;
 	float alph; 
 	float sin, cos; 

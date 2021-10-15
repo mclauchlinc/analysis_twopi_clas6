@@ -19,26 +19,32 @@ Particle::Particle(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Fl
 }
 
 void Particle::PID_Thrown(int idx_, std::shared_ptr<Branches> data_){
-	_p = data_->Branches::mcp(_idx);
-	_theta = data_->Branches::mctheta(_idx);
-	_phi = data_->Branches::mcphi(_idx);
-	switch(data_->Branches::mcid(_idx)){
+	//std::cout<<"Identifying Thrown Particle\n";
+	//std::cout<<"\tMomentum\n";
+	_p = data_->Branches::mcp(idx_);
+	//std::cout<<"\tTheta\n";
+	_theta = data_->Branches::mctheta(idx_);
+	//std::cout<<"\tPhi\n";
+	_phi = data_->Branches::mcphi(idx_);
+	//std::cout<<"\tID" <<data_->Branches::mcid(idx_) <<"\n";
+	switch(data_->Branches::mcid(idx_)){
 		case _ELECTRON_:
-			_pid[0] = true;
+			_pid = {true,false,false,false};
 		break;
 		case _PROTON_:
-			_pid[1] = true;
+			_pid = {false,true,false,false};
 		break;
 		case _PION_:
-			_pid[2] = true;
+			_pid = {false,false,true,false};
 		break;
 		case -_PION_:
-			_pid[3] = true;
+			_pid = {false,false,false,true};
 		break;
 		default:
 			std::cout<<"Unrecognized Particle ID for Thrown Particle\n";
 		break;
 	}
+	//std::cout<<"\tParticle Identified: " <<data_->Branches::mcid(idx_) <<"\n";
 }
 
 void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){

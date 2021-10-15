@@ -41,7 +41,7 @@ int _run_n[_NUM_THREADS_];
 
 
 
-size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, std::shared_ptr<Forest> forest_, int thread_id_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
+size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, int thread_id_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
 	//Number of events in this thread
 	_num_events[thread_id_] = (int) chain_->GetEntries();
 	//Print out information about the thread
@@ -60,12 +60,12 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, st
 			std::cout<<"\r" <<"\t" <<(100*curr_event/_num_events[thread_id_]) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
 		}
 		//Particle ID, Event Selection, and Histogram Filling
-		auto analysis = std::make_shared<Analysis>(data,hists_, forest_, thread_id_, run_num, flags_);
+		auto analysis = std::make_shared<Analysis>(data,hists_, thread_id_, run_num, flags_);
 	}
 }
 
 
-size_t run_files(std::vector<std::string> files_, std::shared_ptr<Histogram> hists_, std::shared_ptr<Forest> forest_, int thread_id_, int max_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
+size_t run_files(std::vector<std::string> files_, std::shared_ptr<Histogram> hists_, int thread_id_, int max_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
 	//Called once per thread
 	//Make a new chain to process for this thread
 	auto chain = std::make_shared<TChain>("h10");
@@ -74,7 +74,7 @@ size_t run_files(std::vector<std::string> files_, std::shared_ptr<Histogram> his
 	fun::loadChain(chain, flags_->Flags::Files(), thread_id_, flags_->Flags::Num_Files());
 	//for(auto in:files_) chain->Add(in.c_str());
 	//Run the function over each thread
-	return run(chain,hists_,forest_,thread_id_,flags_);//,num_ppip);
+	return run(chain,hists_,thread_id_,flags_);//,num_ppip);
 }
 
 #endif
