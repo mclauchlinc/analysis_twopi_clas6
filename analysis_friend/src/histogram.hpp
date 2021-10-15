@@ -18,6 +18,7 @@
 #include <iostream>
 #include "physics.hpp"
 #include "TLatex.h"
+#include "flags.hpp"
 
 using Sparse_5d = std::vector<std::vector<std::vector<std::vector<std::vector<THnSparseD>>>>>;
 using Sparse_4d = std::vector<std::vector<std::vector<std::vector<THnSparseD>>>>;
@@ -173,16 +174,19 @@ protected:
 	TH1D *_accept_hist_2[_n_var_sets][_n_topology][2];//(var,top,{w,q2})
 	
 public:
-	Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree);
+	Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, Flags flags_);
+	//Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, TFile* empty_tree, Flags flags_);
+	//Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, TFile* exp_tree2, TFile* sim_tree2, Flags flags_);
+	//Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, TFile* empty_tree, TFile* exp_tree2, TFile* sim_tree2, TFile* empty_tree, Flags flags_);
 	void Make_Histograms();
 	void Fill_Histograms();
 	void Write_Histograms();
 	void Extract_7d_Histograms(TFile* exp_tree, TFile* sim_tree);
 	void Sparse_Add_7d(THnSparseD &h0, THnSparseD* h1, THnSparseD* h2, int sign, int var);//Add/Subtract Sparse Histograms
 	void Sparse_Add_5d(THnSparseD* &h0, THnSparseD* h1, THnSparseD* h2, int sign, int var);//Add/Subtract Sparse Histograms
-	void Sparse_7to5();//Convert 7d histograms to 5d histograms
-	void Sparse_5to3();//For Single Differential bins
-	void Sparse_5to4();//For Polarization Observables
+	void Sparse_7to5(Flags flags_);//Convert 7d histograms to 5d histograms
+	void Sparse_5to3(Flags flags_);//For Single Differential bins
+	void Sparse_5to4(Flags flags_);//For Polarization Observables
 	void Extract_Bin_Info();//Extract binning information for 7 and 5d histograms
 	void Skeleton_5D();//Create Empty 5D THnSparse to fill
 	void Calc_Acceptance();//Calculate acceptance from 5d histograms

@@ -1,10 +1,10 @@
 #include "histogram.hpp"
 
-Histogram::Histogram(const std::string& output_file, TFile *exp_tree, TFile *sim_tree){
+Histogram::Histogram(const std::string& output_file, TFile *exp_tree, TFile *sim_tree, Flags flags_){
 	//Make output file eventually RootOutputFile = fun::make_file
 	std::cout<<"\nName_File";
 	_RootOutputFile = fun::Name_File(output_file);
-	Histogram::Extract_7d_Histograms(exp_tree,sim_tree);//Gets the 7d histograms off the root file
+	Histogram::Extract_7d_Histograms(exp_tree,sim_tree,flags_);//Gets the 7d histograms off the root file
 	Histogram::Extract_Bin_Info();//Extracts binning information about the 7d histograms just extracted
 	Histogram::Skeleton_5D();//Creates empty vector arrays to map onto in the next step
 	Histogram::Sparse_7to5();//Converts all the 7d histograms into usable 5d histograms for analysis
@@ -37,58 +37,36 @@ void Histogram::Write_Histograms(){
 
 }
 
-void Histogram::Extract_7d_Histograms(TFile *exp_tree, TFile *sim_tree){
+void Histogram::Extract_7d_Histograms(TFile *exp_tree, TFile *sim_tree, Flags flags_){
 	std::cout<<"Extract 7d Histograms\n";
 	char hname[100];
 	//static const char * _sparse_names_[] = {"2#pi_off_proton_#Delta^{++}","2#pi_off_proton_#rho","2#pi_off_proton_#Delta^{0}"};
 	//static const char * topo[] = {"Pmiss","PIPmiss","PIMmiss","Zeromiss","ALLmiss"};
 
-	for(int i =0; i<_n_var_sets; i++){
-		//std::cout<<"Getting Thrown "<<_sparse_names_[i] <<"\n";
-		sprintf(hname,"Thrown_%s",_sparse_names_[i]);
-		_thrown_7d[i] = (THnSparseD *)sim_tree->Get(hname);
-		//std::cout<<"\tThrown integral: " <<fun::nSparseIntegral(_thrown_7d[i]) <<"\n";
-		for(int j = 0; j<_n_topology; j++){
-			//std::cout<<std::endl <<topo[j];
-			//std::cout<<"Getting Exp "<<_sparse_names_[i] <<" " <<_topo_[j] <<"\n";
-			sprintf(hname,"%s_%s",_sparse_names_[i],_topo_[j]);//_top_[j]);
-			//std::cout<<"\nTHnSparse Name: " <<hname <<std::endl;
-			_exp_data_7d[i][j] = (THnSparseD *)exp_tree->Get(hname);
-			//std::cout<<"\tExp_data integral: " <<fun::nSparseIntegral(_exp_data_7d[i][j]) <<"\n";
-			//std::cout<<"Getting Sim "<<_sparse_names_[i] <<" " <<_top_[j] <<"\n";
-			sprintf(hname,"%s_%s",_sparse_names_[i],_top_[j]);
-			_sim_data_7d[i][j] = (THnSparseD *)sim_tree->Get(hname);
-			sprintf(hname,"Weight_%s_%s",_sparse_names_[i],_top_[j]);
-			_sim_weight_sq_7d[i][j] = (THnSparseD *)sim_tree->Get(hname);
-			//std::cout<<"\tSim_data integral: " <<fun::nSparseIntegral(_sim_data_7d[i][j]) <<"\n";
-			//std::cout<<"Getting Acceptance "<<_sparse_names_[i] <<" " <<_top_[j] <<"\n";
-			_acceptance_7d[i][j] = (THnSparseD*)_sim_data_7d[i][j]->Clone();
-			_acceptance_7d[i][j]->Divide(_thrown_7d[i]);
-			//std::cout<<"\tAcceptance integral: " <<fun::nSparseIntegral(_acceptance_7d[i][j]) <<"\n";
-			//std::cout<<"Getting 7d Scale Factor "<<_sparse_names_[i] <<" " <<_top_[j] <<"\n";
-			if(fun::nSparseIntegral(_sim_data_7d[i][j])>0.0){
-				std::cout<<"\tSim Data 7d integral is non-zero\n";
-				_scale_factor_7d[i][j]=fun::nSparseIntegral(_exp_data_7d[i][j])/fun::nSparseIntegral(_sim_data_7d[i][j]);
-			}else{
-				std::cout<<"\tSim Data 7d integral is zero\n";
-				_scale_factor_7d[i][j]=0.0;
-			}
-			//std::cout<<"\nScale factor: " <<_scale_factor_7d[i][j];
-			//std::cout<<"Getting Exp Corr "<<_sparse_names_[i] <<" " <<_top_[j] <<"\n";
-			_exp_corr_7d[i][j]=(THnSparseD*)_exp_data_7d[i][j]->Clone();
-			_exp_corr_7d[i][j]->Divide(_acceptance_7d[i][j]);
-			//std::cout<<"\nexp_corr integral: " <<fun::nSparseIntegral(_exp_data_7d[i][j]);
-			//std::cout<<"Getting Sim Corr "<<_sparse_names_[i] <<" " <<_top_[j] <<"\n";
-			_sim_corr_7d[i][j]=(THnSparseD*)_sim_data_7d[i][j]->Clone();
-			_sim_corr_7d[i][j]->Divide(_acceptance_7d[i][j]);
-			//std::cout<<"\nsim_corr integral: " <<fun::nSparseIntegral(_exp_data_7d[i][j]);
-			//Histogram::Sparse_Add_7d(_sim_holes_7d[i][j],_thrown_7d[i],sim_corr_7d[i][j],-1.0,i);
-			//_exp_holes_7d[i][j]= (THnSparseD*)_sim_holes_7d[i][j]->Clone();
-			//_exp_data_7d[i][j]->Scale(_scale_factor_7d[i][j]);
-			//std::cout<<"Exp Hist Yield 7D: var:" <<var_set[i] <<" top:" <<topo[j] <<" => "	<<fun::nSparseIntegral(_exp_data_7d[i][j]) <<"| numbins:" <<_exp_data_7d[i][j]->GetNbins() <<"\n";
-			//std::cout<<"Sim Hist Yield 7D: var:" <<var_set[i] <<" top:" <<topo[j] <<" => "	<<fun::nSparseIntegral(_sim_data_7d[i][j]) <<"| numbins:" <<_sim_data_7d[i][j]->GetNbins()<<"\n";	
-		}
+	sprintf(hname,"Thrown_%s",_sparse_names_[flags_->Flags::Var_idx()]);
+	_thrown_7d = (THnSparseD *)sim_tree->Get(hname);
+	sprintf(hname,"%s_%s",_sparse_names_[flags_->Flags::Var_idx()],_topo_[flags_->Flags::Top_idx()]);//_top_[flags_->Flags::Top_idx()]);
+	//std::cout<<"\nTHnSparse Name: " <<hname <<std::endl;
+	_exp_data_7d = (THnSparseD *)exp_tree->Get(hname);
+	sprintf(hname,"%s_%s",_sparse_names_[flags_->Flags::Var_idx()],_top_[flags_->Flags::Top_idx()]);
+	_sim_data_7d = (THnSparseD *)sim_tree->Get(hname);
+	sprintf(hname,"Weight_%s_%s",_sparse_names_[flags_->Flags::Var_idx()],_top_[flags_->Flags::Top_idx()]);
+	_sim_weight_sq_7d = (THnSparseD *)sim_tree->Get(hname);
+	_acceptance_7d = (THnSparseD*)_sim_data_7d->Clone();
+	_acceptance_7d->Divide(_thrown_7d);
+	if(fun::nSparseIntegral(_sim_data_7d)>0.0){
+		std::cout<<"\tSim Data 7d integral is non-zero\n";
+		_scale_factor_7d=fun::nSparseIntegral(_exp_data_7d)/fun::nSparseIntegral(_sim_data_7d);
+	}else{
+		std::cout<<"\tSim Data 7d integral is zero\n";
+		_scale_factor_7d=0.0;
 	}
+	_exp_corr_7d=(THnSparseD*)_exp_data_7d->Clone();
+	_exp_corr_7d->Divide(_acceptance_7d);
+	//std::cout<<"\nexp_corr integral: " <<fun::nSparseIntegral(_exp_data_7d);
+	//std::cout<<"Getting Sim Corr "<<_sparse_names_[i] <<" " <<_top_[j] <<"\n";
+	_sim_corr_7d=(THnSparseD*)_sim_data_7d->Clone();
+	_sim_corr_7d->Divide(_acceptance_7d);
 }
 
 
@@ -193,194 +171,188 @@ void Histogram::Sparse_Add_5d(THnSparseD* &h0, THnSparseD* h1, THnSparseD* h2, i
 }
 
 //which->{exp,sim,thrown}
-void	Histogram::Sparse_7to5(){
+void	Histogram::Sparse_7to5(Flags flags_){
 	std::cout<<"Sparse_7to5\n";
 	std::cout<<"\tFilling Those Sparse Friends\n";
 	//Get the 7dimensional bins ready
 	int bin_5d[5];
 	int bin_7d[7];
 	//std::cout<<"\nPart 1";
-	long n_combo = _n_var_sets*_n_topology*_n_bins_7d[0]*_n_bins_7d[1]*_n_bins_7d[2]*_n_bins_7d[3]*_n_bins_7d[4]*_n_bins_7d[5]*_n_bins_7d[6];
+	long n_combo = _n_bins_7d[0]*_n_bins_7d[1]*_n_bins_7d[2]*_n_bins_7d[3]*_n_bins_7d[4]*_n_bins_7d[5]*_n_bins_7d[6];
 	std::cout<<"Bins to iterate: " <<n_combo <<"\nPer:";
 
 	long idx = 0;
-	for(int var = 0; var<_n_var_sets; var++){		
-		//std::cout<<" var set" <<var;
-		for(int top=0; top<_n_topology; top++){
-			for(int i=0; i<_n_bins_7d[0]; i++){//W
-				bin_7d[0]=i;
-				for(int j=0; j< _n_bins_7d[1]; j++){//Q2
-					bin_7d[1]=j;
-					for(int k = 0; k< _n_bins_7d[2]; k++){
-						bin_5d[0]=k;
-						bin_7d[2]=k;
-						for(int l = 0; l< _n_bins_7d[3]; l++){
-							bin_5d[1]=l;
-							bin_7d[3]=l;
-							for(int m = 0; m< _n_bins_7d[4]; m++){
-								bin_5d[2]=m;
-								bin_7d[4]=m;
-								for(int n = 0; n< _n_bins_7d[5]; n++){
-									bin_5d[3]=n;
-									bin_7d[5]=n;
-									for(int o = 0; o< _n_bins_7d[6]; o++){
-										if(((o+1)*(n+1)*(m+1)*(l+1)*(k+1)*(j+1)*(i+1)*(top+1)*(var+1)-1)%(n_combo/100)==0){
-											std::cout<<"\r" <<"\t" <<(100*((o+1)*(n+1)*(m+1)*(l+1)*(k+1)*(j+1)*(i+1)*(top+1)*(var+1)-1)/n_combo) <<" %" <<std::flush;
-										}
-										bin_5d[4]=o;
-										bin_7d[6]=o;
-										//Only fill the sparse histogram where values are non-zero
-										//Exp 7d-5d
-										//std::cout<<"\nMaking an Experimental Histogram: ";
-										
-										if(_exp_data_7d[var][top]->THnSparse::GetBinContent(bin_7d) > 0.0){//If the bin doesn't exist it will yield 0, but not create a bin
-											_exp_data_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,_exp_data_7d[var][top]->THnSparse::GetBinContent(bin_7d));
-											//std::cout<<"Success at "<<bin_5d;
-										}//Need this for scale factor_5d
-
-										
-										//Sim Recon 7d-5d
-										//std::cout<<"\nMaking a Reconstructed Histogram: ";
-										if(_sim_data_7d[var][top]->THnSparse::GetBinContent(bin_7d) > 0.0){//If the bin doesn't exist it will yield 0, but not create a bin
-											_sim_data_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,_sim_data_7d[var][top]->THnSparse::GetBinContent(bin_7d));
-											//std::cout<<"Sucess at " <<bin_5d;
-										}
-
-										//Thrown 7d-5d
-										//std::cout<<"\nMaking a Thrown Histogram: ";
-										if(_thrown_7d[var]->THnSparse::GetBinContent(bin_7d) > 0.0 && top==0){//If the bin doesn't exist it will yield 0, but not create a bin
-											_thrown_5d[var][i][j]->THnSparse::AddBinContent(bin_5d,_thrown_7d[var]->THnSparse::GetBinContent(bin_7d));
-											//std::cout<<"Sucess at " <<bin_5d;
-										}
-										//Acceptance 7d-5d
-										//std::cout<<"\nMaking an Acceptance Histogram: ";
-										
-
-										if(_acceptance_7d[var][top]->THnSparse::GetBinContent(bin_7d) > 0.0){
-											_acceptance_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,_acceptance_7d[var][top]->THnSparse::GetBinContent(bin_7d));
-											//std::cout<<"Sucess at " <<bin_5d;
-										}
-										//Acceptance Corrected Yields
-										if(_exp_corr_7d[var][top]->THnSparse::GetBinContent(bin_7d) > 0.0){
-											_exp_corr_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,_exp_corr_7d[var][top]->THnSparse::GetBinContent(bin_7d));
-											//_exp_corr_holes_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,_exp_corr_7d[var][top]->THnSparse::GetBinContent(bin_7d));
-										}
-										if(_sim_corr_7d[var][top]->THnSparse::GetBinContent(bin_7d) > 0.0){
-											_sim_corr_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,_sim_corr_7d[var][top]->THnSparse::GetBinContent(bin_7d));
-										}
-										/*idx= idx +1;
-										if(idx%(n_combo/100)==0){
-											std::cout<<"\r" <<"\t" <<(100*idx/n_combo) <<" %   "  <<std::flush;
-										}*/
-									}
+	for(int i=0; i<_n_bins_7d[0]; i++){//W
+		bin_7d[0]=i;
+		for(int j=0; j< _n_bins_7d[1]; j++){//Q2
+			bin_7d[1]=j;
+			for(int k = 0; k< _n_bins_7d[2]; k++){//MM1
+				bin_5d[0]=k;
+				bin_7d[2]=k;
+				for(int l = 0; l< _n_bins_7d[3]; l++){//MM2
+					bin_5d[1]=l;
+					bin_7d[3]=l;
+					for(int m = 0; m< _n_bins_7d[4]; m++){//Theta
+						bin_5d[2]=m;
+						bin_7d[4]=m;
+						for(int n = 0; n< _n_bins_7d[5]; n++){//Alpha
+							bin_5d[3]=n;
+							bin_7d[5]=n;
+							for(int o = 0; o< _n_bins_7d[6]; o++){//Phi
+								if(((o+1)*(n+1)*(m+1)*(l+1)*(k+1)*(j+1)*(i+1)*-1)%(n_combo/100)==0){
+									std::cout<<"\r" <<"\t" <<(100*((o+1)*(n+1)*(m+1)*(l+1)*(k+1)*(j+1)*(i+1)*-1)/n_combo) <<" %" <<std::flush;
 								}
+								bin_5d[4]=o;
+								bin_7d[6]=o;
+								//Only fill the sparse histogram where values are non-zero
+								//Exp 7d-5d
+								//std::cout<<"\nMaking an Experimental Histogram: ";
+								
+								if(_exp_data_7d->THnSparse::GetBinContent(bin_7d) > 0.0){//If the bin doesn't exist it will yield 0, but not create a bin
+									_exp_data_5d[i][j]->THnSparse::AddBinContent(bin_5d,_exp_data_7d->THnSparse::GetBinContent(bin_7d));
+									//std::cout<<"Success at "<<bin_5d;
+								}//Need this for scale factor_5d
+
+								
+								//Sim Recon 7d-5d
+								//std::cout<<"\nMaking a Reconstructed Histogram: ";
+								if(_sim_data_7d->THnSparse::GetBinContent(bin_7d) > 0.0){//If the bin doesn't exist it will yield 0, but not create a bin
+									_sim_data_5d[i][j]->THnSparse::AddBinContent(bin_5d,_sim_data_7d->THnSparse::GetBinContent(bin_7d));
+									//std::cout<<"Sucess at " <<bin_5d;
+								}
+
+								//Thrown 7d-5d
+								//std::cout<<"\nMaking a Thrown Histogram: ";
+								if(_thrown_7d->THnSparse::GetBinContent(bin_7d) > 0.0 && top==0){//If the bin doesn't exist it will yield 0, but not create a bin
+									_thrown_5d[i][j]->THnSparse::AddBinContent(bin_5d,_thrown_7d->THnSparse::GetBinContent(bin_7d));
+									//std::cout<<"Sucess at " <<bin_5d;
+								}
+								//Acceptance 7d-5d
+								//std::cout<<"\nMaking an Acceptance Histogram: ";
+								
+
+								if(_acceptance_7d->THnSparse::GetBinContent(bin_7d) > 0.0){
+									_acceptance_5d[i][j]->THnSparse::AddBinContent(bin_5d,_acceptance_7d->THnSparse::GetBinContent(bin_7d));
+									//std::cout<<"Sucess at " <<bin_5d;
+								}
+								//Acceptance Corrected Yields
+								if(_exp_corr_7d->THnSparse::GetBinContent(bin_7d) > 0.0){
+									_exp_corr_5d[i][j]->THnSparse::AddBinContent(bin_5d,_exp_corr_7d->THnSparse::GetBinContent(bin_7d));
+									//_exp_corr_holes_5d[i][j]->THnSparse::AddBinContent(bin_5d,_exp_corr_7d->THnSparse::GetBinContent(bin_7d));
+								}
+								if(_sim_corr_7d->THnSparse::GetBinContent(bin_7d) > 0.0){
+									_sim_corr_5d[i][j]->THnSparse::AddBinContent(bin_5d,_sim_corr_7d->THnSparse::GetBinContent(bin_7d));
+								}
+								/*idx= idx +1;
+								if(idx%(n_combo/100)==0){
+									std::cout<<"\r" <<"\t" <<(100*idx/n_combo) <<" %   "  <<std::flush;
+								}*/
 							}
 						}
-					}
-					_scale_factor_5d[var][top][i][j]=fun::nSparseIntegral(_exp_data_5d[var][top][i][j])/fun::nSparseIntegral(_sim_data_5d[var][top][i][j]);
-					//std::cout<<"Exp Hist 5D Yields| var:" <<var <<"top:" <<top <<"W:" <<i <<" Q2:" <<j <<" => " <<fun::nSparseIntegral(_exp_data_5d[top][var][i][j]) <<"\n";
-					//std::cout<<"Sim Hist 5D Yields| var:" <<var <<"top:" <<top <<"W:" <<i <<" Q2:" <<j <<" => " <<fun::nSparseIntegral(_sim_data_5d[top][var][i][j]) <<"\n";
-					//if(top==0){
-						//std::cout<<"Thr Hist 5D Yields| var:" <<var <<"W:" <<i <<" Q2:" <<j <<" => " <<fun::nSparseIntegral(_thrown_5d[var][i][j]) <<"\n";
-					//}
-					//if(fun::nSparseIntegral(_acceptance[var][top][i][j])>0.0 && fun::nSparseIntegral(_thrown_5d[var][i][j])>0.0){
-					//	_acceptance[var][top][i][j]->Divide(_thrown_5d[var][i][j]);
-					//}
-					if(fun::nSparseIntegral(_acceptance_5d[var][top][i][j]) > 0.0 && fun::nSparseIntegral(_sim_corr_5d[var][top][i][j]) >0.0){
-						//std::cout<<"\nhave Acceptance and Sim data. ";
-						//std::cout<<"\n\t|Adding Sim data to corr hist |";
-						//_sim_corr_5d[var][top][i][j]= (THnSparseD*)_sim_data_5d[var][top][i][j]->Clone();
-						//std::cout<<"\n\tDividing by acceptance |";
-						//_sim_corr_5d[var][top][i][j]->Divide(_acceptance[var][top][i][j]);
-						//std::cout<<"\n\tMade Sim Acceptance Corrected |";
-						for(int k = 0; k< _n_bins_7d[2]; k++){
-							bin_5d[0]=k;
-							for(int l = 0; l< _n_bins_7d[3]; l++){
-								bin_5d[1]=l;
-								for(int n = 0; n< _n_bins_7d[4]; n++){
-									bin_5d[2]=n;
-									for(int m = 0; m< _n_bins_7d[5]; m++){
-										bin_5d[3]=m;
-										for(int o = 0; o< _n_bins_7d[6]; o++){
-											bin_5d[4]=o;
-							//std::cout<<"\n\tMaking Sim Holes: Adding Thrown |";
-											
-											if(_thrown_5d[var][i][j]->THnSparse::GetBinContent(bin_5d)>0.0){
-												/*std::cout<<"\n5d bin: {";
-												for(int boor=0; boor<5; boor++){
-													std::cout<<bin_5d[boor];
-													if(boor!=4){
-														std::cout<<", ";
-													}else{
-														std::cout<<"}";
-													}
-												}
-												std::cout<<"\n\t thrown bin: " <<_thrown_5d[var][i][j]->THnSparse::GetBinContent(bin_5d);*/
-												_sim_holes_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,_thrown_5d[var][i][j]->THnSparse::GetBinContent(bin_5d));
-											}
-							//std::cout<<"\n\tSubtracting Sim Corr |";
-											if(_sim_corr_5d[var][top][i][j]->THnSparse::GetBinContent(bin_5d) >0.0){
-												/*std::cout<<"\n5d bin: {";
-												for(int boor=0; boor<5; boor++){
-													std::cout<<bin_5d[boor];
-													if(boor!=4){
-														std::cout<<", ";
-													}else{
-														std::cout<<"}";
-													}
-												}
-												std::cout<<"\n\t -sim corr bin: " <<-1*(_sim_corr_5d[var][top][i][j]->GetBinContent(bin_5d));*/
-												_sim_holes_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,-1*(_sim_corr_5d[var][top][i][j]->THnSparse::GetBinContent(bin_5d)));
-											}
-										}
-									}
-								}
-							}
-						}
-						//std::cout<<"\nSucess at " <<bin_5d;
-					}
-					//Scale Factor
-					//std::cout<<"\nMaking a Scale Factor: ";
-					if(fun::nSparseIntegral(_exp_data_5d[var][top][i][j]) >0.0 && fun::nSparseIntegral(_sim_data_5d[var][top][i][j]) >0.0){
-						_scale_factor_5d[var][top][i][j]=fun::nSparseIntegral(_exp_data_5d[var][top][i][j])/fun::nSparseIntegral(_sim_data_5d[var][top][i][j]);
-						//std::cout<<"Success at " <<bin_5d; 
-					}else{
-						_scale_factor_5d[var][top][i][j]=0.0;
-						//std::cout<<"Zeroed at " <<bin_5d;
-					}
-					//Experimental correction 
-					//std::cout<<"\nMaking Exp Corr Histogram: ";
-					/*if(fun::nSparseIntegral(_acceptance[var][top][i][j]) > 0 && fun::nSparseIntegral(_sim_data_5d[var][top][i][j])>0.0){
-						//_exp_corr_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,_exp_data_5d[var][top][i][j]->THnSparse::GetBinContent(bin_5d));
-						_exp_corr_5d[var][top][i][j]= (THnSparseD*)_exp_data_5d[var][top][i][j]->Clone();
-						_exp_corr_5d[var][top][i][j]->Divide(_acceptance[var][top][i][j]);
-						//std::cout<<"Sucess at " <<bin_5d;
-					}*/
-					//Experimental Hole estimate
-					//std::cout<<"\nMaking Exp Holes: ";
-					//std::cout<<"\nvar:" <<var <<" top:" <<top <<" W:" <<i <<" Q2:" <<j;
-					//std::cout<<"\nSim_holes integral: " <<fun::nSparseIntegral(_sim_holes_5d[var][top][i][j]);
-					//std::cout<<"\nScale Factor: " <<_scale_factor_5d[var][top][i][j];
-					if(fun::nSparseIntegral(_sim_holes_5d[var][top][i][j])>0.0 && _scale_factor_5d[var][top][i][j]>0.0){
-						//_exp_holes_5d[var][top][i][j]->THnSparse::AddBinContent(bin_5d,_sim_holes_5d[var][top][i][j]->THnSparse::GetBinContent(bin_5d));
-						//std::cout<<"\nvar:" <<var <<" top:" <<top <<" W:" <<i <<" Q2:" <<j <<"| Int sim_holes:" <<fun::nSparseIntegral(_sim_holes_5d[var][top][i][j]);
-						_exp_holes_5d[var][top][i][j]= (THnSparseD*)_sim_holes_5d[var][top][i][j]->Clone();
-						_exp_holes_5d[var][top][i][j]->Scale(_scale_factor_5d[var][top][i][j]);
-						_exp_corr_holes_5d[var][top][i][j] = (THnSparseD*)_exp_corr_5d[var][top][i][j]->Clone();
-						//std::cout<<"\n\tExp Corr integral: " <<fun::nSparseIntegral(_exp_corr_5d[var][top][i][j]);
-						//std::cout<<"\n\tExp holes integral: " <<fun::nSparseIntegral(_exp_holes_5d[var][top][i][j]);
-						_exp_corr_holes_5d[var][top][i][j]->Add(_exp_holes_5d[var][top][i][j]);
-						//std::cout<<"\n\tExp Corr +holes integral: " <<fun::nSparseIntegral(_exp_corr_holes_5d[var][top][i][j]);
-						//std::cout<<"\n\tSuccess at " <<bin_5d;
 					}
 				}
 			}
+			_scale_factor_5d[i][j]=fun::nSparseIntegral(_exp_data_5d[i][j])/fun::nSparseIntegral(_sim_data_5d[i][j]);
+			//std::cout<<"Exp Hist 5D Yields| var:" <<var <<"top:" <<top <<"W:" <<i <<" Q2:" <<j <<" => " <<fun::nSparseIntegral(_exp_data_5d[top][i][j]) <<"\n";
+			//std::cout<<"Sim Hist 5D Yields| var:" <<var <<"top:" <<top <<"W:" <<i <<" Q2:" <<j <<" => " <<fun::nSparseIntegral(_sim_data_5d[top][i][j]) <<"\n";
+			//if(top==0){
+				//std::cout<<"Thr Hist 5D Yields| var:" <<var <<"W:" <<i <<" Q2:" <<j <<" => " <<fun::nSparseIntegral(_thrown_5d[i][j]) <<"\n";
+			//}
+			//if(fun::nSparseIntegral(_acceptance[i][j])>0.0 && fun::nSparseIntegral(_thrown_5d[i][j])>0.0){
+			//	_acceptance[i][j]->Divide(_thrown_5d[i][j]);
+			//}
+			if(fun::nSparseIntegral(_acceptance_5d[i][j]) > 0.0 && fun::nSparseIntegral(_sim_corr_5d[i][j]) >0.0){
+				//std::cout<<"\nhave Acceptance and Sim data. ";
+				//std::cout<<"\n\t|Adding Sim data to corr hist |";
+				//_sim_corr_5d[i][j]= (THnSparseD*)_sim_data_5d[i][j]->Clone();
+				//std::cout<<"\n\tDividing by acceptance |";
+				//_sim_corr_5d[i][j]->Divide(_acceptance[i][j]);
+				//std::cout<<"\n\tMade Sim Acceptance Corrected |";
+				for(int k = 0; k< _n_bins_7d[2]; k++){
+					bin_5d[0]=k;
+					for(int l = 0; l< _n_bins_7d[3]; l++){
+						bin_5d[1]=l;
+						for(int n = 0; n< _n_bins_7d[4]; n++){
+							bin_5d[2]=n;
+							for(int m = 0; m< _n_bins_7d[5]; m++){
+								bin_5d[3]=m;
+								for(int o = 0; o< _n_bins_7d[6]; o++){
+									bin_5d[4]=o;
+					//std::cout<<"\n\tMaking Sim Holes: Adding Thrown |";
+									
+									if(_thrown_5d[i][j]->THnSparse::GetBinContent(bin_5d)>0.0){
+										/*std::cout<<"\n5d bin: {";
+										for(int boor=0; boor<5; boor++){
+											std::cout<<bin_5d[boor];
+											if(boor!=4){
+												std::cout<<", ";
+											}else{
+												std::cout<<"}";
+											}
+										}
+										std::cout<<"\n\t thrown bin: " <<_thrown_5d[i][j]->THnSparse::GetBinContent(bin_5d);*/
+										_sim_holes_5d[i][j]->THnSparse::AddBinContent(bin_5d,_thrown_5d[i][j]->THnSparse::GetBinContent(bin_5d));
+									}
+					//std::cout<<"\n\tSubtracting Sim Corr |";
+									if(_sim_corr_5d[i][j]->THnSparse::GetBinContent(bin_5d) >0.0){
+										/*std::cout<<"\n5d bin: {";
+										for(int boor=0; boor<5; boor++){
+											std::cout<<bin_5d[boor];
+											if(boor!=4){
+												std::cout<<", ";
+											}else{
+												std::cout<<"}";
+											}
+										}
+										std::cout<<"\n\t -sim corr bin: " <<-1*(_sim_corr_5d[i][j]->GetBinContent(bin_5d));*/
+										_sim_holes_5d[i][j]->THnSparse::AddBinContent(bin_5d,-1*(_sim_corr_5d[i][j]->THnSparse::GetBinContent(bin_5d)));
+									}
+								}
+							}
+						}
+					}
+				}
+				//std::cout<<"\nSucess at " <<bin_5d;
+			}
+			//Scale Factor
+			//std::cout<<"\nMaking a Scale Factor: ";
+			if(fun::nSparseIntegral(_exp_data_5d[i][j]) >0.0 && fun::nSparseIntegral(_sim_data_5d[i][j]) >0.0){
+				_scale_factor_5d[i][j]=fun::nSparseIntegral(_exp_data_5d[i][j])/fun::nSparseIntegral(_sim_data_5d[i][j]);
+				//std::cout<<"Success at " <<bin_5d; 
+			}else{
+				_scale_factor_5d[i][j]=0.0;
+				//std::cout<<"Zeroed at " <<bin_5d;
+			}
+			//Experimental correction 
+			//std::cout<<"\nMaking Exp Corr Histogram: ";
+			/*if(fun::nSparseIntegral(_acceptance[i][j]) > 0 && fun::nSparseIntegral(_sim_data_5d[i][j])>0.0){
+				//_exp_corr_5d[i][j]->THnSparse::AddBinContent(bin_5d,_exp_data_5d[i][j]->THnSparse::GetBinContent(bin_5d));
+				_exp_corr_5d[i][j]= (THnSparseD*)_exp_data_5d[i][j]->Clone();
+				_exp_corr_5d[i][j]->Divide(_acceptance[i][j]);
+				//std::cout<<"Sucess at " <<bin_5d;
+			}*/
+			//Experimental Hole estimate
+			//std::cout<<"\nMaking Exp Holes: ";
+			//std::cout<<"\nvar:" <<var <<" top:" <<top <<" W:" <<i <<" Q2:" <<j;
+			//std::cout<<"\nSim_holes integral: " <<fun::nSparseIntegral(_sim_holes_5d[i][j]);
+			//std::cout<<"\nScale Factor: " <<_scale_factor_5d[i][j];
+			if(fun::nSparseIntegral(_sim_holes_5d[i][j])>0.0 && _scale_factor_5d[i][j]>0.0){
+				//_exp_holes_5d[i][j]->THnSparse::AddBinContent(bin_5d,_sim_holes_5d[i][j]->THnSparse::GetBinContent(bin_5d));
+				//std::cout<<"\nvar:" <<var <<" top:" <<top <<" W:" <<i <<" Q2:" <<j <<"| Int sim_holes:" <<fun::nSparseIntegral(_sim_holes_5d[i][j]);
+				_exp_holes_5d[i][j]= (THnSparseD*)_sim_holes_5d[i][j]->Clone();
+				_exp_holes_5d[i][j]->Scale(_scale_factor_5d[i][j]);
+				_exp_corr_holes_5d[i][j] = (THnSparseD*)_exp_corr_5d[i][j]->Clone();
+				//std::cout<<"\n\tExp Corr integral: " <<fun::nSparseIntegral(_exp_corr_5d[i][j]);
+				//std::cout<<"\n\tExp holes integral: " <<fun::nSparseIntegral(_exp_holes_5d[i][j]);
+				_exp_corr_holes_5d[i][j]->Add(_exp_holes_5d[i][j]);
+				//std::cout<<"\n\tExp Corr +holes integral: " <<fun::nSparseIntegral(_exp_corr_holes_5d[i][j]);
+				//std::cout<<"\n\tSuccess at " <<bin_5d;
+			}
 		}
 	}
-	std::cout<<"\n";
 }
 //For Single Differential bins
-void Histogram::Sparse_5to3(){
+void Histogram::Sparse_5to3(Flags flags_){
 	std::cout<<"Sparse 5 to 3\n";
 	//Convert the _exp_corr_5d and _exp_holes_5d to 3 dimensional sparse histograms for usage in plotting single differential cross sections
 	//std::cout<<"\nPart 1";
@@ -391,48 +363,35 @@ void Histogram::Sparse_5to3(){
 	//Get the 7dimensional bins ready
 	TH1D_1d_star exp_ch_1d;
 	TH1D_2d_star exp_ch_2d;
-	TH1D_3d_star exp_ch_3d;
-	TH1D_4d_star exp_ch_4d;
 	TH1D * exp_corr;
 	TH1D * exp_holes;
 	THnSparseD * exp_corr_holes_5d;
 	//std::cout<<"\nPart 2";
-	for(int var = 0; var<_n_var_sets; var++){
-		for(int top=0; top<_n_topology; top++){
-			for(int i=0; i<_n_bins_7d[0]; i++){//W
-				for(int j=0; j< _n_bins_7d[1]; j++){//Q2
-					for(int k=0; k<4; k++){
-						//std::cout<<"\nPart 3 " <<k;
-						
-						sprintf(hname,"%s_yield_acc_corr_holes_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_five_dim_[k],_bin_low_7d[var][0][i],_bin_up_7d[var][0][i],_bin_low_7d[var][1][j],_bin_up_7d[var][1][j],_top_[top],_var_set_[var]);
-						sprintf(xlabel,"%s",_five_dim_[k]);
-						sprintf(ylabel,"Yield");
-						exp_ch_1d.push_back(_exp_corr_holes_5d[var][top][i][j]->Projection(k));
-						//exp_ch_1d.push_back(_thrown_5d[var][i][j]->Projection(k));
-						exp_ch_1d[k]->SetNameTitle(hname,hname);
-						exp_ch_1d[k]->GetXaxis()->SetTitle(xlabel);
-						exp_ch_1d[k]->GetYaxis()->SetTitle(ylabel);
-					}
-					//std::cout<<"\nPart 8 Q2:" <<j;
-					exp_ch_2d.push_back(exp_ch_1d);
-					exp_ch_1d.clear();
-				}
-				//std::cout<<"\nPart 9 W:" <<i;
-				exp_ch_3d.push_back(exp_ch_2d);
-				exp_ch_2d.clear();
+	for(int i=0; i<_n_bins_7d[0]; i++){//W
+		for(int j=0; j< _n_bins_7d[1]; j++){//Q2
+			for(int k=0; k<4; k++){
+				//std::cout<<"\nPart 3 " <<k;
+				sprintf(hname,"%s_yield_acc_corr_holes_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_five_dim_[k],_bin_low_7d[0][i],_bin_up_7d[0][i],_bin_low_7d[1][j],_bin_up_7d[1][j],flags_->Flags::Top(),flags_->Flags::Var_Set());
+				sprintf(xlabel,"%s",_five_dim_[k]);
+				sprintf(ylabel,"Yield");
+				exp_ch_1d.push_back(_exp_corr_holes_5d[i][j]->Projection(k));
+				//exp_ch_1d.push_back(_thrown_5d[i][j]->Projection(k));
+				exp_ch_1d[k]->SetNameTitle(hname,hname);
+				exp_ch_1d[k]->GetXaxis()->SetTitle(xlabel);
+				exp_ch_1d[k]->GetYaxis()->SetTitle(ylabel);
 			}
-			//std::cout<<"\nPart 10 top:" <<top;
-			exp_ch_4d.push_back(exp_ch_3d);
-			exp_ch_3d.clear();
+			//std::cout<<"\nPart 8 Q2:" <<j;
+			exp_ch_2d.push_back(exp_ch_1d);
+			exp_ch_1d.clear();
 		}
-		//std::cout<<"\nPart 11 var:" <<var;
-		_exp_corr_holes_3d.push_back(exp_ch_4d);
-		exp_ch_4d.clear();
+		//std::cout<<"\nPart 9 W:" <<i;
+		_exp_corr_holes_3d.push_back(exp_ch_2d);
+		exp_ch_2d.clear();
 	}
 }
 
 //For Polarization Observables
-void Histogram::Sparse_5to4(){
+void Histogram::Sparse_5to4(Flags flags_){
 	std::cout<<"Sparse 5 to 4\n";
 	char hname[100];
 	char xlabel[100];
@@ -440,8 +399,6 @@ void Histogram::Sparse_5to4(){
 	TH1D_1d_star exp_ch_1d;
 	TH1D_2d_star exp_ch_2d;
 	TH1D_3d_star exp_ch_3d;
-	TH1D_4d_star exp_ch_4d;
-	TH1D_5d_star exp_ch_5d;
 	TH2D * exp_corr_2deg;
 	TH2D * exp_holes_2deg;
 	TH1D * exp_corr;
@@ -451,41 +408,33 @@ void Histogram::Sparse_5to4(){
 	THnSparseD * exp_corr_holes_5d;
 	TH2D* exp_corr_holes_2d;
 	//Convert the _exp_corr_5d and _exp_holes_5d to 4 dimensional sparse histograms for usage in plotting single differential cross sections
-	for(int var = 0; var<_n_var_sets; var++){
-		for(int top=0; top<_n_topology; top++){
-			for(int i=0; i<_n_bins_7d[0]; i++){//W
-				for(int j=0; j< _n_bins_7d[1]; j++){//Q2
-					for(int k=0; k<4; k++){//Xij
-						for(int l=0; l<_n_bins_5d[var][k]; l++){//Bins of Xij
-							//exp_corr_holes_5d = (THnSparseD*)_exp_corr_holes_5d[var][top][i][j]->Clone()->;
-							exp_corr_holes_2d = _exp_corr_holes_5d[var][top][i][j]->Projection(4,k);
-							sprintf(hname,"%s+%f",_five_dim_[k],l);
-							
-							sprintf(xlabel,"Phi (deg)");
-							sprintf(ylabel,"Yield");
-							exp_corr_holes_2d->SetNameTitle(hname,hname);
-							//exp_ch_1d.push_back(_exp_corr_holes_5d[var][top][i][j]->Projection(4,k)->ProjectionX(_five_dim_[k],l,l));
-							exp_ch_1d.push_back(exp_corr_holes_2d->ProjectionX(_five_dim_[k],l,l+1));
-							sprintf(hname,"%s:%f-%f_yield_acc_corr_holes_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_five_dim_[k],_bin_low_5d[var][k][l],_bin_up_5d[var][k][l],_bin_low_7d[var][0][i],_bin_up_7d[var][0][i],_bin_low_7d[var][1][j],_bin_up_7d[var][1][j],_top_[top],_var_set_[var]);
-							exp_ch_1d[l]->SetNameTitle(hname,hname);
-							exp_ch_1d[l]->GetXaxis()->SetTitle(xlabel);
-							exp_ch_1d[l]->GetYaxis()->SetTitle(ylabel);
-							//_exp_corr_4d[var][top][i][j][k][l]=Add(_exp_corr_4d[var][top][i][j][k][l],_exp_holes_4d[var][top][i][j][k][l]);
-						}
-						exp_ch_2d.push_back(exp_ch_1d);
-						exp_ch_1d.clear();
-					}
-					exp_ch_3d.push_back(exp_ch_2d);
-					exp_ch_2d.clear();
+	for(int i=0; i<_n_bins_7d[0]; i++){//W
+		for(int j=0; j< _n_bins_7d[1]; j++){//Q2
+			for(int k=0; k<4; k++){//Xij
+				for(int l=0; l<_n_bins_5d[k]; l++){//Bins of Xij
+					//exp_corr_holes_5d = (THnSparseD*)_exp_corr_holes_5d[var][i][j]->Clone()->;
+					exp_corr_holes_2d = _exp_corr_holes_5d[i][j]->Projection(4,k);
+					sprintf(hname,"%s+%f",_five_dim_[k],l);
+					
+					sprintf(xlabel,"Phi (deg)");
+					sprintf(ylabel,"Yield");
+					exp_corr_holes_2d->SetNameTitle(hname,hname);
+					//exp_ch_1d.push_back(_exp_corr_holes_5d[i][j]->Projection(4,k)->ProjectionX(_five_dim_[k],l,l));
+					exp_ch_1d.push_back(exp_corr_holes_2d->ProjectionX(_five_dim_[k],l,l+1));
+					sprintf(hname,"%s:%f-%f_yield_acc_corr_holes_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_five_dim_[k],_bin_low_5d[k][l],_bin_up_5d[k][l],_bin_low_7d[0][i],_bin_up_7d[0][i],_bin_low_7d[1][j],_bin_up_7d[1][j],flags_->Flags::Top(),flags_->Flags::Var_Set());
+					exp_ch_1d[l]->SetNameTitle(hname,hname);
+					exp_ch_1d[l]->GetXaxis()->SetTitle(xlabel);
+					exp_ch_1d[l]->GetYaxis()->SetTitle(ylabel);
+					//_exp_corr_4d[i][j][k][l]=Add(_exp_corr_4d[i][j][k][l],_exp_holes_4d[i][j][k][l]);
 				}
-				exp_ch_4d.push_back(exp_ch_3d);
-				exp_ch_3d.clear();
+				exp_ch_2d.push_back(exp_ch_1d);
+				exp_ch_1d.clear();
 			}
-			exp_ch_5d.push_back(exp_ch_4d);
-			exp_ch_4d.clear();
+			exp_ch_3d.push_back(exp_ch_2d);
+			exp_ch_2d.clear();
 		}
-		_exp_corr_holes_4d.push_back(exp_ch_5d);
-		exp_ch_5d.clear();
+		_exp_corr_holes_4d.push_back(exp_ch_3d);
+		exp_ch_3d.clear();
 	}
 }
 
@@ -507,18 +456,8 @@ void Histogram::Extract_Bin_Info(){
 	std::vector<std::vector<std::vector<double>>> bin_up_set_2;
 	std::vector<std::vector<std::vector<double>>> bin_mid_set_2;
 	std::vector<std::vector<std::vector<double>>> bin_size_set_2;*/
-	double_2d bin_low_7d_2d;
-	double_2d bin_up_7d_2d;
-	double_2d bin_mid_7d_2d;
-	double_2d bin_size_7d_2d;
-	double_2d bin_edges_7d_2d;
 	double_1d bin_lowside_7d_1d;
 	double_1d bin_topside_7d_1d;
-	double_2d bin_low_5d_2d;
-	double_2d bin_up_5d_2d;
-	double_2d bin_mid_5d_2d;
-	double_2d bin_size_5d_2d;
-	double_2d bin_edges_5d_2d;
 	double_1d bin_lowside_5d_1d;
 	double_1d bin_topside_5d_1d;
 	double_1d bin_low_7d_1d;
@@ -532,98 +471,67 @@ void Histogram::Extract_Bin_Info(){
 	double_1d bin_size_5d_1d;
 	double_1d bin_edges_5d_1d;
 	//Get the 7dimensional bins ready
-	for(int var = 0; var<_n_var_sets; var++){
-		int top = 0;
-		for(int bin_fun=0; bin_fun<5; bin_fun++){
-			n_bins_5d.push_back(_exp_data_7d[var][0]->GetAxis(bin_fun+2)->GetNbins());;
+	for(int bin_fun=0; bin_fun<5; bin_fun++){
+		n_bins_5d.push_back(_exp_data_7d[var][0]->GetAxis(bin_fun+2)->GetNbins());;
+	}
+	_n_bins_5d.push_back(n_bins_5d);
+	n_bins_5d.clear();
+	DIM = _exp_data_7d->GetNdimensions();
+	for(int i = 0; i<DIM; i++){
+		if(top ==0){//Just need to do this once in the loop 
+			_n_bins_7d.push_back(_exp_data_7d->GetAxis(i)->GetNbins());
 		}
-		_n_bins_5d.push_back(n_bins_5d);
-		n_bins_5d.clear();
-			DIM = _exp_data_7d[var][top]->GetNdimensions();
-			for(int i = 0; i<DIM; i++){
-				if(top ==0){//Just need to do this once in the loop 
-					_n_bins_7d.push_back(_exp_data_7d[var][top]->GetAxis(i)->GetNbins());
-				}
-				bin_lowside_7d_1d.push_back(_exp_data_7d[var][top]->GetAxis(i)->GetBinLowEdge(1));
-				bin_topside_7d_1d.push_back(_exp_data_7d[var][top]->GetAxis(i)->GetBinUpEdge(_n_bins_7d[i]));
-				for(int j=0; j<_n_bins_7d[i];j++){
-					bin_low_7d_1d.push_back(_exp_data_7d[var][top]->GetAxis(i)->GetBinLowEdge(j+1));
-					bin_up_7d_1d.push_back(_exp_data_7d[var][top]->GetAxis(i)->GetBinUpEdge(j+1));
-					bin_mid_7d_1d.push_back((bin_up_7d_1d[j]+bin_low_7d_1d[j])/2.0);
-					bin_size_7d_1d.push_back(bin_up_7d_1d[j]-bin_low_7d_1d[j]);
-					bin_edges_7d_1d.push_back(_exp_data_7d[var][top]->GetAxis(i)->GetBinLowEdge(j+1));
-					if(j==_n_bins_7d[i]-1){
-						bin_edges_7d_1d.push_back(_exp_data_7d[var][top]->GetAxis(i)->GetBinUpEdge(j+1));
-					}
-				}
-				bin_low_7d_2d.push_back(bin_low_7d_1d);
-				bin_low_7d_1d.clear();
-				bin_up_7d_2d.push_back(bin_up_7d_1d);
-				bin_up_7d_1d.clear();
-				bin_mid_7d_2d.push_back(bin_mid_7d_1d);
-				bin_mid_7d_1d.clear();
-				bin_size_7d_2d.push_back(bin_size_7d_1d);
-				bin_size_7d_1d.clear();
-				bin_edges_7d_2d.push_back(bin_edges_7d_1d);
-				bin_edges_7d_1d.clear();
+		bin_lowside_7d_1d.push_back(_exp_data_7d->GetAxis(i)->GetBinLowEdge(1));
+		bin_topside_7d_1d.push_back(_exp_data_7d->GetAxis(i)->GetBinUpEdge(_n_bins_7d[i]));
+		for(int j=0; j<_n_bins_7d[i];j++){
+			bin_low_7d_1d.push_back(_exp_data_7d->GetAxis(i)->GetBinLowEdge(j+1));
+			bin_up_7d_1d.push_back(_exp_data_7d->GetAxis(i)->GetBinUpEdge(j+1));
+			bin_mid_7d_1d.push_back((bin_up_7d_1d[j]+bin_low_7d_1d[j])/2.0);
+			bin_size_7d_1d.push_back(bin_up_7d_1d[j]-bin_low_7d_1d[j]);
+			bin_edges_7d_1d.push_back(_exp_data_7d->GetAxis(i)->GetBinLowEdge(j+1));
+			if(j==_n_bins_7d[i]-1){
+				bin_edges_7d_1d.push_back(_exp_data_7d->GetAxis(i)->GetBinUpEdge(j+1));
 			}
-			_bin_low_7d.push_back(bin_low_7d_2d);
-			bin_low_7d_2d.clear();
-			_bin_up_7d.push_back(bin_up_7d_2d);
-			bin_up_7d_2d.clear();
-			_bin_mid_7d.push_back(bin_mid_7d_2d);
-			bin_mid_7d_2d.clear();
-			_bin_size_7d.push_back(bin_size_7d_2d);
-			bin_size_7d_2d.clear();
-			_bin_edges_7d.push_back(bin_edges_7d_2d);
-			bin_edges_7d_2d.clear();
-			_bin_lowside_7d.push_back(bin_lowside_7d_1d);
-			bin_lowside_7d_1d.clear();
-			_bin_topside_7d.push_back(bin_topside_7d_1d);
-			bin_topside_7d_1d.clear();
-			//Get the 5d bins ready
-			for(int j=0; j<DIM-2; j++){
-				//if(var==0 && top==0){
-				//	_n_bins_5d.push_back(_exp_data_7d[var][top]->GetAxis(j+2)->GetNbins());
-					//std::cout<<"\nVar set: " <<var <<" num_bins: " <<_exp_data_7d[var][top]->GetAxis(j+2)->GetNbins();
-				//}
-				bin_lowside_5d_1d.push_back(_exp_data_7d[var][top]->GetAxis(j+2)->GetBinLowEdge(1));
-				bin_topside_5d_1d.push_back(_exp_data_7d[var][top]->GetAxis(j+2)->GetBinUpEdge(_n_bins_5d[var][j]));
-				for(int k=0; k<_n_bins_5d[var][j];k++){
-					bin_low_5d_1d.push_back(_exp_data_7d[var][top]->GetAxis(j+2)->GetBinLowEdge(k+1));
-					bin_up_5d_1d.push_back(_exp_data_7d[var][top]->GetAxis(j+2)->GetBinUpEdge(k+1));
-					bin_mid_5d_1d.push_back((bin_up_5d_1d[k]+bin_low_5d_1d[k])/2.0);
-					bin_size_5d_1d.push_back(bin_up_5d_1d[k]-bin_low_5d_1d[k]);
-					bin_edges_5d_1d.push_back(_exp_data_7d[var][top]->GetAxis(j+2)->GetBinUpEdge(k+1));
-					if(k==_n_bins_5d[var][j]-1){
-						bin_edges_5d_1d.push_back(_exp_data_7d[var][top]->GetAxis(j+2)->GetBinUpEdge(k+1));
-					}
-				}
-				bin_low_5d_2d.push_back(bin_low_5d_1d);
-				bin_low_5d_1d.clear();
-				bin_up_5d_2d.push_back(bin_up_5d_1d);
-				bin_up_5d_1d.clear();
-				bin_mid_5d_2d.push_back(bin_mid_5d_1d);
-				bin_mid_5d_1d.clear();
-				bin_size_5d_2d.push_back(bin_size_5d_1d);
-				bin_size_5d_1d.clear();
-				bin_edges_5d_2d.push_back(bin_edges_5d_1d);
-				bin_edges_5d_1d.clear();
+		}
+		_bin_low_7d.push_back(bin_low_7d_1d);
+		bin_low_7d_1d.clear();
+		_bin_up_7d.push_back(bin_up_7d_1d);
+		bin_up_7d_1d.clear();
+		_bin_mid_7d.push_back(bin_mid_7d_1d);
+		bin_mid_7d_1d.clear();
+		_bin_size_7d.push_back(bin_size_7d_1d);
+		bin_size_7d_1d.clear();
+		_bin_edges_7d.push_back(bin_edges_7d_1d);
+		bin_edges_7d_1d.clear();
+	}
+	//Get the 5d bins ready
+	for(int j=0; j<DIM-2; j++){
+		//if(var==0 && top==0){
+		//	_n_bins_5d.push_back(_exp_data_7d->GetAxis(j+2)->GetNbins());
+			//std::cout<<"\nVar set: " <<var <<" num_bins: " <<_exp_data_7d->GetAxis(j+2)->GetNbins();
+		//}
+		bin_lowside_5d_1d.push_back(_exp_data_7d->GetAxis(j+2)->GetBinLowEdge(1));
+		bin_topside_5d_1d.push_back(_exp_data_7d->GetAxis(j+2)->GetBinUpEdge(_n_bins_5d[var][j]));
+		for(int k=0; k<_n_bins_5d[var][j];k++){
+			bin_low_5d_1d.push_back(_exp_data_7d->GetAxis(j+2)->GetBinLowEdge(k+1));
+			bin_up_5d_1d.push_back(_exp_data_7d->GetAxis(j+2)->GetBinUpEdge(k+1));
+			bin_mid_5d_1d.push_back((bin_up_5d_1d[k]+bin_low_5d_1d[k])/2.0);
+			bin_size_5d_1d.push_back(bin_up_5d_1d[k]-bin_low_5d_1d[k]);
+			bin_edges_5d_1d.push_back(_exp_data_7d->GetAxis(j+2)->GetBinUpEdge(k+1));
+			if(k==_n_bins_5d[var][j]-1){
+				bin_edges_5d_1d.push_back(_exp_data_7d->GetAxis(j+2)->GetBinUpEdge(k+1));
 			}
-			_bin_low_5d.push_back(bin_low_5d_2d);
-			bin_low_5d_2d.clear();
-			_bin_up_5d.push_back(bin_up_5d_2d);
-			bin_up_5d_2d.clear();
-			_bin_mid_5d.push_back(bin_mid_5d_2d);
-			bin_mid_5d_2d.clear();
-			_bin_size_5d.push_back(bin_size_5d_2d);
-			bin_size_5d_2d.clear();
-			_bin_edges_5d.push_back(bin_edges_5d_2d);
-			bin_edges_5d_2d.clear();
-			_bin_lowside_5d.push_back(bin_lowside_5d_1d);
-			bin_lowside_5d_1d.clear();
-			_bin_topside_5d.push_back(bin_topside_5d_1d);
-			bin_topside_5d_1d.clear();
+		}
+		_bin_low_5d.push_back(bin_low_5d_1d);
+		bin_low_5d_1d.clear();
+		_bin_up_5d.push_back(bin_up_5d_1d);
+		bin_up_5d_1d.clear();
+		_bin_mid_5d.push_back(bin_mid_5d_1d);
+		bin_mid_5d_1d.clear();
+		_bin_size_5d.push_back(bin_size_5d_1d);
+		bin_size_5d_1d.clear();
+		_bin_edges_5d.push_back(bin_edges_5d_1d);
+		bin_edges_5d_1d.clear();
 	}
 
 }
@@ -632,7 +540,7 @@ void Histogram::Extract_Bin_Info(){
 void Histogram::Skeleton_5D(){
 	std::cout<<"Skeleton_5D\n";
 	char hname[100];
-	int DIM = _exp_data_7d[0][0]->GetNdimensions();
+	int DIM = _exp_data_7d->GetNdimensions();
 	//std::cout<<"\nPart 2";
 	int bin_sizes_5d[5];
 	double bin_low_5d[5];
@@ -677,152 +585,99 @@ void Histogram::Skeleton_5D(){
 	Sparse_1d exp_set_2;
 	Sparse_2d thrown_set;
 	Sparse_1d thrown_set_1;*/
-	for(int i = 0; i<_n_var_sets; i++){//var sets
-		for(int j=0; j<_n_topology; j++){//topology
-			for(int k=0; k<_n_bins_7d[0]; k++){//W	
-				for(int l=0; l< _n_bins_7d[1]; l++){//Q2
-					for(int boop=0; boop<5; boop++){//Loop over all bins
-						bin_sizes_5d[boop] = _n_bins_5d[i][boop];//Get sizes for individual bins
-						bin_low_5d[boop] = _bin_low_5d[i][boop][0];//Get low end for each bin
-						bin_up_5d[boop] = _bin_up_5d[i][boop][_bin_up_5d[i][boop].size()-1];//Get high end for each bin
-					}
-					//exp
-					sprintf(hname,"exp_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_top_[j],_var_set_[i]);
-					//_exp_data_5d[i][j][k].push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
-					exp_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
-					//sim
-					sprintf(hname,"sim_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_top_[j],_var_set_[i]);
-					//_sim_data_5d[i][j][k].push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
-					sim_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
-					
-					
-					sprintf(hname,"sim_holes_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_top_[j],_var_set_[i]);
-					//_sim_holes_5d[i][j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins[i],bin_low_5d,bin_up_5d));
-					sim_hole_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+	
+	for(int k=0; k<_n_bins_7d[0]; k++){//W	
+		for(int l=0; l< _n_bins_7d[1]; l++){//Q2
+			for(int boop=0; boop<5; boop++){//Loop over all bins
+				bin_sizes_5d[boop] = _n_bins_5d[boop];//Get sizes for individual bins
+				bin_low_5d[boop] = _bin_low_5d[boop][0];//Get low end for each bin
+				bin_up_5d[boop] = _bin_up_5d[boop][_bin_up_5d[boop].size()-1];//Get high end for each bin
+			}
+			//exp
+			sprintf(hname,"exp_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Top(),flags_->Flags::Var_Set());
+			//_exp_data_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			exp_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			//sim
+			sprintf(hname,"sim_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Top(),flags_->Flags::Var_Set());
+			//_sim_data_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			sim_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			
+			
+			sprintf(hname,"sim_holes_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Top(),flags_->Flags::Var_Set());
+			//_sim_holes_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
+			sim_hole_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-					sprintf(hname,"exp_holes_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_top_[j],_var_set_[i]);
-					//std::cout<<"\nexpHoles hname: " <<hname;
-					//_exp_holes_5d[i][j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins[i],bin_low_5d,bin_up_5d));
-					exp_hole_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
-					sprintf(hname,"exp_corr_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_top_[j],_var_set_[i]);
-					//_exp_corr_5d[i][j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins[i],bin_low_5d,bin_up_5d));
-					exp_corr_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			sprintf(hname,"exp_holes_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Top(),flags_->Flags::Var_Set());
+			//std::cout<<"\nexpHoles hname: " <<hname;
+			//_exp_holes_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
+			exp_hole_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			sprintf(hname,"exp_corr_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Top(),flags_->Flags::Var_Set());
+			//_exp_corr_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
+			exp_corr_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-					sprintf(hname,"exp_corr_hole_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_top_[j],_var_set_[i]);
-					//_exp_corr_5d[i][j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins[i],bin_low_5d,bin_up_5d));
-					exp_corr_hole_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			sprintf(hname,"exp_corr_hole_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Top(),flags_->Flags::Var_Set());
+			//_exp_corr_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
+			exp_corr_hole_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-					sprintf(hname,"sim_corr_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_top_[j],_var_set_[i]);
-					//_sim_corr_5d[i][j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins[i],bin_low_5d,bin_up_5d));
-					sim_corr_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			sprintf(hname,"sim_corr_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Top(),flags_->Flags::Var_Set());
+			//_sim_corr_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
+			sim_corr_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-					sprintf(hname,"xs_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_top_[j],_var_set_[i]);
-					//_cross_section_5d[i][j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins[i],bin_low_5d,bin_up_5d));
-					cross_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			sprintf(hname,"xs_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Top(),flags_->Flags::Var_Set());
+			//_cross_section_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
+			cross_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-					sprintf(hname,"acceptance_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_top_[j],_var_set_[i]);
-					//_acceptance[i][j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins[i],bin_low_5d,bin_up_5d));
-					accept_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
-					
-					if(j ==0){
-						sprintf(hname,"thrown_5d_W:%f-%f_Q2:%f-%f_var:%s",_bin_low_7d[i][0][k],_bin_up_7d[i][0][k],_bin_low_7d[i][1][l],_bin_up_7d[i][1][l],_var_set_[i]);
-						//_thrown_5d[l][i].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins[i],bin_low_5d,bin_up_5d));
-						thr_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
-					}
-					scale_1d.push_back(NAN);	
-					//curr_hist=curr_hist+1;
-					//percent=100.0*(curr_hist/num_hist);
-					//std::cout<<"Skeleton_5D " <<percent <<"\r";
-					//std::cout<<"\r" <<"\t" <<"Skeleton_5D " <<(100*curr_hist/num_hist) <<" %"  <<std::flush;
-				}//Q2
-				
-				exp_2d.push_back(exp_1d);
-				sim_2d.push_back(sim_1d);
-				sim_hole_2d.push_back(sim_hole_1d);
-				exp_hole_2d.push_back(exp_hole_1d);
-				exp_corr_hole_2d.push_back(exp_corr_hole_1d);
-				sim_corr_2d.push_back(sim_corr_1d);
-				exp_corr_2d.push_back(exp_corr_1d);
-				cross_2d.push_back(cross_1d);
-				accept_2d.push_back(accept_1d);
-				scale_2d.push_back(scale_1d);
-				if(j==0){
-					thr_2d.push_back(thr_1d);
-					thr_1d.clear();
-				}
-				
-				exp_1d.clear();
-				sim_1d.clear();
-				sim_hole_1d.clear();
-				exp_hole_1d.clear();
-				exp_corr_1d.clear();
-				exp_corr_hole_1d.clear();
-				sim_corr_1d.clear();
-				cross_1d.clear();
-				accept_1d.clear();
-				scale_1d.clear();
-				
-				/*std::vector<THnSparseD> exp_set;
-				std::vector<THnSparseD> sim_set;
-				_exp_data_5d.push_back(exp_set);
-				_sim_data_5d.push_back(sim_set);
-				exp_set.clear();//std::vector::erase(exp_set.begin(),exp_set.begin()+exp_set.size());
-				sim_set.clear();//std::vector::erase(sim_set.begin(),sim_set.begin()+sim_set.size());
-				if(k==0){
-					//thrown_set_1.push_back(thrown_set);
-					//thrown_set.std::vector::erase(thrown_set.begin(),thrown_set.size());
-				}*/
-			}//W
-			exp_3d.push_back(exp_2d);
-			sim_3d.push_back(sim_2d);
-			sim_hole_3d.push_back(sim_hole_2d);
-			exp_hole_3d.push_back(exp_hole_2d);
-			sim_corr_3d.push_back(sim_corr_2d);
-			exp_corr_3d.push_back(exp_corr_2d);
-			exp_corr_hole_3d.push_back(exp_corr_hole_2d);
-			cross_3d.push_back(cross_2d);
-			accept_3d.push_back(accept_2d);
-			scale_3d.push_back(scale_2d);
-			exp_2d.clear();
-			sim_2d.clear();
-			sim_hole_2d.clear();
-			exp_hole_2d.clear();
-			exp_corr_hole_2d.clear();
-			exp_corr_2d.clear();
-			sim_corr_2d.clear();
-			cross_2d.clear();
-			accept_2d.clear();
-			scale_2d.clear();
-			//_thrown_5d.push_back(thr_2d););
-		}//Top loop
-		_exp_data_5d.push_back(exp_3d);
-		_sim_data_5d.push_back(sim_3d);
-		_sim_holes_5d.push_back(sim_hole_3d);
-		_exp_holes_5d.push_back(exp_hole_3d);
-		_exp_corr_holes_5d.push_back(exp_corr_hole_3d);
-		_exp_corr_5d.push_back(exp_corr_3d);
-		_sim_corr_5d.push_back(sim_corr_3d);
-		_cross_section_5d.push_back(cross_3d);
-		_acceptance_5d.push_back(accept_3d);
-		_thrown_5d.push_back(thr_2d);
-		_scale_factor_5d.push_back(scale_3d);
-		exp_3d.clear();
-		sim_3d.clear();
-		sim_hole_3d.clear();
-		exp_hole_3d.clear();
-		exp_corr_hole_3d.clear();
-		exp_corr_3d.clear();
-		sim_corr_3d.clear();
-		cross_3d.clear();
-		accept_3d.clear();
-		thr_2d.clear();
-		scale_3d.clear();
-		/*_exp_data_5d.push_back(exp_set_2);
-		_sim_data_5d.push_back(sim_set_2);
-		exp_set_2.std::vector::erase(exp_set_2.begin(),exp_set_2.begin()+exp_set_2.size());
-		sim_set_2.std::vector::erase(sim_set_2.begin(),sim_set_2.begin()+sim_set_2.size());*/
-	}//var set loop
-	//std::cout<<"\n";
+			sprintf(hname,"acceptance_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Top(),flags_->Flags::Var_Set());
+			//_acceptance[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
+			accept_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			
+			if(j ==0){
+				sprintf(hname,"thrown_5d_W:%f-%f_Q2:%f-%f_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_->Flags::Var_Set());
+				//_thrown_5d[l].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
+				thr_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
+			}
+			scale_1d.push_back(NAN);	
+			//curr_hist=curr_hist+1;
+			//percent=100.0*(curr_hist/num_hist);
+			//std::cout<<"Skeleton_5D " <<percent <<"\r";
+			//std::cout<<"\r" <<"\t" <<"Skeleton_5D " <<(100*curr_hist/num_hist) <<" %"  <<std::flush;
+		}//Q2
+		
+		_exp_data_5d.push_back(exp_1d);
+		_sim_data_5d.push_back(sim_1d);
+		_sim_holes_5d.push_back(sim_hole_1d);
+		_exp_holes_5d.push_back(exp_hole_1d);
+		_exp_corr_holes_5d.push_back(exp_corr_hole_1d);
+		_sim_corr_5d.push_back(sim_corr_1d);
+		_exp_corr_5d.push_back(exp_corr_1d);
+		_cross_section_5d.push_back(cross_1d);
+		_acceptance_5d.push_back(accept_1d);
+		_scale_factor_5d.push_back(scale_1d);
+		_thrown_5d.push_back(thr_1d);
+		
+		exp_1d.clear();
+		sim_1d.clear();
+		sim_hole_1d.clear();
+		exp_hole_1d.clear();
+		exp_corr_1d.clear();
+		exp_corr_hole_1d.clear();
+		sim_corr_1d.clear();
+		cross_1d.clear();
+		accept_1d.clear();
+		scale_1d.clear();
+		thr_1d.clear();
+		
+		/*std::vector<THnSparseD> exp_set;
+		std::vector<THnSparseD> sim_set;
+		_exp_data_5d.push_back(exp_set);
+		_sim_data_5d.push_back(sim_set);
+		exp_set.clear();//std::vector::erase(exp_set.begin(),exp_set.begin()+exp_set.size());
+		sim_set.clear();//std::vector::erase(sim_set.begin(),sim_set.begin()+sim_set.size());
+		if(k==0){
+			//thrown_set_1.push_back(thrown_set);
+			//thrown_set.std::vector::erase(thrown_set.begin(),thrown_set.size());
+		}*/
+	}//W
 	std::cout<<"End Skeleton_5D\n";
 	//std::cout<<"\nCheck: " <<fun::nSparseIntegral(_exp_data_5d[0][0][0][0]) <<"\n";
 }
@@ -865,23 +720,6 @@ void	Histogram::Calc_Acceptance(){
 	double_2d scale_2d;
 	double_1d scale_1d;
 	//THnSparseD empty = new THnSparseD("dummmy","dummy",5,{1,2,3,4,5},{1.0,1.0,1.0,1.0,1.0},{5.0,5.0,5.0,5.0,5.0}); 
-	for(int i =0; i<_n_var_sets; i++){
-		//std::cout<<"Part 2 idx: "<<i <<"\n";
-		/*_acceptance.push_back(nsparse_set_3d);
-		_exp_corr_5d.push_back(nsparse_set_3d);
-		_sim_corr_5d.push_back(nsparse_set_3d);
-		_n_exp_corr.push_back(double_set_3d);
-		_n_sim_corr.push_back(double_set_3d);
-		_scale_factor_5d.push_back(double_set_3d);
-		_n_thrown.push_back(double_set_2d);*/
-		for(int j = 0; j<_n_topology; j++){
-			//std::cout<<"Part 3 idx: "<<i <<" " <<j <<"\n";
-			/*_acceptance[i].push_back(nsparse_set_2d);
-			_exp_corr_5d[i].push_back(nsparse_set_2d);
-			_sim_corr_5d[i].push_back(nsparse_set_2d);
-			_n_exp_corr[i].push_back(double_set_2d);
-			_n_sim_corr[i].push_back(double_set_2d);
-			_scale_factor_5d[i].push_back(double_set_2d);*/
 			for(int k=0; k<_n_bins_7d[0]; k++){
 				//std::cout<<"Part 4 idx: "<<i <<" " <<j <<" " <<k <<"\n";
 				/*_acceptance[i][j].push_back(nsparse_set_1d);

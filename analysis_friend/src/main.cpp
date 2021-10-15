@@ -6,25 +6,35 @@ int main(int argc, char **argv){
 	//start the clock
 	auto start = std::chrono::high_resolution_clock::now();
 
-	/*
-	Inputs should go
-	./read_friend <experimental root file> <simulated root file w/ Radiative Effects> <simulated root file w/o Radiative Effects>
-	*/
-	if(argc != 4){//6){//When I have things for radiative corrections we can add this part
-		std::cout<<"Hey, you didn't enter all the things required";
-	}else{
-		std::cout<<"\nExperiment File: " <<argv[1];
-		std::cout<<"\nSimulated File: " <<argv[2];
-		//std::cout<<"Non Rad Sim File:" <<argv[3];
-		std::cout<<"\nOutput File Name: " <<argv[3];//[5]
+	auto flags = Flags();//argc,argv);
+	flags->Flags::Read_Flags(argc,argv);
+
+	TFile *exp_file;
+	TFile *sim_file;
+	TFile *empty_file;
+	TFile *exp_file2;
+	TFile *sim_file2;
+	TFile *empty_file2;
+	if(flags->Flags::Run("both") == _both_ ){//Looking at both e16 and e1f results
+		exp_file = new TFile(flags->Flags::Exp_File());
+		sim_file = new TFile(flags->Flags::Sim_File());
+		exp_file2 = new TFile(flags->Flags::Exp_File2());
+		sim_file2 = new TFile(flags->Flags::Sim_File2());
+		if(flags->Flags::Has_Empty()){
+			empty_file = new TFile(flags->Flags::Empty_File());
+			empty_file2 = new TFile(flags->Flags::Empty_File2());
+			//auto hist Histogram(flags->Flags::Output_File(),exp_file,sim_file,empty_file,exp_file2,sim_file2,empty_file2,flags);
+		}else{
+			//auto hist Histogram(flags->Flags::Output_File(),exp_file,sim_file,exp_file2,sim_file2,flags);
+		}
+	}else if(flags->Flags::Has_Exp() && flags->Flags::Has_Sim()){//Looking at just e16 or e1f
+		exp_file = new TFile(flags->Flags::Exp_File());
+		sim_file = new TFile(flags->Flags::Sim_File());
+		if(flags->Flags::Has_Empty()){
+			empty_file = new TFile(flags->Flags::Empty_File());
+			//auto hist Histogram(flags->Flags::Output_File(),exp_file,sim_file,empty_file,flags);
+		}else{
+			auto hist Histogram(flags->Flags::Output_File(),exp_file,sim_file,flags);
+		}
 	}
-
-	//Read in the Various THnSparse Histograms
-	TFile *exp_file = new TFile(argv[1],"READ");
-	TFile *sim_file = new TFile(argv[2],"READ");
-
-	std::string output_filename = argv[3];//[5]
-
-	auto hist = Histogram(output_filename,exp_file,sim_file);
-	
 }
