@@ -111,7 +111,7 @@ Flags::Flags(){}
 			if(str.substr(0,7) == _image_name_){
 				_image_name = str.substr(7,str_len);
 				_make_image = true;
-				std::cout<<"\tIDed: Image file is " <<_image_loc <<"\n"; 
+				std::cout<<"\tIDed: Image file is " <<_image_name <<"\n"; 
 			}
 		}if(str_len > 8){
 			if(str.substr(0,8) == _weight_file_){
@@ -149,6 +149,8 @@ Flags::Flags(){}
 			_plot_err = true;
 		}else if(str_ == _wq2_ ){
 			_plot_wq2 = true;
+		}else if(str_ == _acceptance_ ){
+			_plot_acceptance = true;
 		}
 	}
 
@@ -190,46 +192,25 @@ Flags::Flags(){}
 
 	//Plotting
 	bool Flags::Plot_Pol(){
-		if(_plot_all){
-			return true;
-		}else{
-			return _plot_polarization;
-		}
+		return (_plot_all || _plot_polarization);
 	}
 	bool Flags::Plot_Single_Diff(){
-		if(_plot_all){
-			return true;
-		}else{
-			return _plot_single_diff;
-		}
+		return (_plot_all || _plot_single_diff);
 	}
 	bool Flags::Plot_Beam_Spin(){
-		if(_plot_all){
-			return true;
-		}else{
-			return _plot_beam_spin;
-		}
+		return (_plot_all || _plot_beam_spin);
 	}
 	bool Flags::Plot_Eff(){
-		if(_plot_all){
-			return true;
-		}else{
-			return _plot_eff;
-		}
+		return (_plot_all || _plot_eff);
 	}
 	bool Flags::Plot_Err(){
-		if(_plot_all){
-			return true;
-		}else{
-			return _plot_err;
-		}
+		return (_plot_all || _plot_err);
 	}
 	bool Flags::Plot_WQ2(){
-		if(_plot_all){
-			return true;
-		}else{
-			return _plot_wq2;
-		}
+		return (_plot_all || _plot_wq2);
+	}
+	bool Flags::Plot_Acceptance(){
+		return (_plot_all || _plot_acceptance);
 	}
 
 	//File Names

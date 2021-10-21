@@ -16,11 +16,21 @@ double physics::Luminosity(double Qtot_, double corr_factor_){
 }
 
 double physics::Error(double N_gen_, double N_rec_, double weight_sum_){
-	return sqrt((((N_gen_-2*N_rec_)/pow(N_gen_,3.0))*weight_sum_)+((pow(N_rec_,2.0)/pow(N_gen_,4.0))*weight_sum_));
+	//std::cout<<"N_gen = " <<N_gen_ <<" N_rec_ = " <<N_rec_ <<" weight_sum = " <<weight_sum_ <<"\n";
+	if(N_gen_ > 0.0 && N_rec_ > 0.0 && weight_sum_ > 0.0){
+		return sqrt((((N_gen_-2*N_rec_)/pow(N_gen_,3.0))*weight_sum_)+((pow(N_rec_,2.0)/pow(N_gen_,4.0))*weight_sum_));
+	}else{
+		return 0.0;
+	}
 }
 
 double physics::Error(double N_gen_, double N_rec_){
-	return sqrt((N_rec_*(N_gen_-N_rec_))/pow(N_gen_,3.0));
+	//std::cout<<"N_gen = " <<N_gen_ <<" N_rec_ = " <<N_rec_ <<"\n";
+	if(N_gen_ > 0.0 && N_rec_ > 0.0){
+		return sqrt((N_rec_*(N_gen_-N_rec_))/pow(N_gen_,3.0));
+	}else{
+		return 0.0;
+	}
 }
 
 //double physics::Radiative_Corr();

@@ -90,115 +90,113 @@ protected:
 	//RootFiles
 	std::shared_ptr<TFile> _RootOutputFile;
 
-	static const int _n_var_sets = 3;
-	static const int _n_topology = 5;
-
 	//Sparse Binning
-	std::vector<int> _n_bins_7d;//Number of bins in a given dimension //Difficult to define inside a class like this
-	std::vector<std::vector<int>> _n_bins_5d; //var set, then 5dim variables
-	double_3d _bin_low_7d;//Low edge of a bin  [var_set,variable,bin # inside variable]
-	double_3d _bin_up_7d;//Top Edge of a bin 
-	double_2d _bin_lowside_7d; //low values of the bins
-	double_2d _bin_topside_7d; //top values of the bins
-	double_3d _bin_mid_7d;//Middle value of a bin
-	double_3d _bin_size_7d;//Width of a bin
-	double_3d _bin_edges_7d;
-	double_3d _bin_low_5d;//Low edge of a bin [var,bins]
-	double_3d _bin_up_5d;//Top Edge of a bin
-	double_3d _bin_mid_5d;//Middle value of a bin
-	double_3d _bin_size_5d;//Width of a bin
-	double_3d _bin_edges_5d;//Edges of a bin
-	double_2d _bin_lowside_5d;
-	double_2d _bin_topside_5d;
+	std::vector<int> _n_bins_7d;//Number of bins in a given dimension {W,Q2,MM1,MM2,theta,alpha,phi}
+	std::vector<int> _n_bins_5d; //Number of bins in a given dimension {MM1,MM2,theta,alpha,phi}
+	double_2d _bin_low_7d;//Low edge of a bin  {variable,bin # inside variable}
+	double_2d _bin_up_7d;//Top Edge of a bin {variable,bin # inside variable}
+	double_2d _bin_lowside_7d; //low values of the bins {variable,bin # inside variable}
+	double_2d _bin_topside_7d; //top values of the bins {variable,bin # inside variable}
+	double_2d _bin_mid_7d;//Middle value of a bin {variable,bin # inside variable}
+	double_2d _bin_size_7d;//Width of a bin {variable,bin # inside variable}
+	double_2d _bin_edges_7d;//Edges of bins {variable,bin # inside variable}
+	double_2d _bin_low_5d;//Low edge of a bin {variable,bin # inside variable}
+	double_2d _bin_up_5d;//Top Edge of a bin {variable,bin # inside variable}
+	double_2d _bin_mid_5d;//Middle value of a bin {variable,bin # inside variable}
+	double_2d _bin_size_5d;//Width of a bin {variable,bin # inside variable}
+	double_2d _bin_edges_5d;//Edges of a bin {variable,bin # inside variable}
+	double_2d _bin_lowside_5d;// {variable,bin # inside variable}
+	double_2d _bin_topside_5d;// {variable,bin # inside variable}
 
 
 	//Sparse Histograms
-	THnSparseD *_exp_data_7d[_n_var_sets][_n_topology];
-	THnSparseD *_sim_data_7d[_n_var_sets][_n_topology];
-	THnSparseD *_sim_weight_sq_7d[_n_var_sets][_n_topology];
-	Sparse_4d_star _exp_data_5d;//[_n_var_sets][_n_topology];//would have binning for W and then Q2
-	Sparse_4d_star _sim_data_5d;//[_n_var_sets][_n_topology];//would have binning for W and then Q2
-	THnSparseD *_thrown_7d[_n_var_sets];//would have binning for W and then Q2
-	Sparse_3d_star _thrown_5d;//[_n_var_sets];//would have binning for W and then Q2
-	Sparse_4d_star _sim_holes_5d;//[_n_var_sets][_n_topology];//would have binning for W and then Q2
-	Sparse_4d_star _exp_holes_5d;//[_n_var_sets][_n_topology];//would have binning for W and then Q2
-	Sparse_4d_star _exp_corr_5d;//[_n_var_sets][_n_topology];//would have binning for W and then Q2
-	Sparse_4d_star _sim_corr_5d;//[_n_var_sets][_n_topology];//would have binning for W and then Q2//needed due to holes present in reconstructed not in thrown
-	Sparse_4d_star _exp_corr_holes_5d;
-	double_4d _scale_factor_5d;//[_n_var_sets][_n_topology]; //would have binning for W and then Q2= NAN;
-	double _scale_factor_7d[_n_var_sets][_n_topology];
-	THnSparseD *_exp_holes_7d[_n_var_sets][_n_topology];
-	THnSparseD *_sim_holes_7d[_n_var_sets][_n_topology];
-	THnSparseD *_exp_corr_7d[_n_var_sets][_n_topology];
-	THnSparseD *_sim_corr_7d[_n_var_sets][_n_topology];
-	THnSparseD *_cross_section_7d[_n_var_sets][_n_topology];
-	Sparse_4d_star _cross_section_5d;//[_n_var_sets][_n_topology];
-	Sparse_4d_star _acceptance_5d;//[_n_var_sets][_n_topology];
-	THnSparseD *_acceptance_7d[_n_var_sets][_n_topology];
-	TH1D_5d_star _exp_corr_holes_3d; //For single differential {var,top,W,Q2,Xij}[Xij bins]
-	TH1D_6d_star _exp_corr_holes_4d; //For Polarization Observables {var,top,W,Q2,Xij,Xij_bin}[phi bins]
-	THnSparseD *_acceptance_eff_7d[_n_var_sets][_n_topology];
-	THnSparseD *_acceptance_err_7d[_n_var_sets][_n_topology][2];//Last one is Weighted or not
+	THnSparseD *_exp_data_7d;//Experimental Reconstruction 7 dimension
+	THnSparseD *_sim_data_7d;//Simulated Reconstruction
+	THnSparseD *_sim_weight_sq_7d;//summed square of weights for each 7d bin for simulation
+	THnSparseD *_empty_7d;//Empty Reconstruction
+	Sparse_2d_star _exp_data_5d;//Exp Recon 5 Dimension {W,Q2}
+	Sparse_2d_star _sim_data_5d;//Sim Recon 5 Dimension {W,Q2}
+	THnSparseD *_thrown_7d;//Thrown Simulation
+	Sparse_2d_star _thrown_5d;//Thrown Sim 5d {W,Q2}
+	Sparse_2d_star _sim_holes_5d;//Sim Recon Holes {W,Q2}
+	Sparse_2d_star _exp_holes_5d;//Exp Recon Holes {W,Q2}
+	Sparse_2d_star _exp_corr_5d;//Exp Acceptance Corrected {W,Q2}
+	Sparse_2d_star _sim_corr_5d;//Sim Recon Acceptance Corrected  {W,Q2}
+	Sparse_2d_star _exp_corr_holes_5d;//Experimental Accept Corrected and Hole Filled {W,Q2}
+	double_2d _scale_factor_5d;//5d scale factor of simulation to experimental yields {W,Q2}
+	double _scale_factor_7d;//7d scale factor of simulation to experimental yields 
+	THnSparseD *_exp_holes_7d;//Exp holes
+	THnSparseD *_sim_holes_7d;//Sim Holes
+	THnSparseD *_exp_corr_7d;//Exp accept corrected
+	THnSparseD *_sim_corr_7d;//Sim accept corrected
+	THnSparseD *_cross_section_7d;//Cross Section 
+	Sparse_2d_star _cross_section_5d;//;
+	Sparse_2d_star _acceptance_5d;//;
+	THnSparseD *_acceptance_7d;
+	TH1D_3d_star _exp_corr_holes_3d; //For single differential {W,Q2,Xij}[Xij bins]
+	TH1D_4d_star _exp_corr_holes_4d; //For Polarization Observables {W,Q2,Xij,Xij_bin}[phi bins]
+	THnSparseD *_acceptance_eff_7d;
+	THnSparseD *_acceptance_err_7d[2];//Last one is Weighted or not
 
-	TH1D_2d_star _X_bin_sizes; //var set, Xij
-	TH1D_1d_star _phi_bin_sizes;
+	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
+	TH1D* _phi_bin_sizes;//Width of phi bins 
 
-	TH1F_3d_star _sim_eff_1d;//{top,W,Q2}
-	TH1F_3d_star _sim_eff_ratio_1d;//{top,W,Q2}
-	TH2F_1d_star _sim_eff_wq2;//{top}
+	TH1F_2d_star _sim_eff_1d;//Simulation efficiency {W,Q2}
+	TH1F_2d_star _sim_eff_ratio_1d;//Sim efficiency ratio (){W,Q2}
+	TH2F* _sim_eff_wq2;//Sim efficiency as a function of w and Q2 
 
-	TH1D_2d_star _acc_zero_exp;//{var,top}
-	TH1D_4d_star _acc_yield;//{var,top,W,Q2}
-	TH1D_4d_star _acc_zero_thr;//{var,top,W,Q2}
-	TH2D_2d_star _thr_exp_ratio;//{var,top}
-	TH1D_4d_star _acc_rel_error_weighted;//{var,top,W,Q2}
-	TH1D_4d_star _acc_rel_error_unweighted;//{var,top,W,Q2}
+	TH1D* _acc_zero_exp;//In bins where exp_recon!=0 how many bins of the acceptance are zero
+	TH1D_2d_star _acc_yield;//Distribution of acceptance yield {W,Q2}
+	TH1D_2d_star _acc_zero_thr;//In bins where thrown!=0 how many bins of the acceptance are zero {W,Q2}
+	TH2D* _thr_exp_ratio;//Ratio of thrown to exp_recon as a function of W and Q2
+	TH1D_2d_star _acc_rel_error_weighted;//Distribution of Relative error of the Acceptance weighted {W,Q2}
+	TH1D_2d_star _acc_rel_error_unweighted;//Distribution of Relative error of the Acceptance unweighted {W,Q2}
 
 
 
 	//Topology Yields
-	double_4d _n_exp_corr;
-	double_4d _n_sim_corr;
-	double_3d _n_thrown;
+	double_2d _n_exp_corr;
+	double_2d _n_sim_corr;
+	double_2d _n_thrown;
 	//Sparse Binning
 
 	//W Q2 Histograms
-	TH2D *_exp_hist_wq2[_n_var_sets][_n_topology];
-	TH2D *_sim_hist_wq2[_n_var_sets][_n_topology];
-	TH2D *_exp_corr_hist_wq2[_n_var_sets][_n_topology];
-	TH2D *_sim_corr_hist_wq2[_n_var_sets][_n_topology];
-	TH2D *_thr_hist_wq2[_n_topology];
+	TH2D* _exp_hist_wq2;
+	TH2D* _sim_hist_wq2;
+	TH2D* _exp_corr_hist_wq2;
+	TH2D* _sim_corr_hist_wq2;
+	TH2D* _thr_hist_wq2;
 
 	//Acceptance Histograms
-	TH1D_5d_star _accept_hist_1;//(var,top,w,q2,{MM1,MM2,theta,alpha,phi})
-	TH1D *_accept_hist_2[_n_var_sets][_n_topology][2];//(var,top,{w,q2})
+	TH1D_3d_star _accept_hist_1;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+	TH1D* _accept_hist_2[2];//{w,q2}
 	
 public:
 	Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, Flags flags_);
 	//Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, TFile* empty_tree, Flags flags_);
 	//Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, TFile* exp_tree2, TFile* sim_tree2, Flags flags_);
 	//Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, TFile* empty_tree, TFile* exp_tree2, TFile* sim_tree2, TFile* empty_tree, Flags flags_);
-	void Make_Histograms();
-	void Fill_Histograms();
-	void Write_Histograms();
-	void Extract_7d_Histograms(TFile* exp_tree, TFile* sim_tree);
-	void Sparse_Add_7d(THnSparseD &h0, THnSparseD* h1, THnSparseD* h2, int sign, int var);//Add/Subtract Sparse Histograms
-	void Sparse_Add_5d(THnSparseD* &h0, THnSparseD* h1, THnSparseD* h2, int sign, int var);//Add/Subtract Sparse Histograms
+	void Make_Histograms(Flags flags_);
+	void Fill_Histograms(Flags flags_);
+	void Write_Histograms(Flags flags_);
+	void Extract_7d_Histograms(TFile* exp_tree, TFile* sim_tree, Flags flags_);
+	void Sparse_Add_7d(THnSparseD &h0, THnSparseD* h1, THnSparseD* h2, int sign);//Add/Subtract Sparse Histograms
+	void Sparse_Add_5d(THnSparseD* &h0, THnSparseD* h1, THnSparseD* h2, int sign);//Add/Subtract Sparse Histograms
 	void Sparse_7to5(Flags flags_);//Convert 7d histograms to 5d histograms
 	void Sparse_5to3(Flags flags_);//For Single Differential bins
 	void Sparse_5to4(Flags flags_);//For Polarization Observables
-	void Extract_Bin_Info();//Extract binning information for 7 and 5d histograms
-	void Skeleton_5D();//Create Empty 5D THnSparse to fill
-	void Calc_Acceptance();//Calculate acceptance from 5d histograms
-	void Calc_Holes_Sim();//Calculate Estimated Holes in Simulation
-	void Calc_Holes_Exp();//Calculate Estimated Holes in Experiment
-	void Calc_Holes();//Calculate Estimated Holes for Sim and Exp
-	void Calc_Cross_Section();//Calculate Cross Section
-	void Make_Single_Diff();//Make Single Differential Cross Section Histograms
-	void Make_Polarization();//Make Histograms to extract polarization observables
-	void Make_Integrated();//Make Integrated Cross Section Histograms
-	void Make_WQ2();//Make WQ2 histograms to show binnning
-	void Make_Acceptance();
+	void Extract_Bin_Info(Flags flags_);//Extract binning information for 7 and 5d histograms
+	void Skeleton_5D(Flags flags_);//Create Empty 5D THnSparse to fill
+	void Calc_Acceptance(Flags flags_);//Calculate acceptance from 5d histograms
+	void Calc_Holes_Sim(Flags flags_);//Calculate Estimated Holes in Simulation
+	void Calc_Holes_Exp(Flags flags_);//Calculate Estimated Holes in Experiment
+	void Calc_Holes(Flags flags_);//Calculate Estimated Holes for Sim and Exp
+	void Calc_Cross_Section(Flags flags_);//Calculate Cross Section
+	void Make_Single_Diff(Flags flags_);//Make Single Differential Cross Section Histograms
+	void Make_Polarization(Flags flags_);//Make Histograms to extract polarization observables
+	void Make_Integrated(Flags flags_);//Make Integrated Cross Section Histograms
+	void Make_WQ2(Flags flags_);//Make WQ2 histograms to show binnning
+	void Make_Acceptance(Flags flags_);
 	//void Write_5d_Yield();
 	//void Write_5d_Cross_Section();
 	//void Write_5d_Holes();
@@ -206,24 +204,24 @@ public:
 	//void Write_Single_Diff();
 	//void Write_Polarization();
 	//void Write_Integrated();
-	void Convert_to_Cross();
-	void Convert_Single_Diff_to_Cross();
-	void Convert_Polarization_to_Cross();
-	void Write_WQ2();
-	void Write_Acceptance();
-	void Write_Single_Diff();
-	void Write_Polarization();
-	float Bin_Size(int var_set, int variable, int bin_7d);
-	float W_Bin_Size(int var_set, int bin_7d);
-	float Q2_Bin_Size(int var_set, int bin_7d);
-	float X_Bin_Size(int var_set, int variable, int bin_7d);
-	float Phi_Bin_Size(int var_set, int bin_7d);
-	double Bin_Center_7d(int var_set, int dim, int bin);
-	void XandPhi_BinHistograms();
-	void Acceptance_Errors();
-	void Make_Error_Hists();
-	void Fill_Error_Hists();
-	void Write_Error_Hists();
+	void Convert_to_Cross(Flags flags_);
+	void Convert_Single_Diff_to_Cross(Flags flags_);
+	void Convert_Polarization_to_Cross(Flags flags_);
+	void Write_WQ2(Flags flags_);
+	void Write_Acceptance(Flags flags_);
+	void Write_Single_Diff(Flags flags_);
+	void Write_Polarization(Flags flags_);
+	float Bin_Size( int variable, int bin_7d);
+	float W_Bin_Size( int bin_7d);
+	float Q2_Bin_Size( int bin_7d);
+	float X_Bin_Size( int variable, int bin_7d);
+	float Phi_Bin_Size( int bin_7d);
+	double Bin_Center_7d( int dim, int bin);
+	void XandPhi_BinHistograms(Flags flags_);
+	void Acceptance_Errors(Flags flags_);
+	void Make_Error_Hists(Flags flags_);
+	void Fill_Error_Hists(Flags flags_);
+	void Write_Error_Hists(Flags flags_);
 };
 
 #endif

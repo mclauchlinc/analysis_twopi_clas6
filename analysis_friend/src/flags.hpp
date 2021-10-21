@@ -32,6 +32,7 @@ static std::string _beam_spin_ = "beam_spin";
 static std::string _eff_ = "eff";
 static std::string _err_ = "err";
 static std::string _wq2_ = "wq2";
+static std::string _acceptance_ = "accept";
 
 static std::string _output_name_ = "-name=";
 static std::string _sim_file_ = "-sim=";
@@ -88,6 +89,7 @@ private:
 	bool _plot_eff = false;
 	bool _plot_err = false;
 	bool _plot_wq2 = false;
+	bool _plot_acceptance = false;
 
 	std::string _real_top = "";
 	std::string _input_top = "";
@@ -114,6 +116,7 @@ public:
 	bool Plot_Eff();
 	bool Plot_Err();
 	bool Plot_WQ2();
+	bool Plot_Acceptance();
 	//File Names
 	std::string Sim_File();
 	std::string Exp_File();
@@ -131,6 +134,10 @@ public:
 	bool Has_Exp();
 	bool Has_Empty();
 	bool Make_Image();
+	int Var_idx();
+	std::string Var_Set();
+	std::string Top();
+	int Top_idx();
 
 };
 

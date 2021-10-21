@@ -13,6 +13,7 @@ static const double _mp_ = 0.93828;//mass of proton
 //Beam energies in GeV
 static const float _energy_e16_ = 5.754;
 static const float _energy_e1f_ = 5.499;
+static const float _beam_energy_[] = {_energy_e16_,_energy_e1f_};
 
 //Target info for luminosity
 static const double _length_target_ = 5.; //cm
