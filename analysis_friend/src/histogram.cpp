@@ -353,6 +353,7 @@ void	Histogram::Sparse_7to5(Flags flags_){
 			}
 		}
 	}
+	std::cout<<"For Krishna: W:" <<_bin_low_7d[0][12] <<"-" <<_bin_up_7d[0][13] <<" Q2:" <<_bin_low_7d[1][2] <<"-" <<_bin_up_7d[1][2] <<" gives integral: " <<(fun::nSparseIntegral(_exp_data_5d[12][3])+fun::nSparseIntegral(_exp_data_5d[13][3])) <<"\n";
 }
 //For Single Differential bins
 void Histogram::Sparse_5to3(Flags flags_){
