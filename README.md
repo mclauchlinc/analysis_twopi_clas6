@@ -102,15 +102,17 @@
     -empty2=<br>
  the 2s are used for running over both e16 and e1f data sets simultaneously for a combined measured cross section
  **Run Information (-i=)**<br>
-    e16<br>
-    e1f<br>
-    both<br>
-    var_pim => Specific variable set where pim is a focused product hadron<br>
-    var_pro => Specific variable set where pro is a focused product hadron<br>
-    var_pip => Specific variable set where pip is a focused product hadron<br>
+ <ul>
+    <li>e16</li>
+    <li>e1f</li>
+    <li>both</li>
+   <li> var_pim => Specific variable set where pim is a focused product hadron</li>
+    <li>var_pro => Specific variable set where pro is a focused product hadron</li>
+    <li>var_pip => Specific variable set where pip is a focused product hadron</li>
+ </ul>
  **Image File (-image=)** (not used yet)<br>
  Include full path for intended image file to output images of all plots made. </p>
- 
+
 ### Golden Run
  <p>Used to determine a golden run list based on Integrated Faraday Cup Charge normalized by number of Events <br>
  **Example Run**<br>
