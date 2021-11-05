@@ -8,6 +8,7 @@
  <p>This is located in the main directory and all the src files refer to it<br>
  The purpose of this program is to read in root files from CLAS6 runs<br>
  Inputs are given in the form of flags</p>
+
 #### Event Selection Flags
  <p>Flags are handled flags.(c/h)pp and Class "Flags"<br>
  Information about what is to be performed is put in several different channels<br>
@@ -69,8 +70,10 @@
  -cores=  => Used for multithreading. Input the number of threads you wish to utilize<br>
  **Example Running**<br>
  ./bin/analysis -t=e16 -t=filled -loc=/folder/path.txt -cut=dt_pro -cut=fid_ele -cut=sf -cut=mm_pim -plot=all -nplot=cc_eff -nplot=mm_pro -name=/outdir/name.root -friend=/outdir/name_friend.root -n=30 -cores=6</p>
+
 ### Cross Section Extraction
  <p>This takes in THnSparse histograms as output by the Event Selection above and outputs relevant cross sections and other yields</p>
+
 #### Cross Section Extraction Flags
  <p>**Topologies (-t= and -r=)**<br>
  {topologies} => {mpro,mpip,mpim,mzero,mall}<br>
@@ -107,6 +110,7 @@
     var_pip => Specific variable set where pip is a focused product hadron<br>
  **Image File (-image=)** (not used yet)<br>
  Include full path for intended image file to output images of all plots made. </p>
+ 
 ### Golden Run
  <p>Used to determine a golden run list based on Integrated Faraday Cup Charge normalized by number of Events <br>
  **Example Run**<br>
