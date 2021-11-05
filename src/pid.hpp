@@ -13,6 +13,8 @@ namespace pid {
 	bool pid_pro(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 	bool pid_pip(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 	bool pid_pim(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
+	//ID Cut
+	bool id_bank(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_,const char* _species_);
 	//Fiducial Cuts
 	std::vector<bool> fid(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 	bool fid_ele(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);

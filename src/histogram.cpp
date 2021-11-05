@@ -860,6 +860,12 @@ void Histogram::Fid_Make(std::shared_ptr<Flags> flags_){
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
 						}
+						if(_ecuts_[cart[4]]== _id_cut_ && flags_->Flags::ID_Cut()&& _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
+							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] = true;
+						}
 						if(_ecuts_[cart[4]]== _pid_ && _cut_[cart[2]]!=_no_cut_){
 							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[0]]);
@@ -1113,6 +1119,7 @@ void Histogram::Fid_Fill(const char * species_, float theta_, float phi_, const 
 			idx.clear();
 		}
 		idx = Histogram::Fid_cut_idx(species_,pcut_,sector_,cut_,top_,_nweighted_,flags_);
+		
 		//if(pcut_==_event_){
 			//std::cout<<"Trying to fill Fid: phi:" <<phi_ <<" theta:" <<theta_ <<" " <<species_ <<" " <<pcut_ <<" "<<sector_ <<" " <<cut_ <<" " <<top_ <<" " <<weight_ <<"\n";
 		//}
@@ -1120,7 +1127,8 @@ void Histogram::Fid_Fill(const char * species_, float theta_, float phi_, const 
 		if(Histogram::OK_Idx(idx)){
 			if(Histogram::Made_Fid_idx(species_,pcut_,sector_,cut_,top_,_nweighted_)){
 				//if(pcut_ == _event_){
-					//fun::print_vector_idx(idx);
+				//	fun::print_vector_idx(idx);
+				//	std::cout<<species_ <<" " <<pcut_ <<" " <<sector_ <<" " <<cut_ <<" " <<top_ <<" " <<_nweighted_ <<"\n";
 				//}
 				//fun::print_vector_idx(idx);
 				_Fid_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Fill(phi_,theta_,1.0);
@@ -1515,7 +1523,7 @@ void Histogram::SF_Write(std::shared_ptr<Flags> flags_){
 		CartesianGenerator cart(space_dims);
 		std::vector<int> idx;
 		while(cart.GetNextCombination()){
-			if(_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]){
+			if(_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] && fun::ecut_perform(_ecuts_[cart[4]],flags_)){
 				idx = Histogram::SF_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],_W_var_,flags_);
 				idx[4] = (Histogram::W_bins()+1)-((Histogram::W_bins()+1)-cart[0]);
 				//fun::print_vector_idx(idx);
@@ -3256,7 +3264,9 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 				if(thrown_){
 					_Thrown[var_]->Fill(x,weight_);
 				}else{
+					//std::cout<<"Filling Friend!\n";
 					_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
+					//std::cout<<"Done filling friend\n";
 					if(flags_->Flags::Sim()){
 						_Weight_Sum[var_][fun::top_idx(top_)]->Fill(x,weight_*weight_);
 					}

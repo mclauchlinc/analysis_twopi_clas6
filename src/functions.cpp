@@ -31,13 +31,13 @@ std::shared_ptr<TFile> fun::Name_Sparse(std::shared_ptr<Flags> flags_){
   }
 }
 
-std::vector<std::string> fun::read_file_list(std::string path, int thread_num){
+std::vector<std::string> fun::read_file_list(std::string path, int thread_num, std::shared_ptr<Flags> flags_){
   std::ifstream infile(path.c_str()); // in file stream
   std::vector<std::string> result;
   std::string line;
   int t = 0;
   while(getline(infile,line)) { //getline sees if there is a line available
-    if(thread_num == (t%_NUM_THREADS_)){
+    if(thread_num == (t%flags_->Flags::Num_Cores())){//_NUM_THREADS_)){
       result.push_back(line);//Gets the current line
     }
     t++;
@@ -57,8 +57,8 @@ void fun::removeTree(std::string file_name){
   file->Close();
 }
 
-void fun::loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_, int max_){
-  std::vector<std::string> filelist = fun::read_file_list(file_,thread_id_);//read_file_list(file); //creates a vector of file names
+void fun::loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_, int max_, std::shared_ptr<Flags> flags_){
+  std::vector<std::string> filelist = fun::read_file_list(file_,thread_id_,flags_);//read_file_list(file); //creates a vector of file names
   //If not specified will take in all the files in the text file
   int test = filelist.size();
   if(max_ > test)
@@ -267,6 +267,8 @@ bool fun::ecut_perform(const char* ecut_, std::shared_ptr<Flags> flags_){
       pass = true;
     }else if(ecut_==_delta_cut_ && flags_->Flags::Delta_Cut(0)){
       pass = true;
+    }else if(ecut_ == _id_cut_ && flags_->Flags::ID_Cut()){
+      pass = true;
     }else if(ecut_==_event_){
       pass = true;
     }
@@ -295,6 +297,8 @@ bool fun::hcut_perform(const char * species_,const char* hcut_, std::shared_ptr<
       if(hcut_==_fid_cut_ && flags_->Flags::Fid_Cut(fun::species_idx(species_))){
         pass = true;
       }else if(hcut_==_delta_cut_ && flags_->Flags::Delta_Cut(fun::species_idx(species_))){
+        pass = true;
+      }else if(hcut_ == _id_cut_ && flags_->Flags::ID_Cut()){
         pass = true;
       }else if(hcut_==_event_ ){
         pass = true;

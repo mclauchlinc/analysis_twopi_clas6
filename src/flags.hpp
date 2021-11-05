@@ -36,6 +36,7 @@ static std::string _delta_cut_f_[4] = {"dt_ele","dt_pro","dt_pip","dt_pim"};; //
 static std::string _sf_cut_f_ = "sf";
 static std::string _cc_cut_f_ = "cc";
 static std::string _ec_cut_f_ = "ec";
+static std::string _id_cut_f_ = "id";
 static std::string _beta_cut_f_[4] = {"beta_ele","beta_pro","beta_pip","beta_pim"};; //{ele,pro,pip,pim}
 //Other Cuts
 static std::string _vertex_cut_f_ = "vertex";
@@ -82,6 +83,8 @@ static std::string _make_image_ = "-image=";
 //Other Flags
 static std::string _output_name_ = "-name=";
 static std::string _num_files_ = "-n=";
+//Multi-threading
+static std::string _num_cores_= "-cores=";
 
 
 
@@ -101,6 +104,7 @@ private:
 	bool _sf_cut = false;
 	bool _cc_cut = false;
 	bool _ec_cut = false;
+	bool _id_cut = false;
 	bool _beta_cut[4] = {false,false,false,false}; //{ele,pro,pip,pim}
 	//Other Cuts
 	bool _vertex_cut = false;
@@ -147,6 +151,9 @@ private:
 	std::string _output_name = "";
 	std::string _friend_name = "";
 	std::string _image_name = "";
+
+	int _num_cores = -1;
+
 public:
 	Flags();
 	void Help();
@@ -171,6 +178,7 @@ public:
 	bool SF_Cut();
 	bool CC_Cut();
 	bool EC_Cut();
+	bool ID_Cut();
 	bool Beta_Cut(int particle);
 	//Other Cuts
 	bool Vertex_Cut();
@@ -215,6 +223,8 @@ public:
 	std::string Output_Name();
 	std::string Friend_Name();
 	std::string Image_Name();
+
+	int Num_Cores();
 
 };
 

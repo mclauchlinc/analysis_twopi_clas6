@@ -77,6 +77,7 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 			_dt_pass[0] = true;
 			_fid_pass[0] = true;
 			//_beta_pass[0] = true;
+			_id_pass[0] = true;
 		}else{
 			_sanity_pass[0] = pid::sanity_ele(idx_,data_,flags_);
 			if(_sanity_pass[0]){
@@ -87,6 +88,7 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				//_dt_pass[0] = pid::delta_t_ele(idx_,data_,flags_);//Maybe implement later
 				_fid_pass[0] = pid::fid_ele(idx_,data_,flags_);
 				//_beta_pass[0] = pid::
+				_id_pass[0] = pid::id_bank(idx_,data_,flags_,_ele_);
 			}
 		}
 	}else{//Hadron
@@ -95,35 +97,41 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_sanity_pass[1] = true;
 				_dt_pass[1] = true;
 				_fid_pass[1] = true;
+				_id_pass[1] = true;
 			}else{
 				_sanity_pass[1] = pid::sanity_pro(idx_,data_,flags_);
 				if(_sanity_pass[1]){
 					_dt_pass[1] = pid::delta_t_pro(idx_,data_,flags_);
 					_fid_pass[1] = pid::fid_pro(idx_,data_,flags_);
 				}
+				_id_pass[1] = pid::id_bank(idx_,data_,flags_,_pro_);
 			}
 			if(_pid[2]){//Pip
 				_sanity_pass[2] = true;
 				_dt_pass[2] = true;
 				_fid_pass[2] = true;
+				_id_pass[2] = true;
 			}else{
 				_sanity_pass[2] = pid::sanity_pip(idx_,data_,flags_);
 				if(_sanity_pass[2]){
 					_dt_pass[2] = pid::delta_t_pip(idx_,data_,flags_);
 					_fid_pass[2] = pid::fid_pip(idx_,data_,flags_);
 				}
+				_id_pass[2] = pid::id_bank(idx_,data_,flags_,_pip_);
 			}
 		}else if(_q < 0){
 			if(_pid[3]){//Pim
 				_sanity_pass[3] = true;
 				_dt_pass[3] = true;
 				_fid_pass[3] = true;
+				_id_pass[3] = true;
 			}else{
 				_sanity_pass[3] = pid::sanity_pim(idx_,data_,flags_);
 				if(_sanity_pass[3]){
 					_dt_pass[3] = pid::delta_t_pim(idx_,data_,flags_);
 					_fid_pass[3] = pid::fid_pim(idx_,data_,flags_);
 				}
+				_id_pass[3] = pid::id_bank(idx_,data_,flags_,_pim_);
 			}
 		}
 	}
@@ -146,6 +154,9 @@ bool Particle::Pass_cc(){
 }
 bool Particle::Pass_dt(int i){
 	return _dt_pass[i];
+}
+bool Particle::Pass_id(int i){
+	return _id_pass[i];
 }
 bool Particle::Pass_pid(int i){
 	return _pid[i];

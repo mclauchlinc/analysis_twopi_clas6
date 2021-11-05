@@ -127,6 +127,8 @@ Flags::Flags(){}
 				//std::cout<<"Info on the image name\n";
 				_make_image = true;
 				_image_name = str.substr(7,str_len);
+			}else if(str.substr(0,7) == _num_cores_){
+				_num_cores = stoi(str.substr(7,str_len));
 			}
 		}if(str_len > 8){
 			if(str.substr(0,8) == _make_friend_){
@@ -173,6 +175,10 @@ Flags::Flags(){}
 			if(str==_sf_cut_f_){
 				std::cout<<"Will do SF Cut\n";
 				_sf_cut=true;
+			}
+			if(str==_id_cut_f_){
+				std::cout<<"Will do ID Cut\n";
+				_id_cut=true;
 			}
 			if(str==_cc_cut_f_){
 				std::cout<<"Will do CC Cut\n";
@@ -499,6 +505,9 @@ Flags::Flags(){}
 	bool Flags::EC_Cut(){
 		return _ec_cut; 
 	}
+	bool Flags::ID_Cut(){
+		return _id_cut; 
+	}
 	bool Flags::Beta_Cut(int particle){
 		return _beta_cut[particle];
 	}
@@ -600,4 +609,10 @@ Flags::Flags(){}
 	std::string Flags::Image_Name(){
 		return _image_name;
 	}
-
+	int Flags::Num_Cores(){
+		if(_num_cores > 0){
+			return _num_cores;
+		}else{
+			return 1;
+		}
+	}

@@ -35,11 +35,11 @@ std::shared_ptr<TFile> Name_File(std::shared_ptr<Flags> flag_);
 std::shared_ptr<TFile> Name_Image(std::shared_ptr<Flags> flag_);
 std::shared_ptr<TFile> Name_Sparse(std::shared_ptr<Flags> flag_);
 
-std::vector<std::string> read_file_list(std::string path, int thread_num);
+std::vector<std::string> read_file_list(std::string path, int thread_num, std::shared_ptr<Flags> flags_);
 
 void removeTree(std::string file_name);
 
-void loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_, int max_);
+void loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_, int max_, std::shared_ptr<Flags> flags_);
 
 
 

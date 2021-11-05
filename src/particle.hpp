@@ -54,6 +54,7 @@ private:
 	bool _cc_pass = false; //Pass Min CC 
 	bool _dt_pass[4] = {false,false,false,false};//Pass Delta t {ele,pro,pip,pim}
 	bool _beta_pass[4] = {false,false,false,false};//Pass Beta {ele,pro,pip,pim}
+	bool _id_pass[4] = {false,false,false,false};//Pass ID bank {ele,pro,pip,pim}
 	bool _sp_dt_pass[3] = {false,false, false};
 	bool _p_corr = false; //Performed Momentum Correction
 	int _id_crisis = 0;//{0,1,2} = {none, pro/pip, pim/e}
@@ -79,6 +80,7 @@ public:
 	bool Pass_sf();
 	bool Pass_cc();
 	bool Pass_dt(int i);
+	bool Pass_id(int i);
 	bool Pass_pid(int i);
 	bool Corr_p();
 	int ID_crisis();

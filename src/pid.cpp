@@ -49,6 +49,7 @@
 			//std::cout<<pass <<"\n\t\tVertex Electron: ";
 			pass &= pid::vertex_e(idx_,data_,flags_);
 			//std::cout<<pass <<"\n";
+			pass &= pid::id_bank(idx_,data_,flags_,_ele_);
 		}
 		return pass; 
 	}
@@ -62,6 +63,7 @@
 			pass &= pid::delta_t_pro(idx_,data_,flags_);
 			//std::cout<<"\t\tFid for Proton\n";
 			pass &= pid::fid_pro(idx_,data_,flags_);
+			pass &= pid::id_bank(idx_,data_,flags_,_pro_);
 		}
 		return pass;
 	}
@@ -75,6 +77,7 @@
 			pass &= pid::delta_t_pip(idx_,data_,flags_);
 			//std::cout<<"\t\tFid for Pi+\n";
 			pass &= pid::fid_pip(idx_,data_,flags_);
+			pass &= pid::id_bank(idx_,data_,flags_,_pip_);
 		}
 		return pass;
 	}
@@ -84,8 +87,25 @@
 			pass = pid::sanity_pim(idx_,data_,flags_);
 			pass &= pid::delta_t_pim(idx_,data_,flags_);
 			pass &= pid::fid_pim(idx_,data_,flags_);
+			pass &= pid::id_bank(idx_,data_,flags_,_pim_);
 		}
 		return pass;
+	}
+	bool pid::id_bank(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_,const char* _species_){
+		if(!flags_->Flags::ID_Cut()){
+			return true;
+		}
+		if(_species_ == _ele_ && data_->Branches::id(idx_) == _ELECTRON_){
+			return true;
+		}else if(_species_ == _pro_ && data_->Branches::id(idx_) == _PROTON_){
+			return true;
+		}else if(_species_ == _pip_ && data_->Branches::id(idx_) == _PION_){
+			return true;
+		}else if(_species_ == _pim_ && data_->Branches::id(idx_) == -_PION_){
+			return true;
+		}else{
+			return false;
+		}
 	}
 	std::vector<bool> pid::fid(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
 		std::vector<bool> pass;//[4] = {false,false,false,false};

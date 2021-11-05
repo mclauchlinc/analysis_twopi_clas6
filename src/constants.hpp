@@ -9,7 +9,7 @@
 //static int num_mixed_p_pip = 0; 
 
 static const  int MAX_PARTS = 20; 
-static const  int _NUM_THREADS_ = 1;//6;//4;
+static const  int _NUM_THREADS_ = 6;//20;//4;
 
 static const  float _c_special_ = 29.9792458; //speed of light in cm/ns
 static const  float _c_convert_ = 10000000; //Convert c_special to m/s
@@ -117,6 +117,8 @@ static const  std::string path_ce1fs = "/home/mclauchc/analysis/Path_Files/clust
 
 static const  int _plate_swap_e16_[] = {1000,1002};
 static const  int _plate_swap_e1f_[] = {1000,1002};
+static const  int _empty_e16_[] = {30825,30962,31104,31128,31252,31254,31300,31344};
+static const  int _empty_e1f_[] = {10000,20000}
 
 static const  int _e16_ = 0;
 static const  int _e1f_ = 1; 
@@ -131,6 +133,7 @@ static const  char * _cc_cut_ = "min_cc";
 static const  char * _ec_cut_ = "min_ec";
 static const  char * _vertex_cut_ = "vertex";
 static const  char * _beta_cut_ = "beta";
+static const  char * _id_cut_ = "id";
 static const  char * _pid_ = "pid";
 static const  char * _event_ = "event";
 static const  char * _ele_ = "ele";
@@ -170,8 +173,8 @@ static const  char * _false_ = "false";
 static const  char * _truth_[] = {_false_,_true_};
 
 //Parsing Out PID Cuts
-static const  char* _ecuts_[] = {_none_,_sanity_, _fid_cut_, _sf_cut_, _cc_cut_, _ec_cut_, _vertex_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
-static const  char* _hcuts_[] = {_none_,_sanity_, _fid_cut_, _delta_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
+static const  char* _ecuts_[] = {_none_,_sanity_, _fid_cut_, _sf_cut_, _cc_cut_, _ec_cut_, _vertex_cut_,_id_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
+static const  char* _hcuts_[] = {_none_,_sanity_, _fid_cut_, _delta_cut_,_id_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
 static const  char* _top_[] = {_mpro_,_mpip_,_mpim_,_mzero_,_mall_,_mnone_};
 static const  char* _cut_[] = {_cut_applied_,_anti_cut_,_no_cut_};
 static const  char* _species_[] = {_ele_,_pro_,_pip_,_pim_};

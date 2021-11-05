@@ -35,29 +35,26 @@ int _hist_par=0;
 int _other_par=0;
 std::string _file_list;
 
-size_t _num_events[_NUM_THREADS_];
-int _run_n[_NUM_THREADS_];
-
 
 
 
 size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, int thread_id_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
 	//Number of events in this thread
-	_num_events[thread_id_] = (int) chain_->GetEntries();
+	int num_events = (int) chain_->GetEntries();
 	//Print out information about the thread
-	std::cout<<"Thread " <<thread_id_ <<": " <<_num_events[thread_id_] <<" Events\n";
+	std::cout<<"Thread " <<thread_id_ <<": " <<num_events <<" Events\n";
 	
 	//Make a data object which all the branches can be accessed from
 	auto data = std::make_shared<Branches>(chain_,flags_->Flags::Sim());
 
 	int run_num = 53812; //fun::extract_run_number(); //Not Finished so using temporary run number
-	for(size_t curr_event = 0; curr_event < _num_events[thread_id_]; curr_event++){
+	for(size_t curr_event = 0; curr_event < num_events; curr_event++){
 		//Get singular event
 		chain_->GetEntry(curr_event);
 		//Update on Progress through Analysis
-		if(thread_id_ == 0 && curr_event%(_num_events[thread_id_]/100) == 0){
+		if(thread_id_ == 0 && curr_event%(num_events/100) == 0){
 			//curr_file_name = 
-			std::cout<<"\r" <<"\t" <<(100*curr_event/_num_events[thread_id_]) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
+			std::cout<<"\r" <<"\t" <<(100*curr_event/num_events) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
 		}
 		//Particle ID, Event Selection, and Histogram Filling
 		auto analysis = std::make_shared<Analysis>(data,hists_, thread_id_, run_num, flags_);
@@ -65,13 +62,13 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 }
 
 
-size_t run_files(std::vector<std::string> files_, std::shared_ptr<Histogram> hists_, int thread_id_, int max_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
+size_t run_files( std::shared_ptr<Histogram> hists_, int thread_id_, int max_, std::shared_ptr<Flags> flags_){//, int &num_ppip){std::vector<std::string> files_,
 	//Called once per thread
 	//Make a new chain to process for this thread
 	auto chain = std::make_shared<TChain>("h10");
 	//Add every file to the chain
 	std::cout<<"Loading Chain\n";
-	fun::loadChain(chain, flags_->Flags::Files(), thread_id_, flags_->Flags::Num_Files());
+	fun::loadChain(chain, flags_->Flags::Files(), thread_id_, flags_->Flags::Num_Files(),flags_);
 	//for(auto in:files_) chain->Add(in.c_str());
 	//Run the function over each thread
 	return run(chain,hists_,thread_id_,flags_);//,num_ppip);

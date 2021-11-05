@@ -16,9 +16,7 @@ int main(int argc, char **argv){
 	auto start = std::chrono::high_resolution_clock::now();
 	//std::cout<<"The res for DTx is: " <<DTxres <<" and the rest for DTy is: " <<DTyres <<std::endl;
 
-	//for threading
-
-	std::vector<std::vector<std::string>> infilenames(_NUM_THREADS_);
+	
 	//std::vector<std::vector<std::string>> infilenames2(_NUM_THREADS_);//For two lists of plate stuff
 
 	std::cout<<"Reading Flags\n";
@@ -28,15 +26,18 @@ int main(int argc, char **argv){
 	std::cout<<"Test for Vertex plotting "<<flags->Plot_Vertex() <<"\n";
 	std::cout<<"Test for perform  "<<fun::ecut_perform(_event_,flags) <<"\n";
 	std::cout<<"Test for Friend" <<flags->Make_Friend() <<"\n";
+	std::cout<<"Test for ID cut " <<flags->ID_Cut() <<"\n";
 
+	//std::vector<std::vector<std::string>> infilenames(flags->Flags::Num_Cores());
 
 	int num_files = flags->Flags::Num_Files();
-	for(int i=0; i<_NUM_THREADS_; i++){
-		infilenames[i]  = fun::read_file_list(flags->Flags::Files(),i);
-	}
+	std::cout<<"Looking to have " <<flags->Flags::Num_Cores() <<" cores being used\n";
+	//for(int i=0; i<flags->Flags::Num_Cores(); i++){
+	//	infilenames[i]  = fun::read_file_list(flags->Flags::Files(),i,flags);
+	//}
 	
 	// Make a set of threads (Futures are special threads which return a value)
-  	std::future<size_t> threads[_NUM_THREADS_];
+  	std::future<size_t> threads[flags->Flags::Num_Cores()];
 
 	//Define variable for total number of events
 	size_t events = 0; 
@@ -55,18 +56,18 @@ int main(int argc, char **argv){
 
 	//For each thread
 	std::cout<<"Running Multithreaded\n";
-	for(int i = 0; i<_NUM_THREADS_; i++){
+	for(int i = 0; i<flags->Flags::Num_Cores(); i++){
 		//Set the thread to run asynchronously
 		//The function running is the first argument
 		//The functions arguments are all remaining arguments
-		threads[i] = std::async(run_files, infilenames.at(i), hists, i, file_num, flags);//, num_mixed_p_pip[i]);
+		threads[i] = std::async(run_files, hists, i, file_num, flags);//, num_mixed_p_pip[i]);infilenames.at(i)
 	}
-	for(int j = 0; j<_NUM_THREADS_; j++){
+	for(int j = 0; j<flags->Flags::Num_Cores(); j++){//_NUM_THREADS_
 		threads[j].wait(); //Wait until all threads are complete to move on
 	}
 
 	//For each thread to see how many events each thread successfully analyized
-	for(int i = 0; i<_NUM_THREADS_; i++){
+	for(int i = 0; i<flags->Flags::Num_Cores(); i++){//_NUM_THREADS_
 		events += threads[i].get();
 	}
 	//std::cout<<std::endl <<"Total Number of Files: " <<envi->Environment::was_num_file() <<std::endl; 
