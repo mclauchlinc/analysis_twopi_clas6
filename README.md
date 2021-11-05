@@ -13,52 +13,62 @@
  <p>Flags are handled flags.(c/h)pp and Class "Flags"<br>
  Information about what is to be performed is put in several different channels<br>
  **target information (-t=)**<br>
-    e16 => Looking at data from run group E1-6<br>
-    e1f => Looking at data from run group E1F<br>
-    filled => Target was filled<br>
-    sim => This is simulated Data<br>
-    hel => Helicity and Half Wave Plate status will be utilized<br>
+ <ul>   
+    <li>e16 => Looking at data from run group E1-6</li>
+    <li>e1f => Looking at data from run group E1F</li>
+    <li>filled => Target was filled</li>
+    <li>sim => This is simulated Data</li>
+    <li>hel => Helicity and Half Wave Plate status will be utilized</li>
+ </ul>
  **Data Files (-loc=)**<br>
  Data is expected to be in root files with a separate text file having all their full paths separted by line. The pull path of this text file should be input as: -loc=<Full Path to Path File><br>
  **Cuts (-cut= || -ncut=)**<br>
- all<br>
  {particle} => {ele,pro,pip,pim}<br>
  {topology} => {pro,pip,pim,zero}<br>
-    fid_{particle}<br>
-    dt_{particle}<br>
-    sf<br>
-    cc<br>
-    ec<br>
-    id<br>
-    beta_{particle}<br>
-    vertex<br>
-    mm_{topology}<br>
+ <ul>
+    <li>all</li>
+    <li>fid_{particle}</li>
+    <li>dt_{particle}</li>
+    <li>sf</li>
+    <li>cc</li>
+    <li>ec</li>
+    <li>id</li>
+    <li>beta_{particle}</li>
+    <li>vertex</li>
+    <li>mm_{topology}</li>
+ </ul>
  **Efficiency Cuts (-eff=)** (not usable yet)<br>
-    cc<br>
-    dc<br>
-    ec<br>
-    sc<br>
+ <ul>
+    <li>cc</li>
+    <li>dc</li>
+    <li>ec</li>
+    <li>sc</li>
+ </ul>
  **Corrections (-corr=)** <br>
-    p_corr  => Momentum Correction<br>
-    e_corr  => Energy Correction<br>
-    v_corr  => Vertex Correction<br>
+ <ul>   
+    <li>p_corr  => Momentum Correction</li>
+    <li>e_corr  => Energy Correction</li>
+    <li>v_corr  => Vertex Correction</li>
+ </ul>
  **Plots (-plot= || -nplot=)**<br>
-    all<br>
-    wq2<br>
-    fid_{particle}<br>
-    sf<br>
-    cc<br>
-    dt_{particle}<br>
-    cc_eff<br>
-    sc_eff<br>
-    ec_eff<br>
-    dc_eff<br>
-    cc_geo<br>
-    sc_geo<br>
-    ec_geo<br>
-    mm_{topology}<br>
-    beta_{particle}<br>
-    vertex<br>
+ <ul>   
+    <li>all</li>
+    <li>wq2</li>
+    <li>fid_{particle}</li>
+    <li>sf</li>
+    <li>cc</li>
+    <li>dt_{particle}</li>
+    <li>cc_eff</li>
+    <li>sc_eff</li>
+    <li>ec_eff</li>
+    <li>dc_eff</li>
+    <li>cc_geo</li>
+    <li>sc_geo</li>
+    <li>ec_geo</li>
+    <li>mm_{topology}</li>
+    <li>beta_{particle}</li>
+    <li>vertex</li>
+ </ul>
  **THnSparse Friend (-friend=)**<br>
  If wanting to output a THnSparse full of events, simply name the full path of the intended friend<br>
  **Image (-image=)** (not usable yet)<br>
@@ -66,8 +76,10 @@
  **Output file (-name=)**<br>
  Name the full path of the intended output root file with event selection histograms in it<br>
  **Other**<br>
- -n=  => number of files to be used. use -1 if you want all of them in the given path file<br>
- -cores=  => Used for multithreading. Input the number of threads you wish to utilize<br>
+ <ul>
+    <li>-n=  => number of files to be used. use -1 if you want all of them in the given path file</li>
+    <li>-cores=  => Used for multithreading. Input the number of threads you wish to utilize</li>
+ </ul>
  **Example Running**<br>
  ./bin/analysis -t=e16 -t=filled -loc=/folder/path.txt -cut=dt_pro -cut=fid_ele -cut=sf -cut=mm_pim -plot=all -nplot=cc_eff -nplot=mm_pro -name=/outdir/name.root -friend=/outdir/name_friend.root -n=30 -cores=6</p>
 
@@ -77,29 +89,35 @@
 #### Cross Section Extraction Flags
  <p>**Topologies (-t= and -r=)**<br>
  {topologies} => {mpro,mpip,mpim,mzero,mall}<br>
- -t= determines which THnSparse is being extracted based on topology. This is usually "mall"<br>
- -r= determines what the actual topology given is. Within the context of the analysis, there may be times when it really is a missing pi-, but we want to use the "mall" file<br>
+ <ul>
+    <li>-t= determines which THnSparse is being extracted based on topology. This is usually "mall"</li>
+    <li>-r= determines what the actual topology given is. Within the context of the analysis, there may be times when it really is a missing pi-, but we want to use the "mall" file</li>
+ </ul>
  **Histograms (-h=)**<br>
-    all<br>
-    pol => Polarization Observables<br>
-    single_diff => Single Differential Cross Sections<br>
-    beam_spin => Beam Spin Asymmetry<br>
-    eff => Efficiencies<br>
-    err => Errors<br>
-    wq2 => W Q2 distributions<br>
-    accept => Acceptance<br>
+  <ul>
+    <li>all</li>
+    <li>pol => Polarization Observables</li>
+    <li>single_diff => Single Differential Cross Sections</li>
+    <li>beam_spin => Beam Spin Asymmetry</li>
+    <li>eff => Efficiencies</li>
+    <li>err => Errors</li>
+    <li>wq2 => W Q2 distributions</li>
+    <li>accept => Acceptance</li>
+ </ul>
  **Output (-name=)**<br>
  Full path of the output file<br>
  **Files to put in**<br>
  Give full path for these input files<br>
-    -sim=<br>
-    -exp=<br>
-    -weight=<br>
-    -empty=<br>
-    -sim2=<br>
-    -exp2=<br>
-    -weight2=<br>
-    -empty2=<br>
+ <ul>
+    <li>-sim=</li>
+    <li>-exp=</li>
+    <li>-weight=</li>
+    <li>-empty=</li>
+    <li>-sim2=</li>
+    <li>-exp2=</li>
+    <li>-weight2=</li>
+    <li>-empty2=</li>
+ </ul>
  the 2s are used for running over both e16 and e1f data sets simultaneously for a combined measured cross section
  **Run Information (-i=)**<br>
  <ul>
