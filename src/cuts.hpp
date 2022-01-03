@@ -19,9 +19,9 @@ as this contains the necessary functions for the CC segments
 Cut Parameters were found using the jupyter notebooks in the "pyfitting" directory
 */
 //Range of W/Q2
-static const float _WminAna_ = 1.2;//1.4;
-static const float _WmaxAna_ = 2.3;//2.125;
-static const float _Q2minAna_ = 0.8;//3.0;//2.0; Moved up to 3.0 in order to compare with simulation in that range
+static const float _WminAna_ = 1.4;//1.4;not sure why this was 1.2
+static const float _WmaxAna_ = 2.125;//2.125;//not sure why this was 2.4
+static const float _Q2minAna_ = 2.0;//0.8;//3.0;//2.0; Moved up to 3.0 in order to compare with simulation in that range
 static const float _Q2maxAna_ = 5.0; 
 //Cut Parameters
 //Fiducial Cuts

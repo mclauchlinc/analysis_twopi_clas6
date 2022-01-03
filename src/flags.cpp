@@ -114,6 +114,8 @@ Flags::Flags(){}
 			}else if(str.substr(0,6) == _output_name_){
 				//std::cout<<"Info on the output name\n";
 				_output_name = str.substr(6,str_len);
+			}else if(str.substr(0,6) == _base_){
+				_file_base = str.substr(6,str_len);
 			}
 		}if(str_len > 7){
 			//std::cout<<"Checking Length 7 "<<str.substr(0,7) <<"\n";
@@ -156,19 +158,19 @@ Flags::Flags(){}
 		if(include && !_cut_all){
 			for(int i=0; i<4; i++){
 				if(str==_fid_cut_f_[i]){
-					std::cout<<"Will do Fid Cut:" <<i <<std::endl;
+					std::cout<<"Will do Fid Cut: " <<i <<std::endl;
 					_fid_cut[i] = true;
 				}
 				if(str==_delta_cut_f_[i]){
-					std::cout<<"Will do Delta Cut:" <<i <<std::endl;
+					std::cout<<"Will do Delta Cut: " <<i <<std::endl;
 					_delta_cut[i] = true;
 				}
 				if(str==_beta_cut_f_[i]){
-					std::cout<<"Will do Beta Cut:" <<i <<std::endl;
+					std::cout<<"Will do Beta Cut: " <<i <<std::endl;
 					_beta_cut[i] = true;
 				}
 				if(str==_mm_cut_f_[i]){
-					std::cout<<"Will do MM Cut:" <<i <<std::endl;
+					std::cout<<"Will do MM Cut: " <<i <<std::endl;
 					_mm_cut[i]=true;
 				}
 			}
@@ -485,6 +487,9 @@ Flags::Flags(){}
 	}
 	std::string Flags::Files(){
 		return _location;
+	}
+	std::string Flags::Base(){
+		return _file_base;
 	}
 	int Flags::Num_Files(){
 		return _num_files;

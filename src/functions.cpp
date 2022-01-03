@@ -112,15 +112,10 @@ int fun::Make_Dir(std::string a_dir_name){
 }
 */
 
-int fun::extract_run_number(std::string file_name, bool cluster){
+int fun::extract_run_number(std::string file_name_, std::shared_ptr<Flags> flags_){
   int result = 0;
-  if(cluster){
-    std::stringstream boop(file_name.std::string::substr(48,5));//Changed to 74 
-    boop >> result;
-  }else{
-    std::stringstream boop(file_name.std::string::substr(51,5));
-    boop >> result;
-  }
+  std::stringstream name(file_name_.std::string::substr(flags_->Flags::Base().size(),flags_->Flags::Base().size()+5));
+  name >> result;
   return result;
 }
 
@@ -225,6 +220,33 @@ int fun::species_idx(const char* species_){
     }
   }
   return species_idx;
+}
+
+int fun::species_offset(const char* species_, const char* pcut_, std::shared_ptr<Flags> flags_){
+  //For delta, beta, and fid
+  int offset=0;
+  if(pcut_==_fid_cut_){
+    for(int i=0; i<fun::species_idx(species_); i++){
+      if(!flags_->Flags::Plot_Fid(i)){
+        offset-=1;
+      }
+    }
+  }
+  if(pcut_==_delta_cut_){
+    for(int i=0; i<fun::species_idx(species_); i++){
+      if(!flags_->Flags::Plot_Delta(i)){
+        offset-=1;
+      }
+    }
+  }
+  /*if(pcut_==_beta_cut_){
+    for(int i=0; i<fun::species_idx(species_);i++){
+      if(!flags_->Flags::Plot_Beta(i)){
+        offset-=1;
+      }
+    }
+  }*/
+  return offset;
 }
 
 int fun::sector_idx(const char* sector_){
@@ -391,6 +413,96 @@ int fun::cc_side_idx(const char * side_){
     side_idx = 2;
   }
   return side_idx;
+}
+
+bool fun::is_empty(int run_num_, std::shared_ptr<Flags> flags_){
+  switch(flags_->Run()){
+    case 0:
+      for(int i=0; i<std::distance(std::begin(_empty_e16_), std::end(_empty_e16_)); i++){
+        if(run_num_ == _empty_e16_[i]){
+          return true;
+        }
+      }
+    break;
+    case 1:
+      for(int i=0; i<std::distance(std::begin(_empty_e1f_), std::end(_empty_e1f_)); i++){
+        if(run_num_ == _empty_e16_[i]){
+          return true;
+        }
+      }
+    break;
+    default:
+      std::cout<<"<in is_empty> Improper Run Group Given " <<flags_->Run() <<"\n";
+    break;
+  }
+  return false;
+}
+
+bool fun::is_full(int run_num_, std::shared_ptr<Flags> flags_){
+  switch(flags_->Run()){
+    case 0:
+      if(run_num_ >= _e16_run_bounds_[0] && run_num_ <= _e16_run_bounds_[1]){
+        for(int i=0; i<std::distance(std::begin(_empty_e16_), std::end(_empty_e16_)); i++){
+          if(run_num_ == _empty_e16_[i]){
+            return false;
+          }
+        }
+        return true;
+      }else{
+        std::cout<<"Wasn't within the range of e16\n";
+      }
+    break;
+    case 1:
+      if(run_num_ >= _e1f_run_bounds_[0] && run_num_ <= _e1f_run_bounds_[1]){
+        for(int i=0; i<std::distance(std::begin(_empty_e1f_), std::end(_empty_e1f_)); i++){
+          if(run_num_ == _empty_e16_[i]){
+            return false;
+          }
+        }
+        return true;
+      }else{
+        std::cout<<"Wasn't within the range of e1f\n";
+      }
+    break;
+    default:
+      std::cout<<"<in is_full> Improper Run Group Given " <<flags_->Run() <<"\n";
+    break;
+  }
+  return false;
+}
+
+bool fun::correct_run_num(int run_num_, std::shared_ptr<Flags> flags_){
+  if(flags_->Flags::Fill()){//Was the target filled?
+    return fun::is_full(run_num_,flags_);
+  }else{
+    return fun::is_empty(run_num_,flags_);
+  }
+}
+
+int fun::real_helicity(int hel_, int run_num_, std::shared_ptr<Flags> flags_){
+  int hel = hel_*_plate_sign_[flags_->Run()]; 
+  switch(flags_->Run()){
+    case 0:
+      for(int i=0; i<std::distance(std::begin(_plate_swap_e16_), std::end(_plate_swap_e16_)); i++){
+        if(run_num_ >= _plate_swap_e16_[i] ){
+          hel = hel*-1;
+        }
+      }
+      return hel; 
+    break;
+    case 1:
+      for(int i=0; i<std::distance(std::begin(_plate_swap_e1f_), std::end(_plate_swap_e1f_)); i++){
+        if(run_num_ >= _plate_swap_e1f_[i]){
+          hel = hel*-1;
+        }
+      }
+      return hel; 
+    break;
+    default:
+      std::cout<<"Entered wrong run <fun::real_helicity>\n";
+      return 0; 
+    break;
+  }
 }
 
 /*

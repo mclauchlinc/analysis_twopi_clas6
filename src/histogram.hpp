@@ -20,6 +20,7 @@
 #include "cuts.hpp"
 #include <cmath>
 #include "TLatex.h"
+#include <mutex>//For pausing the multithreading for the filling of THnSparse histograms 
 //#include <unistd.h>//to allow us to use chdir
 //#include "TImage.h"
 //#include "particle.hpp"
@@ -93,7 +94,10 @@ static float _cc_eff2_xmin_ = 0.5;//Sector
 static float _cc_eff2_xmax_ = 6.5; //Sector
 static int _cc_eff2_xbin_ = 6;//Sector
 
-
+//For Momentum Binning
+static float _p_bin_min_ = 0.5;//GeV
+static float _p_bin_max_ = 5.0;//GeV
+static int _p_bin_bins_= 25;//Steps
 
 //Detector Parsing
 static int _n_cc_seg_ = 18;
@@ -147,6 +151,7 @@ using TH2F_ptr_3d = std::vector<std::vector<std::vector<TH2F*>>>;
 using TH2F_ptr_4d = std::vector<std::vector<std::vector<std::vector<TH2F*>>>>;
 using TH2F_ptr_5d = std::vector<std::vector<std::vector<std::vector<std::vector<TH2F*>>>>>;
 using TH2F_ptr_6d = std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<TH2F*>>>>>>;
+using TH2F_ptr_7d = std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<TH2F*>>>>>>>;
 
 using TH1F_ptr_1d = std::vector<TH1F*>;
 using TH1F_ptr_2d = std::vector<std::vector<TH1F*>>;
@@ -259,7 +264,7 @@ protected:
 	TH2F_ptr_5d _WQ2_hist;
 	Bool_5d _WQ2_made;
 	//TH2F_ptr_5d _Made_WQ2_hist;//[11][6][2][2];//electron cuts, topologies (including pre), Recon vs. thrown, weight (for data this should always be "Recon")
-	TH2F_ptr_6d _Fid_hist;
+	TH2F_ptr_7d _Fid_hist;
 	Bool_6d _Fid_made;
 
 	//CC Histograms
@@ -270,7 +275,7 @@ protected:
 
 
 	//MM Histograms
-	TH1F_ptr_4d _MM_hist;
+	TH1F_ptr_5d _MM_hist;
 	Bool_4d _MM_made;
 
 	TH2F_ptr_5d _SF_hist;
@@ -280,10 +285,11 @@ protected:
 	TH1F_ptr_3d _Vertex_hist;
 
 	//Delta Histograms
-	TH2F_ptr_5d _Delta_hist;
+	TH2F_ptr_6d _Delta_hist;
 
 	//THnSparse Friend Histograms
 	THnSparseD* _Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Friend2[3][5];//For negative Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 	THnSparseD* _Thrown[3];//Variable Sets
 	THnSparseD* _Weight_Sum[3][5];
 
@@ -370,6 +376,10 @@ public:
 	void Write(std::shared_ptr<Flags> flags_);
 	//void Print(const std::string& output_dir_, std::shared_ptr<Flags> flags_);
 	//W Qsquared plots
+	int P_bin(float p_);
+	float P_Min(int p_bin_);
+	float P_Max(int p_bin_);
+	float P_center(int p_bin_);
 	int W_bins();
 	int W_bin(float W_);
 	float W_bot(int bin_);
@@ -394,8 +404,8 @@ public:
 	int hcut_idx(char * hcut_, int hadron_, std::shared_ptr<Flags> flags_);
 	int hcut_idx(const char * hcut_, int hadron_, std::shared_ptr<Flags> flags_);
 	bool Made_Fid_idx(const char* species_, const char* pcut_,const char * sector_, const char * cut_, const char * top_, const char * weight_);
-	std::vector<int> Fid_cut_idx(const char* species_, const char* pcut_,const char * sector_, const char * cut_, const char * top_, const char * weight_, std::shared_ptr<Flags> flags_);
-	void Fid_Fill(const char * species_, float theta_, float phi_,const char* pcut_,const char * sector_,const char *cut_, const char* top_, std::shared_ptr<Flags> flags_, float weight_);
+	std::vector<int> Fid_cut_idx(const char* species_, const char* pcut_,const char * sector_, const char * cut_, const char * top_, const char * weight_,const char * p_dep_, float p_, std::shared_ptr<Flags> flags_);
+	void Fid_Fill(const char * species_, float theta_, float phi_,const char* pcut_,const char * sector_,const char *cut_, const char* top_, float p_, std::shared_ptr<Flags> flags_, float weight_);
 	void Fid_Write(std::shared_ptr<Flags> flags_);
 	 //*--------------------------------End Fid Plot----------------------------*
 
@@ -425,14 +435,14 @@ public:
 
  	//*-------------------------------Start Delta T Plot----------------------------*
  	void Delta_Make(std::shared_ptr<Flags> flags_);
-	std::vector<int> Delta_idx(float W_, const char* species_, const char* pcut_, const char* cut_, const char* top_, const char* W_dep_, std::shared_ptr<Flags> flags_);
-	void Delta_Fill(float p_, float dt_, float weight_, float W_, const char* species_, const char* pcut_, const char* cut_, const char* top_, std::shared_ptr<Flags> flags_ );
+	std::vector<int> Delta_idx(float W_, const char* sector_,const char* species_, const char* pcut_, const char* cut_, const char* top_, const char* W_dep_, std::shared_ptr<Flags> flags_);
+	void Delta_Fill(float p_, float dt_, float weight_, float W_, const char* species_, const char* pcut_, const char* cut_, const char* top_, const char* sector_,std::shared_ptr<Flags> flags_ );
 	void Delta_Write(std::shared_ptr<Flags> flags_);
  	//*-------------------------------End Delta T Plot------------------------------*
 	//*-------------------------------Start MM Plot----------------------------*
 	void MM_Make(std::shared_ptr<Flags> flags_);
-	std::vector<int> MM_idx(const char* top_, const char* cut_, const char * clean_, const char * W_dep_, float W_, std::shared_ptr<Flags> flags_);
-	void MM_Fill(const char* top_, const char* cut_, const char * clean_, float MM_, float W_, float weight_, std::shared_ptr<Flags> flags_);
+	std::vector<int> MM_idx(const char* top_, const char* cut_, const char * clean_, const char * sector_, const char * W_dep_, float W_, std::shared_ptr<Flags> flags_);
+	void MM_Fill(const char* top_, const char* cut_, const char * clean_, const char * sector_, float MM_, float W_, float weight_, std::shared_ptr<Flags> flags_);
 	void MM_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End MM Plot----------------------------*
 	//*-------------------------------Start CC Efficiency Plot----------------------------*

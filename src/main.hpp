@@ -47,7 +47,7 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	//Make a data object which all the branches can be accessed from
 	auto data = std::make_shared<Branches>(chain_,flags_->Flags::Sim());
 
-	int run_num = 53812; //fun::extract_run_number(); //Not Finished so using temporary run number
+	int run_num = fun::extract_run_number(chain_->GetFile()->GetName(),flags_); //Not Finished so using temporary run number
 	for(size_t curr_event = 0; curr_event < num_events; curr_event++){
 		//Get singular event
 		chain_->GetEntry(curr_event);

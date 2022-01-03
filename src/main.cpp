@@ -15,7 +15,7 @@ int main(int argc, char **argv){
 	std::cout<<"Starting Clock\n";
 	auto start = std::chrono::high_resolution_clock::now();
 	//std::cout<<"The res for DTx is: " <<DTxres <<" and the rest for DTy is: " <<DTyres <<std::endl;
-
+	
 	
 	//std::vector<std::vector<std::string>> infilenames2(_NUM_THREADS_);//For two lists of plate stuff
 

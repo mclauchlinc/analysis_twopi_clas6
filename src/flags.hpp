@@ -28,6 +28,7 @@ static std::string _filled_ = "filled"; //Was the target filled
 static std::string _sim_ = "sim"; //Is this simulated data
 static std::string _location_ = "-loc="; //path to text file containing all file locations
 static std::string _helicity_ = "hel"; //Are we separating out beam helicity?
+static std::string _base_ = "-base=";//For identifying the front base of the file for easier run number extraction
 //PID Cuts Performed
 static std::string _cut_f_ = "-cut=";
 static std::string _ncut_ = "-ncut=";
@@ -41,7 +42,7 @@ static std::string _beta_cut_f_[4] = {"beta_ele","beta_pro","beta_pip","beta_pim
 //Other Cuts
 static std::string _vertex_cut_f_ = "vertex";
 //Event Selection
-static std::string _mm_cut_f_[4] = {"mm_pro,mm_pip,mm_pim,mm_zero"};
+static std::string _mm_cut_f_[4] = {"mm_pro","mm_pip","mm_pim","mm_zero"};
 //Efficiency Cuts
 static std::string _eff_cut_ = "-eff=";
 static std::string _neff_cut_ = "-neff=";
@@ -94,7 +95,8 @@ private:
 	int _run_group = -1; //{0,1}->{e1-6,e1f}
 	bool _filled = false; //Was the target filled
 	bool _sim = false; //Is this simulated data
-	std::string _location = ""; //
+	std::string _location = ""; //Location of path file
+	std::string _file_base = "";//File base name
 	bool _helicity = false; //Are we separating out beam helicity?
 	int _num_files = -1;
 	//PID Cuts Performed
@@ -171,6 +173,7 @@ public:
 	bool Fill();
 	bool Helicity();
 	std::string Files();
+	std::string Base();
 	int Num_Files();
 	//PID Cuts 
 	bool Fid_Cut(int particle);

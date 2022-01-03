@@ -43,7 +43,7 @@ void loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_
 
 
 
-int extract_run_number(std::string file_name, bool cluster);
+int extract_run_number(std::string file_name_, std::shared_ptr<Flags> flags_);
 
 float extract_run_number_float(std::string file_name, bool cluster);
 void print_vector_idx(std::vector<int> vec_);
@@ -55,6 +55,7 @@ int weight_idx(const char* hcut_);
 int recon_idx(const char* recon_);
 int cut_idx(const char* cut_);
 int species_idx(const char* species_);
+int species_offset(const char* species_, const char* pcut_, std::shared_ptr<Flags> flags_);
 int sector_idx(const char* sector_);
 int ecut_offset(const char * ecut_, std::shared_ptr<Flags> flags_);
 bool ecut_perform(const char* ecut_, std::shared_ptr<Flags> flags_);
@@ -68,6 +69,10 @@ bool top_perform(const char* top_, std::shared_ptr<Flags> flags_);
 int truth_idx(bool pass_);
 int top_offset(const char * top_, std::shared_ptr<Flags> flags_);
 int cc_side_idx(const char * side_);
+bool is_empty(int run_num_, std::shared_ptr<Flags> flags_);
+bool is_full(int run_num_, std::shared_ptr<Flags> flags_);
+bool correct_run_num(int run_num_, std::shared_ptr<Flags> flags_);
+int real_helicity(int hel_, int run_num_, std::shared_ptr<Flags> flags_);
 //int array_size(char* array_[]);
 //int array_size(const char* array_[]);
 }

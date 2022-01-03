@@ -115,10 +115,14 @@ static const  std::string path_ce16s = "/home/mclauchc/analysis/Path_Files/clust
 static const  std::string path_ce1f = "/home/mclauchc/analysis/Path_Files/cluster_e1f_file_paths.txt";
 static const  std::string path_ce1fs = "/home/mclauchc/analysis/Path_Files/cluster_e1f_sim_files.txt";
 
-static const  int _plate_swap_e16_[] = {1000,1002};
-static const  int _plate_swap_e1f_[] = {1000,1002};
+static const  int _plate_sign_[] = {1,1};//1 is positive, -1 is negative
+static const  int _plate_swap_e16_[] = {30703,30916,31143,31255};//Starts "out"
+static const  int _plate_swap_e1f_[] = {38092,38114,38131,38132,38137,38143,38194,38199,38200,38203,38204,38207,38265,38290,38300,38548,38681};//"Starts "pos"
 static const  int _empty_e16_[] = {30825,30962,31104,31128,31252,31254,31300,31344};
-static const  int _empty_e1f_[] = {10000,20000}
+static const  int _empty_e1f_[] = {37854,37856,38111,38112,38587,38588,38590};
+static const  int _bad_helicity_e1f_[] = {38131};
+static const  int _e16_run_bounds_[] = {30540,31484};
+static const  int _e1f_run_bounds_[] = {37658,38751};
 
 static const  int _e16_ = 0;
 static const  int _e1f_ = 1; 
@@ -166,6 +170,11 @@ static const  char * _W_var_ = "W_Dep";
 static const  char * _W_range_ = "in_range";
 static const  char * _W_all_ = "all";
 static const  char * _W_dep_[] = {_W_var_,_W_range_,_W_all_};
+
+static const  char * _p_dep_ = "p_dep";
+static const  char * _no_p_dep_ = "no_p_dep";
+
+static const  char * _p_look_[] = {_no_p_dep_,_p_dep_};
 
 
 static const  char * _true_ = "true";

@@ -153,7 +153,7 @@ int main(int argc, char **argv){
 				std::cout<<"\r" <<"\t" <<(100*curr_event/num_of_events) <<" %"  <<std::flush;//<<"|| File: " <<chain->GetFile()->GetName() <<std::flush;//;
 			}
 	}
-	std::cout<<"**Total Charge: " <<sum_q <<"***\n";
+	std::cout<<"\nTotal Charge: " <<sum_q <<"\n";
 	std::cout<<"For Individual Files\n";
 	std::cout<<"\tMin Charge: " <<min_q_seg <<" Max Charge: " <<max_q_seg <<"\n";
 	std::cout<<"\tMin Event: " <<min_event_seg <<" Max Event: " <<max_event_seg <<"\n";
