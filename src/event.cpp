@@ -11,7 +11,7 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, std::shared_ptr
 			Event::Extract_Particles(top_,p0_,p1_,p2_,flags_);
 			_weight = weight_;
 			_top[top_] = true;
-			if(cuts::MM_cut(top_,_MM,_W,flags_)){
+			if(cuts::MM_cut(top_,_MM2,p0_.Particle::Sector(),_W,flags_)){
 				//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
 				_pass[top_] = true;
 				_pass_top = top_;
@@ -60,7 +60,7 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, s
 			Event::Extract_Particles(top_,p0_,p1_,p2_,p3_,flags_);
 			_weight = weight_;
 			_top[top_] = true;
-			if(cuts::MM_cut(top_,_MM,_W,flags_) && _MM != 0.0){
+			if(cuts::MM_cut(top_,_MM2,p0_.Particle::Sector(),_W,flags_) && _MM != 0.0){
 				//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
 				_pass[top_] = true;
 				_pass_top = top_;

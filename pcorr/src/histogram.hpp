@@ -28,116 +28,13 @@
 //#include "CartesianGenerator.hh"
 
 //Binning Info
-//W Q2
-static float _wq2_xmin_ = -0.01;//GeV
-static float _wq2_xmax_ = 3.99; //GeV
-static int _wq2_xbin_ = 200;//GeV
-static float _wq2_ymin_ = -0.01;//GeV^2
-static float _wq2_ymax_ = 8.99; //GeV^2
-static int _wq2_ybin_ = 200;//GeV^2
+static float _theta_min_ = 11.5;
+static float _theta_max_ = 26.5;
+static int _theta_bin_ = 24;
 
-//PID Plots
-//Fiducial 
-static float _fid_xmin_ = -30.0;//Degrees
-static float _fid_xmax_ = 30.0; //Degrees
-static int _fid_xbin_ = 400;//Degrees
-static float _fid_ymin_ = 0.0;//Degrees
-static float _fid_ymax_ = 180.0; //Degrees
-static int _fid_ybin_ = 300;//Degrees
-//Delta T
-static float _delta_xmin_ = 0.0;//GeV
-static float _delta_xmax_ = 6.0; //GeV
-static int _delta_xbin_ = 1000;//GeV
-static float _delta_ymin_ = -6.0;//ns
-static float _delta_ymax_ = 6.0; //ns
-static int _delta_ybin_ = 400;//ns
-//SF
-static float _sf_xmin_ = 0.0;//GeV
-static float _sf_xmax_ = 6.0; //GeV
-static int _sf_xbin_ = 500;//GeV
-static float _sf_ymin_ = 0;//unitless
-static float _sf_ymax_ = 1.0; //unitless
-static int _sf_ybin_ = 300;//unitless
-//CC
-//nphe
-static float _cc_xmin_ = -0.5;//Segment
-static float _cc_xmax_ = 500.5; //Segment
-static int _cc_xbin_ = 501;//Segment
-//EC
-static float _ec_xmin_ = 0.0;//GeV
-static float _ec_xmax_ = 6.0; //GeV
-static int _ec_xbin_ = 100;//GeV
-//MM
-static float _mm_min_[4] = {0.7,0.0,0.0,-0.2};
-static float _mm_max_[4] = {1.5,0.3,0.3,0.2};
-static int _mm_bin_[4] = {200,200,200,200};
-//MM2
-static float _mm2_min_[4] = {0.7,0.0,0.0,-0.02};
-static float _mm2_max_[4] = {1.5,0.09,0.09,0.02};
-static int _mm2_bin_[4] = {100,100,100,100};
-//EC
-static float _ec_min_ = 0.0;
-static float _ec_max_ = 6.0;
-static int _ec_bin_ = 200; 
-
-//Detector Plots
-//Vertex
-static float _vertex_min_ = -12.0;
-static float _vertex_max_ = 5.0;
-static int _vertex_bin_ = 200;
-//CC Eff
-	//Momentum vs. Theta
-static float _cc_eff1_xmin_ = 0.0;//GeV
-static float _cc_eff1_xmax_ = 5.0;//GeV
-static int _cc_eff1_xbin_ = 300;
-static float _cc_eff1_ymin_ = 0.0;//Degrees
-static float _cc_eff1_ymax_ = 80.0;//Degrees
-static int _cc_eff1_ybin_ = 300;
-	//Sector and Segment yields
-static float _cc_eff2_xmin_ = 0.5;//Sector
-static float _cc_eff2_xmax_ = 6.5; //Sector
-static int _cc_eff2_xbin_ = 6;//Sector
-
-//For Momentum Binning
-static float _p_bin_min_ = 0.5;//GeV
-static float _p_bin_max_ = 5.0;//GeV
-static int _p_bin_bins_= 25;//Steps
-
-//Detector Parsing
-static int _n_cc_seg_ = 18;
-static int _n_cc_lrc_ = 3; 
-static int _n_sec_ = 6; 
-
-//THnSparse Binning
-static int _n_var_ = 3; //Number of variable sets
-static float _W_min_ = 1.4;
-static float _W_max_ = 2.125;
-static float _W_res_ = 0.025;
-static float _Q2_min_ = 2.0;
-static float _Q2_max_ = 5.0;
-static float _Q2_bins_[6] = {2.0,2.4,3.0,3.5,4.2,5.0};
-static float _MM_min_[3] = {1.1,0.3,1.1};
-static float _MM_max_[3] = {2.0,1.1,2.0};
-static int _MM_bins_ = 14;
-static float _MM2_min_[3] = {0.3,1.1,1.1};
-static float _MM2_max_[3] = {1.1,2.0,2.0};
-static int _theta_bins_ = 10;
-static float _theta_min_ = 0.0;
-static float _theta_max_ = 180.0;
-static int _alpha_bins_ = 10;
-static float _alpha_min_ = 0.0;
-static float _alpha_max_ = 360.;
-static int _phi_bins_ = 10;
-static float _phi_min_ = 0.0; 
-static float _phi_max_ = 360.0;
-
-
-//using TH2F_ptr = std::make_shared<TH2F*>;
-//using TH1F_ptr = std::make_shared<TH1F*>;
-//using THn_ptr = std::make_shared<THnSparseD*>;
-//using TGraph_ptr = std::make_shared<TGraph*>;
-//using TDir_ptr = std::make_shared<TDirectory*>;
-
+static float _phi_min_ = -30.0;
+static float _phi_max = 30.0;
+static int _phi_bin_ = 60;
 
 using Bool_1d = std::vector<bool>;
 using Bool_2d = std::vector<std::vector<bool>>;
@@ -145,8 +42,6 @@ using Bool_3d = std::vector<std::vector<std::vector<bool>>>;
 using Bool_4d = std::vector<std::vector<std::vector<std::vector<bool>>>>;
 using Bool_5d = std::vector<std::vector<std::vector<std::vector<std::vector<bool>>>>>;
 using Bool_6d = std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<bool>>>>>>;
-
-
 
 using TH2F_ptr = std::shared_ptr<TH2F>;
 using TH2F_ptr_1d = std::vector<TH2F*>;
@@ -188,7 +83,6 @@ class Histogram {
 protected:
 	
 	std::shared_ptr<TFile> _RootOutputFile;
-	std::shared_ptr<TFile> _SparseFile;
 	std::shared_ptr<TFile> _HistImageFile;
 
 	TCanvas* def;

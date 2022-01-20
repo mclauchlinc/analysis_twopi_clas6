@@ -376,6 +376,19 @@ int Histogram::ecut_idx(const char * ecut_, std::shared_ptr<Flags> flags_){
 	//std::cout<<"\tarrived at: "<<idx <<"\n";
 	return idx; 
 }
+//*------------------------------- Start Plot 1 Electron Angle Correction ---------------------------------*
+void Histogram::ECorr_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Plot_ECorr()){ return;}
+
+
+	std::vector<long> space_dims(3);
+	space_dims[0] = _theta_bins_;//Theta bins
+	space_dims[1] = _phi_bins_; //phi bins
+	space_dims[2] = 6; //Sectors
+}
+
+//*------------------------------- End Plot 1 Electron Angle Correction ---------------------------------*
+
 //*------------------------------- Start W Q2 ---------------------------------*
 void Histogram::WQ2_Make(std::shared_ptr<Flags> flags_){
 	if(flags_->Plot_WQ2()){

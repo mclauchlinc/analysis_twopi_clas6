@@ -251,7 +251,7 @@ bool cuts::min_ec(Float_t etot_, int sector_, std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Sim()){
 		sim_idx = 1; 
 	}
-	if(etot_ >= _ec_min_[flags_->Flags::Run()][sim_idx][sector_-1]){
+	if(etot_ >= _ec_min_cut_[flags_->Flags::Run()][sim_idx][sector_-1]){
 		pass = true;
 	}
 	return pass;
@@ -281,25 +281,54 @@ bool cuts::sf_cut(float p_, float sf_, float phi_, std::shared_ptr<Flags> flags_
 	return pass;
 }
 //Not utilized yet, but will be in time 
-float cuts::mm_top(int run_, int sim_, int top_, float W_){
+float cuts::mm_top(int run_, int sim_, int top_, int sector_, float W_){
 	float output = 0.0;
-	for(int i=0; i<4; i++){
-		output += _mm_top_[run_][sim_][top_][i]*TMath::Power(W_,i);
-	}
-	return output;
+	/*
+	run {0,1} -> e16,e1f
+	sim {0,1} -> sim,exp
+	top {0,1,2,3} -> {mpro,mpip,mpim,mzero}
+	*/
+	//std::cout<<"\tgetting mm_top for W: " <<W_ <<"\n";
+	//std::cout<<"\t\tsim : " <<sim_ <<" run: " <<run_ <<" top: " <<top_ <<" sector: " <<sector_-1 <<" top/bot: " <<1 <<" slope/inter: " <<0 <<"\n";
+	//std::cout<<"\t\t\tslope: " <<_mm2_par_[sim_][run_][top_][sector_-1][1][0] <<"\tintercept: " <<_mm2_par_[sim_][run_][top_][sector_-1][1][1] <<"\n";
+	//std::cout<<"\t\tupper: " <<_mm2_par_[sim_][run_][top_][sector_-1][1][0]*W_ + 						_mm2_par_[sim_][run_][top_][sector_-1][1][1] <<"\n";
+	//std::cout<<"\t\t\tCheck: " <<_mm2_par_[sim_][run_][top_][sector_-1][1][0]*W_ <<" + " <<	_mm2_par_[sim_][run_][top_][sector_-1][1][1] <<"\n";
+	return ((_mm2_par_[sim_][run_][top_][sector_-1][1][0]*W_) + _mm2_par_[sim_][run_][top_][sector_-1][1][1]);
 }
 //Not utilized yet, but will be in time 
-float cuts::mm_bot(int run_, int sim_, int top_, float W_){
-	float output = 0.0;
-	for(int i=0; i<4; i++){
-		output += _mm_bot_[run_][sim_][top_][i]*TMath::Power(W_,i);
-	}
-	return output;
+float cuts::mm_bot(int run_, int sim_, int top_, int sector_, float W_){
+	/*
+	run {0,1} -> e16,e1f
+	sim {0,1} -> sim,exp
+	top {0,1,2,3} -> {mpro,mpip,mpim,mzero}
+	*/
+	//std::cout<<"\tgetting mm_bot: for W: " <<W_ <<"\n";
+	//std::cout<<"\t\tsim : " <<sim_ <<" run: " <<run_ <<" top: " <<top_ <<" sector: " <<sector_-1 <<" top/bot: " <<0 <<" slope/inter: " <<0 <<"\n";
+	//std::cout<<"\t\t\tslope" <<_mm2_par_[sim_][run_][top_][sector_-1][0][0] <<"\tintercept" <<_mm2_par_[sim_][run_][top_][sector_-1][0][1] <<"\n";
+	//std::cout<<"\t\tlower: " <<_mm2_par_[sim_][run_][top_][sector_-1][0][0]*W_ + _mm2_par_[sim_][run_][top_][sector_-1][0][1] <<"\n";
+	//std::cout<<"\t\t\tCheck: " <<_mm2_par_[sim_][run_][top_][sector_-1][0][0]*W_ <<" + " <<_mm2_par_[sim_][run_][top_][sector_-1][0][1] <<"\n";
+	return ((_mm2_par_[sim_][run_][top_][sector_-1][0][0]*W_) + _mm2_par_[sim_][run_][top_][sector_-1][0][1]);
 }
 //Will need some modification to have W dependence, but this will work for now
-bool cuts::MM_cut(int top_, float mm_, float W_, std::shared_ptr<Flags> flags_){
+bool cuts::MM_cut(int top_, float mm_, int sector_, float W_, std::shared_ptr<Flags> flags_){
 	bool pass = false;
-	
+	if(!flags_->Flags::MM_Cut(top_)){
+		return false;
+	}
+	int sim_idx = 0; 
+	if(flags_->Flags::Sim()){
+		sim_idx = 1; 
+	}
+	//std::cout<<"Trying to cut MM for: " <<_top_[top_] <<" with W: " <<W_ <<"\n";
+	//std::cout<<"\tMissing Mass: " <<mm_ <<" with top: " <<cuts::mm_top(flags_->Flags::Run(),sim_idx,top_,sector_,W_) <<" and bot: " <<cuts::mm_bot(flags_->Flags::Run(),sim_idx,top_,sector_,W_) <<"\n";
+
+	if(mm_ < cuts::mm_top(flags_->Flags::Run(),sim_idx,top_,sector_,W_) && mm_ > cuts::mm_bot(flags_->Flags::Run(),sim_idx,top_,sector_,W_)){
+		pass = true;
+	}
+	return pass; 
+
+
+	/*//New comment out
 	int sim_idx = 0; 
 	if(flags_->Flags::Sim()){
 		sim_idx = 1; 
@@ -317,7 +346,7 @@ bool cuts::MM_cut(int top_, float mm_, float W_, std::shared_ptr<Flags> flags_){
 	/*if(mm_ > cuts::mm_bot(flags_->Flags::Run(),sim_idx,top_,W_) && mm_ < cuts::mm_top(flags_->Flags::Run(),sim_idx,top_,W_)){
 		pass = true;
 	}*/
-	return pass; 
+	//return pass; 
 }
 
 //Putting together the e_sanity cuts based on environment we set
