@@ -74,7 +74,7 @@ int Histogram::Phi_Idx(float phi_){
 	int idx=-1;
 	float res = (_phi_max_-_phi_min_)/_phi_bins_;
 	for(int i=0; i<_phi_bins_; i++){
-		if(phi_ > (_phi_min_ + (float)i*res) || phi_<(_phi_min_ + ((float)i+1.0)*res)){
+		if(phi_ > (_phi_min_ + (float)i*res) && phi_<(_phi_min_ + ((float)i+1.0)*res)){
 			idx = i;
 		}
 	}
@@ -110,7 +110,7 @@ int Histogram::Theta_Idx(float theta_){
 	int idx=-1;
 	float res = (_theta_max_-_theta_min_)/_theta_bins_;
 	for(int i=0; i<_theta_bins_; i++){
-		if(theta_ > (_theta_min_ + (float)i*res) || theta_<(_theta_min_ + ((float)i+1.0)*res)){
+		if(theta_ >= (_theta_min_ + (float)i*res) && theta_<(_theta_min_ + ((float)i+1.0)*res)){
 			idx = i;
 		}
 	}
@@ -171,7 +171,10 @@ void Histogram::ECorr_Angle_Make(std::shared_ptr<Flags> flags_){
 		if((!flags_->Flags::E_Theta_Corr() && _ele_corr_[corr_idx]==_ele_angle_corr_) || (!flags_->Flags::E_PCorr() && _ele_corr_[corr_idx]==_ele_p_corr_)){
 			//std::cout<<"\tFlag said not to make histograms for " <<corr_idx <<"\n";
 		}else{
-			sprintf(hname,"Delta_Theta_Sec:%s_Phi:%.2f-%.2f_Theta:%.2f-%.2f",_sector_[sec_idx],Phi_Low(phi_idx),Phi_Top(phi_idx),Theta_Low(theta_idx),Theta_Top(theta_idx));
+			//std::cout<<"Making: " <<_Delta_Theta_hist.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+			//std::cout<<"\tCorr idx: " <<corr_idx <<" sector idx:" <<sec_idx <<" phi_idx:" <<phi_idx <<" theta_idx:" <<theta_idx <<"\n";
+			sprintf(hname,"Delta_Theta_Sec:%s_Theta:%.2f-%.2f_Phi:%.2f-%.2f",_sector_[sec_idx],Theta_Low(theta_idx),Theta_Top(theta_idx),Phi_Low(phi_idx),Phi_Top(phi_idx));
+			//std::cout<<"\tHistogram name: " <<hname <<"\n";
 			plot_1d.push_back(new TH1F(hname,hname,_delta_theta_res,_delta_theta_min,_delta_theta_max));
 		}
 		if(cart[0]==space_dims[0]-1){
@@ -216,6 +219,8 @@ void Histogram::ECorr_Angle_Fill(float delta_theta_, float theta_, float phi_, i
 	std::vector<int> idx = ECorr_Angle_idx(theta_,phi_,sector_,corr_,flags_);
 	if(OK_Idx(idx)){
 		_Delta_Theta_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Fill(delta_theta_);
+		//std::cout<<"Tried to Fill |" <<delta_theta_ <<"| at | theta:" <<theta_ <<"__idx(" <<Theta_Idx(theta_) <<") " <<" phi:" <<phi_ <<"__idx(" <<Phi_Idx(phi_) <<") "<<" sector:" <<sector_ <<" corr_stat:" <<corr_ <<"\n";
+		//std::cout<<"\tHist Index at: " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<" " <<idx[3] <<"\n";
 	}
 }
 
@@ -223,21 +228,33 @@ void Histogram::ECorr_Angle_Write(std::shared_ptr<Flags> flags_){
 	if(!flags_->Flags::Plot_E_PCorr()){ return; }
 	std::cout<<"Writing Electron Momentum Correction Plots\n";
 	char dir_name[100];
+	//std::cout<<"Making Large Directory:";
 	TDirectory* dir_e_corr = _RootOutputFile->mkdir("Electron PCorr");
+	//std::cout<<" Done\n";
 	dir_e_corr->cd();
+	//std::cout<<"Making Sub Directories: ";
 	TDirectory* dir_sub[6][_theta_bins_+1][_phi_bins_+1];//{sector,theta,phi}
+	//std::cout<<"Initialized\n";
 	for(int i=0; i<6; i++){
-		sprintf(dir_name,"Electron PCorr Sec:%s",i+1);
+		sprintf(dir_name,"Electron PCorr Sec:%d",i+1);
+		//std::cout<<"\tMaking Sub Directory " <<i <<" " <<0 <<" " <<0 <<" : ";
 		dir_sub[i][0][0] = dir_e_corr->mkdir(dir_name);
+		//std::cout<<"Done\n";
 		for(int j=0; j<_theta_bins_; j++){
-			sprintf(dir_name,"Electron PCorr Sec:%s Theta:%.2f-%.2f",i+1,Theta_Low(j),Theta_Top(j));
+			sprintf(dir_name,"Electron PCorr Sec:%d Theta:%.2f-%.2f",i+1,Theta_Low(j),Theta_Top(j));
+			//std::cout<<"\t\tMaking Sub Directory " <<i <<" " <<j+1 <<" " <<0 <<" : ";
 			dir_sub[i][j+1][0] = dir_sub[i][0][0]->mkdir(dir_name);
+			//std::cout<<"Done\n";
 			for(int k=0; k<_phi_bins_; k++){
-				sprintf(dir_name,"Electron PCorr Sec:%s Theta:%.2f-%.2f Phi:%.2f-%.2f",i+1,Theta_Low(j),Theta_Top(j),Phi_Low(k),Phi_Top(k));
+				sprintf(dir_name,"Electron PCorr Sec:%d Theta:%.2f-%.2f Phi:%.2f-%.2f",i+1,Theta_Low(j),Theta_Top(j),Phi_Low(k),Phi_Top(k));
+				//std::cout<<"\t\tMaking Final Sub Directory " <<i <<" " <<j+1 <<" " <<k+1 <<" : ";
 				dir_sub[i][j+1][k+1] = dir_sub[i][j+1][0]->mkdir(dir_name);
+				
+				//std::cout<<"Done\n";
 			} 
 		}
 	}
+	std::cout<<"Directories Built\n";
 	std::vector<long> space_dims(4);
 	space_dims[0] = _theta_bins_;//Theta bins
 	space_dims[1] = _phi_bins_; //phi bins
@@ -257,6 +274,8 @@ void Histogram::ECorr_Angle_Write(std::shared_ptr<Flags> flags_){
 		theta_idx=cart[0];
 		idx = ECorr_Angle_idx(Theta_Center(theta_idx),Phi_Center(phi_idx),sec_idx+1,_ele_corr_[corr_idx],flags_);
 		if(OK_Idx(idx)){
+			//std::cout<<"Trying to write at | theta:" <<Theta_Center(theta_idx) <<"idx(" <<theta_idx <<") " <<" phi:" <<Phi_Center(phi_idx) <<"idx(" <<phi_idx <<") "<<" sector:" <<sec_idx+1 <<" corr_stat:" <<_ele_corr_[corr_idx] <<"\n";
+			//std::cout<<"\tGood Index at: " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<" " <<idx[3] <<"\n";
 			dir_sub[sec_idx][theta_idx+1][phi_idx+1]->cd();
 			_Delta_Theta_hist[idx[0]][idx[1]][idx[2]][idx[3]]->SetXTitle("Delta Theta (deg)");
 			_Delta_Theta_hist[idx[0]][idx[1]][idx[2]][idx[3]]->SetYTitle("Yield");

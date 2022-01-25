@@ -84,9 +84,6 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			//	hists_->Histogram::W_Fill(W,fun::get_sector(data,0));
 			//}
 		}
-
-		//Particle ID, Event Selection, and Histogram Filling
-		//auto analysis = std::make_shared<Analysis>(data,hists_, thread_id_, run_num, flags_);
 	}
 }
 
