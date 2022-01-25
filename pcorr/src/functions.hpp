@@ -12,9 +12,14 @@
 #include <string>
 #include <TLorentzVector.h>
 #include "TVector3.h"
+#include <math.h>
+#include "flags.hpp"
+#include "TFile.h"
+#include "TChain.h"
 
 namespace fun {
-	float theta_calc(float theta_p_, float beam_energy_);
+	std::shared_ptr<TFile> Name_File(std::shared_ptr<Flags> flag_);
+	float theta_calc(float theta_p_, float beam_energy_, bool radians_=false);
 	float delta_theta(float theta_e_, float theta_p_, float beam_energy_);
 	float poly_4(float x_, float a_, float b_, float c_, float d_, float e_);
 	float poly_3(float x_, float a_, float b_, float c_, float d_);
@@ -26,8 +31,11 @@ namespace fun {
 	float phi(std::shared_ptr<Branches> data_, int idx_, bool center_=false, bool radians_=false);
 	float p_calc(float theta_e_, float beam_energy_);
 	float delta_p_e(float p_e_, float theta_e_, float beam_energy_);
+	TLorentzVector Set_k_mu(int run_);
 	float W(TLorentzVector k_mu_prime_, int run_);
 	TLorentzVector Make_4Vector(float p, float theta, float phi, float m);
+	void loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_, int max_, std::shared_ptr<Flags> flags_);
+	std::vector<std::string> read_file_list(std::string path, int thread_num, std::shared_ptr<Flags> flags_);
 }
 
 #endif

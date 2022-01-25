@@ -23,11 +23,6 @@ int main(int argc, char **argv){
 	auto flags = std::make_shared<Flags>();//argc,argv);
 	flags->Flags::Read_Flags(argc,argv);
 
-	std::cout<<"Test for Vertex plotting "<<flags->Plot_Vertex() <<"\n";
-	std::cout<<"Test for perform  "<<fun::ecut_perform(_event_,flags) <<"\n";
-	std::cout<<"Test for Friend" <<flags->Make_Friend() <<"\n";
-	std::cout<<"Test for ID cut " <<flags->ID_Cut() <<"\n";
-
 	//std::vector<std::vector<std::string>> infilenames(flags->Flags::Num_Cores());
 
 	int num_files = flags->Flags::Num_Files();

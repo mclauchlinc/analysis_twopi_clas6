@@ -219,6 +219,11 @@ static const  char* _phi_ = "Phi";
 static const  char* _friend_pars_[] = {_W_,_Q2_,_MM1_[0],_MM2_[0],_theta_,_alpha_,_phi_};
 static const  char* _var_names_[] =  {"#Delta^{++}","#rho","#Delta^{0}"};
 
+static const  char* _ele_angle_corr_ = "e_theta_corr";
+static const  char* _ele_p_corr_ = "e_p_corr";
+static const  char* _no_corr_ = "no_corr";
+static const  char* _ele_corr_[] = {_no_corr_,_ele_angle_corr_,_ele_p_corr_};
+
 
 
 static const  char * species[] = {_ele_,_pro_,_pip_,_pim_};//4

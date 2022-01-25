@@ -273,6 +273,8 @@ Flags::Flags(){}
 			_plot_cc_geo = true;
 			_plot_ec_geo = true;
 			_plot_vertex = true;
+			_plot_e_pcorr = true;
+			_plot_elastic = true;
 			_plot_all = true;
 		}
 		if(include && !_plot_all){
@@ -325,6 +327,12 @@ Flags::Flags(){}
 			if(str == _plot_vertex_){
 				_plot_vertex = true;
 			}
+			if(str == _plot_e_pcorr_){
+				_plot_e_pcorr = true;
+			}
+			if(str == _plot_elastic_){
+				_plot_elastic = true;
+			}
 		}
 		if(!include && _plot_all){
 			if(str == _plot_wq2_){
@@ -373,6 +381,12 @@ Flags::Flags(){}
 			}
 			if(str == _plot_vertex_){
 				_plot_vertex = false;
+			}
+			if(str == _plot_e_pcorr_){
+				_plot_e_pcorr = false;
+			}
+			if(str == _plot_elastic_){
+				_plot_elastic = false;
 			}
 		}
 	}
@@ -445,16 +459,24 @@ Flags::Flags(){}
 	void Flags::Corr_Flag(std::string str, bool include){
 		if(str == _all_f_){
 			_p_corr = true;
-			_e_corr = true;
+			_en_corr = true;
 			_v_corr = true;
 			_corr_all = true;
 		}
 		if(include && !_corr_all){
 			if(str == _p_corr_){
 				_p_corr = true;
+				_e_theta_corr = true;
+				_e_p_corr = true;
 			}
-			if(str == _e_corr_){
-				_e_corr = true;
+			if(str == _e_theta_corr_){
+				_e_theta_corr = true;
+			}
+			if(str == _e_p_corr_){
+				_e_p_corr = true;
+			}
+			if(str == _en_corr_){
+				_en_corr = true;
 			}
 			if(str == _v_corr_){
 				_v_corr = true;
@@ -464,8 +486,14 @@ Flags::Flags(){}
 			if(str == _p_corr_){
 				_p_corr = false;
 			}
-			if(str == _e_corr_){
-				_e_corr = false;
+			if(str == _e_theta_corr_){
+				_e_theta_corr = false;
+			}
+			if(str == _e_p_corr_){
+				_e_p_corr = false;
+			}
+			if(str == _en_corr_){
+				_en_corr = false;
 			}
 			if(str == _v_corr_){
 				_v_corr = false;
@@ -550,8 +578,14 @@ Flags::Flags(){}
 	bool Flags::P_Corr(){
 		return _p_corr;
 	}
+	bool Flags::E_Theta_Corr(){
+		return _e_theta_corr;
+	}
+	bool Flags::E_PCorr(){
+		return _e_p_corr;
+	}
 	bool Flags::E_Corr(){
-		return _e_corr;
+		return _en_corr;
 	}
 	bool Flags::Vertex_Corr(){
 		return _v_corr;
@@ -592,6 +626,12 @@ Flags::Flags(){}
 	}
 	bool Flags::Plot_Vertex(){
 		return _plot_vertex;
+	}
+	bool Flags::Plot_E_PCorr(){
+		return _plot_e_pcorr;
+	}
+	bool Flags::Plot_Elastic(){
+		return _plot_elastic;
 	}
 	//Histogram Separation
 
