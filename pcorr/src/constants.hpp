@@ -223,6 +223,9 @@ static const  char* _ele_angle_corr_ = "e_theta_corr";
 static const  char* _ele_p_corr_ = "e_p_corr";
 static const  char* _no_corr_ = "no_corr";
 static const  char* _ele_corr_[] = {_no_corr_,_ele_angle_corr_,_ele_p_corr_};
+static const  char* _pro_thresh_ = "pro_thresh";
+static const  char* _no_pro_thresh_ = "no_pro_thresh";
+static const  char* _proton_threshold_[] = {_no_pro_thresh_,_pro_thresh_};
 
 
 

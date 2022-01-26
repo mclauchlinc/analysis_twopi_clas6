@@ -26,13 +26,13 @@
 //#include "CartesianGenerator.hh"
 
 //Binning Info
-static float _theta_min_ = 11.5;
-static float _theta_max_ = 26.5;
-static int _theta_bins_ = 24;
+static float _theta_min_ = 10.0;
+static float _theta_max_ = 30.0;
+static int _theta_bins_ = 40;
 
-static float _phi_min_ = -30.0;
-static float _phi_max_ = 30.0;
-static int _phi_bins_ = 60;
+static float _phi_min_ = -25.0;
+static float _phi_max_ = 25.0;
+static int _phi_bins_ = 100;
 
 using Bool_1d = std::vector<bool>;
 using Bool_2d = std::vector<std::vector<bool>>;
@@ -88,7 +88,12 @@ protected:
 	float _delta_theta_min = -0.2;
 	int _delta_theta_res = 200;
 
+	float _elast_max = 1.4;
+	float _elast_min = 0.5;
+	int _elast_res = 300;
+
 	TH1F_ptr_4d _Delta_Theta_hist;
+	TH1F_ptr_3d _Elast_hist;
 
 public:
 	Histogram(std::shared_ptr<Flags> flags_);
@@ -110,7 +115,10 @@ public:
 	void ECorr_Angle_Fill(float delta_theta_, float theta_, float phi_, int sector_, const char* corr_, std::shared_ptr<Flags> flags_);
 	void ECorr_Angle_Write(std::shared_ptr<Flags> flags_);
 	//*------------------------------- End Plot 1 Electron Angle Correction ---------------------------------*
-	
+	void Elastic_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> Elastic_idx(int sector_, const char* corr_, const char* pro_thresh_, std::shared_ptr<Flags> flags_);
+	void Elastic_Fill(float W_, int sector_, const char* corr_, const char* pro_thresh_, std::shared_ptr<Flags> flags_);
+	void Elast_Write(std::shared_ptr<Flags> flags_);
 };
 
 

@@ -4,6 +4,7 @@
 Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	std::cout<<"Making Histograms\n";
 	Histogram::ECorr_Angle_Make(flags_);
+	Histogram::Elastic_Make(flags_);
 }
 
 bool Histogram::OK_Idx(std::vector<int> idx_){
@@ -25,6 +26,7 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	std::cout<< "Writing Plots" <<std::endl;
 	_RootOutputFile->cd();
 	Histogram::ECorr_Angle_Write(flags_);
+	Histogram::Elast_Write(flags_);
 	_RootOutputFile->Close();
 	std::cout<<"Histograms Done!" <<std::endl;
 }
@@ -173,7 +175,7 @@ void Histogram::ECorr_Angle_Make(std::shared_ptr<Flags> flags_){
 		}else{
 			//std::cout<<"Making: " <<_Delta_Theta_hist.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 			//std::cout<<"\tCorr idx: " <<corr_idx <<" sector idx:" <<sec_idx <<" phi_idx:" <<phi_idx <<" theta_idx:" <<theta_idx <<"\n";
-			sprintf(hname,"Delta_Theta_Sec:%s_Theta:%.2f-%.2f_Phi:%.2f-%.2f",_sector_[sec_idx],Theta_Low(theta_idx),Theta_Top(theta_idx),Phi_Low(phi_idx),Phi_Top(phi_idx));
+			sprintf(hname,"Delta_Theta_%s_Sec:%s_Theta:%.2f-%.2f_Phi:%.2f-%.2f",_sector_[sec_idx],Theta_Low(theta_idx),Theta_Top(theta_idx),Phi_Low(phi_idx),Phi_Top(phi_idx));
 			//std::cout<<"\tHistogram name: " <<hname <<"\n";
 			plot_1d.push_back(new TH1F(hname,hname,_delta_theta_res,_delta_theta_min,_delta_theta_max));
 		}
@@ -286,7 +288,157 @@ void Histogram::ECorr_Angle_Write(std::shared_ptr<Flags> flags_){
 
 //*------------------------------- End Plot 1 Electron Angle Correction ---------------------------------*
 //*------------------------------- Start Elastic ---------------------------------*
+void Histogram::Elastic_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Elastic()){ return ;}
 
+	TH1F_ptr_1d plot_1d;
+	TH1F_ptr_2d plot_2d;
+
+
+	std::vector<long> space_dims(3);
+	space_dims[0] = 6; //Sectors
+	space_dims[1] = 2; //Proton 35 deg cut
+	space_dims[2] = 3; //Electron Corrections Performed
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+
+	while(cart.GetNextCombination()){
+		if((!flags_->Flags::E_Theta_Corr() && _ele_corr_[cart[2]]==_ele_angle_corr_) || (!flags_->Flags::E_PCorr() && _ele_corr_[cart[2]]==_ele_p_corr_)){
+			//
+		}else{
+			//std::cout<<"Trying to make: sector:" <<cart[0]+1 <<" ele_corr:" <<_ele_corr_[cart[2]] <<" pro_thres:" <<_proton_threshold_[cart[1]] <<"\n";
+			//std::cout<<"Making Elastic Histogram: " <<_Elast_hist.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+			sprintf(hname,"Elastic_Peak_%s_Sector:%d_%s",_ele_corr_[cart[2]],cart[0],_proton_threshold_[cart[1]]);
+			plot_1d.push_back(new TH1F(hname,hname,_elast_res, _elast_min, _elast_max));
+			if(cart[0] == space_dims[0]-1){
+				if(plot_1d.size()>0){
+					plot_2d.push_back(plot_1d);
+					plot_1d.clear();
+				}
+				if(cart[1] == space_dims[1]-1){
+					if(plot_2d.size()>0){
+						_Elast_hist.push_back(plot_2d);
+						plot_2d.clear();
+					}
+				}
+			}
+		}
+	}
+}
+
+std::vector<int> Histogram::Elastic_idx(int sector_, const char* corr_, const char* pro_thresh_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx;
+	
+	if(flags_->Flags::E_Theta_Corr() && corr_ == _ele_angle_corr_){
+		idx.push_back(1);
+	}else if(flags_->Flags::E_PCorr() && corr_ == _ele_p_corr_){
+		idx.push_back(2);
+	}else if(corr_== _no_corr_){
+		idx.push_back(0);
+	}else{
+		idx.push_back(-1);
+	}
+	if(pro_thresh_ == _no_pro_thresh_){
+		idx.push_back(0);
+	}else if(pro_thresh_ == _pro_thresh_){
+		idx.push_back(1);
+	}else{
+		idx.push_back(-1);
+	}
+	idx.push_back(sector_-1);
+	return idx;
+}
+
+void Histogram::Elastic_Fill(float W_, int sector_, const char* corr_, const char* pro_thresh_,std::shared_ptr<Flags> flags_){
+	//std::cout<<"\tFilling Elastic Hist for " <<W_ <<" " <<sector_ <<" " <<corr_ <<" " <<pro_thresh_ <<"\n";
+	std::vector<int> idx = Elastic_idx(sector_, corr_, pro_thresh_,flags_);
+	if(OK_Idx(idx) && flags_->Flags::Plot_Elastic()){
+		//std::cout<<"\t\tGood Index! Let's fill: " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
+		_Elast_hist[idx[0]][idx[1]][idx[2]]->Fill(W_);
+	}
+}
+
+void Histogram::Elast_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Elastic()){ return ;}
+	std::cout<<"Writing Elastic Peak Plots\n";
+	char dir_name[100];
+	//std::cout<<"Making Large Directory:";
+	TDirectory* dir_ela = _RootOutputFile->mkdir("Elastic Peak");
+	//std::cout<<" Done\n";
+	dir_ela->cd();
+	//std::cout<<"Making Sub Directories: ";
+	TDirectory* dir_sub[6][3];//{sector,proton_thesh}
+	for(int i=0; i<6; i++){
+		sprintf(dir_name,"Elastic Peak Sector:%d",i+1);
+		dir_sub[i][0] = dir_ela->mkdir(dir_name);
+		for(int j=0; j<2; j++){
+			sprintf(dir_name,"Elastic Peak Sector:%d %s",i+1,_proton_threshold_[j]);
+			dir_sub[i][j+1] = dir_sub[i][0]->mkdir(dir_name);
+		}
+	}
+	std::vector<long> space_dims(3);
+	space_dims[0] = 6; //Sectors
+	space_dims[1] = 2; //Proton 35 deg cut
+	space_dims[2] = 3; //Electron Corrections Performed
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+	std::vector<int> idx;
+
+	while(cart.GetNextCombination()){
+		if((!flags_->Flags::E_Theta_Corr() && _ele_corr_[cart[2]]==_ele_angle_corr_) || (!flags_->Flags::E_PCorr() && _ele_corr_[cart[2]]==_ele_p_corr_)){
+			//
+		}else{
+			idx = Elastic_idx(cart[0]+1,_ele_corr_[cart[2]],_proton_threshold_[cart[1]],flags_);
+			if(OK_Idx(idx)){
+				dir_sub[cart[0]][cart[1]+1]->cd();
+				_Elast_hist[idx[0]][idx[1]][idx[2]]->SetXTitle("W (GeV)");
+				_Elast_hist[idx[0]][idx[1]][idx[2]]->SetYTitle("Yield");
+				_Elast_hist[idx[0]][idx[1]][idx[2]]->Write();
+			}
+		}
+	}
+}
 
 //*------------------------------- End Elastic ---------------------------------*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
