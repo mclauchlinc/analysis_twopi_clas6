@@ -11,6 +11,7 @@
 #include "branches.hpp"
 #include <unistd.h>
 #include "corrections.hpp"
+#include "cuts.hpp"
 
 std::string comp; //Variable for choosing which data set will be used
 char* output_name;//Variable for the output file name. This is reassigned through input parameters
@@ -57,59 +58,151 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 		}
 		if(data->gpart()>=2 && data->q(1)>0.0){
 			//std::cout<<"We are indeed plotting pcorr. Let's make some W's\n";
-			TLorentzVector k_mu = fun::Make_4Vector(data->p(0), fun::theta(data,0), fun::phi(data,0), _me_);
+			float p_e = data->p(0);
+
+			float theta_p = fun::theta(data,1);
+			float theta_e = fun::theta(data,0);
+			float phi_e = fun::phi(data,0);
+			float phi_e_center = fun::phi(data,0,true);
+			int sector_e = fun::get_sector(data, 0);
+			float theta_e_corr = corr::theta_e_corr(theta_e,phi_e_center,flags_->Run(),true,sector_e);
+			TLorentzVector k_mu = fun::Make_4Vector(p_e, theta_e, phi_e, _me_);
 			float W = fun::W(k_mu,flags_->Run());
+			TLorentzVector k_mu_acorr = fun::Make_4Vector(p_e, theta_e_corr, phi_e, _me_);
+			float W_acorr = fun::W(k_mu_acorr,flags_->Run());
+			//TLorentzVector k_mu_pcorr = fun::Make_4Vector(corr::p_corr_e(data->p(0),corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run(),true,),fun::phi(data,0,true),flags_->Run()), corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()), fun::phi(data,0), _me_);
+			//float W_pcorr = fun::W(k_mu_pcorr,flags_->Run());
+			if(flags_->Plot_Check()){
+				if(cuts::W_cut(W,flags_->Run())){
+					hists_->Histogram::Check_Fill(fun::theta(data,1),fun::theta(data,0),fun::get_sector(data, 0),_check_1_,flags_);
+					hists_->Histogram::Check_Fill(fun::theta_calc(fun::theta(data,1), _beam_energy_[flags_->Run()]),fun::theta(data,0),fun::get_sector(data, 0),_check_2_,flags_);
+					hists_->Histogram::Check_Fill(fun::delta_theta(fun::theta(data,0), fun::theta(data,1), _beam_energy_[flags_->Run()]),fun::theta(data,0),fun::get_sector(data, 0),_check_3_,flags_);
+					hists_->Histogram::Check_Fill(fun::delta_theta(fun::theta(data,0), fun::theta(data,1), _beam_energy_[flags_->Run()]),fun::phi(data,0,true),fun::get_sector(data, 0),_check_4_,flags_);
+				}
+			}
 			//Elastic Histograms
 			if(flags_->Plot_Elastic()){
 				//std::cout<<"Filling Elastic Histograms\n";
-				hists_->Histogram::Elastic_Fill(W,fun::get_sector(data, 0),_no_corr_,_no_pro_thresh_,flags_);
-				if(fun::theta(data,1)>=_theta_cut_){
-					hists_->Histogram::Elastic_Fill(W,fun::get_sector(data, 0),_no_corr_,_pro_thresh_,flags_);
-				}
-				if(flags_->Flags::E_Theta_Corr()){
-					TLorentzVector k_mu_acorr = fun::Make_4Vector(data->p(0), corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()), fun::phi(data,0), _me_);
-					float W_acorr = fun::W(k_mu_acorr,flags_->Run());
-					hists_->Histogram::Elastic_Fill(W_acorr,fun::get_sector(data, 0),_ele_angle_corr_,_no_pro_thresh_,flags_);
-					if(corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run())>=_theta_cut_){
-						hists_->Histogram::Elastic_Fill(W_acorr,fun::get_sector(data, 0),_ele_angle_corr_,_pro_thresh_,flags_);
+				if(flags_->Flags::Fid_Cut(0)){
+					hists_->Histogram::Angular_Fill(theta_e, phi_e_center, sector_e,_no_corr_, _no_pro_thresh_, _no_cut_,flags_);
+					if(theta_p>=_theta_cut_){
+						hists_->Histogram::Angular_Fill(theta_e, phi_e_center, fun::get_sector(data, 0), _no_corr_, _pro_thresh_, _no_cut_,flags_);
 					}
-				}
-				if(flags_->Flags::E_PCorr()){
-					TLorentzVector k_mu_pcorr = fun::Make_4Vector(corr::p_corr_e(data->p(0),corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()),fun::phi(data,0,true),flags_->Run()), corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()), fun::phi(data,0), _me_);
-					float W_pcorr = fun::W(k_mu_pcorr,flags_->Run());
-					hists_->Histogram::Elastic_Fill(W_pcorr,fun::get_sector(data, 0),_ele_p_corr_,_no_pro_thresh_,flags_);
-					if(corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run())>=_theta_cut_){
-						hists_->Histogram::Elastic_Fill(W_pcorr,fun::get_sector(data, 0),_ele_p_corr_,_pro_thresh_,flags_);
+					if(cuts::fid_e(data->p(0),theta_e,phi_e_center,flags_)){
+						hists_->Histogram::Elastic_Fill(W,sector_e,_no_corr_,_no_pro_thresh_,flags_);
+						hists_->Histogram::Angular_Fill(theta_e, phi_e_center, sector_e,_no_corr_, _no_pro_thresh_, _fid_cut_,flags_);
+						if(theta_p>=_theta_cut_){
+							hists_->Histogram::Elastic_Fill(W,sector_e,_no_corr_,_pro_thresh_,flags_);
+							hists_->Histogram::Angular_Fill(theta_e, phi_e_center, sector_e, _no_corr_, _pro_thresh_, _fid_cut_,flags_);
+						}
+					}
+					if(flags_->Flags::E_Theta_Corr() && cuts::fid_e(data->p(0),theta_e_corr,phi_e_center,flags_)){
+						//TLorentzVector k_mu_acorr = fun::Make_4Vector(data->p(0), theta_e_corr, fun::phi(data,0), _me_);
+						//float W_acorr = fun::W(k_mu_acorr,flags_->Run());
+						hists_->Histogram::Elastic_Fill(W_acorr,sector_e,_ele_angle_corr_,_no_pro_thresh_,flags_);
+						hists_->Histogram::Angular_Fill(theta_e_corr, phi_e_center, sector_e,_ele_angle_corr_, _no_pro_thresh_, _no_cut_,flags_);
+						if(theta_p>=_theta_cut_){
+							hists_->Histogram::Elastic_Fill(W_acorr,sector_e,_ele_angle_corr_,_pro_thresh_,flags_);
+							hists_->Histogram::Angular_Fill(theta_e_corr, phi_e_center, sector_e,_ele_angle_corr_, _pro_thresh_, _no_cut_,flags_);
+						}
+					}
+					if(flags_->Flags::E_PCorr() && cuts::fid_e(corr::p_corr_e(data->p(0),theta_e_corr,phi_e_center,flags_->Run()),theta_e_corr,phi_e_center,flags_)){
+						//TLorentzVector k_mu_pcorr = fun::Make_4Vector(corr::p_corr_e(data->p(0), theta_e_corr, fun::phi(data,0), _me_);
+						//float W_pcorr = fun::W(k_mu_pcorr,flags_->Run());
+						//hists_->Histogram::Elastic_Fill(W_pcorr,sector_e,_ele_p_corr_,_no_pro_thresh_,flags_);
+						//hists_->Histogram::Angular_Fill(theta_e_corr, phi_e_center, sector_e,_ele_p_corr_, _no_pro_thresh_, _no_cut_,flags_);
+						//if(theta_p>=_theta_cut_){
+						//	hists_->Histogram::Elastic_Fill(W_pcorr,sector_e,_ele_p_corr_,_pro_thresh_,flags_);
+						//	hists_->Histogram::Angular_Fill(theta_e_corr, phi_e_center, sector_e,_ele_p_corr_, _pro_thresh_, _no_cut_,flags_);
+						//}
+					}
+				}else{
+					hists_->Histogram::Elastic_Fill(W,sector_e,_no_corr_,_no_pro_thresh_,flags_);
+					hists_->Histogram::Angular_Fill(fun::theta(data,0), phi_e_center, sector_e,_no_corr_, _no_pro_thresh_, _no_cut_,flags_);
+					if(fun::theta(data,1)>=_theta_cut_){
+						hists_->Histogram::Elastic_Fill(W,sector_e,_no_corr_,_pro_thresh_,flags_);
+						hists_->Histogram::Angular_Fill(fun::theta(data,0), phi_e_center, sector_e, _no_corr_, _pro_thresh_, _no_cut_,flags_);
+					}
+					if(flags_->Flags::E_Theta_Corr()){
+						//TLorentzVector k_mu_acorr = fun::Make_4Vector(data->p(0), theta_e_corr, fun::phi(data,0), _me_);
+						//float W_acorr = fun::W(k_mu_acorr,flags_->Run());
+						hists_->Histogram::Elastic_Fill(W_acorr,sector_e,_ele_angle_corr_,_no_pro_thresh_,flags_);
+						hists_->Histogram::Angular_Fill(theta_e_corr, phi_e_center, sector_e,_ele_angle_corr_, _no_pro_thresh_, _no_cut_,flags_);
+						if(theta_p>=_theta_cut_){
+							hists_->Histogram::Elastic_Fill(W_acorr,sector_e,_ele_angle_corr_,_pro_thresh_,flags_);
+							hists_->Histogram::Angular_Fill(theta_e_corr, phi_e_center, sector_e,_ele_angle_corr_, _pro_thresh_, _no_cut_,flags_);
+						}
+					}
+					if(flags_->Flags::E_PCorr() && cuts::fid_e(corr::p_corr_e(data->p(0),theta_e_corr,phi_e_center,flags_->Run()),theta_e_corr,phi_e_center,flags_)){
+						TLorentzVector k_mu_pcorr = fun::Make_4Vector(corr::p_corr_e(data->p(0),theta_e_corr,phi_e_center,flags_->Run()), theta_e_corr, fun::phi(data,0), _me_);
+						float W_pcorr = fun::W(k_mu_pcorr,flags_->Run());
+						hists_->Histogram::Elastic_Fill(W_pcorr,sector_e,_ele_p_corr_,_no_pro_thresh_,flags_);
+						hists_->Histogram::Angular_Fill(theta_e_corr, phi_e_center, sector_e,_ele_p_corr_, _no_pro_thresh_, _no_cut_,flags_);
+						if(theta_p>=_theta_cut_){
+							hists_->Histogram::Elastic_Fill(W_pcorr,sector_e,_ele_p_corr_,_pro_thresh_,flags_);
+							hists_->Histogram::Angular_Fill(theta_e_corr, phi_e_center, sector_e,_ele_p_corr_, _pro_thresh_, _no_cut_,flags_);
+						}
 					}
 				}
 			}
 			//Delta Theta Histograms
 			if(flags_->Plot_E_PCorr()){
-				//std::cout<<"Filling Delta Theta Histograms\n";
-				if(cuts::W_cut(W,flags_->Run())){
-					if(fun::theta(data,1)>=_theta_cut_){	
-						float delta_theta = fun::delta_theta(fun::theta(data,0), fun::theta(data,1), _beam_energy_[flags_->Run()]);
-						hists_->Histogram::ECorr_Angle_Fill(delta_theta, fun::theta(data,0),fun::phi(data,0,true),fun::get_sector(data, 0), _no_corr_, flags_);
-					}
-				}
-				if(flags_->Flags::E_Theta_Corr()){	
-					TLorentzVector k_mu_acorr = fun::Make_4Vector(data->p(0), corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()), fun::phi(data,0), _me_);
-					float W_acorr = fun::W(k_mu_acorr,flags_->Run());
-					if(cuts::W_cut(W_acorr,flags_->Run())){
-						if(corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run())>=_theta_cut_){
-							float delta_theta_acorr = fun::delta_theta(corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()), fun::theta(data,1), _beam_energy_[flags_->Run()]);
-							hists_->Histogram::ECorr_Angle_Fill(delta_theta_acorr, corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()),fun::phi(data,0,true),fun::get_sector(data, 0), _ele_angle_corr_, flags_);
+				if(flags_->Flags::Fid_Cut(0)){
+					if(cuts::fid_e(p_e,theta_e,phi_e_center,flags_)){
+					//std::cout<<"Filling Delta Theta Histograms\n";
+						if(cuts::W_cut(W,flags_->Run())){
+							if(theta_p>=_theta_cut_){	
+								float delta_theta = fun::delta_theta(theta_e, theta_p, _beam_energy_[flags_->Run()]);
+								hists_->Histogram::ECorr_Angle_Fill(delta_theta, theta_e,phi_e_center,fun::get_sector(data, 0), _no_corr_, flags_);
+							}
 						}
 					}
-				}
-				if(flags_->Flags::E_PCorr()){
-					TLorentzVector k_mu_pcorr = fun::Make_4Vector(corr::p_corr_e(data->p(0),corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()),fun::phi(data,0,true),flags_->Run()), corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()), fun::phi(data,0), _me_);
-					float W_pcorr = fun::W(k_mu_pcorr,flags_->Run());
-					if(cuts::W_cut(W_pcorr,flags_->Run())){
-						if(corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run())>=_theta_cut_){
-							
-							float delta_theta_pcorr = fun::delta_theta(corr::theta_e_corr(fun::theta(data,0),fun::phi(data,0,true),flags_->Run()), fun::theta(data,1), _beam_energy_[flags_->Run()]);
-							hists_->Histogram::ECorr_Angle_Fill(delta_theta_pcorr, fun::theta(data,0),fun::phi(data,0,true),fun::get_sector(data, 0), _ele_p_corr_, flags_);
+					if(flags_->Flags::E_Theta_Corr() && cuts::fid_e(p_e,theta_e_corr,phi_e_center,flags_)){	
+						if(cuts::W_cut(W_acorr,flags_->Run())){
+							if(theta_p>=_theta_cut_){
+								float delta_theta_acorr = fun::delta_theta(theta_e_corr, theta_p, _beam_energy_[flags_->Run()]);
+								hists_->Histogram::ECorr_Angle_Fill(delta_theta_acorr, theta_e_corr,phi_e_center,fun::get_sector(data, 0), _ele_angle_corr_, flags_);
+							}
+						}
+					}
+					if(flags_->Flags::E_PCorr()){
+						TLorentzVector k_mu_pcorr = fun::Make_4Vector(corr::p_corr_e(p_e,theta_e_corr,phi_e_center,flags_->Run()), theta_e_corr, fun::phi(data,0), _me_);
+						float W_pcorr = fun::W(k_mu_pcorr,flags_->Run());
+						if(cuts::W_cut(W_pcorr,flags_->Run())){
+							if(theta_p>=_theta_cut_){
+								
+								float delta_theta_pcorr = fun::delta_theta(theta_e_corr, theta_p, _beam_energy_[flags_->Run()]);
+								hists_->Histogram::ECorr_Angle_Fill(delta_theta_pcorr, theta_e,phi_e_center,sector_e, _ele_p_corr_, flags_);
+							}
+						}
+					}
+				}else{
+				//std::cout<<"Filling Delta Theta Histograms\n";
+					if(cuts::W_cut(W,flags_->Run())){
+						if(theta_p>=_theta_cut_){	
+							float delta_theta = fun::delta_theta(theta_e, theta_p, _beam_energy_[flags_->Run()]);
+							hists_->Histogram::ECorr_Angle_Fill(delta_theta, theta_e,phi_e_center,sector_e, _no_corr_, flags_);
+						}
+					}
+					if(flags_->Flags::E_Theta_Corr()){	
+						//TLorentzVector k_mu_acorr = fun::Make_4Vector(p_e, theta_e_corr, fun::phi(data,0), _me_);
+						//float W_acorr = fun::W(k_mu_acorr,flags_->Run());
+						if(cuts::W_cut(W_acorr,flags_->Run())){
+							if(theta_e_corr>=_theta_cut_){
+								float delta_theta_acorr = fun::delta_theta(theta_e_corr, theta_p, _beam_energy_[flags_->Run()]);
+								hists_->Histogram::ECorr_Angle_Fill(delta_theta_acorr, theta_e_corr,phi_e_center,sector_e, _ele_angle_corr_, flags_);
+							}
+						}
+					}
+					if(flags_->Flags::E_PCorr()){
+						TLorentzVector k_mu_pcorr = fun::Make_4Vector(corr::p_corr_e(data->p(0),theta_e_corr,phi_e_center,flags_->Run()), theta_e_corr,phi_e, _me_);
+						float W_pcorr = fun::W(k_mu_pcorr,flags_->Run());
+						if(cuts::W_cut(W_pcorr,flags_->Run())){
+							if(theta_e_corr>=_theta_cut_){
+								
+								float delta_theta_pcorr = fun::delta_theta(theta_e_corr, theta_p, _beam_energy_[flags_->Run()]);
+								hists_->Histogram::ECorr_Angle_Fill(delta_theta_pcorr, theta_e_corr,phi_e_center,sector_e, _ele_p_corr_, flags_);
+							}
 						}
 					}
 				}

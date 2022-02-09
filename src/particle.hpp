@@ -10,6 +10,7 @@
 #include "physics.hpp"
 #include "pid.hpp"
 #include "flags.hpp"
+#include "corrections.hpp"
 
 /*
 	This class is for individual particles in an event

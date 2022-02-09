@@ -275,6 +275,7 @@ Flags::Flags(){}
 			_plot_vertex = true;
 			_plot_e_pcorr = true;
 			_plot_elastic = true;
+			_plot_check = true;
 			_plot_all = true;
 		}
 		if(include && !_plot_all){
@@ -333,6 +334,9 @@ Flags::Flags(){}
 			if(str == _plot_elastic_){
 				_plot_elastic = true;
 			}
+			if(str == _plot_check_){
+				_plot_check = true;
+			}
 		}
 		if(!include && _plot_all){
 			if(str == _plot_wq2_){
@@ -387,6 +391,9 @@ Flags::Flags(){}
 			}
 			if(str == _plot_elastic_){
 				_plot_elastic = false;
+			}
+			if(str == _plot_check_){
+				_plot_check = false;
 			}
 		}
 	}
@@ -632,6 +639,9 @@ Flags::Flags(){}
 	}
 	bool Flags::Plot_Elastic(){
 		return _plot_elastic;
+	}
+	bool Flags::Plot_Check(){
+		return _plot_check;
 	}
 	//Histogram Separation
 

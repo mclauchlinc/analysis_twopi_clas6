@@ -19,6 +19,7 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	Histogram::MM_Make(flags_);
 	Histogram::CC_Eff_Make(flags_);
 	Histogram::Friend_Make(flags_);
+	Histogram::PCorr_Check_Make(flags_);
 	//Histogram::Cross_Make(flags_);
 	//Histogram::XY_Make(flags_);
 	//Histogram::Fid_Det_Make(flags_);
@@ -59,6 +60,7 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	//std::cout<<"Writing MM Histograms\n";
 	Histogram::MM_Write(flags_);
 	Histogram::CC_Eff_Write(flags_);
+	Histogram::PCorr_Check_Write(flags_);
 	//Histogram::XY_Write(_envi);
 	//Histogram::Fid_Det_Write(_envi);
 	//Friend_Write(_envi);
@@ -1874,7 +1876,7 @@ void Histogram::SF_Write(std::shared_ptr<Flags> flags_){
 			//if(_SF_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]] && 
 			if(fun::ecut_perform(_ecuts_[cart[4]],flags_) && fun::top_perform(_top_[cart[2]],flags_)){
 				if(cart[0]<Histogram::W_bins()){
-					std::cout<<"Will be trying to write a W varying SF histogram\n";
+					//std::cout<<"Will be trying to write a W varying SF histogram\n";
 					std::cout<<"\t" <<_ecuts_[cart[4]] <<" " <<_cut_[cart[3]] <<" " <<_top_[cart[2]] <<" " <<_sector_[cart[1]] <<" " <<_W_var_ <<"\n";
 					idx = Histogram::SF_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_sector_[cart[1]],_W_var_,flags_,Histogram::W_center(cart[0]));
 					fun::print_vector_idx(idx);
@@ -1887,7 +1889,7 @@ void Histogram::SF_Write(std::shared_ptr<Flags> flags_){
 				//fun::print_vector_idx(idx);
 				if(Histogram::OK_Idx(idx)){
 					if(cart[0]<Histogram::W_bins()){
-						std::cout<<"\tTrying to write a W varying SF histogram\n";
+						//std::cout<<"\tTrying to write a W varying SF histogram\n";
 						dir_sf_sub[cart[4]][cart[3]+1][cart[2]+1][cart[1]+1][1]->cd();
 						_SF_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->SetXTitle("Momentum (GeV)");
 						_SF_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->SetYTitle("Sampling Fraction");
@@ -3828,6 +3830,119 @@ void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
 		}
 	}
 }
+
+//*------------------------------- Start Check ---------------------------------*
+void Histogram::PCorr_Check_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Check()){ return ;}
+
+	TH1F_ptr_1d plot_1d;
+	TH1F_ptr_2d plot_2d;
+
+
+	std::vector<long> space_dims(3);
+	space_dims[0] = 6; //Sectors
+	space_dims[1] = 4; //Missing Mass
+	space_dims[2] = 3; //Corrections {none,e_theta,e_p}
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+
+	while(cart.GetNextCombination()){
+		//std::cout<<"Trying to make: sector:" <<cart[0]+1 <<" ele_corr:" <<_ele_corr_[cart[2]] <<" pro_thres:" <<_proton_threshold_[cart[1]] <<"\n";
+		//std::cout<<"Making Check Histogram: " <<_Check_hist.size() <<" " <<plot_1d.size() <<"\n";
+		if((!flags_->Flags::E_Theta_Corr() && _ele_corr_[cart[2]]==_ele_angle_corr_) || (!flags_->Flags::E_PCorr() && _ele_corr_[cart[2]]==_ele_p_corr_)){
+			//
+		}else{
+			sprintf(hname,"Ele_PCorr_Check_%s_%s_Sector:%d",_top_[cart[1]],_ele_corr_[cart[2]],cart[0]+1);
+			plot_1d.push_back(new TH1F(hname,hname,_mm2_bin_[cart[1]],_mm2_min_[cart[1]],_mm2_max_[cart[1]]));
+			if(cart[0] == space_dims[0]-1){
+				if(plot_1d.size()>0){
+					plot_2d.push_back(plot_1d);
+					plot_1d.clear();
+				}
+				if(cart[1]== space_dims[1]-1){
+					if(plot_2d.size()>0){
+						_PCorr_Check_hist.push_back(plot_2d);
+						plot_2d.clear();
+					}
+				}
+			}
+		}
+	}
+}
+
+std::vector<int> Histogram::PCorr_Check_idx(int sector_, const char* top_, const char* corr_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx;
+	//std::cout<<"Trying to fill in " <<sector_ <<" " <<check_ <<"\n";
+	if(!flags_->Plot_Check()){
+		idx.push_back(-1);
+		idx.push_back(-1);
+		idx.push_back(-1);
+		return idx;
+	}
+	if(flags_->Flags::E_Theta_Corr() && corr_ == _ele_angle_corr_){
+		idx.push_back(1);
+	}else if(flags_->Flags::E_PCorr() && corr_ == _ele_p_corr_){
+		idx.push_back(2);
+	}else if(corr_== _no_corr_){
+		idx.push_back(0);
+	}else{
+		idx.push_back(-1);
+	}
+	idx.push_back(fun::top_idx(top_));
+	idx.push_back(sector_-1);
+	//std::cout<<"idx: " <<idx[0] <<" " <<idx[1] <<"\n";
+	return idx;
+}
+
+void Histogram::PCorr_Check_Fill(float MM2_, int sector_, const char* top_, const char* corr_, std::shared_ptr<Flags> flags_){
+	//std::cout<<"\tFilling Check Hist for " <<xval_ <<" " <<yval_ <<" " <<sector_ <<" " <<check_ <<"\n";
+	std::vector<int> idx = PCorr_Check_idx(sector_,top_, corr_,flags_);
+	if(OK_Idx(idx) && flags_->Flags::Plot_Check()){
+		//std::cout<<"\t\tGood Index! Let's fill: " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
+		_PCorr_Check_hist[idx[0]][idx[1]][idx[2]]->Fill(MM2_);
+	}
+}
+
+void Histogram::PCorr_Check_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Check()){ return ;}
+	std::cout<<"Writing PCorr Check Plots\n";
+	char dir_name[100];
+	//std::cout<<"Making Large Directory:";
+	TDirectory* dir_check = _RootOutputFile->mkdir("PCorr Check Plots");
+	//std::cout<<" Done\n";
+	dir_check->cd();
+	//std::cout<<"Making Sub Directories: ";
+	TDirectory* dir_sub[6][5];//{sector,proton_thesh}
+	for(int i=0; i<6; i++){
+		sprintf(dir_name,"PCorr Check Plots Sector:%d",i+1);
+		dir_sub[i][0] = dir_check->mkdir(dir_name);
+		for(int j=0; j<3; j++){
+			sprintf(dir_name,"PCorr Check Plots Sector:%d %s",i+1,_ele_corr_[j]);
+			dir_sub[i][j+1] = dir_sub[i][0]->mkdir(dir_name);
+		}
+	}
+	std::vector<long> space_dims(3);
+	space_dims[0] = 6; //Sectors
+	space_dims[1] = 4; //Topologies
+	space_dims[2] = 3; //corrections 
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+	std::vector<int> idx;
+
+	while(cart.GetNextCombination()){
+		idx = PCorr_Check_idx(cart[0]+1,_top_[cart[1]],_ele_corr_[cart[2]],flags_);
+		if(OK_Idx(idx)){
+			dir_sub[cart[0]][cart[2]+1]->cd();
+			_PCorr_Check_hist[idx[0]][idx[1]][idx[2]]->SetXTitle("MM^2 (GeV)");
+			_PCorr_Check_hist[idx[0]][idx[1]][idx[2]]->SetYTitle("Yield");
+			_PCorr_Check_hist[idx[0]][idx[1]][idx[2]]->Write();
+		}
+	}
+}
+
+//*------------------------------- End Check2 ---------------------------------*
+
+
 
 /*float Histogram::Friend_bin_reverse(int variable_, int bin_, int var_){//This only works for equally spaced bins. Will need rework when bins have varied sizes
 	float val = NAN;

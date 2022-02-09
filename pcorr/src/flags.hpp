@@ -80,6 +80,7 @@ static std::string _plot_beta_[4] = {"beta_ele","beta_pro","beta_pip","beta_pim"
 static std::string _plot_vertex_ = "vertex";
 static std::string _plot_e_pcorr_ = "e_pcorr";
 static std::string _plot_elastic_ = "elastic";
+static std::string _plot_check_ = "check";
 //Histogram Separation
 //Will have space for this
 //THnSparse
@@ -152,6 +153,7 @@ private:
 	bool _plot_vertex = false;
 	bool _plot_e_pcorr = false;
 	bool _plot_elastic = false;
+	bool _plot_check = false;
 
 	//Histogram Separation
 		//Will have space for this
@@ -225,6 +227,7 @@ public:
 	bool Plot_Vertex();
 	bool Plot_E_PCorr();
 	bool Plot_Elastic();
+	bool Plot_Check();
 	//Portions of Histograms
 	bool Ele_Cut(const char * ecut_);
 

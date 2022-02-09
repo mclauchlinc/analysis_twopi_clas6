@@ -452,6 +452,17 @@ void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std:
 	}
 	//std::cout<<"Filling MM for no cut\n";
 	hist_->Histogram::MM_Fill(_top_[top],_no_cut_,_clean_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
+	if(flags_->Plot_Check()){
+		if(flags_->E_PCorr() && !flags_->Sim()){
+			hist_->Histogram::PCorr_Check_Fill(event_.Event::MM2(),event_.Event::Sector(0),_top_[top],_ele_p_corr_,flags_);
+		}
+		if(flags_->E_Theta_Corr()&& !flags_->Sim()){
+			hist_->Histogram::PCorr_Check_Fill(event_.Event::MM2(),event_.Event::Sector(0),_top_[top],_ele_angle_corr_,flags_);
+		}else if(!flags_->Sim()){
+			hist_->Histogram::PCorr_Check_Fill(event_.Event::MM2(),event_.Event::Sector(0),_top_[top],_no_corr_,flags_);
+		}
+	}
+	
 	//hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,event_.Event::Top(),_nthrown_,flags_,event_.Event::Weight());
 }
 

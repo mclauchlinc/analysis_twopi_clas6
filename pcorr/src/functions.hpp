@@ -36,6 +36,7 @@ namespace fun {
 	TLorentzVector Make_4Vector(float p, float theta, float phi, float m);
 	void loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_, int max_, std::shared_ptr<Flags> flags_);
 	std::vector<std::string> read_file_list(std::string path, int thread_num, std::shared_ptr<Flags> flags_);
+	void print_vector_idx(std::vector<int> vec_);
 }
 
 #endif

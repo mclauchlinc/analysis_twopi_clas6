@@ -226,6 +226,15 @@ static const  char* _ele_corr_[] = {_no_corr_,_ele_angle_corr_,_ele_p_corr_};
 static const  char* _pro_thresh_ = "pro_thresh";
 static const  char* _no_pro_thresh_ = "no_pro_thresh";
 static const  char* _proton_threshold_[] = {_no_pro_thresh_,_pro_thresh_};
+static const  char* _pcorr_ele_fid_[] = {_no_cut_,_fid_cut_};
+
+
+static const  char* _check_1_ = "Ele_Theta_v_Pro_Theta";
+static const  char* _check_2_ = "Ele_Theta_v_Ele_Calc";
+static const  char* _check_3_ = "Ele_Theta_v_Delta_Theta";
+static const  char* _check_4_ = "Ele_Phi_v_Delta_Theta";
+static const  char* _check_names_[] = {_check_1_,_check_2_,_check_3_,_check_4_};
+
 
 
 

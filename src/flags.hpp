@@ -56,7 +56,9 @@ static std::string _eff_sc_ = "sc";
 static std::string _corr_ = "-corr=";
 static std::string _ncorr_ = "-ncorr=";
 static std::string _p_corr_ = "p_corr";//Momentum
-static std::string _e_corr_ = "e_corr";//Energy
+static std::string _e_theta_corr_ = "e_theta_corr";
+static std::string _e_p_corr_ = "e_pcorr";
+static std::string _en_corr_ = "en_corr";//Energy
 static std::string _v_corr_ = "v_corr";//Vertex
 //Histograms
 static std::string _plot_ = "-plot=";
@@ -76,6 +78,9 @@ static std::string _plot_ec_geo_ = "ec_geo";
 static std::string _plot_mm_[4] = {"mm_pro","mm_pip","mm_pim","mm_zero"}; //{pro,pip,pim,zero}
 static std::string _plot_beta_[4] = {"beta_ele","beta_pro","beta_pip","beta_pim"}; //{ele,pro,pip,pim}
 static std::string _plot_vertex_ = "vertex";
+static std::string _plot_e_pcorr_ = "e_pcorr";
+static std::string _plot_elastic_ = "elastic";
+static std::string _plot_check_ = "check";
 //Histogram Separation
 //Will have space for this
 //THnSparse
@@ -125,7 +130,9 @@ private:
 	//Corrections
 	bool _corr_all = false;
 	bool _p_corr = false;//Momentum
-	bool _e_corr = false;//Energy
+	bool _e_theta_corr = false;
+	bool _e_p_corr = false;
+	bool _en_corr = false;//Energy
 	bool _v_corr = false;//Vertex
 	//Histograms
 	bool _plot_all = false;
@@ -144,6 +151,9 @@ private:
 	bool _plot_ec_eff = false;
 	bool _plot_dc_eff = false;
 	bool _plot_vertex = false;
+	bool _plot_e_pcorr = false;
+	bool _plot_elastic = false;
+	bool _plot_check = false;
 
 	//Histogram Separation
 		//Will have space for this
@@ -197,6 +207,8 @@ public:
 	bool SC_Geo();
 	//Corrections
 	bool P_Corr();
+	bool E_Theta_Corr();
+	bool E_PCorr();
 	bool Delta_Corr();
 	bool E_Corr();
 	bool Vertex_Corr();
@@ -213,6 +225,9 @@ public:
 	bool Plot_MM(int topology);
 	bool Plot_Beta(int particle);
 	bool Plot_Vertex();
+	bool Plot_E_PCorr();
+	bool Plot_Elastic();
+	bool Plot_Check();
 	//Portions of Histograms
 	bool Ele_Cut(const char * ecut_);
 

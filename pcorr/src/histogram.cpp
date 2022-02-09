@@ -5,6 +5,8 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	std::cout<<"Making Histograms\n";
 	Histogram::ECorr_Angle_Make(flags_);
 	Histogram::Elastic_Make(flags_);
+	Histogram::Check_Make(flags_);
+	Histogram::Angular_Make(flags_);
 }
 
 bool Histogram::OK_Idx(std::vector<int> idx_){
@@ -27,6 +29,8 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	_RootOutputFile->cd();
 	Histogram::ECorr_Angle_Write(flags_);
 	Histogram::Elast_Write(flags_);
+	Histogram::Check_Write(flags_);
+	Histogram::Angular_Write(flags_);
 	_RootOutputFile->Close();
 	std::cout<<"Histograms Done!" <<std::endl;
 }
@@ -175,7 +179,7 @@ void Histogram::ECorr_Angle_Make(std::shared_ptr<Flags> flags_){
 		}else{
 			//std::cout<<"Making: " <<_Delta_Theta_hist.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 			//std::cout<<"\tCorr idx: " <<corr_idx <<" sector idx:" <<sec_idx <<" phi_idx:" <<phi_idx <<" theta_idx:" <<theta_idx <<"\n";
-			sprintf(hname,"Delta_Theta_%s_Sec:%s_Theta:%.2f-%.2f_Phi:%.2f-%.2f",_sector_[sec_idx],Theta_Low(theta_idx),Theta_Top(theta_idx),Phi_Low(phi_idx),Phi_Top(phi_idx));
+			sprintf(hname,"Delta_Theta_%s_Sec:%s_Theta:%.2f-%.2f_Phi:%.2f-%.2f",_ele_corr_[corr_idx],_sector_[sec_idx],Theta_Low(theta_idx),Theta_Top(theta_idx),Phi_Low(phi_idx),Phi_Top(phi_idx));
 			//std::cout<<"\tHistogram name: " <<hname <<"\n";
 			plot_1d.push_back(new TH1F(hname,hname,_delta_theta_res,_delta_theta_min,_delta_theta_max));
 		}
@@ -308,7 +312,7 @@ void Histogram::Elastic_Make(std::shared_ptr<Flags> flags_){
 		}else{
 			//std::cout<<"Trying to make: sector:" <<cart[0]+1 <<" ele_corr:" <<_ele_corr_[cart[2]] <<" pro_thres:" <<_proton_threshold_[cart[1]] <<"\n";
 			//std::cout<<"Making Elastic Histogram: " <<_Elast_hist.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
-			sprintf(hname,"Elastic_Peak_%s_Sector:%d_%s",_ele_corr_[cart[2]],cart[0],_proton_threshold_[cart[1]]);
+			sprintf(hname,"Elastic_Peak_%s_Sector:%d_%s",_ele_corr_[cart[2]],cart[0]+1,_proton_threshold_[cart[1]]);
 			plot_1d.push_back(new TH1F(hname,hname,_elast_res, _elast_min, _elast_max));
 			if(cart[0] == space_dims[0]-1){
 				if(plot_1d.size()>0){
@@ -400,13 +404,230 @@ void Histogram::Elast_Write(std::shared_ptr<Flags> flags_){
 }
 
 //*------------------------------- End Elastic ---------------------------------*
+//*------------------------------- Start Check ---------------------------------*
+void Histogram::Check_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Check()){ return ;}
+
+	TH2F_ptr_1d plot_1d;
 
 
+	std::vector<long> space_dims(2);
+	space_dims[0] = 6; //Sectors
+	space_dims[1] = 4; //Types of Check Plots
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+
+	while(cart.GetNextCombination()){
+		//std::cout<<"Trying to make: sector:" <<cart[0]+1 <<" ele_corr:" <<_ele_corr_[cart[2]] <<" pro_thres:" <<_proton_threshold_[cart[1]] <<"\n";
+		//std::cout<<"Making Check Histogram: " <<_Check_hist.size() <<" " <<plot_1d.size() <<"\n";
+		sprintf(hname,"%s_%d_Sector:%d",_check_names_[cart[1]],cart[0]+1);
+		plot_1d.push_back(new TH2F(hname,hname,_check_xres[cart[1]], _check_xmin[cart[1]], _check_xmax[cart[1]],_check_yres[cart[1]], _check_ymin[cart[1]], _check_ymax[cart[1]]));
+		if(cart[0] == space_dims[0]-1){
+			if(plot_1d.size()>0){
+				_Check_hist.push_back(plot_1d);
+				plot_1d.clear();
+			}
+		}
+	}
+}
+
+std::vector<int> Histogram::Check_idx(int sector_, const char* check_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx;
+	//std::cout<<"Trying to fill in " <<sector_ <<" " <<check_ <<"\n";
+	if(!flags_->Plot_Check()){
+		idx.push_back(-1);
+		idx.push_back(-1);
+		return idx;
+	}
+	for(int i=0; i<4; i++){
+		if(check_ == _check_names_[i]){
+			idx.push_back(i);
+		}
+	}
+	if(idx.size()==0){
+		idx.push_back(-1);
+	}
+	idx.push_back(sector_-1);
+	//std::cout<<"idx: " <<idx[0] <<" " <<idx[1] <<"\n";
+	return idx;
+}
+
+void Histogram::Check_Fill(float xval_, float yval_, int sector_, const char* check_, std::shared_ptr<Flags> flags_){
+	//std::cout<<"\tFilling Check Hist for " <<xval_ <<" " <<yval_ <<" " <<sector_ <<" " <<check_ <<"\n";
+	std::vector<int> idx = Check_idx(sector_, check_,flags_);
+	if(OK_Idx(idx) && flags_->Flags::Plot_Check()){
+		//std::cout<<"\t\tGood Index! Let's fill: " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
+		_Check_hist[idx[0]][idx[1]]->Fill(xval_,yval_);
+	}
+}
+
+void Histogram::Check_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Check()){ return ;}
+	std::cout<<"Writing Check Plots\n";
+	char dir_name[100];
+	//std::cout<<"Making Large Directory:";
+	TDirectory* dir_check = _RootOutputFile->mkdir("Check Plots");
+	//std::cout<<" Done\n";
+	dir_check->cd();
+	//std::cout<<"Making Sub Directories: ";
+	TDirectory* dir_sub[6][5];//{sector,proton_thesh}
+	for(int i=0; i<6; i++){
+		sprintf(dir_name,"Check Plots Sector:%d",i+1);
+		dir_sub[i][0] = dir_check->mkdir(dir_name);
+		for(int j=0; j<4; j++){
+			sprintf(dir_name,"Check Plots Sector:%d %s",i+1,_check_names_[j]);
+			dir_sub[i][j+1] = dir_sub[i][0]->mkdir(dir_name);
+		}
+	}
+	std::vector<long> space_dims(2);
+	space_dims[0] = 6; //Sectors
+	space_dims[1] = 4; //Check Plots
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+	std::vector<int> idx;
+
+	while(cart.GetNextCombination()){
+		idx = Check_idx(cart[0]+1,_check_names_[cart[1]],flags_);
+		if(OK_Idx(idx)){
+			dir_sub[cart[0]][cart[1]+1]->cd();
+			_Check_hist[idx[0]][idx[1]]->SetXTitle(_check_xnames[cart[1]]);
+			_Check_hist[idx[0]][idx[1]]->SetYTitle(_check_ynames[cart[1]]);
+			_Check_hist[idx[0]][idx[1]]->Write();
+		}
+	}
+}
+
+//*------------------------------- End Check ---------------------------------*
+//*------------------------------- Start Angular ---------------------------------*
+void Histogram::Angular_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Fid(0)){ return ;}
+
+	TH2F_ptr_1d plot_1d;
+	TH2F_ptr_2d plot_2d;
+	TH2F_ptr_3d plot_3d;
 
 
+	std::vector<long> space_dims(4);
+	space_dims[0] = 6; //Sectors
+	space_dims[1] = 2; //Proton 35 deg cut
+	space_dims[2] = 3; //Electron Corrections Performed
+	space_dims[3] = 2; //Fiducial Cut
+	CartesianGenerator cart(space_dims);
+	char hname[100];
 
+	while(cart.GetNextCombination()){
+		if(!flags_->Flags::Plot_Fid(0)){
+			//
+		}else if(cart[3]!=1 || flags_->Flags::Fid_Cut(0)){
+			//std::cout<<"Trying to make: sector:" <<cart[0]+1 <<" ele_corr:" <<_ele_corr_[cart[2]] <<" pro_thres:" <<_proton_threshold_[cart[1]] <<"\n";
+			//std::cout<<"Making Angular Histogram: " <<_Elast_hist.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+			sprintf(hname,"Angular_Distribution_%s_Sector:%d_%s_%s",_ele_corr_[cart[2]],cart[0]+1,_proton_threshold_[cart[1]],_pcorr_ele_fid_[cart[3]]);
+			plot_1d.push_back(new TH2F(hname,hname,_fid_xbin, _fid_xmin, _fid_xmax,_fid_ybin, _fid_ymin, _fid_ymax));
+			if(cart[0] == space_dims[0]-1){
+				if(plot_1d.size()>0){
+					plot_2d.push_back(plot_1d);
+					plot_1d.clear();
+				}
+				if(cart[1] == space_dims[1]-1){
+					if(plot_2d.size()>0){
+						plot_3d.push_back(plot_2d);
+						plot_2d.clear();
+					}
+					if(cart[2] == space_dims[2]-1){
+						if(plot_3d.size()>0){
+							_Angular_hist.push_back(plot_3d);
+							plot_3d.clear();
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
+std::vector<int> Histogram::Angular_idx(int sector_, const char* corr_, const char* pro_thresh_, const char* fid_cut_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx;
+	//std::cout<<"Filling Angular: " <<sector_ <<" " <<corr_ <<" " <<pro_thresh_ <<" " <<fid_cut_ <<"\n";
+	if(flags_->Fid_Cut(0) && fid_cut_ == _fid_cut_){
+		idx.push_back(1);
+	}else if(fid_cut_ == _no_cut_){
+		idx.push_back(0);
+	}else{
+		idx.push_back(-1);
+	}
+	if(flags_->Flags::E_Theta_Corr() && corr_ == _ele_angle_corr_){
+		idx.push_back(1);
+	}else if(flags_->Flags::E_PCorr() && corr_ == _ele_p_corr_){
+		idx.push_back(2);
+	}else if(corr_== _no_corr_){
+		idx.push_back(0);
+	}else{
+		idx.push_back(-1);
+	}
+	if(pro_thresh_ == _no_pro_thresh_){
+		idx.push_back(0);
+	}else if(pro_thresh_ == _pro_thresh_){
+		idx.push_back(1);
+	}else{
+		idx.push_back(-1);
+	}
+	idx.push_back(sector_-1);
+	//fun::print_vector_idx(idx);
+	return idx;
+}
 
+void Histogram::Angular_Fill(float theta_, float phi_, int sector_, const char* corr_, const char* pro_thresh_, const char* fid_cut_,std::shared_ptr<Flags> flags_){
+	//std::cout<<"\tFilling Angular Hist for " <<W_ <<" " <<sector_ <<" " <<corr_ <<" " <<pro_thresh_ <<"\n";
+	std::vector<int> idx = Angular_idx(sector_, corr_, pro_thresh_,fid_cut_,flags_);
+	if(OK_Idx(idx) && flags_->Flags::Plot_Fid(0)){
+		//std::cout<<"\t\tGood Index! Let's fill: " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
+		_Angular_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Fill(phi_,theta_);
+	}
+}
+
+void Histogram::Angular_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Fid(0)){ return ;}
+	std::cout<<"Writing Angular Peak Plots\n";
+	char dir_name[100];
+	//std::cout<<"Making Large Directory:";
+	TDirectory* dir_ang = _RootOutputFile->mkdir("Angular Plots");
+	//std::cout<<" Done\n";
+	dir_ang->cd();
+	//std::cout<<"Making Sub Directories: ";
+	TDirectory* dir_sub[6][3+1];//{sector,proton_thesh}
+	for(int i=0; i<6; i++){
+		sprintf(dir_name,"Angular Plots Sector:%d",i+1);
+		dir_sub[i][0] = dir_ang->mkdir(dir_name);
+		for(int j=0; j<3; j++){
+			sprintf(dir_name,"Angular Plots Sector:%d %s",i+1,_ele_corr_[j]);
+			dir_sub[i][j+1] = dir_sub[i][0]->mkdir(dir_name);
+		}
+	}
+	std::vector<long> space_dims(4);
+	space_dims[0] = 6; //Sectors
+	space_dims[1] = 2; //Proton 35 deg cut
+	space_dims[2] = 3; //Electron Corrections Performed
+	space_dims[3] = 2; //Fiducial Cut
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+	std::vector<int> idx;
+
+	while(cart.GetNextCombination()){
+		if(!flags_->Flags::Plot_Fid(0)){
+			//
+		}else{
+			idx = Angular_idx(cart[0]+1,_ele_corr_[cart[2]],_proton_threshold_[cart[1]],_pcorr_ele_fid_[cart[3]],flags_);
+			if(OK_Idx(idx)){
+				dir_sub[cart[0]][cart[2]+1]->cd();
+				_Angular_hist[idx[0]][idx[1]][idx[2]][idx[3]]->SetXTitle("Phi (deg)");
+				_Angular_hist[idx[0]][idx[1]][idx[2]][idx[3]]->SetYTitle("Theta (deg)");
+				_Angular_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Write();
+			}
+		}
+	}
+}
+
+//*------------------------------- End Elastic ---------------------------------*
 
 
 

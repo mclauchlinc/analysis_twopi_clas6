@@ -505,6 +505,73 @@ int fun::real_helicity(int hel_, int run_num_, std::shared_ptr<Flags> flags_){
   }
 }
 
+bool fun::is_num_in_list(int num_, const int list_[]){
+  bool present = false;
+  std::cout<<"size of array: " <<(sizeof(list_)/sizeof(list_[0])) <<"\n";
+  
+  return present;
+}
+
+bool fun::correct_run(int run_num_, std::shared_ptr<Flags> flags_){
+  if(flags_->Sim()){ return true;}
+  bool empty = false;
+  bool beam = false;
+  bool other = false;
+  if(flags_->Run()==_e16_){//e16
+    for(int i=0; i<(sizeof(_empty_e16_)/sizeof(_empty_e16_[0])); i++){
+      if(run_num_ == _empty_e16_[i]){
+        empty=true;
+      }
+    }
+    //empty = fun::is_num_in_list(run_num_,_empty_e16_);
+    //std::cout<<"Checking Beam| size: " <<sizeof(_beam_e16_)/sizeof(_beam_e16_[0]) <<"\n";
+    for(int i=0; i<(sizeof(_beam_e16_)/sizeof(_beam_e16_[0])); i++){
+      if(run_num_ == _beam_e16_[i]){
+        beam=true;
+      }
+    }
+    //beam = fun::is_num_in_list(run_num_,_beam_e16_);
+    for(int i=0; i<(sizeof(_other_e16_)/sizeof(_other_e16_[0])); i++){
+      if(run_num_ == _other_e16_[i]){
+        other=true;
+      }
+    }
+    //std::cout<<"Checking Other| size: " <<sizeof(_other_e16_)/sizeof(_other_e16_[0]) <<"\n";
+    //other = fun::is_num_in_list(run_num_,_other_e16_);
+    if(flags_->Fill()){//Filled Target
+      return (beam && !empty && !other);
+    }else{//Empty Target
+      return (beam && empty);
+    }
+  }
+
+
+    //if(flags_->Fill()){//Filled Target
+    // return (fun::is_num_in_list(run_num_,_beam_e16_,_beam_e16_.size()) && !fun::is_num_in_list(run_num_,_empty_e16_,_empty_e16_.size()) && !fun::is_num_in_list(run_num_,_other_e16_,_other_e16_.size()));
+    //}else{//Empty Target
+    //  return (fun::is_num_in_list(run_num_,_beam_e16_,_beam_e16_.size()) && fun::is_num_in_list(run_num_,_empty_e16_,_empty_e16_.size()));
+    //}
+  /*}else if(flags_->Run()==_e1f_){
+    if(flags_->Fill()){//Filled Target
+      return (fun::is_num_in_list(run_num_,_beam_e1f_,_beam_e1f_.size()) && !fun::is_num_in_list(run_num_,_empty_e1f_,_empty_e1f_.size()) && !fun::is_num_in_list(run_num_,_other_e1f_,_other_e1f_.size()));
+    }else{//Empty Target
+      return (fun::is_num_in_list(run_num_,_beam_e1f_,_beam_e1f_.size()) && fun::is_num_in_list(run_num_,_empty_e1f_,_empty_e1f_.size()));
+    }
+  }*/
+}
+
+  float fun::poly_4(float x_, float a_, float b_, float c_, float d_, float e_){
+    return a_*pow(x_,4) + b_*pow(x_,3) + c_*pow(x_,2) + d_*x_ + e_;
+  }
+
+  float fun::poly_3(float x_, float a_, float b_, float c_, float d_){
+    return a_*pow(x_,3) + b_*pow(x_,2) + c_*x_ + d_;
+  }
+
+  float fun::poly_2(float x_, float a_, float b_, float c_){
+    return a_*pow(x_,2) + b_*x_,2 + c_;
+  }
+
 /*
 int fun::array_size(char * array_[]){
   return std::distance(std::begin(array_), std::end(array_));

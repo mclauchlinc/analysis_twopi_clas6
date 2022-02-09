@@ -92,8 +92,29 @@ protected:
 	float _elast_min = 0.5;
 	int _elast_res = 300;
 
+	float _fid_xmin = -30.0;//Degrees
+	float _fid_xmax = 30.0; //Degrees
+	int _fid_xbin = 400;//Degrees
+	float _fid_ymin = 0.0;//Degrees
+	float _fid_ymax = 180.0; //Degrees
+	int _fid_ybin = 300;//Degrees
+
+	float _check_xmax[4] = {180.0,180.0,0.4,0.4};
+	float _check_xmin[4] = {0.0,0.0,-0.4,-0.4};
+	float _check_ymax[4] = {180.0,180.0,180.0,30.0};
+	float _check_ymin[4] = {0.0,0.0,0.0,-30.0};
+	int _check_xres[4] = {360,360,200,200};
+	int _check_yres[4] = {360,360,200,200};
+	char* _check_xnames[4] = {"Proton Theta (deg)","Electron Theta Calc (deg)","Delta Theta (deg)","Delta Theta (deg)"};
+	char* _check_ynames[4] = {"Electron Theta(deg)","Electron Theta (deg)","Electron Theta (deg)","Electron Phi (deg)"};
+	//char* _check_names[] = {"Ele_Theta_v_Pro_Theta","Ele_Theta_v_Ele_Calc","Ele_Theta_v_Delta_Theta","Ele_Phi_v_Delta_Theta"};
+	//float _check2_xmax[4] = {} 
+
+
 	TH1F_ptr_4d _Delta_Theta_hist;
 	TH1F_ptr_3d _Elast_hist;
+	TH2F_ptr_2d _Check_hist;
+	TH2F_ptr_4d _Angular_hist;
 
 public:
 	Histogram(std::shared_ptr<Flags> flags_);
@@ -114,12 +135,23 @@ public:
 	std::vector<int> ECorr_Angle_idx(float theta_, float phi_, int sector_, const char * corr_ , std::shared_ptr<Flags> flags_);
 	void ECorr_Angle_Fill(float delta_theta_, float theta_, float phi_, int sector_, const char* corr_, std::shared_ptr<Flags> flags_);
 	void ECorr_Angle_Write(std::shared_ptr<Flags> flags_);
-	//*------------------------------- End Plot 1 Electron Angle Correction ---------------------------------*
+	//*------------------------------- Start Elastic Plots ---------------------------------*
 	void Elastic_Make(std::shared_ptr<Flags> flags_);
 	std::vector<int> Elastic_idx(int sector_, const char* corr_, const char* pro_thresh_, std::shared_ptr<Flags> flags_);
 	void Elastic_Fill(float W_, int sector_, const char* corr_, const char* pro_thresh_, std::shared_ptr<Flags> flags_);
 	void Elast_Write(std::shared_ptr<Flags> flags_);
-};
+	//*------------------------------- Start Check Plots ---------------------------------*
+	void Check_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> Check_idx(int sector_, const char* check_, std::shared_ptr<Flags> flags_);
+	void Check_Fill(float xval_, float yval_, int sector_, const char* check_, std::shared_ptr<Flags> flags_);
+	void Check_Write(std::shared_ptr<Flags> flags_);
+	//*------------------------------- Start Anglular ---------------------------------*
+	void Angular_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> Angular_idx(int sector_, const char* corr_, const char* pro_thresh_, const char* fid_cut_, std::shared_ptr<Flags> flags_);
+	void Angular_Fill(float theta_, float phi_, int sector_, const char* corr_, const char* pro_thresh_, const char* fid_cut_,std::shared_ptr<Flags> flags_);
+	void Angular_Write(std::shared_ptr<Flags> flags_);
+	//*------------------------------- End Elastic ---------------------------------*
+};	
 
 
 

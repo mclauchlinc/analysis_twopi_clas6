@@ -73,6 +73,11 @@ bool is_empty(int run_num_, std::shared_ptr<Flags> flags_);
 bool is_full(int run_num_, std::shared_ptr<Flags> flags_);
 bool correct_run_num(int run_num_, std::shared_ptr<Flags> flags_);
 int real_helicity(int hel_, int run_num_, std::shared_ptr<Flags> flags_);
+bool is_num_in_list(int num_, const int list_[]);
+bool correct_run(int run_num_, std::shared_ptr<Flags> flags_);
+float poly_4(float x_, float a_, float b_, float c_, float d_, float e_);
+float poly_3(float x_, float a_, float b_, float c_, float d_);
+float poly_2(float x_, float a_, float b_, float c_);
 //int array_size(char* array_[]);
 //int array_size(const char* array_[]);
 }

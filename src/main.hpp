@@ -47,17 +47,24 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	//Make a data object which all the branches can be accessed from
 	auto data = std::make_shared<Branches>(chain_,flags_->Flags::Sim());
 
-	int run_num = fun::extract_run_number(chain_->GetFile()->GetName(),flags_); //Not Finished so using temporary run number
+	int run_num = 0;fun::extract_run_number(chain_->GetFile()->GetName(),flags_); //Not Finished so using temporary run number
 	for(size_t curr_event = 0; curr_event < num_events; curr_event++){
 		//Get singular event
 		chain_->GetEntry(curr_event);
-		//Update on Progress through Analysis
-		if(thread_id_ == 0 && curr_event%(num_events/100) == 0){
-			//curr_file_name = 
-			std::cout<<"\r" <<"\t" <<(100*curr_event/num_events) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
+		run_num = fun::extract_run_number(chain_->GetFile()->GetName(),flags_);
+		//std::cout<<"Run Number is: " <<run_num <<" and it: ";
+		if(fun::correct_run(run_num,flags_)){
+			//std::cout<<"passed\n";
+			//Update on Progress through Analysis
+			if(thread_id_ == 0 && curr_event%(num_events/100) == 0){
+				//curr_file_name = 
+				std::cout<<"\r" <<"\t" <<(100*curr_event/num_events) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
+			}
+			//Particle ID, Event Selection, and Histogram Filling
+			auto analysis = std::make_shared<Analysis>(data,hists_, thread_id_, run_num, flags_);
+		}else{
+			//std::cout<<"failed\n";
 		}
-		//Particle ID, Event Selection, and Histogram Filling
-		auto analysis = std::make_shared<Analysis>(data,hists_, thread_id_, run_num, flags_);
 	}
 }
 

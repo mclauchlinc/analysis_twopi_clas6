@@ -302,7 +302,7 @@ protected:
 	THnSparseD* _Weight_Sum[3][5];
 
 
-
+	TH1F_ptr_3d _PCorr_Check_hist;
 
 	//TH2F_ptr_5d _Made_Fid_hist;//[7][4][11][30][26][6][2][2];//sector, species, cut, W binning, p binning, topology, anti, weight
 	/*TH2F_ptr _SF_hist[10][30][7][6][2];//cuts, W Binning, Sector, topology, anti, weight
@@ -474,6 +474,12 @@ public:
 	void Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, std::shared_ptr<Flags> flags_);
 	void Friend_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End Friend Plot----------------------------*
+	//*-------------------------------Start PCorr Check Plot----------------------------*
+	void PCorr_Check_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> PCorr_Check_idx(int sector_, const char* top_, const char* corr_, std::shared_ptr<Flags> flags_);
+	void PCorr_Check_Fill(float MM2_, int sector_, const char* top_, const char* corr_, std::shared_ptr<Flags> flags_);
+	void PCorr_Check_Write(std::shared_ptr<Flags> flags_);
+	//*-------------------------------End PCorr Check Plot----------------------------*
 };
 
 

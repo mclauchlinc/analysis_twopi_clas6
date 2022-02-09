@@ -49,8 +49,19 @@ void Particle::PID_Thrown(int idx_, std::shared_ptr<Branches> data_){
 
 void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
 	//Kinematic Quantities
+	if(idx_==0 && flags_->E_PCorr()){
+		//if(flags_->E_Theta_Corr()){
+			_p = corr::p_corr_e(data_->Branches::p(idx_),corr::theta_e_corr(physics::get_theta(data_->Branches::cz(idx_)),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run()),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run());
+		//}else{
+			//_p = corr::p_corr_e(data_->Branches::p(idx_),physics::get_theta(data_->Branches::cz(idx_)),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run());
+		//}
+	}
 	_p = data_->Branches::p(idx_);
-	_theta = physics::get_theta(data_->Branches::cz(idx_));
+	if(idx_==0 && (flags_->E_Theta_Corr() || flags_->E_PCorr())){
+		_theta = corr::theta_e_corr(physics::get_theta(data_->Branches::cz(idx_)),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run());
+	}else{
+		_theta = physics::get_theta(data_->Branches::cz(idx_));
+	}
 	_phi = physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_));
 	_q = data_->Branches::q(idx_);
 	for(int i=0; i<4; i++){

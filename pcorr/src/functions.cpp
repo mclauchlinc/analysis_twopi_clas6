@@ -33,7 +33,7 @@ float fun::poly_2(float x_, float a_, float b_, float c_){
 
 float fun::theta(std::shared_ptr<Branches> data_, int idx_, bool radians_){
 	if(radians_){
-		return TMath::ACos(data_->cz(idx_))*_degree_;
+		return TMath::ACos(data_->cz(idx_));
 	}
 	return TMath::ACos(data_->cz(idx_))*_degree_;
 }
@@ -69,23 +69,23 @@ float fun::phi_center( float phi_){
 			phi_corr = phi_;
 		break;
 		case 2:
-			phi_corr = phi_-60;
+			phi_corr = phi_-60.0;
 		break;
 		case 3:
-			phi_corr = phi_-120;
+			phi_corr = phi_-120.0;
 		break;
 		case 4:
-			if(phi_<=-150){
-				phi_corr = phi_+180;
-			}else if(phi_>=150){
-				phi_corr = phi_-180;
+			if(phi_<=-150.0){
+				phi_corr = phi_+180.0;
+			}else if(phi_>=150.0){
+				phi_corr = phi_-180.0;
 			}
 		break;
 		case 5:
-			phi_corr = phi_+120;
+			phi_corr = phi_+120.0;
 		break;
 		case 6:
-			phi_corr = phi_+60;
+			phi_corr = phi_+60.0;
 		break;
 		default:
 			std::cout<<"Improper phi. Cannot determine sector\n";
@@ -102,13 +102,21 @@ float fun::phi_center( float phi_){
 
 float fun::phi(std::shared_ptr<Branches> data_, int idx_, bool center_, bool radians_){
 	float phi = TMath::ATan2(data_->cy(idx_),data_->cx(idx_));
+	//std::cout<<"\tPhi start (deg): " <<phi*_degree_ <<"\n";
 	if(center_){
-		phi = phi_center(phi*_degree_);
+		if(radians_){
+			return phi_center(phi*_degree_)/_degree_;
+		}else{
+			//std::cout<<"\tPhi Centerd (deg): " <<phi_center(phi*_degree_) <<"\n";
+			return phi_center(phi*_degree_);
+		}
+	}else{
+		if(radians_){
+			return phi;
+		}else{
+			return phi*_degree_;
+		}
 	}
-	if(radians_){
-		return phi;
-	}
-	return phi*_degree_;
 }
 
 float fun::p_calc(float theta_e_, float beam_energy_){
@@ -179,4 +187,12 @@ std::vector<std::string> fun::read_file_list(std::string path, int thread_num, s
     t++;
   }
   return result;
+}
+
+void fun::print_vector_idx(std::vector<int> vec_){
+  std::cout<<"\tIndex: ";
+  for(int i=0; i<vec_.size(); i++){
+    std::cout<<vec_[i] <<" ";
+  }
+  std::cout<<"\n";
 }
