@@ -26,9 +26,9 @@
 //#include "CartesianGenerator.hh"
 
 //Binning Info
-static float _theta_min_ = 10.0;
-static float _theta_max_ = 30.0;
-static int _theta_bins_ = 40;
+static float _theta_min_ = 14.0;
+static float _theta_max_ = 60.0;
+static int _theta_bins_ = 92;
 
 static float _phi_min_ = -25.0;
 static float _phi_max_ = 25.0;

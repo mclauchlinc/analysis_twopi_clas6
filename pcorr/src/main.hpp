@@ -64,6 +64,8 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			float theta_e = fun::theta(data,0);
 			float phi_e = fun::phi(data,0);
 			float phi_e_center = fun::phi(data,0,true);
+			//std::cout<<"Electron Phi: " <<phi_e <<" | centered: " <<phi_e_center <<" gives bin: " <<hists_->Histogram::Phi_Idx(phi_e_center) <<" which says range is: " <<hists_->Histogram::Phi_Low(hists_->Histogram::Phi_Idx(phi_e_center)) <<"_" <<hists_->Histogram::Phi_Top(hists_->Histogram::Phi_Idx(phi_e_center)) <<"\n";
+			std::cout<<"Electron Theta: " <<theta_e <<" gives bin: " <<hists_->Histogram::Theta_Idx(theta_e) <<" which says range is: " <<hists_->Histogram::Theta_Low(hists_->Histogram::Theta_Idx(theta_e)) <<"_" <<hists_->Histogram::Theta_Top(hists_->Histogram::Theta_Idx(theta_e)) <<"\n";
 			int sector_e = fun::get_sector(data, 0);
 			float theta_e_corr = corr::theta_e_corr(theta_e,phi_e_center,flags_->Run(),true,sector_e);
 			TLorentzVector k_mu = fun::Make_4Vector(p_e, theta_e, phi_e, _me_);
