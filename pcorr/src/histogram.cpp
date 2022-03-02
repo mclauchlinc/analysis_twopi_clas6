@@ -7,6 +7,7 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	Histogram::Elastic_Make(flags_);
 	Histogram::Check_Make(flags_);
 	Histogram::Angular_Make(flags_);
+	Histogram::E_PCorr_Make(flags_);
 }
 
 bool Histogram::OK_Idx(std::vector<int> idx_){
@@ -31,6 +32,7 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	Histogram::Elast_Write(flags_);
 	Histogram::Check_Write(flags_);
 	Histogram::Angular_Write(flags_);
+	Histogram::E_PCorr_Write(flags_);
 	_RootOutputFile->Close();
 	std::cout<<"Histograms Done!" <<std::endl;
 }
@@ -212,6 +214,10 @@ std::vector<int> Histogram::ECorr_Angle_idx(float theta_, float phi_, int sector
 		idx.push_back(2);
 	}else if(corr_== _no_corr_){
 		idx.push_back(0);
+	}else if(flags_->Flags::E_Theta_Corr() && corr_ == _ele_angle_corr_){
+		idx.push_back(1);
+	}else if(flags_->Flags::E_PCorr() && corr_ == _ele_p_corr_){
+		idx.push_back(2);
 	}else{
 		idx.push_back(-1);
 	}
@@ -222,6 +228,7 @@ std::vector<int> Histogram::ECorr_Angle_idx(float theta_, float phi_, int sector
 }
 
 void Histogram::ECorr_Angle_Fill(float delta_theta_, float theta_, float phi_, int sector_, const char* corr_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_E_PCorr()){ return; }
 	std::vector<int> idx = ECorr_Angle_idx(theta_,phi_,sector_,corr_,flags_);
 	if(OK_Idx(idx)){
 		_Delta_Theta_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Fill(delta_theta_);
@@ -331,6 +338,7 @@ void Histogram::Elastic_Make(std::shared_ptr<Flags> flags_){
 }
 
 std::vector<int> Histogram::Elastic_idx(int sector_, const char* corr_, const char* pro_thresh_, std::shared_ptr<Flags> flags_){
+	
 	std::vector<int> idx;
 	
 	if(flags_->Flags::E_Theta_Corr() && corr_ == _ele_angle_corr_){
@@ -354,6 +362,7 @@ std::vector<int> Histogram::Elastic_idx(int sector_, const char* corr_, const ch
 }
 
 void Histogram::Elastic_Fill(float W_, int sector_, const char* corr_, const char* pro_thresh_,std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Elastic()){ return ;}
 	//std::cout<<"\tFilling Elastic Hist for " <<W_ <<" " <<sector_ <<" " <<corr_ <<" " <<pro_thresh_ <<"\n";
 	std::vector<int> idx = Elastic_idx(sector_, corr_, pro_thresh_,flags_);
 	if(OK_Idx(idx) && flags_->Flags::Plot_Elastic()){
@@ -453,6 +462,7 @@ std::vector<int> Histogram::Check_idx(int sector_, const char* check_, std::shar
 }
 
 void Histogram::Check_Fill(float xval_, float yval_, int sector_, const char* check_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Check()){ return ;}
 	//std::cout<<"\tFilling Check Hist for " <<xval_ <<" " <<yval_ <<" " <<sector_ <<" " <<check_ <<"\n";
 	std::vector<int> idx = Check_idx(sector_, check_,flags_);
 	if(OK_Idx(idx) && flags_->Flags::Plot_Check()){
@@ -577,6 +587,7 @@ std::vector<int> Histogram::Angular_idx(int sector_, const char* corr_, const ch
 }
 
 void Histogram::Angular_Fill(float theta_, float phi_, int sector_, const char* corr_, const char* pro_thresh_, const char* fid_cut_,std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Fid(0)){ return ;}
 	//std::cout<<"\tFilling Angular Hist for " <<W_ <<" " <<sector_ <<" " <<corr_ <<" " <<pro_thresh_ <<"\n";
 	std::vector<int> idx = Angular_idx(sector_, corr_, pro_thresh_,fid_cut_,flags_);
 	if(OK_Idx(idx) && flags_->Flags::Plot_Fid(0)){
@@ -628,7 +639,154 @@ void Histogram::Angular_Write(std::shared_ptr<Flags> flags_){
 }
 
 //*------------------------------- End Elastic ---------------------------------*
+//*------------------------------- Start Delta P ---------------------------------*
+void Histogram::E_PCorr_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Plot_E_PCorr()){ return;}
+	std::cout<<"Making Electron Momentum Correction Delta Theta Plots\n";
+	TH1F_ptr_3d plot_3d;
+	TH1F_ptr_2d plot_2d;
+	TH1F_ptr_1d plot_1d;
 
+
+	std::vector<long> space_dims(4);
+	space_dims[0] = _theta_bins_;//Theta bins
+	space_dims[1] = _phi_bins_; //phi bins
+	space_dims[2] = 6; //Sectors
+	space_dims[3] = 3; //no corrections done, angle corrections done, full momentum corrections done
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+	int corr_idx = -1;
+	int sec_idx = -1;
+	int phi_idx = -1;
+	int theta_idx = -1; 
+
+	while(cart.GetNextCombination()){
+		corr_idx=cart[3];
+		sec_idx=cart[2];
+		phi_idx=cart[1];
+		theta_idx=cart[0];
+		if((!flags_->Flags::E_Theta_Corr() && _ele_corr_[corr_idx]==_ele_angle_corr_) || (!flags_->Flags::E_PCorr() && _ele_corr_[corr_idx]==_ele_p_corr_)){
+			//std::cout<<"\tFlag said not to make histograms for " <<corr_idx <<"\n";
+		}else{
+			//std::cout<<"Making: " <<_Delta_Theta_hist.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+			//std::cout<<"\tCorr idx: " <<corr_idx <<" sector idx:" <<sec_idx <<" phi_idx:" <<phi_idx <<" theta_idx:" <<theta_idx <<"\n";
+			sprintf(hname,"Delta_P_ele_%s_Sec:%s_Theta:%.2f-%.2f_Phi:%.2f-%.2f",_ele_corr_[corr_idx],_sector_[sec_idx],Theta_Low(theta_idx),Theta_Top(theta_idx),Phi_Low(phi_idx),Phi_Top(phi_idx));
+			//std::cout<<"\tHistogram name: " <<hname <<"\n";
+			plot_1d.push_back(new TH1F(hname,hname,_delta_p_res,_delta_p_min,_delta_p_max));
+		}
+		if(cart[0]==space_dims[0]-1){
+			if(plot_1d.size()>0){
+				plot_2d.push_back(plot_1d);
+				plot_1d.clear();
+			}
+			if(cart[1]==space_dims[1]-1){
+				if(plot_2d.size()>0){
+					plot_3d.push_back(plot_2d);
+					plot_2d.clear();
+				}
+				if(cart[2]==space_dims[2]-1){
+					if(plot_3d.size()>0){
+						_E_PCorr_hist.push_back(plot_3d);
+						plot_3d.clear();
+					}
+				}
+			}
+		}
+	}
+}
+
+std::vector<int> Histogram::E_PCorr_idx(float theta_, float phi_, int sector_, const char * corr_ , std::shared_ptr<Flags> flags_){
+	std::vector<int> idx;
+	if(flags_->Flags::E_Theta_Corr() && corr_ == _ele_angle_corr_){
+		idx.push_back(1);
+	}else if(flags_->Flags::E_PCorr() && corr_ == _ele_p_corr_){
+		idx.push_back(2);
+	}else if(corr_== _no_corr_){
+		idx.push_back(0);
+	}else if(flags_->Flags::E_Theta_Corr() && corr_ == _ele_angle_corr_){
+		idx.push_back(1);
+	}else if(flags_->Flags::E_PCorr() && corr_ == _ele_p_corr_){
+		idx.push_back(2);
+	}else{
+		idx.push_back(-1);
+	}
+	idx.push_back(sector_-1);
+	idx.push_back(Phi_Idx(phi_));
+	idx.push_back(Theta_Idx(theta_));
+	return idx;
+}
+
+void Histogram::E_PCorr_Fill(float delta_p_e_, float theta_, float phi_, int sector_, const char* corr_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_E_PCorr()){ return; }
+	//std::cout<<"Filling E_PCorr Hist with " <<delta_p_e_ <<" theta: " <<theta_ <<" phi:" <<phi_ <<" sector:" <<sector_ <<" corr:" <<corr_ <<"\n";
+	std::vector<int> idx = E_PCorr_idx(theta_,phi_,sector_,corr_,flags_);
+	if(OK_Idx(idx)){
+		_E_PCorr_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Fill(delta_p_e_);
+		//std::cout<<"Tried to Fill |" <<delta_theta_ <<"| at | theta:" <<theta_ <<"__idx(" <<Theta_Idx(theta_) <<") " <<" phi:" <<phi_ <<"__idx(" <<Phi_Idx(phi_) <<") "<<" sector:" <<sector_ <<" corr_stat:" <<corr_ <<"\n";
+		//std::cout<<"\tHist Index at: " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<" " <<idx[3] <<"\n";
+	}
+}
+
+void Histogram::E_PCorr_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_E_PCorr()){ return; }
+	std::cout<<"Writing Electron Momentum Correction Plots\n";
+	char dir_name[100];
+	//std::cout<<"Making Large Directory:";
+	TDirectory* dir_e_corr = _RootOutputFile->mkdir("Electron PCorr2");
+	//std::cout<<" Done\n";
+	dir_e_corr->cd();
+	//std::cout<<"Making Sub Directories: ";
+	TDirectory* dir_sub[6][_theta_bins_+1][_phi_bins_+1];//{sector,theta,phi}
+	//std::cout<<"Initialized\n";
+	for(int i=0; i<6; i++){
+		sprintf(dir_name,"Electron PCorr2 Sec:%d",i+1);
+		//std::cout<<"\tMaking Sub Directory " <<i <<" " <<0 <<" " <<0 <<" : ";
+		dir_sub[i][0][0] = dir_e_corr->mkdir(dir_name);
+		//std::cout<<"Done\n";
+		for(int j=0; j<_theta_bins_; j++){
+			sprintf(dir_name,"Electron PCorr2 Sec:%d Theta:%.2f-%.2f",i+1,Theta_Low(j),Theta_Top(j));
+			//std::cout<<"\t\tMaking Sub Directory " <<i <<" " <<j+1 <<" " <<0 <<" : ";
+			dir_sub[i][j+1][0] = dir_sub[i][0][0]->mkdir(dir_name);
+			//std::cout<<"Done\n";
+			for(int k=0; k<_phi_bins_; k++){
+				sprintf(dir_name,"Electron PCorr2 Sec:%d Theta:%.2f-%.2f Phi:%.2f-%.2f",i+1,Theta_Low(j),Theta_Top(j),Phi_Low(k),Phi_Top(k));
+				//std::cout<<"\t\tMaking Final Sub Directory " <<i <<" " <<j+1 <<" " <<k+1 <<" : ";
+				dir_sub[i][j+1][k+1] = dir_sub[i][j+1][0]->mkdir(dir_name);
+				
+				//std::cout<<"Done\n";
+			} 
+		}
+	}
+	std::cout<<"Directories Built\n";
+	std::vector<long> space_dims(4);
+	space_dims[0] = _theta_bins_;//Theta bins
+	space_dims[1] = _phi_bins_; //phi bins
+	space_dims[2] = 6; //Sectors
+	space_dims[3] = 3; //no corrections done, angle corrections done, full momentum corrections done
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+	int corr_idx = -1;
+	int sec_idx = -1;
+	int phi_idx = -1;
+	int theta_idx = -1; 
+	std::vector<int> idx;
+	while(cart.GetNextCombination()){
+		corr_idx=cart[3];
+		sec_idx=cart[2];
+		phi_idx=cart[1];
+		theta_idx=cart[0];
+		idx = E_PCorr_idx(Theta_Center(theta_idx),Phi_Center(phi_idx),sec_idx+1,_ele_corr_[corr_idx],flags_);
+		if(OK_Idx(idx)){
+			//std::cout<<"Trying to write at | theta:" <<Theta_Center(theta_idx) <<"idx(" <<theta_idx <<") " <<" phi:" <<Phi_Center(phi_idx) <<"idx(" <<phi_idx <<") "<<" sector:" <<sec_idx+1 <<" corr_stat:" <<_ele_corr_[corr_idx] <<"\n";
+			//std::cout<<"\tGood Index at: " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<" " <<idx[3] <<"\n";
+			dir_sub[sec_idx][theta_idx+1][phi_idx+1]->cd();
+			_E_PCorr_hist[idx[0]][idx[1]][idx[2]][idx[3]]->SetXTitle("Delta P (GeV)");
+			_E_PCorr_hist[idx[0]][idx[1]][idx[2]][idx[3]]->SetYTitle("Yield");
+			_E_PCorr_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Write();
+		}
+	}
+}
+//*------------------------------- End Delta P ---------------------------------*
 
 
 

@@ -126,6 +126,10 @@ bool Event::Check_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, 
 	}else{
 		//std::cout<<"\tBAD ELECTRON\n";
 	}
+	//std::cout<<"Checking Particles. Pass is: " <<pass <<"\n";
+	//std::cout<<"\tWQ2 Cut flag is: " <<flags_->Flags::WQ2_Cut() <<" and W:" <<_W <<" Q2:" <<_Q2 <<" and cut result:" <<cuts::in_range(_W,_Q2) <<"\n";
+	pass &= ((cuts::in_range(_W,_Q2) && flags_->Flags::WQ2_Cut()) || !flags_->Flags::WQ2_Cut());
+	//std::cout<<"\tPass is now: " <<pass <<"\n"; 
 	return pass;
 }
 bool Event::Check_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, std::shared_ptr<Flags> flags_){
@@ -137,6 +141,7 @@ bool Event::Check_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, 
 			pass = true;
 		}
 	}
+	pass &= ((cuts::in_range(_W,_Q2) && flags_->Flags::WQ2_Cut()) || !flags_->Flags::WQ2_Cut());
 	return pass;
 }
 

@@ -39,6 +39,7 @@ static std::string _cc_cut_f_ = "cc";
 static std::string _ec_cut_f_ = "ec";
 static std::string _id_cut_f_ = "id";
 static std::string _beta_cut_f_[4] = {"beta_ele","beta_pro","beta_pip","beta_pim"};; //{ele,pro,pip,pim}
+static std::string _wq2_cut_f_ = "wq2";
 //Other Cuts
 static std::string _vertex_cut_f_ = "vertex";
 //Event Selection
@@ -126,6 +127,7 @@ private:
 	bool _cc_geo_cut = false;
 	bool _ec_geo_cut = false;
 	bool _sc_geo_cut = false;
+	bool _wq2_cut = false;
 	bool _geo_all = true;
 	//Corrections
 	bool _corr_all = false;
@@ -195,6 +197,7 @@ public:
 	bool Beta_Cut(int particle);
 	//Other Cuts
 	bool Vertex_Cut();
+	bool WQ2_Cut();
 	//Event Selection 
 	bool MM_Cut(int topology);
 	//Efficiency Cuts

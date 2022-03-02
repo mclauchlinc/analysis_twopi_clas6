@@ -196,3 +196,12 @@ void fun::print_vector_idx(std::vector<int> vec_){
   }
   std::cout<<"\n";
 }
+
+float fun::p_calc_e(float theta_e_, float beam_){
+	return beam_/(1+(2*beam_*TMath::Sin(theta_e_*_radian_/2.0)*TMath::Sin(theta_e_*_radian_/2.0)/_mp_));
+}
+
+
+float fun::delta_p(float theta_e_, float beam_, float p_e_){
+	return fun::p_calc_e(theta_e_, beam_)/p_e_;
+}

@@ -26,9 +26,9 @@
 //#include "CartesianGenerator.hh"
 
 //Binning Info
-static float _theta_min_ = 14.0;
-static float _theta_max_ = 60.0;
-static int _theta_bins_ = 92;
+static float _theta_min_ = 13.0;
+static float _theta_max_ = 35.0;
+static int _theta_bins_ = 44;
 
 static float _phi_min_ = -25.0;
 static float _phi_max_ = 25.0;
@@ -110,11 +110,15 @@ protected:
 	//char* _check_names[] = {"Ele_Theta_v_Pro_Theta","Ele_Theta_v_Ele_Calc","Ele_Theta_v_Delta_Theta","Ele_Phi_v_Delta_Theta"};
 	//float _check2_xmax[4] = {} 
 
+	float _delta_p_max = 1.1;
+	float _delta_p_min = 0.9;
+	int _delta_p_res = 200;
 
 	TH1F_ptr_4d _Delta_Theta_hist;
 	TH1F_ptr_3d _Elast_hist;
 	TH2F_ptr_2d _Check_hist;
 	TH2F_ptr_4d _Angular_hist;
+	TH1F_ptr_4d _E_PCorr_hist;
 
 public:
 	Histogram(std::shared_ptr<Flags> flags_);
@@ -151,6 +155,11 @@ public:
 	void Angular_Fill(float theta_, float phi_, int sector_, const char* corr_, const char* pro_thresh_, const char* fid_cut_,std::shared_ptr<Flags> flags_);
 	void Angular_Write(std::shared_ptr<Flags> flags_);
 	//*------------------------------- End Elastic ---------------------------------*
+	//*------------------------------- Start PCorr ---------------------------------*
+	void E_PCorr_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> E_PCorr_idx(float theta_, float phi_, int sector_, const char * corr_ , std::shared_ptr<Flags> flags_);
+	void E_PCorr_Fill(float delta_p_e_, float theta_, float phi_, int sector_, const char* corr_, std::shared_ptr<Flags> flags_);
+	void E_PCorr_Write(std::shared_ptr<Flags> flags_);
 };	
 
 

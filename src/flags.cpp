@@ -153,6 +153,7 @@ Flags::Flags(){}
 			_cc_cut = true;
 			_ec_cut = true;
 			_vertex_cut=true;
+			_wq2_cut=true;
 			_cut_all = true;
 		}
 		if(include && !_cut_all){
@@ -194,6 +195,10 @@ Flags::Flags(){}
 				std::cout<<"Will do Vertex Cut\n";
 				_vertex_cut=true;
 			}
+			if(str==_wq2_cut_f_){
+				std::cout<<"Will do W Q^2 Cut\n";
+				_wq2_cut=true;
+			}
 		}
 		if(!include && _cut_all){
 			for(int i=0; i<4; i++){
@@ -229,6 +234,10 @@ Flags::Flags(){}
 			if(str==_vertex_cut_f_){
 				std::cout<<"Will NOT do Vertex Cut\n";
 				_vertex_cut=false;
+			}
+			if(str==_wq2_cut_f_){
+				std::cout<<"Will NOT do W Q^2 Cut\n";
+				_wq2_cut=false;
 			}
 		}
 	}
@@ -554,6 +563,9 @@ Flags::Flags(){}
 	//Other Cuts
 	bool Flags::Vertex_Cut(){
 		return _vertex_cut;
+	}
+	bool Flags::WQ2_Cut(){
+		return _wq2_cut;
 	}
 	//Event Selection 
 	bool Flags::MM_Cut(int topology){

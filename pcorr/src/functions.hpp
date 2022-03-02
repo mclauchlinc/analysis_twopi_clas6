@@ -37,6 +37,8 @@ namespace fun {
 	void loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_, int max_, std::shared_ptr<Flags> flags_);
 	std::vector<std::string> read_file_list(std::string path, int thread_num, std::shared_ptr<Flags> flags_);
 	void print_vector_idx(std::vector<int> vec_);
+	float p_calc_e(float theta_e_, float beam_);
+	float delta_p(float theta_e_, float beam_, float p_e_);
 }
 
 #endif
