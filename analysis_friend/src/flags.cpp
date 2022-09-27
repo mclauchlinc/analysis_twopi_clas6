@@ -155,12 +155,16 @@ Flags::Flags(){}
 	}
 
 	void Flags::Info_Flag(std::string str_){
+		//std::cout<<"Current Run Info:\n\trun group: " <<_run_group <<"\n\tvar set: " <<_var_set <<"\n\tvar idx: "<<_var_idx <<"\n";
 		if(str_ == _run_e16_){
-			_run_group == 0;
+			_run_group = 0;
+			std::cout<<"Run group e16\n";
 		}else if(str_ == _run_e1f_){
-			_run_group == 1;
+			_run_group = 1;
+			std::cout<<"Run group e1f\n";
 		}else if(str_ == _both_){
-			_run_group == 2;
+			_run_group = 2;
+			std::cout<<"Run group both\n";
 		}else if(str_ == _var_pim_){
 			_var_set = "pim";
 			_var_idx = 0;
@@ -172,6 +176,7 @@ Flags::Flags(){}
 			_var_set = "pip";
 			_var_idx = 2;
 		}
+		//std::cout<<"New Run Info:\n\trun group: " <<_run_group <<"\n\tvar set: " <<_var_set <<"\n\tvar idx: "<<_var_idx <<"\n";
 	}
 
 	int Flags::Run(){

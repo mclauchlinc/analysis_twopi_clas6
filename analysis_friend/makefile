@@ -4,7 +4,7 @@ INCLUDE		= $(shell root-config --incdir)
 ROOTSYS		= $(shell root-config --exec-prefix)
 #Tell which compiler to use
 CXX = g++
-CXXFLAGS =      -O2 -fPIC -w -g -pthread -stdlib=libc++ -std=c++17 -m64 -I/usr/local/root_install/include
+CXXFLAGS =      -O2 -fPIC -w -g -pthread -stdlib=libc++ -std=c++17 -m64  -I${INCLUDE}
 #Target is the name of the output executable
 TARGET =	friend
 #The name of the file you want to comilie usually something like main.cpp 

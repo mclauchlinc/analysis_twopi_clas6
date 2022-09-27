@@ -179,6 +179,7 @@ public:
 	void Make_Histograms(Flags flags_);
 	void Fill_Histograms(Flags flags_);
 	void Write_Histograms(Flags flags_);
+	std::shared_ptr<TFile> Name_Output(Flags flags_);
 	void Extract_7d_Histograms(TFile* exp_tree, TFile* sim_tree, Flags flags_);
 	void Sparse_Add_7d(THnSparseD &h0, THnSparseD* h1, THnSparseD* h2, int sign);//Add/Subtract Sparse Histograms
 	void Sparse_Add_5d(THnSparseD* &h0, THnSparseD* h1, THnSparseD* h2, int sign);//Add/Subtract Sparse Histograms
@@ -196,6 +197,7 @@ public:
 	void Make_Polarization(Flags flags_);//Make Histograms to extract polarization observables
 	void Make_Integrated(Flags flags_);//Make Integrated Cross Section Histograms
 	void Make_WQ2(Flags flags_);//Make WQ2 histograms to show binnning
+	//void Make_Acceptance_Statistics(Flags flags_);//Make Histograms for determining proper Acceptance Statistics //Cannot make this here in the form the data has already been placed. Need on rootfile level for sim recon
 	void Make_Acceptance(Flags flags_);
 	//void Write_5d_Yield();
 	//void Write_5d_Cross_Section();

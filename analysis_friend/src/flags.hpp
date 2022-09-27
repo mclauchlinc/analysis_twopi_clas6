@@ -24,7 +24,7 @@ static std::string _real_top_ = "-r=";//Tells program which topology is truly be
 
 //Topologies are listed in Constants.hpp
 
-static std::string _histograms_ = "-h=";
+static std::string _histograms_ = "-h="; 
 static std::string _all_ = "all";
 static std::string _polarization_ = "pol";
 static std::string _single_diff_ = "single_diff";

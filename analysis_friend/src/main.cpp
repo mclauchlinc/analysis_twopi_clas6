@@ -9,13 +9,12 @@ int main(int argc, char **argv){
 	flags.Flags::Read_Flags(argc,argv);
 	std::cout<<"Test Plot Single Diff " <<flags.Flags::Plot_Single_Diff() <<"\n";
 
-	TFile *exp_file;
-	TFile *sim_file;
-	TFile *empty_file;
-	TFile *exp_file2;
-	TFile *sim_file2;
-	TFile *empty_file2;
+	
+
+	std::cout<<"Run both? " <<flags.Flags::Run("both") <<"\n";
+	std::cout<<"Run both? " <<flags.Flags::Run() <<"\n";
 	if(flags.Flags::Run("both") == _both_ ){//Looking at both e16 and e1f results
+		std::cout<<"Working with both e16 and e1f\n";
 		exp_file = new TFile(flags.Flags::Exp_File().c_str());
 		sim_file = new TFile(flags.Flags::Sim_File().c_str());
 		exp_file2 = new TFile(flags.Flags::Exp_File2().c_str());
@@ -27,14 +26,27 @@ int main(int argc, char **argv){
 		}else{
 			//auto hist Histogram(flags.Flags::Output_File(),exp_file,sim_file,exp_file2,sim_file2,flags);
 		}
+		if(flags.Flags::Has_Weight()){
+			weight_file = new TFile(flags.Flags::Weight_File().c_str());
+			weight_file2 = new TFile(flags.Flags::Weight_File2().c_str());
+		}
 	}else if(flags.Flags::Has_Exp() && flags.Flags::Has_Sim()){//Looking at just e16 or e1f
+		std::cout<<"Working with just " <<flags.Flags::Run("type") <<"\n";
 		exp_file = new TFile(flags.Flags::Exp_File().c_str());
 		sim_file = new TFile(flags.Flags::Sim_File().c_str());
+		auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,flags);
+		//Haven't implemented empty file or cc_acceptance integration yet
+		/*if(flags.Flags::Has_Weight()){
+			weight_file = new TFile(flags.Flags::Weight_File().c_str());
+		}
 		if(flags.Flags::Has_Empty()){
 			empty_file = new TFile(flags.Flags::Empty_File().c_str());
 			//auto hist Histogram(flags.Flags::Output_File(),exp_file,sim_file,empty_file,flags);
+		}else if(flags.Flags::Has_Weight()){
+			auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,flags);
 		}else{
 			auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,flags);
-		}
+		}*/
+		
 	}
 }

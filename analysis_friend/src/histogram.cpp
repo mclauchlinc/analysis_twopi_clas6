@@ -18,9 +18,12 @@ Histogram::Histogram(const std::string& output_file, TFile *exp_tree, TFile *sim
 }
 
 void Histogram::Make_Histograms(Flags flags_){
+	_RootOutputFile=Histogram::Name_Output(flags_);
+	TCanvas* def = new TCanvas("def");
 	std::cout<<"Making Histograms\n";
 	Histogram::Make_WQ2(flags_);
 	Histogram::Make_Acceptance(flags_);
+	//Histogram::Make_Acceptance_Statistics(flags_); //Cannot perform here. Require rootfile level for sim recon data
 	Histogram::Make_Error_Hists(flags_);
 }
 
@@ -29,13 +32,18 @@ void Histogram::Fill_Histograms(Flags flags_){
 }
 	
 void Histogram::Write_Histograms(Flags flags_){
-	Histogram::Write_WQ2(flags_);
-	Histogram::Write_Acceptance(flags_);
+	std::cout<<"Writing Histograms\n";
+	//Histogram::Write_WQ2(flags_); //Already written when making
+	//Histogram::Write_Acceptance(flags_); //Already written when making
 	Histogram::Write_Single_Diff(flags_);
 	Histogram::Write_Error_Hists(flags_);
 	Histogram::Write_Polarization(flags_);
-	
+	_RootOutputFile->Close();
+	std::cout<<"Output File: " <<flags_.Flags::Output_File() <<"\n";
+}
 
+std::shared_ptr<TFile> Histogram::Name_Output(Flags flags_){
+	return std::make_shared<TFile>(flags_.Flags::Output_File().c_str(),"RECREATE");
 }
 
 void Histogram::Extract_7d_Histograms(TFile *exp_tree, TFile *sim_tree, Flags flags_){
@@ -46,7 +54,7 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree, TFile *sim_tree, Flags fl
 	sprintf(hname,"Thrown_%s",_sparse_names_[flags_.Flags::Var_idx()]);
 	std::cout<<"Getting Thrown THnSparse " <<hname <<"\n";
 	_thrown_7d = (THnSparseD *)sim_tree->Get(hname);
-	sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_topo_[flags_.Flags::Top_idx()]);//_top_[flags_.Flags::Top_idx()]);
+	sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);//_top_[flags_.Flags::Top_idx()]);
 	std::cout<<"Getting Exp THnSparse " <<hname <<"\n";
 	_exp_data_7d = (THnSparseD *)exp_tree->Get(hname);
 	sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);
@@ -60,9 +68,11 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree, TFile *sim_tree, Flags fl
 	if(fun::nSparseIntegral(_sim_data_7d)>0.0){
 		std::cout<<"\tSim Data 7d integral is non-zero\n";
 		_scale_factor_7d=fun::nSparseIntegral(_exp_data_7d)/fun::nSparseIntegral(_sim_data_7d);
+		std::cout<<"\tScale factor 7d set to " <<_scale_factor_7d <<"\n";
 	}else{
 		std::cout<<"\tSim Data 7d integral is zero\n";
 		_scale_factor_7d=0.0;
+		std::cout<<"\tScale factor 7d set to " <<_scale_factor_7d <<"\n";
 	}
 	_exp_corr_7d=(THnSparseD*)_exp_data_7d->Clone();
 	_exp_corr_7d->Divide(_acceptance_7d);
@@ -926,57 +936,221 @@ void	Histogram::Make_Integrated(Flags flags_){
 }
 
 void Histogram::Make_WQ2(Flags flags_){
-	std::cout<<"Making WQ2 Plots\n";
+	std::cout<<"\tMaking WQ2 Plots\n";
 	if(!flags_.Flags::Plot_WQ2()){
-		std::cout<<"\tNot making WQ2 Plots\n";
+		std::cout<<"\t\tNot making WQ2 Plots\n";
 		return;
 		std::cout<<"\t\tProperly exited...?\n";
 	}
 	char hname[100];
 	sprintf(hname,"Exp_WQ2_Top:%s_Var:%s",flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 	_exp_hist_wq2 = _exp_data_7d->Projection(1,0);
+	std::cout<<"\t\tExperimental WQ2 total yield: " <<_exp_hist_wq2->Integral() <<"\n";
 	_exp_hist_wq2->SetNameTitle(hname,hname);
 	sprintf(hname,"Sim_WQ2_Top:%s_Var:%s",flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 	_sim_hist_wq2 = _sim_data_7d->Projection(1,0);
+	std::cout<<"\t\tSimulated WQ2 total yield: " <<_sim_hist_wq2->Integral() <<"\n";
 	_sim_hist_wq2->SetNameTitle(hname,hname);
 	sprintf(hname,"Exp_Corr_WQ2_Top:%s_Var:%s",flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 	_exp_corr_hist_wq2 = _exp_corr_7d->Projection(1,0);
+	std::cout<<"\t\tExperimental acceptance corrected WQ2 total yield: " <<_exp_corr_hist_wq2->Integral() <<"\n";
 	_exp_corr_hist_wq2->SetNameTitle(hname,hname);
 	sprintf(hname,"Sim_Corr_WQ2_Top:%s_Var:%s",flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 	_sim_corr_hist_wq2 = _sim_corr_7d->Projection(1,0);
+	std::cout<<"\t\tSim acceptance corrected WQ2 total yield: " <<_sim_corr_hist_wq2->Integral() <<"\n";
 	_sim_corr_hist_wq2->SetNameTitle(hname,hname);
 	sprintf(hname,"Thr_WQ2_Var:%s",flags_.Flags::Var_Set().c_str());
 	_thr_hist_wq2 = _thrown_7d->Projection(1,0);
+	std::cout<<"\t\tThrown WQ2 total yield: " <<_thr_hist_wq2->Integral() <<"\n";
 	_thr_hist_wq2->SetNameTitle(hname,hname);
+	std::cout<<"\tWriting W vs Q2 Plots\n";
+	if(!flags_.Plot_WQ2()){
+		std::cout<<"\tNot Plotting WQ2\n";
+	 	return;
+	 	std::cout<<"\t\tProperly exited...?\n";
+	}else{
+		std::cout<<"\t\tMaking Directory\n";
+		TDirectory* dir_WQ2 = _RootOutputFile->mkdir("WQ2 Plots");
+		dir_WQ2->cd();
+		std::cout<<"\t\tWriting in Directory\n";
+		std::cout<<"\t\tWriting exp hist\n";
+		_exp_hist_wq2->SetXTitle("W (GeV)");
+		_exp_hist_wq2->SetYTitle("Q^{2} (GeV^{2}");
+		_exp_hist_wq2->SetOption("Colz");
+		_exp_hist_wq2->Write();
+		std::cout<<"\t\tWriting sim hist\n";
+		_sim_hist_wq2->SetXTitle("W (GeV)");
+		_sim_hist_wq2->SetYTitle("Q^{2} (GeV^{2}");
+		_sim_hist_wq2->SetOption("Colz");
+		_sim_hist_wq2->Write();
+		std::cout<<"\t\tWriting exp acceptance corrected hist\n";
+		_exp_corr_hist_wq2->SetXTitle("W (GeV)");
+		_exp_corr_hist_wq2->SetYTitle("Q^{2} (GeV^{2}");
+		_exp_corr_hist_wq2->SetOption("Colz");
+		_exp_corr_hist_wq2->Write();
+		std::cout<<"\t\tWriting sim acceptance corrected hist\n";
+		_sim_corr_hist_wq2->SetXTitle("W (GeV)");
+		_sim_corr_hist_wq2->SetYTitle("Q^{2} (GeV^{2}");
+		_sim_corr_hist_wq2->SetOption("Colz");
+		_sim_corr_hist_wq2->Write();
+	}
 }
 
-void Histogram::Make_Acceptance(Flags flags_){
-	std::cout<<"Making Acceptance Plots\n";
-	//TH1D_5d _accept_hist_1;//(var,top,w,q2,{MM1,MM2,theta,alpha,phi})
-	//TH1D_3d _accept_hist_2;//(var,top,{w,q2})
-	//std::cout<<"\nMaking WQ2 Plots";
-	char hname[100];
-	TH1D_1d_star accept_hist_01;
-	TH1D_2d_star accept_hist_02;
-	for(int k=0; k<_n_bins_7d[0]; k++){
-		//_accept_hist_1.push_back(accept_hist_03);
-		for(int l=0; l<_n_bins_7d[1]; l++){
-			//_accept_hist_1[k].push_back(accept_hist_04);
-			for(int m=0; m<5; m++){
-				//std::cout<<"\nstep 1";
-				sprintf(hname,"acceptance_%s_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_five_dim_[m],_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
-				accept_hist_01.push_back(_acceptance_5d[k][l]->Projection(m));
+//Plots showing the number of empty reconstructed simulation bins where there is data from experiment
+//This doesn't work the way I had very much hoped it would work. Cannot make this histogram as intended here
+/*
+void Histogram::Make_Acceptance_Statistics(Flags flags_){
+	std::cout<<"\tMake Acceptance Statistic Plot? ";
+	if(flags_.Flags::Plot_Acceptance()){
+		std::cout<<"Yes\n";
+		char hname[100];
+		sprintf(hname,"Determination of Proper Simulation Statistics");
+		_acc_zero_exp = new TH1D(hname,hname,200,0.0,1.0);
+		int bin_7d[7];
+		int sim_bins_total = _sim_data_7d->THnSparse::GetNbins();
+		int sim_bin = 0;
+		float frac = (float)sim_bin/(float)sim_bins_total;
+		std::cout<<"Total Reconstructed Bins: " <<sim_bins_total <<"\n";
+		for(int i=0; i<_n_bins_7d[0]; i++){//W
+			bin_7d[0]=i;
+			for(int j=0; j< _n_bins_7d[1]; j++){//Q2
+				bin_7d[1]=j;
+				for(int k = 0; k< _n_bins_7d[2]; k++){//MM1
+					bin_7d[2]=k;
+					for(int l = 0; l< _n_bins_7d[3]; l++){//MM2
+						bin_7d[3]=l;
+						for(int m = 0; m< _n_bins_7d[4]; m++){//Theta
+							bin_7d[4]=m;
+							for(int n = 0; n< _n_bins_7d[5]; n++){//Alpha
+								bin_7d[5]=n;
+								for(int o = 0; o< _n_bins_7d[6]; o++){//Phi
+									bin_7d[6]=o;
+									if(_sim_data_7d->THnSparse::GetBinContent(bin_7d)>0.0){
+										sim_bin++;
+										frac = (float)sim_bin/(float)sim_bins_total;
+									}
+									if(_exp_data_7d->THnSparse::GetBinContent(bin_7d) > 0.0){
+										if(_sim_data_7d->THnSparse::GetBinContent(bin_7d)==0.0){
+											_acc_zero_exp->Fill(frac);
+										}		
+									}
+								}
+							}
+						}
+					}
+				}
 			}
-			//std::cout<<"\nstep 2";
-			accept_hist_02.push_back(accept_hist_01);
-			accept_hist_01.clear();
 		}
-		//std::cout<<"\nstep 3";
-		_accept_hist_1.push_back(accept_hist_02);
-		accept_hist_02.clear();
+		TDirectory* dir_acc_zero = _RootOutputFile->mkdir("Acceptance Statistics");
+		dir_acc_zero->cd();
+		_acc_zero_exp->SetXTitle("Fraction of Simulation Performed");
+		_acc_zero_exp->SetYTitle("Number of empty Rec Bins in Filled Exp bins");
+		_acc_zero_exp->Write();
 	}
-	_accept_hist_2[0]=(TH1D*)_acceptance_7d->Projection(0)->Clone();
-	_accept_hist_2[1]=(TH1D*)_acceptance_7d->Projection(1)->Clone();
+}*/
+
+
+//These are the 1 dimensional Acceptance plots that vary by W and Q2
+void Histogram::Make_Acceptance(Flags flags_){
+	if(flags_.Flags::Plot_Acceptance()){
+		std::cout<<"Making Acceptance Plots\n";
+		std::cout<<"\tMaking Acceptance Directory\n";
+		TDirectory* dir_A = _RootOutputFile->mkdir("Acceptance Plots");
+		dir_A->cd();
+		std::cout<<"\t\tMaking sub directories\n";
+		TDirectory* dir_A_1[_n_bins_7d[1]];
+		TDirectory* dir_A_2[_n_bins_7d[1]][_n_bins_7d[0]];
+		//TH1D_5d _accept_hist_1;//(var,top,w,q2,{MM1,MM2,theta,alpha,phi})
+		//TH1D_3d _accept_hist_2;//(var,top,{w,q2})
+		//std::cout<<"\nMaking WQ2 Plots";
+		char hname[100];
+		char dir_name[100];
+		TH1D_1d_star accept_hist_01;
+		TH1D_2d_star accept_hist_02;
+		//TH1D* accept_hist_00;
+		for(int k=0; k<_n_bins_7d[0]; k++){
+			/*std::cout<<"\t\tIterating by Q2. Bin:" <<l <<"\n";
+			sprintf(dir_name,"Acceptance_Q2:%.3f-%.3f",_bin_low_7d[1][l],_bin_up_7d[1][l]);
+			std::cout<<"\t\tdir_name: " <<dir_name <<"\n";
+			dir_A_1[l] = dir_A->mkdir(dir_name);*/
+			//_accept_hist_1.push_back(accept_hist_03);
+			for(int l=0; l<_n_bins_7d[1]; l++){
+				//std::cout<<"\t\t\tacceptance integral: " <<fun::nSparseIntegral(_acceptance_5d[k][l]) <<" for W Q2 bins: " <<k <<" " <<l <<"\n";
+				//std::cout<<"\t\t\tQ2 bin:" <<l <<" W bin:" <<k <<"\n";
+				//sprintf(dir_name,"Acceptance_W:%.3f-%.3f_Q2:%.3f-%.3f",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l]);
+				//std::cout<<"\t\t\tdirectory name: " <<dir_name <<"\n";		
+				//_accept_hist_1[k].push_back(accept_hist_04);
+				//std::cout<<"\t\t\t\t5d Acceptance isn't empty\n";
+				//dir_A_2[l][k] = dir_A_1[l]->mkdir(dir_name);
+				//dir_A_2[l][k]->cd();
+				//std::cout<<"\t\t\t\tEntered Directory for saving\n";
+				for(int m=0; m<5; m++){
+					//std::cout<<"\nstep 1";
+					//sprintf(hname,"acceptance_%s_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_set:%s_",_five_dim_[m],_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+					//std::cout<<"\tGetting hist: " <<hname <<"\n";
+					accept_hist_01.push_back(_acceptance_5d[k][l]->Projection(m));
+					//accept_hist_00 = _acceptance_5d[k][l]->Projection(m);
+					//std::cout<<"\t\tWriting 1D Acceptance for W:" <<k <<" Q2:" <<l <<" X:" <<m <<"\n";
+					//accept_hist_00->SetTitle(hname);
+					//accept_hist_00->SetYTitle("Integrated Acceptance");
+					//accept_hist_00->SetXTitle(_five_dim_[m]);
+					//accept_hist_00->Write();
+				}
+				//std::cout<<"\nstep 2";
+				accept_hist_02.push_back(accept_hist_01);
+				accept_hist_01.clear();
+			}
+			//std::cout<<"\nstep 3";
+			_accept_hist_1.push_back(accept_hist_02);
+			accept_hist_02.clear();
+		}
+		_accept_hist_2[0]=(TH1D*)_acceptance_7d->Projection(0)->Clone();
+		_accept_hist_2[1]=(TH1D*)_acceptance_7d->Projection(1)->Clone();
+		std::cout<<"\tWriting W Q2 projections of acceptance\n";
+		dir_A->cd();
+		_accept_hist_2[0]->SetXTitle("W (GeV)");
+		_accept_hist_2[0]->SetYTitle("Integrated Acceptance");
+		_accept_hist_2[0]->Write();
+		_accept_hist_2[1]->SetXTitle("Q^{2} (GeV^{2})");
+		_accept_hist_2[1]->SetYTitle("Integrated Acceptance");
+		_accept_hist_2[1]->Write();
+
+		//TString* path; 
+		//char path[100];
+		for(int l=0; l<_n_bins_7d[1]; l++){
+			std::cout<<"\t\tIterating by Q2. Bin:" <<l <<"\n";
+			sprintf(dir_name,"Acceptance_Q2:%.3f-%.3f",_bin_low_7d[1][l],_bin_up_7d[1][l]);
+			std::cout<<"\t\t" <<dir_name <<"\n";
+			dir_A_1[l] = dir_A->mkdir(dir_name);
+			dir_A_1[l]->cd();
+			gDirectory->pwd();
+			for(int k =0; k<_n_bins_7d[0]; k++){
+				if(fun::nSparseIntegral(_acceptance_5d[k][l])>0.0){
+					std::cout<<"\t\t\tacceptance integral: " <<fun::nSparseIntegral(_acceptance_5d[k][l]) <<" for W Q2 bins: " <<k <<" " <<l <<"\n";
+					std::cout<<"\t\t\tQ2 bin:" <<l <<" W bin:" <<k <<"\n";
+					sprintf(dir_name,"Acceptance_W:%.3f-%.3f_Q2:%.3f-%.3f",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l]);
+					std::cout<<"\t\t\tMaking dir:" <<dir_name <<"\n";
+					dir_A_2[l][k] = dir_A_1[l]->mkdir(dir_name);
+					//std::cout<<"\t\tdirectory contents " <<dir_A_1[l]->Print() <<"\n";
+					dir_A_2[l][k]->cd();
+					dir_A_2[l][k]->Print();
+					//std::cout<<"\t\t pwd: " <<dir_A_2[l][k]->TDirectory::pwd() <<"\n"; 
+					gDirectory->pwd();
+					//gDirectory->GetDirectory();
+					//std::cout<<"\t\t\t\tlook at full path: " <<path <<"\n";
+					std::cout<<"\t\t\tEntered Directory for saving " <<dir_name <<"\n";
+					for(int m=0; m<5; m++){
+						std::cout<<"\t\t\t\tWriting 1D Acceptance for W:" <<k <<" Q2:" <<l <<" X:" <<m <<"\n";
+						sprintf(hname,"Acceptance_%s_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_set:%s_",_five_dim_[m],_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+						_accept_hist_1[k][l][m]->SetTitle(hname);
+						_accept_hist_1[k][l][m]->SetYTitle("Integrated Acceptance");
+						_accept_hist_1[k][l][m]->SetXTitle(_five_dim_[m]);
+						_accept_hist_1[k][l][m]->Write();
+					}
+				}
+			}
+		}
+	}
 }
 	//void Write_5d_Yield();
 	//void Write_5d_Cross_Section();
@@ -1061,6 +1235,7 @@ void Histogram::Convert_Polarization_to_Cross(Flags flags_){
 	}
 }
 
+//It appears That I cannot access any of these histograms at this point for some reason, so I'm moving the writing to where I make them. Will address this issue at a later date 9/23/22
 void Histogram::Write_WQ2(Flags flags_){
 	std::cout<<"Writing W vs Q2 Plots\n";
 	if(!flags_.Plot_WQ2()){
@@ -1068,11 +1243,21 @@ void Histogram::Write_WQ2(Flags flags_){
 	 	return;
 	 	std::cout<<"\t\tProperly exited...?\n";
 	}
+	std::cout<<"\tMaking Directory\n";
 	TDirectory* dir_WQ2 = _RootOutputFile->mkdir("WQ2 Plots");
 	dir_WQ2->cd();
+	std::cout<<"\tWriting in Directory\n";
+	std::cout<<"\t\t\tChecking exp hist yield: " <<_exp_hist_wq2->Integral() <<"\n";
+	std::cout<<"\t\tWriting exp hist\n";
+	_exp_hist_wq2->SetXTitle("W (GeV)");
+	_exp_hist_wq2->SetYTitle("Q^{2} (GeV^{2}");
+	_exp_hist_wq2->SetOption("Colz");
 	_exp_hist_wq2->Write();
+	std::cout<<"\t\tWriting sim hist\n";
 	_sim_hist_wq2->Write();
+	std::cout<<"\t\tWriting exp acceptance corrected hist\n";
 	_exp_corr_hist_wq2->Write();
+	std::cout<<"\t\tWriting sim acceptance corrected hist\n";
 	_sim_corr_hist_wq2->Write();
 }
 
@@ -1083,41 +1268,52 @@ void Histogram::Write_Acceptance(Flags flags_){
 		return;
 		std::cout<<"\t\tProperly exited...?\n";
 	}
+	std::cout<<"\tMaking directory\n";
 	TDirectory* dir_A = _RootOutputFile->mkdir("Acceptance Plots");
 	dir_A->cd();
-	//std::cout<<"\nPart 1";
+	std::cout<<"\t\tPart 1\n";
 	TDirectory* dir_A_1[_n_bins_7d[1]];
 	TDirectory* dir_A_2[_n_bins_7d[1]][_n_bins_7d[0]];
 	char dir_name[100];
 	for(int l=0; l<_n_bins_7d[1]; l++){
-		//std::cout<<"\nPart 4";
-		sprintf(dir_name,"Acceptance__Q2:%f-%f",_bin_low_7d[1][l],_bin_up_7d[1][l]);
+		std::cout<<"\t\tPart 4\n";
+		sprintf(dir_name,"Acceptance_Q2:%.3f-%.3f",_bin_low_7d[1][l],_bin_up_7d[1][l]);
+		std::cout<<"\t\t\t" <<dir_name <<"\n";
 		dir_A_1[l] = dir_A->mkdir(dir_name);
 		for(int k =0; k<_n_bins_7d[0]; k++){
 			if(fun::nSparseIntegral(_acceptance_5d[k][l])>0.0){
-				//std::cout<<"\nPart 5";
-				//std::cout<<"\t index:" <<i <<" " <<j <<" " <<k <<" " <<l <<"\n";
-				sprintf(dir_name,"Acceptance__W:%f-%f_Q2:%f-%f",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l]);
+				std::cout<<"acceptance integral: " <<fun::nSparseIntegral(_acceptance_5d[k][l]) <<" for W Q2 bins: " <<k <<" " <<l <<"\n";
+				std::cout<<"\t\tPart 5\n";
+				//std::cout<<"\t\t index:" <<i <<" " <<j <<" " <<k <<" " <<l <<"\n";
+				sprintf(dir_name,"Acceptance_W:%.3f-%.3f_Q2:%.3f-%.3f",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l]);
+				std::cout<<"\t\t\t" <<dir_name <<"\n";
 				dir_A_2[l][k] = dir_A_1[k]->mkdir(dir_name);
 				if(fun::nSparseIntegral(_acceptance_5d[k][l])>0.0){
-					//std::cout<<"\nPart 7e";
+					std::cout<<"\t\tPart 7e\n";
 					dir_A_2[l][k]->cd();
-					//std::cout<<"\nPart 7";
+					std::cout<<"\t\tPart 7\n";
 					for(int m=0; m<5; m++){
-						//std::cout<<"\nPart 8";
+						std::cout<<"\t\tPart 8\n";
 						_accept_hist_1[k][l][m]->Write();
 					}
 				}
 			}
 		}
 	}
+	std::cout<<"Writing W Q2 projections of acceptance\n";
+	dir_A->cd();
+	_accept_hist_2[0]->SetXTitle("W (GeV)");
+	_accept_hist_2[0]->SetYTitle("Integrated Acceptance");
+	_accept_hist_2[0]->Write();
+	_accept_hist_2[1]->SetXTitle("Q^{2} (GeV^{2})");
+	_accept_hist_2[1]->SetYTitle("Integrated Acceptance");
+	_accept_hist_2[1]->Write();
 	//std::cout<<"\nPart 7a";
 	//std::cout<<"\nPart 9";
 	/*if(fun::nSparseIntegral(_acceptance_7d)>0.0){
 		//std::cout<<"\nPart 10";
 		dir_A_2->cd();
-		_accept_hist_2[0]->Write();
-		_accept_hist_2[1]->Write();
+		
 	}*/
 	std::cout<<": Done\n";
 }

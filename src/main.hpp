@@ -40,7 +40,8 @@ std::string _file_list;
 
 size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, int thread_id_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
 	//Number of events in this thread
-	int num_events = (int) chain_->GetEntries();
+	std::cout<<"Time to run!\n\tCalculating number of events for this thread\n";
+	int num_events = (long) chain_->GetEntries();
 	//Print out information about the thread
 	std::cout<<"Thread " <<thread_id_ <<": " <<num_events <<" Events\n";
 	

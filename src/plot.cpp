@@ -91,14 +91,21 @@ void plot::plot_thrown(Particle particle_, std::shared_ptr<Histogram> hist_, std
 
 void plot::plot_no_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
 	if(par_ == 0){
+		//std::cout<<"No Cut SF\n";
 		hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _none_, _no_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
+		//std::cout<<"No Cut CC\n";
 		hist_->Histogram::CC_Fill(particle_.Particle::Get_nphe(), particle_.Particle::Get_cc_seg(), _none_, _no_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], _cc_sides_[particle_.Particle::Get_cc_lrc()], flags_);
 		//hist_->Fill_EC();
+		//std::cout<<"No Cut Vertex\n";
 		hist_->Histogram::Vertex_Fill(particle_.Particle::Get_vz(), particle_.Particle::Get_Weight(), _none_, _no_cut_,_mnone_,_sector_[particle_.Particle::Sector()-1],flags_);
+		//std::cout<<"No Cut WQ2\n";
 		hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_none_,_no_cut_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
+		//std::cout<<"No Cut CC Eff\n";
 		hist_->Histogram::CC_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(), _none_, _no_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
 	}
+	//std::cout<<"No Cut Fid\n";
 	hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_none_,_sector_[particle_.Particle::Sector()-1],_no_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+	//std::cout<<"No Cut Delta\n";
 	hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _none_, _no_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
 }
 void plot::plot_sanity_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){

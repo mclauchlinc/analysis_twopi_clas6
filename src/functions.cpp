@@ -58,7 +58,9 @@ void fun::removeTree(std::string file_name){
 }
 
 void fun::loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_, int max_, std::shared_ptr<Flags> flags_){
+  std::cout<<"Loading up the vector\n";
   std::vector<std::string> filelist = fun::read_file_list(file_,thread_id_,flags_);//read_file_list(file); //creates a vector of file names
+  std::cout<<"Vector Loaded\n";
   //If not specified will take in all the files in the text file
   int test = filelist.size();
   if(max_ > test)
@@ -73,8 +75,11 @@ void fun::loadChain(std::shared_ptr<TChain> chain_, std::string file_, int threa
     //if(run_type ==3 || run_type == 4){//With some of the larger sim files this seems to be an issue where there are multiple trees in the sim files..?
     //  fun::removeTree(filelist[i]);
     //}
+    std::cout<<"\r\tAdding file number " <<i <<std::flush;
+    //std::cout<<"\tAdding file number " <<i <<"\n";
     chain_->AddFile(filelist[i].c_str());
   }
+  std::cout<<"Chain loaded\n";
 }
 
 /*char* fun::appendCharToCharArray(char* array, char a)
@@ -114,6 +119,8 @@ int fun::Make_Dir(std::string a_dir_name){
 
 int fun::extract_run_number(std::string file_name_, std::shared_ptr<Flags> flags_){
   int result = 0;
+  //std::cout<<"File name: " <<file_name_ <<std::endl;
+  //std::cout<<"Base: " <<flags_->Flags::Base() <<"\n";
   std::stringstream name(file_name_.std::string::substr(flags_->Flags::Base().size(),flags_->Flags::Base().size()+5));
   name >> result;
   return result;
