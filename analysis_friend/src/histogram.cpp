@@ -11,6 +11,7 @@ Histogram::Histogram(const std::string& output_file, TFile *exp_tree, TFile *sim
 	Histogram::Sparse_5to3(flags_);
 	Histogram::Sparse_5to4(flags_);
 	Histogram::Convert_to_Cross(flags_);
+	Histogram::Calc_Cross_Section(flags_);
 	Histogram::Acceptance_Errors(flags_);
 	Histogram::Make_Histograms(flags_);
 	Histogram::Fill_Histograms(flags_);
@@ -23,6 +24,8 @@ void Histogram::Make_Histograms(Flags flags_){
 	std::cout<<"Making Histograms\n";
 	Histogram::Make_WQ2(flags_);
 	Histogram::Make_Acceptance(flags_);
+	Histogram::Make_Single_Diff(flags_);
+	Histogram::Make_Polarization(flags_);
 	//Histogram::Make_Acceptance_Statistics(flags_); //Cannot perform here. Require rootfile level for sim recon data
 	Histogram::Make_Error_Hists(flags_);
 }
@@ -35,9 +38,9 @@ void Histogram::Write_Histograms(Flags flags_){
 	std::cout<<"Writing Histograms\n";
 	//Histogram::Write_WQ2(flags_); //Already written when making
 	//Histogram::Write_Acceptance(flags_); //Already written when making
-	Histogram::Write_Single_Diff(flags_);
+	//Histogram::Write_Single_Diff(flags_);
 	Histogram::Write_Error_Hists(flags_);
-	Histogram::Write_Polarization(flags_);
+	//Histogram::Write_Polarization(flags_);
 	_RootOutputFile->Close();
 	std::cout<<"Output File: " <<flags_.Flags::Output_File() <<"\n";
 }
@@ -600,6 +603,8 @@ void Histogram::Skeleton_5D(Flags flags_){
 	Sparse_1d_star accept_1d;
 	Sparse_2d_star thr_2d;
 	Sparse_1d_star thr_1d;
+	Sparse_2d_star cs_5d_2d;
+	Sparse_1d_star cs_5d_1d;
 
 	double_3d scale_3d;
 	double_2d scale_2d;
@@ -619,44 +624,44 @@ void Histogram::Skeleton_5D(Flags flags_){
 				bin_up_5d[boop] = _bin_up_5d[boop][_bin_up_5d[boop].size()-1];//Get high end for each bin
 			}
 			//exp
-			sprintf(hname,"exp_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"exp_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 			//_exp_data_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 			exp_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 			//sim
-			sprintf(hname,"sim_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"sim_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 			//_sim_data_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 			sim_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 			
 			
-			sprintf(hname,"sim_holes_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"sim_holes_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 			//_sim_holes_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
 			sim_hole_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-			sprintf(hname,"exp_holes_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"exp_holes_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 			//std::cout<<"\nexpHoles hname: " <<hname;
 			//_exp_holes_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
 			exp_hole_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
-			sprintf(hname,"exp_corr_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"exp_corr_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 			//_exp_corr_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
 			exp_corr_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-			sprintf(hname,"exp_corr_hole_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"exp_corr_hole_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 			//_exp_corr_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
 			exp_corr_hole_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-			sprintf(hname,"sim_corr_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"sim_corr_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 			//_sim_corr_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
 			sim_corr_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-			sprintf(hname,"xs_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"cross_section_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 			//_cross_section_5d[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
 			cross_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 
-			sprintf(hname,"acceptance_5d_W:%f-%f_Q2:%f-%f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"acceptance_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 			//_acceptance[j][k].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
 			accept_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 			
-			sprintf(hname,"thrown_5d_W:%f-%f_Q2:%f-%f_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Var_Set().c_str());
+			sprintf(hname,"thrown_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_var:%s",_bin_low_7d[0][k],_bin_up_7d[0][k],_bin_low_7d[1][l],_bin_up_7d[1][l],flags_.Flags::Var_Set().c_str());
 			//_thrown_5d[l].push_back(new THnSparseD(hname,hname,DIM-2,_n_bins,bin_low_5d,bin_up_5d));
 			thr_1d.push_back(new THnSparseD(hname,hname,DIM-2,bin_sizes_5d,bin_low_5d,bin_up_5d));
 			
@@ -690,6 +695,7 @@ void Histogram::Skeleton_5D(Flags flags_){
 		accept_1d.clear();
 		scale_1d.clear();
 		thr_1d.clear();
+		cs_5d_1d.clear();
 		
 		/*std::vector<THnSparseD> exp_set;
 		std::vector<THnSparseD> sim_set;
@@ -919,16 +925,152 @@ void	Histogram::Calc_Holes(Flags flags_){
 }
 
 void Histogram::Calc_Cross_Section(Flags flags_){
-	std::cout<<"Calc";
+	std::cout<<"Calculate 7 dimensional Cross Section";
+	//Get the 7dimensional bins ready
+	int bin_5d[5];
+	int bin_7d[7];
 
+	long idx = 0;
+	std::cout<<"\tcloning\n";
+	TH2D_1d_star cs_2d_1d;
+	TH2D_2d_star cs_2d_2d;
+	//_cross_section_7d=(THnSparseD*)_exp_corr_7d->THnSparse::Clone();
+	//_exp_corr_holes_5d[i][j] = (THnSparseD*)_exp_corr_5d[i][j]->Clone();
+	for(int i=0; i<_n_bins_7d[0]; i++){//W
+		bin_7d[0]=i;
+		for(int j=0; j< _n_bins_7d[1]; j++){//Q2
+			bin_7d[1]=j;
+			for(int k = 0; k< _n_bins_7d[2]; k++){//MM1
+				//_cross_section_5d[i][j]=(THnSparseD*)_exp_data_5d[i][j]->Clone();
+				bin_5d[0]=k;
+				bin_7d[2]=k;
+				for(int l = 0; l< _n_bins_7d[3]; l++){//MM2
+					bin_5d[1]=l;
+					bin_7d[3]=l;
+					for(int m = 0; m< _n_bins_7d[4]; m++){//Theta
+						bin_5d[2]=m;
+						bin_7d[4]=m;
+						for(int n = 0; n< _n_bins_7d[5]; n++){//Alpha
+							bin_5d[3]=n;
+							bin_7d[5]=n;
+							for(int o = 0; o< _n_bins_7d[6]; o++){//Phi
+								bin_5d[4]=o;
+								//std::cout<<"\t\tAdding bin content: " <<bin_7d <<" | " <<bin_5d <<"\n";
+								bin_7d[6]=o;
+								//_cross_section_7d->THnSparse::AddBinContent(bin_7d,_exp_corr_7d->THnSparse::GetBinContent(bin_7d));//Should replace this and empty piece with empty subtracted then acceptance divided
+								//_cross_section_7d->THnSparse::AddBinContent(bin_7d,flags_.Flags::Qr()*_empty_7d->THnSparse::GetBinContent(bin_7d));
+								//_cross_section_7d->THnSparse::AddBinContent(bin_7d,_scale_factor_7d*_exp_holes_7d->THnSparse::GetBinContent(bin_7d));
+								
+								_cross_section_5d[i][j]->THnSparse::AddBinContent(bin_5d,_exp_data_5d[i][j]->THnSparse::GetBinContent(bin_5d));//Should replace this and empty piece with empty subtracted then acceptance divided
+								//_cross_section_7d->THnSparse::AddBinContent(bin_7d,flags_.Flags::Qr()*_empty_7d->THnSparse::GetBinContent(bin_7d));
+								_cross_section_5d[i][j]->THnSparse::AddBinContent(bin_5d,_scale_factor_5d[i][j]*_exp_holes_5d[i][j]->THnSparse::GetBinContent(bin_5d));
+							}
+						}
+					}
+				}
+			}
+			for(int p=0; i<4; i++){
+				cs_2d_1d.push_back(_cross_section_5d[i][j]->THnSparse::Projection(p,4));
+			}
+			cs_2d_2d.push_back(cs_2d_1d);
+			cs_2d_1d.clear();
+		}
+		_cross_section_2d.push_back(cs_2d_2d);
+		cs_2d_2d.clear();
+	}
 }
 
 void	Histogram::Make_Single_Diff(Flags flags_){
-	std::cout<<"Calc";
+	std::cout<<"Making Single Differential";
+	if(!flags_.Flags::Plot_Single_Diff()){
+		std::cout<<" | Not plotting single differential cross sections\n";
+		return;
+	}
+	char place[100];
+	//Making the histograms
+	TH1D_1d_star single_1d;
+	TH1D_2d_star single_2d;
+	for(int i=0; i<_n_bins_7d[0]; i++){
+		for(int j=0; j<_n_bins_7d[1]; j++){
+			for(int k=0; k<5; k++){
+				sprintf(place,"Projection in W(%.3f-%.3f) Q2(%.3f-%.3f)",_bin_low_7d[0][i],_bin_up_7d[0][i],_bin_low_7d[1][j],_bin_up_7d[1][j]);
+				std::cout<<"\t" <<place <<" with integral of: " <<fun::nSparseIntegral(_cross_section_5d[i][j]) <<"\n";
+				single_1d.push_back(_cross_section_5d[i][j]->Projection(k));
+			}
+			single_2d.push_back(single_1d);
+			single_1d.clear();
+		}
+		_single_diff_hist.push_back(single_2d);
+		single_2d.clear();
+	}
+
+
+	std::cout<<"\tMaking Directory\n";
+	TDirectory* dir_S = _RootOutputFile->mkdir("Single Differential CS");
+	dir_S->cd();
+	//gDirectory->pwd();
+	TDirectory* dir_S1[5];
+	TDirectory* dir_S2[5][_n_bins_7d[1]];
+	char dirname[100];
+	char hname[100];
+	for(int k=0; k<5; k++){
+		sprintf(dirname,"%s",_five_dim_[k]);
+		dir_S1[k] = dir_S->mkdir(dirname);
+		dir_S1[k]->cd();
+		for(int j=0; j<_n_bins_7d[1]; j++){
+			sprintf(dirname,"%s_Q2|%.3f-%.3f",_five_dim_[k],_bin_low_7d[1][j],_bin_up_7d[1][j]);
+			dir_S2[k][j] = dir_S1[k]->mkdir(dirname);
+			dir_S2[k][j]->cd();
+			for(int i=0; i<_n_bins_7d[0]; i++){
+				//std::cout<<"\t\tTrying to make projection in final directory\n\t\t\tk= " <<k <<" j= " <<j <<" i= " <<i <<"\n";
+				//gDirectory->pwd();
+				//_single_diff_hist[i][j][k]=_cross_section_5d[i][j]->Projection(k);//Oh, I haven't built out the single_diff at all
+				sprintf(hname,"Single_Differential_Cross_Section_%s_W=(%.3f-%.3f)_Q2=(%.3f-%.3f)",_five_dim_[k],_bin_low_7d[0][i],_bin_up_7d[0][i],_bin_low_7d[1][j],_bin_up_7d[1][j]);
+				//std::cout<<"\t\t\t" <<hname <<"\n";
+				_single_diff_hist[i][j][k]->SetTitle(hname);
+				//std::cout<<"\t\t\tAssigned title: " <<hname <<"\n"; 
+				_single_diff_hist[i][j][k]->SetXTitle(_five_dim_[k]);
+				//std::cout<<"\t\t\tLabeled X axis: " <<_five_dim_[k] <<"\n"; 
+				_single_diff_hist[i][j][k]->SetYTitle("Differential Cross Section (microbarns/unit)");
+				//std::cout<<"\t\t\tLabeled Y axis: " <<"Differential Cross Section (microbarns/unit)" <<"\n"; 
+				_single_diff_hist[i][j][k]->Write();
+				//std::cout<<"\t\t\tHistogram Written\n";
+			}
+		}
+	}
 }
 
 void	Histogram::Make_Polarization(Flags flags_){
-	std::cout<<"Calc";
+	//In no way complete 10/4/22
+	std::cout<<"Make Polarization Histograms";
+	if(!flags_.Flags::Plot_Pol()){
+		std::cout<<" | Not plotting Polarization cross sections\n";
+		return;
+	}
+	TDirectory* dir_P = _RootOutputFile->mkdir("Polarization CS");
+	dir_P->cd();
+	TDirectory* dir_P1[4];
+	TDirectory* dir_P2[5][_n_bins_7d[1]];
+	char dirname[100];
+	char hname[100];
+	for(int k=0; k<4; k++){
+		sprintf(dirname,"%s",_five_dim_[k]);
+		dir_P1[k] = dir_P->mkdir(dirname);
+		dir_P1[k]->cd();
+		for(int j=0; j<_n_bins_7d[1]; j++){
+			sprintf(dirname,"%s_Q2|%.3f-%.3f",_five_dim_[k],_bin_low_7d[1][j],_bin_up_7d[1][j]);
+			dir_P2[k][j] = dir_P->mkdir(dirname);
+			dir_P2[k][j]->cd();
+			for(int i=0; i<_n_bins_7d[0]; i++){
+				_single_diff_hist[i][j][k]=_cross_section_5d[i][j]->Projection(k);
+				sprintf(hname,"Polarization_Cross_Section_%s_W|%.3f-%.3f_Q2|%.3f-%.3f",_five_dim_[k],_bin_low_7d[0][i],_bin_up_7d[0][i],_bin_low_7d[1][j],_bin_up_7d[1][j]);
+				_single_diff_hist[i][j][k]->SetTitle(hname);
+				_single_diff_hist[i][j][k]->SetXTitle(_five_dim_[k]);
+				_single_diff_hist[i][j][k]->SetXTitle("Polarization Cross Section (microbarns/unit)");
+				_single_diff_hist[i][j][k]->Write();
+			}
+		}
+	}
 }
 
 void	Histogram::Make_Integrated(Flags flags_){

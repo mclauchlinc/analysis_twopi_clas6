@@ -246,7 +246,7 @@ public:
 	std::string Image_Name();
 
 	int Num_Cores();
-
+	void Print_Flags();
 };
 
 

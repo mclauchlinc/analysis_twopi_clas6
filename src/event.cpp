@@ -344,6 +344,10 @@ int Event::CC_seg(){
 int Event::CC_side(){
 	return _cc_lrc;
 }
+float Event::CC_eff(){
+	return 1.0;
+	//return some function that gets the CC efficiency for that given panel 
+}
 int Event::nphe(){
 	return _nphe;
 }

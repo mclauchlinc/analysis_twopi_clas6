@@ -115,7 +115,7 @@ static const  std::string path_ce16s = "/home/mclauchc/analysis/Path_Files/clust
 static const  std::string path_ce1f = "/home/mclauchc/analysis/Path_Files/cluster_e1f_file_paths.txt";
 static const  std::string path_ce1fs = "/home/mclauchc/analysis/Path_Files/cluster_e1f_sim_files.txt";
 
-static const  int _plate_sign_[] = {1,1};//1 is positive, -1 is negative
+static const  int _plate_sign_[] = {1,-1};//1 is positive, -1 is negative
 static const  int _plate_swap_e16_[] = {30703,30916,31143,31255};//Starts "out"
 static const  int _plate_swap_e1f_[] = {38092,38114,38131,38132,38137,38143,38194,38199,38200,38203,38204,38207,38265,38290,38300,38548,38681};//"Starts "pos"
 //static const  int _empty_e16_[] = {30825,30962,31104,31128,31252,31254,31300,31344};//From Arjun analysis

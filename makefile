@@ -4,7 +4,8 @@ INCLUDE		= $(shell root-config --incdir)
 ROOTSYS		= $(shell root-config --exec-prefix)
 #Tell which compiler to use
 CXX = g++
-CXXFLAGS =      -O2 -fPIC -w -g -pthread -stdlib=libc++ -std=c++14 -m64 -I/usr/local/root/include
+#CXXFLAGS =      -O2 -fPIC -w -g -pthread -stdlib=libc++ -std=c++14 -m64 -I/usr/local/root/include
+CXXFLAGS =      -O2 -fPIC -w -g -pthread -stdlib=libc++ -std=c++14 -m64 -I${INCLUDE}
 #Target is the name of the output executable
 TARGET =	analysis
 #The name of the file you want to comilie usually something like main.cpp 

@@ -92,6 +92,7 @@ public:
 	float Vy();
 	int CC_seg();
 	int CC_side();
+	float CC_eff();
 	int nphe();
 	float MMb(int i);
 	float MM2b(int i);

@@ -22,7 +22,7 @@ int main(int argc, char **argv){
 	std::cout<<"Reading Flags\n";
 	auto flags = std::make_shared<Flags>();//argc,argv);
 	flags->Flags::Read_Flags(argc,argv);
-
+	flags->Flags::Print_Flags();
 	//std::vector<std::vector<std::string>> infilenames(flags->Flags::Num_Cores());
 
 	int num_files = flags->Flags::Num_Files();
@@ -56,6 +56,18 @@ int main(int argc, char **argv){
 		//The function running is the first argument
 		//The functions arguments are all remaining arguments
 		threads[i] = std::async(run_files, hists, i, file_num, flags);//, num_mixed_p_pip[i]);infilenames.at(i)
+		/*
+		I keep running into issues with putting all the files onto one chain
+		It says "illegal instruction" when trying to GetEntries() for the chain
+		if all the simulation files are on one chain. 
+		Further, THnSparse don't like multiple threads writing to them at the same
+		time. So to resolve this, I'm still having multithreaded, but now waiting
+		for each thread to finish first so only one thread is writing to the 
+		THnSparse at a time. This will be very slow
+		*/
+		if(flags->Flags::Make_Friend()){
+			threads[i].wait(); 
+		}
 	}
 	for(int j = 0; j<flags->Flags::Num_Cores(); j++){//_NUM_THREADS_
 		threads[j].wait(); //Wait until all threads are complete to move on

@@ -57,7 +57,7 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 		if(fun::correct_run(run_num,flags_)){
 			//std::cout<<"passed\n";
 			//Update on Progress through Analysis
-			if(thread_id_ == 0 && curr_event%(num_events/100) == 0){
+			if((thread_id_ == 0 || flags_->Flags::Make_Friend()) && curr_event%(num_events/100) == 0){
 				//curr_file_name = 
 				std::cout<<"\r" <<"\t" <<(100*curr_event/num_events) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
 			}

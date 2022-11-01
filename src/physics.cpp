@@ -660,8 +660,8 @@ float physics::epsilon(TLorentzVector k0, float Energy, float Q_2){
 
 float physics::MM_2(TLorentzVector p1, TLorentzVector p2){
 	return (p1+p2).Mag();
-}
-//Get the MM of a two particle system
+}//Get the MM of a two particle system
+
 float physics::gamma_nu(int set, float Ep, float Q_2, float W_){
 	float event_energy;
 	switch(set){

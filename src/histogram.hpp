@@ -299,7 +299,11 @@ protected:
 	THnSparseD* _Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 	THnSparseD* _Friend2[3][5];//For negative Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 	THnSparseD* _Thrown[3];//Variable Sets
-	THnSparseD* _Weight_Sum[3][5];
+	THnSparseD* _W_Thrown[3];//Variable Sets
+	THnSparseD* _Weight_Sum[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	//Weighted with 
+	THnSparseD* _W_Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _W_Friend2[3][5];//For negative helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 
 
 	TH1F_ptr_3d _PCorr_Check_hist;
@@ -471,7 +475,7 @@ public:
 	int Friend_phi_idx(float phi_);
 	std::vector<int>  Friend_idx( float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_);
 	void Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_, int var_);
-	void Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, std::shared_ptr<Flags> flags_);
+	void Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float cc_eff_, std::shared_ptr<Flags> flags_);
 	void Friend_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End Friend Plot----------------------------*
 	//*-------------------------------Start PCorr Check Plot----------------------------*

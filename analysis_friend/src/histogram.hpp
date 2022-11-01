@@ -132,10 +132,11 @@ protected:
 	THnSparseD *_cross_section_7d;//Cross Section 
 	Sparse_2d_star _cross_section_5d;//;
 	Sparse_2d_star _acceptance_5d;//;
+	TH2D_3d_star _cross_section_2d;//
 	THnSparseD *_acceptance_7d;
 	TH1D_3d_star _exp_corr_holes_3d; //For single differential {W,Q2,Xij}[Xij bins]
 	TH1D_4d_star _exp_corr_holes_4d; //For Polarization Observables {W,Q2,Xij,Xij_bin}[phi bins]
-	THnSparseD *_acceptance_eff_7d;
+	THnSparseD *_acceptance_eff_7d; // Acceptance Efficiency? 
 	THnSparseD *_acceptance_err_7d[2];//Last one is Weighted or not
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
@@ -166,6 +167,12 @@ protected:
 	TH2D* _exp_corr_hist_wq2;
 	TH2D* _sim_corr_hist_wq2;
 	TH2D* _thr_hist_wq2;
+
+	//Single Differential Histograms
+	TH1D_3d_star _single_diff_hist;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+
+	//Polarization Histograms
+	TH1D_3d_star _polarization_hist;//{w,q2,X} X->{MM1,MM2,theta,alpha}
 
 	//Acceptance Histograms
 	TH1D_3d_star _accept_hist_1;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}

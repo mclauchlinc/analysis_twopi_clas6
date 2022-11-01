@@ -365,7 +365,7 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 	if(thrown_){
 		hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mzero_,_thrown_,flags_,event_.Event::Weight());
 		for(int j=0; j<3; j++){
-			hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), flags_);
+			hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), 0, 0.0, flags_);
 		}
 	}else{
 		//if(event_.Event::Top()==3){
@@ -415,7 +415,7 @@ void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std:
 		//std::cout<<"Event Passed \n";
 		for(int k=0; k<3; k++){
 			//std::cout<<"Friend Fill \n";
-			hist_->Histogram::Friend_Fill(_top_[event_.Event::Top()], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), flags_);
+			hist_->Histogram::Friend_Fill(_top_[event_.Event::Top()], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
 		}
 		//std::cout<<"particle Filling\n";
 		for(int j=0; j<4; j++){//Particle
@@ -479,7 +479,7 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 	hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mall_,_nthrown_,flags_,event_.Event::Weight());
 	if(event_.Event::Pass()){
 		for(int j=0; j<3; j++){
-			hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), flags_);
+			hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
 		}
 		for(int i=0; i<4; i++){//Species Loop
 			if(_species_[i]==_ele_){

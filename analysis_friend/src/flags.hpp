@@ -53,6 +53,14 @@ static std::string _var_pim_ = "var_pim";
 static std::string _var_pro_ = "var_pro";
 static std::string _var_pip_ = "var_pip";
 
+//Luminosity
+static std::string _lumen_ = "-l=";
+static std::string _lumen2_ = "-l2=";
+
+//Charge Ratio
+static std::string _qratio_ = "-qr=";
+static std::string _qratio2_ = "-qr2=";
+
 static std::string _image_name_ = "-image=";
 
 
@@ -98,6 +106,13 @@ private:
 
 	std::string _var_set = "";
 	int _var_idx = -1; 
+
+	float _luminosity = NAN;
+	float _luminosity2 = NAN;
+
+
+	float _Qr = NAN; //Integrated Charge Ratio between filled and empty target 
+	float _Qr2 = NAN;
 
 	
 public:
