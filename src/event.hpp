@@ -16,7 +16,7 @@ private:
 	bool _top[4] = {false,false,false,false}; //Which topology was looked at {pmiss,pipmiss,pimmiss,zeromiss}
 	bool _pass[4] = {false,false,false,false}; //Did it pass this topology's MM cut? 
 	int _pass_top = -1; //Final assignment of Event Topology {zero,pim,pip,pro}
-	float _weight = NAN; 
+	float _weight = 1.0; 
 	float _ev_weight = NAN;
 	bool _sim = false; 
 	bool _thrown = false;
@@ -43,7 +43,11 @@ private:
 	int _nphe = -99; //Number photo electrons put in CC
 	int _cc_seg = -99; //CC segment
 	int _cc_lrc = -99; //CC side {left,coinc,right}
+	float _cc_eff = NAN;//CC Efficiency
 	float _dt[4] = {NAN,NAN,NAN,NAN};
+	
+	//Virtual Photon Flux
+	float _virtual_photon_flux = NAN;
 
 	float _vz = NAN;
 	float _vx = NAN;
@@ -114,6 +118,7 @@ public:
 	bool Was_COM();
 	int Run();
 	int Sector(int particle_);
+	float Virtual_Photon_Flux();
 };
 
 

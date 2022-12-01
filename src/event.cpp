@@ -147,11 +147,15 @@ bool Event::Check_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, 
 
 void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, std::shared_ptr<Flags> flags_){
 	_k1_lab = physics::Make_4Vector(_beam_energy_[flags_->Flags::Run()],0.0,0.0,1.0,_me_);
+	_virtual_photon_flux = physics::gamma_nu(flags_->Flags::Run(), _k1_lab[3], _Q2, _W);
 	_sf = p0_.Particle::Get_sf();
 	_etot = p0_.Particle::Get_etot();
-	_cc_lrc = p0_.Particle::Get_cc_lrc();
-	_cc_seg = p0_.Particle::Get_cc_seg();
-	_nphe = p0_.Particle::Get_nphe();
+	if(!flags_->Flags::Sim()){
+		_cc_lrc = p0_.Particle::Get_cc_lrc();
+		_cc_seg = p0_.Particle::Get_cc_seg();
+		_cc_eff = detect::cc_eff(flags_->Flags::Run(),p0_.Particle::Sector(),_cc_seg,_cc_lrc);//sector is adjusted to be an index in the function
+		_nphe = p0_.Particle::Get_nphe();
+	}
 	_vz = p0_.Particle::Get_vz();
 	_vx = p0_.Particle::Get_vx();
 	_vy = p0_.Particle::Get_vy();
@@ -218,11 +222,15 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 }
 void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, std::shared_ptr<Flags> flags_){
 	_k1_lab = physics::Make_4Vector(_beam_energy_[_run],0.0,0.0,1.0,_me_);
+	_virtual_photon_flux = physics::gamma_nu(flags_->Flags::Run(), _k1_lab[3], _Q2, _W);
 	_sf = p0_.Particle::Get_sf();
 	_etot = p0_.Particle::Get_etot();
-	_cc_lrc = p0_.Particle::Get_cc_lrc();
-	_cc_seg = p0_.Particle::Get_cc_seg();
-	_nphe = p0_.Particle::Get_nphe();
+	if(!flags_->Flags::Sim()){
+		_cc_lrc = p0_.Particle::Get_cc_lrc();
+		_cc_seg = p0_.Particle::Get_cc_seg();
+		_cc_eff = detect::cc_eff(flags_->Flags::Run(),p0_.Particle::Sector(),_cc_seg,_cc_lrc);//sector is adjusted to be an index in the function
+		_nphe = p0_.Particle::Get_nphe();
+	}
 	_vz = p0_.Particle::Get_vz();
 	_vx = p0_.Particle::Get_vx();
 	_vy = p0_.Particle::Get_vy();
@@ -345,7 +353,7 @@ int Event::CC_side(){
 	return _cc_lrc;
 }
 float Event::CC_eff(){
-	return 1.0;
+	return _cc_eff;
 	//return some function that gets the CC efficiency for that given panel 
 }
 int Event::nphe(){
@@ -527,6 +535,10 @@ int Event::Run(){
 
 int Event::Sector(int particle_){
 	return physics::get_sector(_phi_lab[particle_]);
+}
+
+float Event::Virtual_Photon_Flux(){
+	return _virtual_photon_flux;
 }
 
 //void Event::Calculate_All(){

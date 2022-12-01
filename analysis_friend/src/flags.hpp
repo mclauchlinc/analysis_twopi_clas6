@@ -43,6 +43,12 @@ static std::string _sim_file2_ = "-sim2=";
 static std::string _exp_file2_ = "-exp2=";
 static std::string _weight_file2_ = "-weight2=";
 static std::string _empty_file2_ = "-empty2=";
+static std::string _sim_no_rad_file_ = "no_rad=";
+static std::string _sim_no_rad_file2_ = "no_rad2=";
+static std::string _exp_pos_file_ = "expp=";
+static std::string _exp_pos_file2_ = "expp2=";
+static std::string _exp_neg_file_ = "expn=";
+static std::string _exp_neg_file2_ = "expn2=";
 
 //Other Info about the run
 static std::string _info_ = "-i=";
@@ -52,6 +58,7 @@ static std::string _both_ = "both";
 static std::string _var_pim_ = "var_pim";
 static std::string _var_pro_ = "var_pro";
 static std::string _var_pip_ = "var_pip";
+static std::string _flux_included_ = "flux_weighted";
 
 //Luminosity
 static std::string _lumen_ = "-l=";
@@ -78,16 +85,27 @@ private:
 	bool _has_weight = false;
 
 	//File Locations/Names
-	std::string _sim_loc = "";
-	std::string _exp_loc = "";
-	std::string _empty_loc = "";
-	std::string _weight_loc = "";
+	std::string _sim_loc = "";//Simulation file for
+	std::string _sim_no_rad_loc = "";//Simulation file with no radiative corrections
+	std::string _exp_loc = "";//Experimental data file, ideally weighted with CC efficiencies and virtual photon flux
+	std::string _empty_loc = "";//Experimental empty target file
+	std::string _weight_loc = "";//I don't remember the use for this, but I believe it comes into play for error analysis
 	std::string _sim_loc2 = "";
+	std::string _sim_no_rad_loc2 = "";
 	std::string _exp_loc2 = "";
+	std::string _exp_pos_loc = "";//Experimental Data for postitive helicity
+	std::string _exp_neg_loc = "";//Experimental Data for negative helicity
+	std::string _exp_pos_loc2 = "";
+	std::string _exp_neg_loc2 = "";
 	std::string _empty_loc2 = "";
 	std::string _weight_loc2 = "";
 	std::string _output_name = "";
 	std::string _image_name = "";
+
+	//Procedure Flags
+	bool _helicity = false;
+	bool _rad_corr = false;
+	bool _flux_inc = false;
 
 	//Plots
 	bool _plot_all = false;
@@ -107,7 +125,7 @@ private:
 	std::string _var_set = "";
 	int _var_idx = -1; 
 
-	float _luminosity = NAN;
+	float _luminosity = NAN;//Integrated luminosity for the given run
 	float _luminosity2 = NAN;
 
 
@@ -143,6 +161,10 @@ public:
 	std::string Weight_File2();
 	std::string Output_File();
 	std::string Image_File();
+	std::string Exp_Hel(int i_);
+	std::string Exp_Hel2(int i_);
+	std::string Sim_No_Rad();
+	std::string Sim_No_Rad2();
 	//Have Things
 	bool Has_Weight();
 	bool Has_Sim();
@@ -153,7 +175,9 @@ public:
 	std::string Var_Set();
 	std::string Top();
 	int Top_idx();
-
+	bool Helicity();
+	bool Rad_Corr();
+	bool Flux_Included();
 };
 
 

@@ -3675,36 +3675,36 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 				sprintf(hname,"2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
 				_Friend[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 				_Friend[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-				_Friend[i][j]->Sumw2();//Allow Weights and keep track of error
+				_Friend[i][j]->Sumw2();//Weights as normal
 				sprintf(hname,"Scaled_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
 				_W_Friend[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 				_W_Friend[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-				_W_Friend[i][j]->Sumw2();//Allow Weights and keep track of error
+				_W_Friend[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
 				if(flags_->Flags::Sim()){
 					sprintf(hname,"Weight_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
 					_Weight_Sum[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 					_Weight_Sum[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					_Weight_Sum[i][j]->Sumw2();
+					_Weight_Sum[i][j]->Sumw2();//Squared weights for the purpose of error analysis for simulation 
 				}else if(flags_->Flags::Helicity()){
 					sprintf(hname,"2#pi_off_proton_%s_%s_neg",_var_names_[i],_top_[j]);
 					_Friend2[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 					_Friend2[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					_Friend2[i][j]->Sumw2();//Allow Weights and keep track of error
+					_Friend2[i][j]->Sumw2();//Normal Weights
 					sprintf(hname,"Scaled_2#pi_off_proton_%s_%s_neg",_var_names_[i],_top_[j]);
 					_W_Friend2[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 					_W_Friend2[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					_W_Friend2[i][j]->Sumw2();//Allow Weights and keep track of error
+					_W_Friend2[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
 				}
 			}
 			if(flags_->Flags::Sim()){
 				sprintf(hname,"Thrown_2#pi_off_proton_%s",_var_names_[i]);
 				_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 				_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
-				_Thrown[i]->Sumw2();//Allow Weights and keep track of error
+				_Thrown[i]->Sumw2();//Allow Weights with virtual photon flux, etc. 
 				sprintf(hname,"Scaled_Thrown_2#pi_off_proton_%s",_var_names_[i]);
 				_W_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 				_W_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
-				_W_Thrown[i]->Sumw2();//Allow Weights and keep track of error
+				_W_Thrown[i]->Sumw2();//No modification to weights with virtual photon flux
 			}
 		}
 		
@@ -3830,7 +3830,7 @@ void Histogram::Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, flo
 }
 
 
-void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float cc_eff_, std::shared_ptr<Flags> flags_){
+void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float plus_weight_, std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Make_Friend() && fun::top_perform(top_,flags_)){
 		//std::cout<<"W:" <<W_ <<" Q2:" <<Q2_ <<" MM:" <<MM_ <<" MM2:" <<MM2_ <<" theta:" <<theta_ <<" alpha:" <<alpha_ <<" phi:" <<phi_ <<" weight:" <<weight_ <<" thrown:" <<thrown_ <<"\n";
 		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_) && !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
@@ -3843,19 +3843,23 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 			//if(y[0]>=0){
 				if(thrown_){
 					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
+					_W_Thrown[var_]->Fill(x,weight_*plus_weight_);
 					_Thrown[var_]->Fill(x,weight_);
-					_W_Thrown[var_]->Fill(x,weight_);
 				}else{
 					//std::cout<<"Filling Friend!\n";
 					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
-					_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
-					if(flags_->Flags::Sim()){
-						physics::gamma_nu(int set, float Ep, float Q_2, float W_);
-						_W_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_/physics::gamma_nu(flags_->Flags::Run(),event_.Get_P0(0,false),event_.Q2(),event_.W()));
+					if(flags_->Flags::Helicity()){//If taking Helicity into account then we'll have two output THnSparse
+						if(helicity_ == 1){
+							_W_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
+							_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
+						}else if(helicity_ == -1){
+							_W_Friend2[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
+							_Friend2[var_][fun::top_idx(top_)]->Fill(x,weight_);
+						}
 					}else{
-						_W_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_/(physics::gamma_nu(flags_->Flags::Run(),event_.Get_P0(0,false),event_.Q2(),event_.W())*cc_eff_));
+						_W_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
+						_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
 					}
-					
 					//std::cout<<"Done filling friend\n";
 					if(flags_->Flags::Sim()){
 						std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
@@ -3879,6 +3883,11 @@ void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
 					_W_Friend[i][j]->Write();
 					if(flags_->Flags::Sim()){
 						_Weight_Sum[i][j]->Write();
+					}else{
+						if(flags_->Flags::Helicity()){
+							_Friend2[i][j]->Write();
+							_W_Friend2[i][j]->Write();
+						}
 					}
 				}
 			}

@@ -92,6 +92,8 @@ static std::string _output_name_ = "-name=";
 static std::string _num_files_ = "-n=";
 //Multi-threading
 static std::string _num_cores_= "-cores=";
+//Weighting
+static std::string _flux_weight_ = "-flux=";//(y or n)
 
 
 
@@ -167,6 +169,7 @@ private:
 	std::string _image_name = "";
 
 	int _num_cores = -1;
+	bool _flux_weight = false;//Will you weight the THnSparse output with Virtual Photon Flux (and CC efficiency if relevant)?
 
 public:
 	Flags();
@@ -247,6 +250,8 @@ public:
 
 	int Num_Cores();
 	void Print_Flags();
+
+	bool Flux_Weight();
 };
 
 

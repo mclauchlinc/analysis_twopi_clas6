@@ -87,6 +87,16 @@ Flags::Flags(){}
 				_has_sim = true;
 				std::cout<<"\tIDed: sim file is " <<_sim_loc <<"\n"; 
 			}
+			if(str.substr(0,5) == _exp_pos_file_){
+				_exp_pos_loc = str.substr(5,str_len);
+				_helicity = true;
+				std::cout<<"\tIDed: exp pos file is " <<_exp_pos_loc <<"\n"; 
+			}
+			if(str.substr(0,5) == _exp_neg_file_){
+				_exp_neg_loc = str.substr(5,str_len);
+				_helicity = true;
+				std::cout<<"\tIDed: exp neg file is " <<_exp_neg_loc <<"\n"; 
+			}
 		}if(str_len > 6){
 			if(str.substr(0,6) == _output_name_){
 				_output_name = str.substr(6,str_len);
@@ -102,6 +112,16 @@ Flags::Flags(){}
 				_has_sim = true;
 				std::cout<<"\tIDed: sim file2 is " <<_sim_loc2 <<"\n"; 
 			}
+			if(str.substr(0,6) == _exp_pos_file2_){
+				_exp_pos_loc2 = str.substr(6,str_len);
+				_helicity = true;
+				std::cout<<"\tIDed: exp pos file2 is " <<_exp_pos_loc2 <<"\n"; 
+			}
+			if(str.substr(0,6) == _exp_neg_file2_){
+				_exp_neg_loc2 = str.substr(6,str_len);
+				_helicity = true;
+				std::cout<<"\tIDed: exp neg file2 is " <<_exp_neg_loc2 <<"\n"; 
+			}
 		}if(str_len > 7){
 			if(str.substr(0,7) == _empty_file_){
 				_empty_loc = str.substr(7,str_len);
@@ -113,6 +133,11 @@ Flags::Flags(){}
 				_make_image = true;
 				std::cout<<"\tIDed: Image file is " <<_image_name <<"\n"; 
 			}
+			if(str.substr(0,7) == _sim_no_rad_file_){
+				_sim_no_rad_loc = str.substr(7,str_len);
+				_rad_corr = true;
+				std::cout<<"\tIDed: Sim No Rad File is " <<_sim_no_rad_loc <<"\n"; 
+			}
 		}if(str_len > 8){
 			if(str.substr(0,8) == _weight_file_){
 				_weight_loc = str.substr(8,str_len);
@@ -123,6 +148,11 @@ Flags::Flags(){}
 				_empty_loc2 = str.substr(8,str_len);
 				_has_empty = true;
 				std::cout<<"\tIDed: empty file2 is " <<_empty_loc <<"\n"; 
+			}
+			if(str.substr(0,8) == _sim_no_rad_file2_){
+				_sim_no_rad_loc2 = str.substr(8,str_len);
+				_rad_corr = true;
+				std::cout<<"\tIDed: Sim No Rad File2 is " <<_sim_no_rad_loc2 <<"\n"; 
 			}
 		}
 		if(str_len > 9){
@@ -175,6 +205,8 @@ Flags::Flags(){}
 		}else if(str_ == _var_pip_){
 			_var_set = "pip";
 			_var_idx = 2;
+		}else if(str_ == _flux_included_){
+			_flux_inc = true;
 		}
 		//std::cout<<"New Run Info:\n\trun group: " <<_run_group <<"\n\tvar set: " <<_var_set <<"\n\tvar idx: "<<_var_idx <<"\n";
 	}
@@ -249,6 +281,34 @@ Flags::Flags(){}
 	std::string Flags::Image_File(){
 		return _image_name;
 	}
+	std::string Flags::Exp_Hel(int i_){
+		if(i_==0){
+			std::cout<<"No helicity preference. Her is the standard file:\n";
+			return _exp_loc;
+		}
+		if(i_>0){
+			return _exp_pos_loc;
+		}else if (i_<0){
+			return _exp_neg_loc;
+		}
+	}
+	std::string Flags::Exp_Hel2(int i_){
+		if(i_==0){
+			std::cout<<"No helicity preference. Her is the standard file:\n";
+			return _exp_loc2;
+		}
+		if(i_>0){
+			return _exp_pos_loc2;
+		}else if (i_<0){
+			return _exp_neg_loc2;
+		}
+	}
+	std::string Flags::Sim_No_Rad(){
+		return _sim_no_rad_loc;
+	}
+	std::string Flags::Sim_No_Rad2(){
+		return _sim_no_rad_loc2;
+	}
 
 	//Have Things
 	bool Flags::Has_Weight(){
@@ -283,4 +343,13 @@ Flags::Flags(){}
 				return i;
 			}
 		}
+	}
+	bool Flags::Helicity(){
+		return _helicity;
+	}
+	bool Flags::Rad_Corr(){
+		return _rad_corr;
+	}
+	bool Flags::Flux_Included(){
+		return _flux_inc;
 	}

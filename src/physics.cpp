@@ -662,6 +662,7 @@ float physics::MM_2(TLorentzVector p1, TLorentzVector p2){
 	return (p1+p2).Mag();
 }//Get the MM of a two particle system
 
+//Virtual Photon Flux
 float physics::gamma_nu(int set, float Ep, float Q_2, float W_){
 	float event_energy;
 	switch(set){
@@ -674,7 +675,7 @@ float physics::gamma_nu(int set, float Ep, float Q_2, float W_){
 	}
 	return _fine_structure_*W_*(W_*W_-_mp_*_mp_)/(4*TMath::Pi()*event_energy*event_energy*_mp_*_mp_*(1-epsilon(set,Ep,Q_2))*Q_2);
 }
-//Virtual Photon Flux
+
 float physics::Qfaraday(float q_last, float q_next, float q_tot, int run1, int run2){
 	float q_tot_n = 0.0;
 	if((run1==run2) && (q_next > q_last)){

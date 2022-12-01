@@ -118,6 +118,10 @@ float detect::cc_y(std::shared_ptr<Branches> data_, int idx_){
 	return detect::cc_y(data_->dc_cxsc(idx_), data_->dc_cysc(idx_), data_->dc_czsc(idx_), data_->dc_xsc(idx_), data_->dc_ysc(idx_), data_->dc_zsc(idx_), data_->sc_sect(idx_)); 
 }
 
+float detect::cc_eff(int run_, int sec_, int seg_, int pos_){
+	return detect::cc_eff_vals[run_][sec_-1][seg_][pos_];
+}
+
 
 //SC functions
 float detect::sc_theta(std::shared_ptr<Branches> data_, int idx_){
