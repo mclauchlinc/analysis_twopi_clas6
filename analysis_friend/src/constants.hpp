@@ -15,6 +15,11 @@ static const float _energy_e16_ = 5.754;
 static const float _energy_e1f_ = 5.499;
 static const float _beam_energy_[] = {_energy_e16_,_energy_e1f_};
 
+//Beam Polarizations
+static const float _pol_e16_ = 0.70;//Not accurate and needs to be updated 12/6/22
+static const float _pol_e1f_ = 0.70;//Not accurate and needs to be updated 12/6/22
+static const float _beam_pol_[] = {_pol_e16_,_pol_e1f_};
+
 //Target info for luminosity
 static const double _length_target_ = 5.; //cm
 static const double _density_target_ = 0.073; //g/cm^3 

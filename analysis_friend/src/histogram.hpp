@@ -110,6 +110,8 @@ protected:
 
 
 	//Sparse Histograms
+	THnSparseD *_exp_data_7d_pos;//Experimental reconstruction 7d with postitive helicity
+	THnSparseD *_exp_data_7d_neg;//Experimental reconstruction 7d with negative helicity
 	THnSparseD *_exp_data_7d;//Experimental Reconstruction 7 dimension
 	THnSparseD *_sim_data_7d;//Simulated Reconstruction
 	THnSparseD *_sim_weight_sq_7d;//summed square of weights for each 7d bin for simulation
@@ -202,6 +204,7 @@ public:
 	void Calc_Cross_Section(Flags flags_);//Calculate Cross Section
 	void Make_Single_Diff(Flags flags_);//Make Single Differential Cross Section Histograms
 	void Make_Polarization(Flags flags_);//Make Histograms to extract polarization observables
+	void Beam_Spin(Flags flags_);
 	void Make_Integrated(Flags flags_);//Make Integrated Cross Section Histograms
 	void Make_WQ2(Flags flags_);//Make WQ2 histograms to show binnning
 	//void Make_Acceptance_Statistics(Flags flags_);//Make Histograms for determining proper Acceptance Statistics //Cannot make this here in the form the data has already been placed. Need on rootfile level for sim recon
@@ -231,6 +234,7 @@ public:
 	void Make_Error_Hists(Flags flags_);
 	void Fill_Error_Hists(Flags flags_);
 	void Write_Error_Hists(Flags flags_);
+	THnSparseD* Add_Sparse(THnSparse * h1_, THnSparse * h2_);
 };
 
 #endif
