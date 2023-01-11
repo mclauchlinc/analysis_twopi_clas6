@@ -649,6 +649,9 @@ bool Flags::Plot_CC(){
 bool Flags::Plot_CC_Eff(){
 	return _plot_cc_eff;
 }
+bool Flags::Plot_SC_Eff(){
+	return _plot_sc_eff;
+}
 bool Flags::Plot_Delta(int particle){
 	return _plot_dt[particle];
 }
@@ -766,6 +769,8 @@ void Flags::Print_Flags(){
 	std::cout<<"Plot SF: " <<Plot_SF()<<"\n";
 	std::cout<<"Plot CC: " <<Plot_CC()<<"\n";
 	std::cout<<"Plot CC Eff: " <<Plot_CC_Eff()<<"\n";
+	std::cout<<"Plot SC Eff: " <<Plot_SC_Eff()<<"\n";
+	//std::cout<<"Plot CC Eff: " <<Plot_CC_Eff()<<"\n";
 	std::cout<<"Plot Delta:\n" ;
 	for(int i= 0; i<4; i++){
 		std::cout<<"\t" <<i <<Plot_Delta(i) <<"\n";

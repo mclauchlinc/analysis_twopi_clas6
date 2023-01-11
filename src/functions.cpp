@@ -79,7 +79,7 @@ void fun::loadChain(std::shared_ptr<TChain> chain_, std::string file_, int threa
     //std::cout<<"\tAdding file number " <<i <<"\n";
     chain_->AddFile(filelist[i].c_str());
   }
-  std::cout<<"Chain loaded\n";
+  std::cout<<"\nChain loaded\n";
 }
 
 /*char* fun::appendCharToCharArray(char* array, char a)

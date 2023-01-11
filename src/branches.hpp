@@ -30,7 +30,7 @@ class Branches {
   float _tr_time= NAN;
   float _rf_time1= NAN;
   float _rf_time2= NAN;
-  int _gpart = 0;
+  int _gpart = 0; 
   int _id[MAX_PARTS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};    //[gpart]
   int _stat[MAX_PARTS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};  //[gpart]
   int _dc[MAX_PARTS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};    //[gpart]

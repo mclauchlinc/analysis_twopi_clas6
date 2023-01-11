@@ -98,6 +98,11 @@ static float _cc_eff2_xmin_ = 0.5;//Sector
 static float _cc_eff2_xmax_ = 6.5; //Sector
 static int _cc_eff2_xbin_ = 6;//Sector
 
+//SC Eff
+static float _sc_eff_xmin_ = -1.5;//Sector
+static float _sc_eff_xmax_ = 58.5; //Sector
+static int _sc_eff_xbin_ = 60;//Sector
+
 //For Momentum Binning
 static float _p_bin_min_ = 0.5;//GeV
 static float _p_bin_max_ = 5.0;//GeV
@@ -278,6 +283,8 @@ protected:
 	TH1F_ptr_3d _CC_Eff2_hist;
 	TH2F_ptr_4d _CC_Eff1_hist;
 
+	//SC Histograms
+	TH1F_ptr_3d _SC_Eff_hist;
 
 	//MM Histograms
 	TH1F_ptr_5d _MM_hist;
@@ -297,12 +304,15 @@ protected:
 
 	//THnSparse Friend Histograms
 	THnSparseD* _Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Friend1[3][5];//For positive Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 	THnSparseD* _Friend2[3][5];//For negative Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 	THnSparseD* _Thrown[3];//Variable Sets
 	THnSparseD* _W_Thrown[3];//Variable Sets
 	THnSparseD* _Weight_Sum[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Weight_Sum_Thrown[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 	//Weighted with 
 	THnSparseD* _W_Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _W_Friend1[3][5];//For positive helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 	THnSparseD* _W_Friend2[3][5];//For negative helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 
 
@@ -463,6 +473,12 @@ public:
 	void CC_Eff_Fill(float p_, float theta_, float weight_, const char* ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_);
 	void CC_Eff_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End CC Efficiency Plot----------------------------*
+	//*-------------------------------Start SC Eff Plot------------------------------*
+	void SC_Eff_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> SC_Eff_idx(const char * species_, const char * sector_, const char * pcut_, std::shared_ptr<Flags> flags_);
+	void SC_Eff_Fill(int sc_pd_, float weight_, const char* species_, const char* pcut_, const char * sector_, std::shared_ptr<Flags> flags_);
+	void SC_Eff_Write(std::shared_ptr<Flags> flags_);
+	//*-------------------------------End SC Eff Plot------------------------------*
 	//*-------------------------------Start Friend Plot----------------------------*
 	std::vector<int> Friend_Bin_Sizes(std::shared_ptr<Flags> flags_);
 	void Friend_Make(std::shared_ptr<Flags> flags_);

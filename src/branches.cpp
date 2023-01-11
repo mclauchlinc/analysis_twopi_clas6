@@ -79,9 +79,9 @@ void Branches::init() {
   _tree->SetBranchAddress("ec_m4", &_ec_m4);
   _tree->SetBranchAddress("ec_c2", &_ec_c2);
   _tree->SetBranchAddress("sc_part", &_sc_part);
-  _tree->SetBranchAddress("sc_sect", &_sc_sect);
+  _tree->SetBranchAddress("sc_sect", &_sc_sect);//Sector for SC
   _tree->SetBranchAddress("sc_hit", &_sc_hit);
-  _tree->SetBranchAddress("sc_pd", &_sc_pd);
+  _tree->SetBranchAddress("sc_pd", &_sc_pd);//Paddle Number for SC 
   _tree->SetBranchAddress("sc_stat", &_sc_stat);
   _tree->SetBranchAddress("edep", &_edep);
   _tree->SetBranchAddress("sc_t", &_sc_t);//Time it took to get from vertex to SC

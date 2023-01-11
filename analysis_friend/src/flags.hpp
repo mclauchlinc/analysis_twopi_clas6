@@ -37,18 +37,19 @@ static std::string _acceptance_ = "accept";
 static std::string _output_name_ = "-name=";
 static std::string _sim_file_ = "-sim=";
 static std::string _exp_file_ = "-exp=";
-static std::string _weight_file_ = "-weight=";
+//static std::string _weight_file_ = "-weight=";
 static std::string _empty_file_ = "-empty=";
+static std::string _sim_no_rad_file_ = "-no_rad=";
 static std::string _sim_file2_ = "-sim2=";
 static std::string _exp_file2_ = "-exp2=";
-static std::string _weight_file2_ = "-weight2=";
+//static std::string _weight_file2_ = "-weight2=";
 static std::string _empty_file2_ = "-empty2=";
-static std::string _sim_no_rad_file_ = "no_rad=";
-static std::string _sim_no_rad_file2_ = "no_rad2=";
-static std::string _exp_pos_file_ = "expp=";
-static std::string _exp_pos_file2_ = "expp2=";
-static std::string _exp_neg_file_ = "expn=";
-static std::string _exp_neg_file2_ = "expn2=";
+
+static std::string _sim_no_rad_file2_ = "-no_rad2=";
+//static std::string _exp_pos_file_ = "expp=";
+//static std::string _exp_pos_file2_ = "expp2=";
+//static std::string _exp_neg_file_ = "expn=";
+//static std::string _exp_neg_file2_ = "expn2=";
 
 //Other Info about the run
 static std::string _info_ = "-i=";
@@ -178,6 +179,7 @@ public:
 	bool Helicity();
 	bool Rad_Corr();
 	bool Flux_Included();
+	float Qr();//Charge Ratio for exp target vs. no target
 };
 
 

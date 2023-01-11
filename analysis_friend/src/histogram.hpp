@@ -3,6 +3,7 @@
 
 #include "TH1.h"
 #include "TH2.h"
+#include "TH3.h"
 #include "TFile.h"
 #include "TCanvas.h"
 #include "TDirectory.h"
@@ -114,15 +115,21 @@ protected:
 	THnSparseD *_exp_data_7d_neg;//Experimental reconstruction 7d with negative helicity
 	THnSparseD *_exp_data_7d;//Experimental Reconstruction 7 dimension
 	THnSparseD *_sim_data_7d;//Simulated Reconstruction
+	THnSparseD *_thrown_7d_no_rad;//Simulated thrown with no radiative effects
 	THnSparseD *_sim_weight_sq_7d;//summed square of weights for each 7d bin for simulation
 	THnSparseD *_empty_7d;//Empty Reconstruction
+	THnSparseD *_empty_7d_pos;//Empty Reconstruction positive helicity
+	THnSparseD *_empty_7d_neg;//Empty Reconstruction negative helicity
+	
 	Sparse_2d_star _exp_data_5d;//Exp Recon 5 Dimension {W,Q2}
+	Sparse_2d_star _empty_5d;//Exp Empty Recon 5d {W,Q2}
 	Sparse_2d_star _sim_data_5d;//Sim Recon 5 Dimension {W,Q2}
 	THnSparseD *_thrown_7d;//Thrown Simulation
 	Sparse_2d_star _thrown_5d;//Thrown Sim 5d {W,Q2}
 	Sparse_2d_star _sim_holes_5d;//Sim Recon Holes {W,Q2}
 	Sparse_2d_star _exp_holes_5d;//Exp Recon Holes {W,Q2}
 	Sparse_2d_star _exp_corr_5d;//Exp Acceptance Corrected {W,Q2}
+	Sparse_2d_star _empty_corr_5d;//Exp Acceptance Corrected {W,Q2}
 	Sparse_2d_star _sim_corr_5d;//Sim Recon Acceptance Corrected  {W,Q2}
 	Sparse_2d_star _exp_corr_holes_5d;//Experimental Accept Corrected and Hole Filled {W,Q2}
 	double_2d _scale_factor_5d;//5d scale factor of simulation to experimental yields {W,Q2}
@@ -130,6 +137,7 @@ protected:
 	THnSparseD *_exp_holes_7d;//Exp holes
 	THnSparseD *_sim_holes_7d;//Sim Holes
 	THnSparseD *_exp_corr_7d;//Exp accept corrected
+	THnSparseD *_empty_corr_7d;//Exp accept corrected
 	THnSparseD *_sim_corr_7d;//Sim accept corrected
 	THnSparseD *_cross_section_7d;//Cross Section 
 	Sparse_2d_star _cross_section_5d;//;
@@ -140,6 +148,7 @@ protected:
 	TH1D_4d_star _exp_corr_holes_4d; //For Polarization Observables {W,Q2,Xij,Xij_bin}[phi bins]
 	THnSparseD *_acceptance_eff_7d; // Acceptance Efficiency? 
 	THnSparseD *_acceptance_err_7d[2];//Last one is Weighted or not
+	 
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
 	TH1D* _phi_bin_sizes;//Width of phi bins 
@@ -155,7 +164,10 @@ protected:
 	TH1D_2d_star _acc_rel_error_weighted;//Distribution of Relative error of the Acceptance weighted {W,Q2}
 	TH1D_2d_star _acc_rel_error_unweighted;//Distribution of Relative error of the Acceptance unweighted {W,Q2}
 
+	TH2D* _rad_corr;//Radiative Corrections
 
+	//std::vector<std::vector<double>> _rad_corr;//Radiative Correction
+	//std::vector<std::vector<double>> _rad_corr2;//Radiative Correction2
 
 	//Topology Yields
 	double_2d _n_exp_corr;
@@ -179,9 +191,12 @@ protected:
 	//Acceptance Histograms
 	TH1D_3d_star _accept_hist_1;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
 	TH1D* _accept_hist_2[2];//{w,q2}
+
+	//Beam Spin Histograms
+	TH1D_2d_star _beam_spin_hist;
 	
 public:
-	Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, Flags flags_);
+	Histogram(const std::string& output_file_, TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
 	//Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, TFile* empty_tree, Flags flags_);
 	//Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, TFile* exp_tree2, TFile* sim_tree2, Flags flags_);
 	//Histogram(const std::string& output_file, TFile* exp_tree, TFile* sim_tree, TFile* empty_tree, TFile* exp_tree2, TFile* sim_tree2, TFile* empty_tree, Flags flags_);
@@ -189,12 +204,12 @@ public:
 	void Fill_Histograms(Flags flags_);
 	void Write_Histograms(Flags flags_);
 	std::shared_ptr<TFile> Name_Output(Flags flags_);
-	void Extract_7d_Histograms(TFile* exp_tree, TFile* sim_tree, Flags flags_);
+	void Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);//(TFile* exp_tree, TFile* sim_tree, Flags flags_);
 	void Sparse_Add_7d(THnSparseD &h0, THnSparseD* h1, THnSparseD* h2, int sign);//Add/Subtract Sparse Histograms
 	void Sparse_Add_5d(THnSparseD* &h0, THnSparseD* h1, THnSparseD* h2, int sign);//Add/Subtract Sparse Histograms
 	void Sparse_7to5(Flags flags_);//Convert 7d histograms to 5d histograms
-	void Sparse_5to3(Flags flags_);//For Single Differential bins
-	void Sparse_5to4(Flags flags_);//For Polarization Observables
+	void Sparse_5to3(Flags flags_);//Making Single Differential Histograms
+	void Sparse_5to4(Flags flags_);//Making Polarization Histograms
 	void Extract_Bin_Info(Flags flags_);//Extract binning information for 7 and 5d histograms
 	void Skeleton_5D(Flags flags_);//Create Empty 5D THnSparse to fill
 	void Calc_Acceptance(Flags flags_);//Calculate acceptance from 5d histograms
@@ -235,6 +250,7 @@ public:
 	void Fill_Error_Hists(Flags flags_);
 	void Write_Error_Hists(Flags flags_);
 	THnSparseD* Add_Sparse(THnSparse * h1_, THnSparse * h2_);
+	//void Radiative_Correction(Flags flags_);
 };
 
 #endif

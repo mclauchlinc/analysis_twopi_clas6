@@ -69,6 +69,12 @@
         "unordered_set": "cpp",
         "variant": "cpp",
         "vector": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "codecvt": "cpp",
+        "numbers": "cpp",
+        "queue": "cpp",
+        "*.tcc": "cpp",
+        "functional": "cpp",
+        "utility": "cpp"
     }
 }

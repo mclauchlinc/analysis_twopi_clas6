@@ -20,6 +20,7 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	Histogram::CC_Eff_Make(flags_);
 	Histogram::Friend_Make(flags_);
 	Histogram::PCorr_Check_Make(flags_);
+	Histogram::SC_Eff_Make(flags_);
 	//Histogram::Cross_Make(flags_);
 	//Histogram::XY_Make(flags_);
 	//Histogram::Fid_Det_Make(flags_);
@@ -61,6 +62,7 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	Histogram::MM_Write(flags_);
 	Histogram::CC_Eff_Write(flags_);
 	Histogram::PCorr_Check_Write(flags_);
+	Histogram::SC_Eff_Write(flags_);
 	//Histogram::XY_Write(_envi);
 	//Histogram::Fid_Det_Write(_envi);
 	//Friend_Write(_envi);
@@ -3644,7 +3646,123 @@ void Histogram::CC_Eff_Write(std::shared_ptr<Flags> flags_){
 }
 
 //*-------------------------------End CC Eff Plot------------------------------*
+//*-------------------------------Start SC Eff Plot----------------------------*
+void Histogram::SC_Eff_Make(std::shared_ptr<Flags> flags_){//Go by 
+	if(!flags_->Flags::Plot_SC_Eff()){
+		return;
+	}
+	std::cout<<"\tMaking SC Efficiency Histograms\n";
+	std::vector<long> space_dims(3);
+	space_dims[2] = std::distance(std::begin(_species_),std::end(_species_));
+	space_dims[1] = std::distance(std::begin(_sector_),std::end(_sector_));
+	space_dims[0] = std::distance(std::begin(_ecuts_),std::end(_ecuts_));
 
+	TH1F_ptr_1d plot_1d;
+	TH1F_ptr_2d plot_2d;
+	char hname[100];
+	CartesianGenerator cart(space_dims);
+	while(cart.GetNextCombination()){
+		if(_species_[cart[2]]==_ele_){
+			if(fun::ecut_perform(_ecuts_[cart[0]],flags_)){
+				//std::cout<<"species: " <<_species_[cart[2]] <<" sector: " <<_sector_[cart[1]] <<" ecut: " <<_ecuts_[cart[0]] <<" => idx: " <<_SC_Eff_hist.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+				sprintf(hname,"SC_Paddle_Yield_%s_%s_%s",_species_[cart[2]],_sector_[cart[1]],_ecuts_[cart[0]]);
+				plot_1d.push_back(new TH1F(hname,hname,_sc_eff_xbin_,_sc_eff_xmin_,_sc_eff_xmax_));
+			}
+		}else if(cart[0]< std::distance(std::begin(_hcuts_), std::end(_hcuts_))){
+			if(fun::hcut_perform(_species_[cart[2]],_hcuts_[cart[0]],flags_)){
+				//std::cout<<"species: " <<_species_[cart[2]] <<" sector: " <<_sector_[cart[1]] <<" hcut: " <<_hcuts_[cart[0]] <<" => idx: " <<_SC_Eff_hist.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+				sprintf(hname,"SC_Paddle_Yield_%s_%s_%s",_species_[cart[2]],_sector_[cart[1]],_hcuts_[cart[0]]);
+				plot_1d.push_back(new TH1F(hname,hname,_sc_eff_xbin_,_sc_eff_xmin_,_sc_eff_xmax_));
+			}
+		}
+		if(cart[0]==space_dims[0]-1){
+			if(plot_1d.size()>0){
+				plot_2d.push_back(plot_1d);
+				plot_1d.clear();
+			}
+			if(cart[1]==space_dims[1]-1){
+				if(plot_2d.size()>0){
+					_SC_Eff_hist.push_back(plot_2d);
+					plot_2d.clear();
+				}
+			}
+		}
+	}
+}
+
+std::vector<int> Histogram::SC_Eff_idx(const char * species_, const char * sector_, const char * pcut_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx;
+	if(!flags_->Flags::Plot_SC_Eff()){
+		idx.push_back(-1);
+		idx.push_back(-1);
+		idx.push_back(-1);
+		return idx;
+	}
+	idx.push_back(fun::species_idx(species_));
+	idx.push_back(fun::sector_idx(sector_));
+	if(fun::pcut_perform(species_,pcut_,flags_)){
+		if(species_==_ele_){
+			idx.push_back(fun::ecut_idx(pcut_)+fun::ecut_offset(pcut_,flags_));
+		}else{
+			idx.push_back(fun::hcut_idx(pcut_)+fun::hcut_offset(species_,pcut_,flags_));
+		}
+	}else{
+		idx.push_back(-1);
+	}
+	//std::cout<<"Looking for index of " <<species_ <<" " <<sector_ <<" " <<pcut_ <<" => " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
+	return idx;
+}
+void Histogram::SC_Eff_Fill(int sc_pd_, float weight_, const char* species_, const char* pcut_, const char * sector_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_SC_Eff()){
+		return;
+	}
+	std::vector<int> idx=SC_Eff_idx(species_,sector_,pcut_,flags_);
+	if(Histogram::OK_Idx(idx)){
+		_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->Fill(sc_pd_,weight_);
+	}
+	idx.clear();
+	idx=SC_Eff_idx(species_,_sec_all_,pcut_,flags_);
+	if(Histogram::OK_Idx(idx)){
+		_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->Fill(sc_pd_,weight_);
+	}
+}
+void Histogram::SC_Eff_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_SC_Eff()){
+		return;
+	}
+	std::cout<<"Writing SC Efficiency Histograms\n";
+	std::vector<long> space_dims(3);
+	space_dims[2] = std::distance(std::begin(_species_),std::end(_species_));
+	space_dims[1] = std::distance(std::begin(_sector_),std::end(_sector_));
+	space_dims[0] = std::distance(std::begin(_ecuts_),std::end(_ecuts_));
+	TDirectory* Dir_SC = _RootOutputFile->mkdir("SC_Eff");
+	TDirectory* Dir_SC_sub[space_dims[2]][space_dims[0]+1];
+	CartesianGenerator cart(space_dims);
+	char dirname[100];
+	std::vector<int> idx; 
+	for(int i=0; i<space_dims[2]; i++){
+		sprintf(dirname,"SC_Eff_%s",_species_[i]);
+		Dir_SC_sub[i][0] = Dir_SC->mkdir(dirname);
+		for(int j=0; j<space_dims[1]; j++){
+			sprintf(dirname,"SC_Eff_%s_%s",_species_[i],_sector_[j]);
+			Dir_SC_sub[i][j+1] = Dir_SC_sub[i][0]->mkdir(dirname);
+		}
+	}
+	while(cart.GetNextCombination()){
+		if(_species_[cart[2]]==_ele_){
+			idx = SC_Eff_idx(_species_[cart[2]],_sector_[cart[1]],_ecuts_[cart[0]],flags_);
+		}else{
+			idx = SC_Eff_idx(_species_[cart[2]],_sector_[cart[1]],_hcuts_[cart[0]],flags_);
+		}
+		if(Histogram::OK_Idx(idx)){
+			Dir_SC_sub[cart[2]][cart[1]+1]->cd();
+			_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->SetXTitle("SC Paddle");
+			_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->SetYTitle("Yield");
+			_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->Write();
+		}
+	} 
+}
+//*-------------------------------End SC Eff Plot------------------------------*
 //*------------------------------- Start Friend Plot --------------------------*
 std::vector<int> Histogram::Friend_Bin_Sizes(std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Make_Friend()){
@@ -3685,7 +3803,19 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 					_Weight_Sum[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 					_Weight_Sum[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
 					_Weight_Sum[i][j]->Sumw2();//Squared weights for the purpose of error analysis for simulation 
+					sprintf(hname,"Thrown_Weight_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
+					_Weight_Sum_Thrown[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					_Weight_Sum_Thrown[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					_Weight_Sum_Thrown[i][j]->Sumw2();//Squared weights for the purpose of error analysis for simulation 
 				}else if(flags_->Flags::Helicity()){
+					sprintf(hname,"2#pi_off_proton_%s_%s_pos",_var_names_[i],_top_[j]);
+					_Friend1[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					_Friend1[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					_Friend1[i][j]->Sumw2();//Normal Weights
+					sprintf(hname,"Scaled_2#pi_off_proton_%s_%s_pos",_var_names_[i],_top_[j]);
+					_W_Friend1[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					_W_Friend1[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					_W_Friend1[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
 					sprintf(hname,"2#pi_off_proton_%s_%s_neg",_var_names_[i],_top_[j]);
 					_Friend2[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 					_Friend2[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
@@ -3845,21 +3975,21 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
 					_W_Thrown[var_]->Fill(x,weight_*plus_weight_);
 					_Thrown[var_]->Fill(x,weight_);
+					_Weight_Sum_Thrown[var_][fun::top_idx(top_)]->Fill(x,weight_*weight_);
 				}else{
 					//std::cout<<"Filling Friend!\n";
 					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
 					if(flags_->Flags::Helicity()){//If taking Helicity into account then we'll have two output THnSparse
 						if(helicity_ == 1){
-							_W_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
-							_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
+							_W_Friend1[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
+							_Friend1[var_][fun::top_idx(top_)]->Fill(x,weight_);
 						}else if(helicity_ == -1){
 							_W_Friend2[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
 							_Friend2[var_][fun::top_idx(top_)]->Fill(x,weight_);
 						}
-					}else{
-						_W_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
-						_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
 					}
+					_W_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
+					_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
 					//std::cout<<"Done filling friend\n";
 					if(flags_->Flags::Sim()){
 						std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
@@ -3883,9 +4013,12 @@ void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
 					_W_Friend[i][j]->Write();
 					if(flags_->Flags::Sim()){
 						_Weight_Sum[i][j]->Write();
+						_Weight_Sum_Thrown[i][j]->Write();
 					}else{
 						if(flags_->Flags::Helicity()){
+							_Friend1[i][j]->Write();
 							_Friend2[i][j]->Write();
+							_W_Friend1[i][j]->Write();
 							_W_Friend2[i][j]->Write();
 						}
 					}

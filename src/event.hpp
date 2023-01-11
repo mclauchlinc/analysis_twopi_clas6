@@ -45,6 +45,7 @@ private:
 	int _cc_lrc = -99; //CC side {left,coinc,right}
 	float _cc_eff = NAN;//CC Efficiency
 	float _dt[4] = {NAN,NAN,NAN,NAN};
+	int _sc_pd[4] = {-1,-1,-1,-1};
 	
 	//Virtual Photon Flux
 	float _virtual_photon_flux = NAN;
@@ -119,6 +120,7 @@ public:
 	int Run();
 	int Sector(int particle_);
 	float Virtual_Photon_Flux();
+	int SC_pd(int i);
 };
 
 

@@ -56,6 +56,7 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 		//std::cout<<"Run Number is: " <<run_num <<" and it: ";
 		if(fun::correct_run(run_num,flags_)){
 			//std::cout<<"passed\n";
+			//std::cout<<"Run Number is: " <<run_num <<" and it: passed";
 			//Update on Progress through Analysis
 			if((thread_id_ == 0 || flags_->Flags::Make_Friend()) && curr_event%(num_events/100) == 0){
 				//curr_file_name = 

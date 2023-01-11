@@ -160,6 +160,7 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 	_vx = p0_.Particle::Get_vx();
 	_vy = p0_.Particle::Get_vy();
 	_dt[0] = p0_.Particle::Get_delta(0);
+	_sc_pd[0] = p0_.Particle::Get_sc_pd();
 	switch(top_){
 			case 0:
 				_vec_lab[0] = p0_.Particle::Get_4Vec(0);
@@ -171,11 +172,13 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 				_phi_lab[2] = p1_.Particle::Get_phi();
 				_theta_lab[2] = p1_.Particle::Get_theta();
 				_dt[2] = p1_.Particle::Get_delta(2);
+				_sc_pd[2] = p1_.Particle::Get_sc_pd();
 				_vec_lab[3] = p2_.Particle::Get_4Vec(3);
 				_p_lab[3] = p2_.Particle::Get_p();
 				_phi_lab[3] = p2_.Particle::Get_phi();
 				_theta_lab[3] = p2_.Particle::Get_theta();
 				_dt[3] = p2_.Particle::Get_delta(3);
+				_sc_pd[3] = p2_.Particle::Get_sc_pd();
 				_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[2],_vec_lab[3]);
 				_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[2],_vec_lab[3]);
 			break;
@@ -189,11 +192,13 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 				_phi_lab[1] = p1_.Particle::Get_phi();
 				_theta_lab[1] = p1_.Particle::Get_theta();
 				_dt[1] = p1_.Particle::Get_delta(1);
+				_sc_pd[1] = p1_.Particle::Get_sc_pd();
 				_vec_lab[3] = p2_.Particle::Get_4Vec(3);
 				_p_lab[3] = p2_.Particle::Get_p();
 				_phi_lab[3] = p2_.Particle::Get_phi();
 				_theta_lab[3] = p2_.Particle::Get_theta();
 				_dt[3] = p2_.Particle::Get_delta(3);
+				_sc_pd[3] = p2_.Particle::Get_sc_pd();
 				_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[3]);
 				_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[1],_vec_lab[3]);
 			break;
@@ -206,11 +211,14 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 				_p_lab[1] = p1_.Particle::Get_p();
 				_phi_lab[1] = p1_.Particle::Get_phi();
 				_theta_lab[1] = p1_.Particle::Get_theta();
+				_dt[1] = p1_.Particle::Get_delta(1);
+				_sc_pd[1] = p1_.Particle::Get_sc_pd();
 				_vec_lab[2] = p2_.Particle::Get_4Vec(2);
 				_p_lab[2] = p2_.Particle::Get_p();
 				_phi_lab[2] = p2_.Particle::Get_phi();
 				_theta_lab[2] = p2_.Particle::Get_theta();
 				_dt[2] = p2_.Particle::Get_delta(2);
+				_sc_pd[2] = p2_.Particle::Get_sc_pd();
 				_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[2]);
 				_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[1],_vec_lab[2]);
 			break;
@@ -235,6 +243,7 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 	_vx = p0_.Particle::Get_vx();
 	_vy = p0_.Particle::Get_vy();
 	_dt[0] = p0_.Particle::Get_delta(0);
+	_sc_pd[0] = p0_.Particle::Get_sc_pd();
 	if(top_==3){
 		_vec_lab[0] = p0_.Particle::Get_4Vec(0);
 		_p_lab[0] = p0_.Particle::Get_p();
@@ -245,16 +254,19 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 		_phi_lab[1] = p1_.Particle::Get_phi();
 		_theta_lab[1] = p1_.Particle::Get_theta();
 		_dt[1] = p1_.Particle::Get_delta(1);
+		_sc_pd[1] = p1_.Particle::Get_sc_pd();
 		_vec_lab[2] = p2_.Particle::Get_4Vec(2);
 		_p_lab[2] = p2_.Particle::Get_p();
 		_phi_lab[2] = p2_.Particle::Get_phi();
 		_theta_lab[2] = p2_.Particle::Get_theta();
 		_dt[2] = p2_.Particle::Get_delta(2);
+		_sc_pd[2] = p2_.Particle::Get_sc_pd();
 		_vec_lab[3] = p3_.Particle::Get_4Vec(3);
 		_p_lab[3] = p3_.Particle::Get_p();
 		_phi_lab[3] = p3_.Particle::Get_phi();
 		_theta_lab[3] = p3_.Particle::Get_theta();
 		_dt[3] = p3_.Particle::Get_delta(3);
+		_sc_pd[3] = p3_.Particle::Get_sc_pd();
 		_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 		_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 	}
@@ -541,6 +553,9 @@ float Event::Virtual_Photon_Flux(){
 	return _virtual_photon_flux;
 }
 
+int Event::SC_pd(int i){
+	return _sc_pd[i];
+}
 //void Event::Calculate_All(){
 
 //}

@@ -24,8 +24,8 @@ int main(int argc, char **argv){
 			sim_file = new TFile(flags.Flags::Sim_File().c_str());
 			sim_file2 = new TFile(flags.Flags::Sim_File2().c_str());
 			if(flags.Flags::Rad_Corr()){
-				sim_no_rad_file = new TFile(flags.Flags::Sim_No_Rad());
-				sim_no_rad_file2 = new TFile(flags.Flags::Sim_No_Rad2());
+				sim_no_rad_file = new TFile(flags.Flags::Sim_No_Rad().c_str());
+				sim_no_rad_file2 = new TFile(flags.Flags::Sim_No_Rad2().c_str());
 			}
 		}else{
 			std::cout<<"Working with both e16 and e1f\n";
@@ -34,8 +34,8 @@ int main(int argc, char **argv){
 			exp_file2 = new TFile(flags.Flags::Exp_File2().c_str());
 			sim_file2 = new TFile(flags.Flags::Sim_File2().c_str());
 			if(flags.Flags::Rad_Corr()){
-				sim_no_rad_file = new TFile(flags.Flags::Sim_No_Rad());
-				sim_no_rad_file2 = new TFile(flags.Flags::Sim_No_Rad2());
+				sim_no_rad_file = new TFile(flags.Flags::Sim_No_Rad().c_str());
+				sim_no_rad_file2 = new TFile(flags.Flags::Sim_No_Rad2().c_str());
 			}
 		}
 		if(flags.Flags::Has_Empty()){
@@ -49,29 +49,34 @@ int main(int argc, char **argv){
 			weight_file = new TFile(flags.Flags::Weight_File().c_str());
 			weight_file2 = new TFile(flags.Flags::Weight_File2().c_str());
 		}
+		//auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,flags);
 	}else if(flags.Flags::Has_Exp() && flags.Flags::Has_Sim()){//Looking at just e16 or e1f
 		std::cout<<"Working with just " <<flags.Flags::Run("type") <<"\n";
 		if(flags.Flags::Helicity()){
-			exp_pos_file = new TFile(flags.Flags::Exp_Hel(1).c_str());
-			exp_neg_file = new TFile(flags.Flags::Exp_Hel(-1).c_str());
+			std::cout<<"Helcity stuff!\n";
+			exp_file = new TFile(flags.Flags::Exp_Hel(1).c_str());
+			//exp_neg_file = new TFile(flags.Flags::Exp_Hel(-1).c_str());
 			sim_file = new TFile(flags.Flags::Sim_File().c_str());
 			if(flags.Flags::Rad_Corr()){
-				sim_no_rad_file = new TFile(flags.Flags::Sim_No_Rad());
+				sim_no_rad_file = new TFile(flags.Flags::Sim_No_Rad().c_str());
 			}
 			if(flags.Flags::Has_Empty()){
 				empty_file = new TFile(flags.Flags::Empty_File().c_str());
-				auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,flags);
+				std::cout<<"Running single run with empty and no rad\n";
+				std::cout<<"empty file: " <<flags.Flags::Empty_File().c_str() <<"\nno rad file: " <<flags.Flags::Sim_No_Rad().c_str() <<"\n";
+				auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,empty_file,sim_no_rad_file,flags);
 			}else{
-				auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,flags);
+				//auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,flags);
 			}
 		}else{
+			std::cout<<"No Helcity stuff!\n";
 			exp_file = new TFile(flags.Flags::Exp_File().c_str());
 			sim_file = new TFile(flags.Flags::Sim_File().c_str());
 			if(flags.Flags::Rad_Corr()){
-				sim_no_rad_file = new TFile(flags.Flags::Sim_No_Rad());
-				sim_no_rad_file2 = new TFile(flags.Flags::Sim_No_Rad2());
+				sim_no_rad_file = new TFile(flags.Flags::Sim_No_Rad().c_str());
+				//sim_no_rad_file2 = new TFile(flags.Flags::Sim_No_Rad2());
 			}
-			auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,flags);
+			//auto hist = Histogram(flags.Flags::Output_File(),exp_file,sim_file,flags);
 		}
 		
 		

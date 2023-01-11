@@ -68,6 +68,8 @@ private:
 	float _dtheta[3] = {NAN,NAN,NAN};
 	float _dphi[3] = {NAN,NAN,NAN};
 
+	int _sc_pd = -1;
+
 
 public:
 	Particle(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_, bool thrown_ = false);
@@ -99,6 +101,7 @@ public:
 	int Get_idx();
 	float Get_Weight();
 	int Get_q();
+	int Get_sc_pd();
 
 	float W();
 	float Q2();

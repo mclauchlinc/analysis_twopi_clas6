@@ -57,10 +57,14 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 		//}
 	}
 	_p = data_->Branches::p(idx_);
+	
 	if(idx_==0 && (flags_->E_Theta_Corr() || flags_->E_PCorr())){
 		_theta = corr::theta_e_corr(physics::get_theta(data_->Branches::cz(idx_)),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run());
 	}else{
 		_theta = physics::get_theta(data_->Branches::cz(idx_));
+	}
+	if(flags_->Flags::Plot_SC_Eff() && data_->Branches::sc(idx_)>0){
+		_sc_pd = data_->Branches::sc_pd(idx_);
 	}
 	_phi = physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_));
 	_q = data_->Branches::q(idx_);
@@ -227,6 +231,11 @@ float Particle::Get_Weight(){
 
 int Particle::Get_q(){
 	return _q;
+}
+
+
+int Particle::Get_sc_pd(){
+	return _sc_pd;
 }
 
 float Particle::W(){//Will assume whatever particle is there is an electron
