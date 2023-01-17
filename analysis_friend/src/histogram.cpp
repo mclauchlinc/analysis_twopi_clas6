@@ -74,10 +74,11 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 			_exp_data_7d_neg = (THnSparseD *)exp_tree_->Get(hname);
 			_empty_7d_neg = (THnSparseD *)empty_tree_->Get(hname);
 			std::cout<<"Getting full Exp THnSparse " <<hname <<"\n";
-			_exp_data_7d = (THnSparseD *)_exp_data_7d_pos->Clone();
-			_exp_data_7d->Add(_exp_data_7d_neg);//Histogram::Add_Sparse(_exp_data_7d_pos,_exp_data_7d_neg);
-			_empty_7d = (THnSparseD *)_empty_7d_pos->Clone();
-			_empty_7d->Add(_empty_7d_neg);//Histogram::Add_Sparse(_empty_7d_pos,_empty_7d_neg);
+			sprintf(hname,"Scaled_%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);//_top_[flags_.Flags::Top_idx()]);
+			_exp_data_7d = (THnSparseD *)exp_tree_->Get(hname);//(THnSparseD *)_exp_data_7d_pos->Clone();
+			//_exp_data_7d->Add(_exp_data_7d_neg);//Histogram::Add_Sparse(_exp_data_7d_pos,_exp_data_7d_neg);
+			_empty_7d = (THnSparseD *)empty_tree_->Get(hname);//(THnSparseD *)_empty_7d_pos->Clone();
+			//_empty_7d->Add(_empty_7d_neg);//Histogram::Add_Sparse(_empty_7d_pos,_empty_7d_neg);
 		}else{
 			sprintf(hname,"Scaled_%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);//_top_[flags_.Flags::Top_idx()]);
 			std::cout<<"Getting Exp THnSparse " <<hname <<"\n";
@@ -107,11 +108,12 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 			std::cout<<"Getting Exp Empty THnSparse Neg" <<hname <<"\n";
 			_empty_7d_neg = (THnSparseD *)empty_tree_->Get(hname);
 			std::cout<<"Getting full Exp THnSparse " <<hname <<"\n";
-			_exp_data_7d = (THnSparseD*)_exp_data_7d_pos->Clone();
-			_exp_data_7d->Add(_exp_data_7d_neg);//Histogram::Add_Sparse(_exp_data_7d_pos,_exp_data_7d_neg);
+			sprintf(hname,"%s_%s_neg",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);//_top_[flags_.Flags::Top_idx()]);
+			_exp_data_7d = (THnSparseD *)exp_tree_->Get(hname);//(THnSparseD*)_exp_data_7d_pos->Clone();
+			//_exp_data_7d->Add(_exp_data_7d_neg);//Histogram::Add_Sparse(_exp_data_7d_pos,_exp_data_7d_neg);
 			std::cout<<"Getting full Exp Empty THnSparse from sum " <<hname <<"\n";
-			_empty_7d = (THnSparseD*)_empty_7d_pos->Clone();
-			_empty_7d->Add(_empty_7d_neg);//Histogram::Add_Sparse(_empty_7d_pos,_empty_7d_neg);
+			_empty_7d = (THnSparseD *)empty_tree_->Get(hname);//(THnSparseD*)_empty_7d_pos->Clone();
+			//_empty_7d->Add(_empty_7d_neg);//Histogram::Add_Sparse(_empty_7d_pos,_empty_7d_neg);
 		}else{
 			sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);//_top_[flags_.Flags::Top_idx()]);
 			std::cout<<"Getting Exp THnSparse " <<hname <<"\n";
@@ -170,23 +172,37 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	exp_wq2->SetYTitle("Q2 (GeV^2)");
 	exp_wq2->Write();
 	TH2D* sim_wq2 = _sim_data_7d->Projection(1,0);
-	sprintf(hname,"sim_Data_W_vs_Q2");
+	sprintf(hname,"Sim_Data_W_vs_Q2");
 	sim_wq2->SetNameTitle(hname,hname);
 	sim_wq2->SetXTitle("W (GeV)");
 	sim_wq2->SetYTitle("Q2 (GeV^2)");
 	sim_wq2->Write();
-	TH2D* exp_pos_wq2 = _exp_data_7d_pos->Projection(1,0);
-	sprintf(hname,"Exp_Data_Pos_W_vs_Q2");
-	exp_pos_wq2->SetNameTitle(hname,hname);
-	exp_pos_wq2->SetXTitle("W (GeV)");
-	exp_pos_wq2->SetYTitle("Q2 (GeV^2)");
-	exp_pos_wq2->Write();
-	TH2D* exp_neg_wq2 = _exp_data_7d_neg->Projection(1,0);
-	sprintf(hname,"Exp_Data_Neg_W_vs_Q2");
-	exp_neg_wq2->SetNameTitle(hname,hname);
-	exp_neg_wq2->SetXTitle("W (GeV)");
-	exp_neg_wq2->SetYTitle("Q2 (GeV^2)");
-	exp_neg_wq2->Write();
+	if(flags_.Flags::Helicity()){
+		TH2D* exp_pos_wq2 = _exp_data_7d_pos->Projection(1,0);
+		sprintf(hname,"Exp_Data_Pos_W_vs_Q2");
+		exp_pos_wq2->SetNameTitle(hname,hname);
+		exp_pos_wq2->SetXTitle("W (GeV)");
+		exp_pos_wq2->SetYTitle("Q2 (GeV^2)");
+		exp_pos_wq2->Write();
+		TH2D* exp_neg_wq2 = _exp_data_7d_neg->Projection(1,0);
+		sprintf(hname,"Exp_Data_Neg_W_vs_Q2");
+		exp_neg_wq2->SetNameTitle(hname,hname);
+		exp_neg_wq2->SetXTitle("W (GeV)");
+		exp_neg_wq2->SetYTitle("Q2 (GeV^2)");
+		exp_neg_wq2->Write();
+		TH2D* empty_wq2_pos = _empty_7d_pos->Projection(1,0);
+		sprintf(hname,"Empty_Pos_W_vs_Q2");
+		empty_wq2_pos->SetNameTitle(hname,hname);
+		empty_wq2_pos->SetXTitle("W (GeV)");
+		empty_wq2_pos->SetYTitle("Q2 (GeV^2)");
+		empty_wq2_pos->Write();
+		TH2D* empty_wq2_neg = _empty_7d_neg->Projection(1,0);
+		sprintf(hname,"Empty_Neg_W_vs_Q2");
+		empty_wq2_neg->SetNameTitle(hname,hname);
+		empty_wq2_neg->SetXTitle("W (GeV)");
+		empty_wq2_neg->SetYTitle("Q2 (GeV^2)");
+		empty_wq2_neg->Write();
+	}
 	TH2D* acc_wq2 = _acceptance_7d->Projection(1,0);
 	sprintf(hname,"Acceptance_W_vs_Q2");
 	acc_wq2->SetNameTitle(hname,hname);
@@ -199,18 +215,6 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	empty_wq2->SetXTitle("W (GeV)");
 	empty_wq2->SetYTitle("Q2 (GeV^2)");
 	empty_wq2->Write();
-	TH2D* empty_wq2_pos = _empty_7d_pos->Projection(1,0);
-	sprintf(hname,"Empty_Pos_W_vs_Q2");
-	empty_wq2_pos->SetNameTitle(hname,hname);
-	empty_wq2_pos->SetXTitle("W (GeV)");
-	empty_wq2_pos->SetYTitle("Q2 (GeV^2)");
-	empty_wq2_pos->Write();
-	TH2D* empty_wq2_neg = _empty_7d_neg->Projection(1,0);
-	sprintf(hname,"Empty_Neg_W_vs_Q2");
-	empty_wq2_neg->SetNameTitle(hname,hname);
-	empty_wq2_neg->SetXTitle("W (GeV)");
-	empty_wq2_neg->SetYTitle("Q2 (GeV^2)");
-	empty_wq2_neg->Write();
 	TH2D* exp_corr_wq2 = _exp_corr_7d->Projection(1,0);
 	sprintf(hname,"Exp_Corr_W_vs_Q2");
 	exp_corr_wq2->SetNameTitle(hname,hname);
@@ -223,6 +227,11 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	sim_corr_wq2->SetXTitle("W (GeV)");
 	sim_corr_wq2->SetYTitle("Q2 (GeV^2)");
 	sim_corr_wq2->Write();
+	sprintf(hname,"Rad_Corr_W_vs_Q2");
+	_rad_corr->SetNameTitle(hname,hname);
+	_rad_corr->SetXTitle("W (GeV)");
+	_rad_corr->SetYTitle("Q2 (GeV^2)");
+	_rad_corr->Write();
 }
 
 

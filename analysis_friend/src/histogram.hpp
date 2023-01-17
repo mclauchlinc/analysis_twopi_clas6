@@ -251,6 +251,9 @@ public:
 	void Write_Error_Hists(Flags flags_);
 	THnSparseD* Add_Sparse(THnSparse * h1_, THnSparse * h2_);
 	//void Radiative_Correction(Flags flags_);
+	//*-------------------------------Start Hole Identification-----------------------*
+	int Hole_Size(THnSparse* hist_); 
+	
 };
 
 #endif

@@ -280,8 +280,10 @@ protected:
 	//CC Histograms
 	Bool_6d _CC_made;
 	TH1F_ptr_6d _CC_hist;
-	TH1F_ptr_3d _CC_Eff2_hist;
-	TH2F_ptr_4d _CC_Eff1_hist;
+
+	//Kinematic Efficencies
+	TH1F_ptr_4d _Kinematic_Eff2_hist;
+	TH2F_ptr_5d _Kinematic_Eff1_hist;
 
 	//SC Histograms
 	TH1F_ptr_3d _SC_Eff_hist;
@@ -467,12 +469,12 @@ public:
 	void MM_Fill(const char* top_, const char* cut_, const char * clean_, const char * sector_, float MM_, float W_, float weight_, std::shared_ptr<Flags> flags_);
 	void MM_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End MM Plot----------------------------*
-	//*-------------------------------Start CC Efficiency Plot----------------------------*
-	void CC_Eff_Make(std::shared_ptr<Flags> flags_);
-	std::vector<int> CC_Eff_idx(int which_, const char * ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_);
-	void CC_Eff_Fill(float p_, float theta_, float weight_, const char* ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_);
-	void CC_Eff_Write(std::shared_ptr<Flags> flags_);
-	//*-------------------------------End CC Efficiency Plot----------------------------*
+	//*-------------------------------Start Kinematic Efficiency Plot----------------------------*
+	void Kinematic_Eff_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> Kinematic_Eff_idx(int which_, const char* species_, const char * ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_);
+	void Kinematic_Eff_Fill(float p_, float theta_, float weight_, const char* species_, const char* ecut_, const char* cut_, const char* sector_, const char* top_, std::shared_ptr<Flags> flags_);
+	void Kinematic_Eff_Write(std::shared_ptr<Flags> flags_);
+	//*-------------------------------End Kinematic Efficiency Plot----------------------------*
 	//*-------------------------------Start SC Eff Plot------------------------------*
 	void SC_Eff_Make(std::shared_ptr<Flags> flags_);
 	std::vector<int> SC_Eff_idx(const char * species_, const char * sector_, const char * pcut_, std::shared_ptr<Flags> flags_);
@@ -500,6 +502,7 @@ public:
 	void PCorr_Check_Fill(float MM2_, int sector_, const char* top_, const char* corr_, std::shared_ptr<Flags> flags_);
 	void PCorr_Check_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End PCorr Check Plot----------------------------*
+	
 };
 
 
