@@ -35,20 +35,13 @@
 		//std::cout<<"\t\tIn Particle ID for Electron\n";
 		bool pass = false;
 		if(idx_==0){
-			//std::cout<<"\t\tSanity Electron: ";
 			pass = pid::sanity_ele(idx_,data_,flags_);
-			//std::cout<<pass <<"\n\t\tFid Electron: ";
 			pass &= pid::fid_ele(idx_,data_,flags_);
-			//std::cout<<pass <<"\n\t\tSF Electron: ";
 			pass &= pid::sf(idx_,data_,flags_);
-			//std::cout<<pass <<"\n\t\tEC Electron: ";
 			pass &= pid::min_ec(idx_,data_,flags_);
-			//pass &= pid::min_p(idx_,data_,flags_);
-			//std::cout<<pass <<"\n\t\tCC Electron: ";
+			pass &= pid::sc_eff(0, idx_, data_, flags_);
 			pass &= pid::min_cc(idx_,data_,flags_);
-			//std::cout<<pass <<"\n\t\tVertex Electron: ";
 			pass &= pid::vertex_e(idx_,data_,flags_);
-			//std::cout<<pass <<"\n";
 			pass &= pid::id_bank(idx_,data_,flags_,_ele_);
 		}
 		return pass; 
@@ -57,11 +50,9 @@
 		//std::cout<<"\t\tIn Particle ID for Proton\n";
 		bool pass = false;
 		if(idx_ > 0){
-			//std::cout<<"\t\tSanity for Proton\n";
 			pass = pid::sanity_pro(idx_,data_,flags_);
-			//std::cout<<"\t\tDelta for Proton\n";
 			pass &= pid::delta_t_pro(idx_,data_,flags_);
-			//std::cout<<"\t\tFid for Proton\n";
+			pass &= pid::sc_eff(1, idx_, data_, flags_);
 			pass &= pid::fid_pro(idx_,data_,flags_);
 			pass &= pid::id_bank(idx_,data_,flags_,_pro_);
 		}
@@ -71,11 +62,9 @@
 		//std::cout<<"\t\tIn Particle ID for Proton\n";
 		bool pass = false;
 		if(idx_ > 0){
-			//std::cout<<"\t\tSanity for Pi+\n";
 			pass = pid::sanity_pip(idx_,data_,flags_);
-			//std::cout<<"\t\tDelta for Pi+\n";
 			pass &= pid::delta_t_pip(idx_,data_,flags_);
-			//std::cout<<"\t\tFid for Pi+\n";
+			pass &= pid::sc_eff(2, idx_, data_, flags_);
 			pass &= pid::fid_pip(idx_,data_,flags_);
 			pass &= pid::id_bank(idx_,data_,flags_,_pip_);
 		}
@@ -86,6 +75,7 @@
 		if(idx_ > 0){
 			pass = pid::sanity_pim(idx_,data_,flags_);
 			pass &= pid::delta_t_pim(idx_,data_,flags_);
+			pass &= pid::sc_eff(3, idx_, data_, flags_);
 			pass &= pid::fid_pim(idx_,data_,flags_);
 			pass &= pid::id_bank(idx_,data_,flags_,_pim_);
 		}
@@ -331,59 +321,42 @@
 		return pass;
 	}
 	bool pid::sanity_ele(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
-		bool pass = false;
-		if(idx_ == 0){
-			int dc = data_->Branches::dc(idx_);
-			int sc = data_->Branches::sc(idx_);
-			int ec = data_->Branches::ec(idx_);
-			int cc = data_->Branches::cc(idx_);
-			int stat = data_->Branches::stat(idx_);
-			pass = cuts::e_sanity(dc,sc,ec,cc,stat);
-		}
+		bool pass = (idx_==0);
+		int dc = data_->Branches::dc(idx_);
+		int sc = data_->Branches::sc(idx_);
+		int ec = data_->Branches::ec(idx_);
+		int cc = data_->Branches::cc(idx_);
+		int stat = data_->Branches::stat(idx_);
+		pass &= cuts::e_sanity(dc,sc,ec,cc,stat);
 		return pass;
 	}
 	bool pid::sanity_pro(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
-		bool pass = false;
-		if(idx_ > 0){
-			int dc = data_->Branches::dc(idx_);
-			int sc = data_->Branches::sc(idx_);
-			int stat = data_->Branches::stat(idx_);
-			pass = cuts::pro_sanity(dc,sc,stat);
-		}
+		bool pass = (idx_ >0);
+		pass &= cuts::pro_sanity(data_->Branches::dc(idx_),data_->Branches::sc(idx_),data_->Branches::stat(idx_));
 		return pass;
 	}
 	bool pid::sanity_pip(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
-		bool pass = false;
-		if(idx_ > 0){
-			int dc = data_->Branches::dc(idx_);
-			int sc = data_->Branches::sc(idx_);
-			int stat = data_->Branches::stat(idx_);
-			pass = cuts::pip_sanity(dc,sc,stat);
-		}
+		bool pass = (idx_ >0);
+		pass &= cuts::pip_sanity(data_->Branches::dc(idx_),data_->Branches::sc(idx_),data_->Branches::stat(idx_));
 		return pass;
 	}
 	bool pid::sanity_pim(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
-		bool pass = false;
-		if(idx_ > 0){
-			int dc = data_->Branches::dc(idx_);
-			int sc = data_->Branches::sc(idx_);
-			int stat = data_->Branches::stat(idx_);
-			pass = cuts::pim_sanity(dc,sc,stat);
-		}
+		bool pass = (idx_ >0);
+		pass &= cuts::pim_sanity(data_->Branches::dc(idx_),data_->Branches::sc(idx_),data_->Branches::stat(idx_));
 		return pass;
 	}
 
 	bool pid::vertex_e(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
-		bool pass = false;
-		if(flags_->Flags::Vertex_Cut()){
-			if(idx_ == 0){
-				int run = flags_->Flags::Run();
-				bool sim = flags_->Flags::Sim();
-				float vz = data_->Branches::vz(idx_);
-				pass = cuts::vertex_cut(vz,run);
-			}
-		}else{
-			pass = true;
+		if(!flags_->Flags::Vertex_Cut()){
+			return true;
 		}
-		return pass;
+		return cuts::vertex_cut(data_->Branches::vz(idx_),flags_->Flags::Run());
+	}
+
+	//Efficiency Cuts
+	bool pid::sc_eff(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
+		if(!flags_->Flags::SC_Eff()){
+			return true;
+		}
+		return cuts::sc_eff_cut(data_->Branches::p(idx_), physics::get_theta(data_->Branches::cz(idx_)), flags_->Flags::Run(), par_);
 	}

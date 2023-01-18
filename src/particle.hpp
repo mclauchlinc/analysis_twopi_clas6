@@ -57,8 +57,11 @@ private:
 	bool _beta_pass[4] = {false,false,false,false};//Pass Beta {ele,pro,pip,pim}
 	bool _id_pass[4] = {false,false,false,false};//Pass ID bank {ele,pro,pip,pim}
 	bool _sp_dt_pass[3] = {false,false, false};
+	bool _vertex_pass = false;//Did it fall within the determined vertex region?
 	bool _p_corr = false; //Performed Momentum Correction
 	int _id_crisis = 0;//{0,1,2} = {none, pro/pip, pim/e}
+	//Efficiency Passes
+	bool _sc_eff_pass[4] = {false,false,false,false};
 	std::vector<bool> _pid;// = {false,false,false,false};//Identified {ele,pro,pip,pim}
 	bool _ided = false; //Has gone through PID
 	bool _event[4] = {false,false,false,false};
@@ -85,6 +88,8 @@ public:
 	bool Pass_dt(int i);
 	bool Pass_id(int i);
 	bool Pass_pid(int i);
+	bool Pass_vertex();
+	bool Pass_SC_Eff(int i);
 	bool Corr_p();
 	int ID_crisis();
 	bool IDed();

@@ -415,6 +415,43 @@ bool cuts::vertex_cut(float vz_, int run_){
 	}
 	return pass;
 }
+//These all need to be built up 1/18/23
+bool cuts::sc_eff_ele_cut(float p_, float theta_, int run_){
+	bool pass = false;
+	return pass;
+}
+bool cuts::sc_eff_pro_cut(float p_, float theta_, int run_){
+	bool pass = false;
+	return pass;
+}
+bool cuts::sc_eff_pip_cut(float p_, float theta_, int run_){
+	bool pass = false;
+	return pass;
+}
+bool cuts::sc_eff_pim_cut(float p_, float theta_, int run_){
+	bool pass = false;
+	return pass;
 
-
+}
+bool cuts::sc_eff_cut(float p_, float theta_, int run_, int par_){
+	bool pass = false;
+	switch(par_){
+		case 0:
+			pass = sc_eff_ele_cut(p_,theta_,run_);
+		break;
+		case 1:
+			pass = sc_eff_pro_cut(p_,theta_,run_);
+		break;
+		case 2:
+			pass = sc_eff_pim_cut(p_,theta_,run_);
+		break;
+		case 3:
+			pass = sc_eff_pim_cut(p_,theta_,run_);
+		break;
+		default:
+			pass = sc_eff_ele_cut(p_,theta_,run_);
+		break;
+	}
+	return pass;
+}
 

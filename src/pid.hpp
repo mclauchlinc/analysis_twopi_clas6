@@ -41,6 +41,8 @@ namespace pid {
 	bool sanity_pim(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 	//Vertex Cuts
 	bool vertex_e(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
+	//Efficiency Cuts
+	bool sc_eff(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 }
 
 #endif

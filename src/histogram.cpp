@@ -3661,7 +3661,7 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 		std::cout<<"Writing Kinematic Efficiency\n";
 		char dirname[100];
 		TDirectory* dir_kin_eff = _RootOutputFile->mkdir("Kinematic Efficiency");
-		TDirectory* dir_kin_eff_sub[std::distance(std::begin(_species_), std::end(_species_))][std::distance(std::begin(_ecuts_), std::end(_ecuts_))][std::distance(std::begin(_cut_), std::end(_cut_))+1][std::distance(std::begin(_top_), std::end(_top_))+1];
+		TDirectory* dir_kin_eff_sub[std::distance(std::begin(_species_), std::end(_species_))][std::distance(std::begin(_ecuts_), std::end(_ecuts_))+1][std::distance(std::begin(_cut_), std::end(_cut_))+1][std::distance(std::begin(_top_), std::end(_top_))+1];
 		for(int h=0; h<std::distance(std::begin(_species_), std::end(_species_)); h++){
 			//std::cout<<"making dir at " <<h <<" 0 0 0\n";
 			sprintf(dirname,"kinematic_eff_%s",_species_[h]);
@@ -3671,18 +3671,18 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 					if(fun::ecut_perform(_ecuts_[i],flags_)){
 						//std::cout<<"making dir at "<<h <<" " <<i <<" " <<0 <<" " <<0 <<" putting in " <<h <<" 0 0 0\n";
 						sprintf(dirname,"kinematic_eff_%s_%s",_species_[h],_ecuts_[i]);
-						dir_kin_eff_sub[h][i][0][0] = dir_kin_eff_sub[h][0][0][0]->mkdir(dirname);
+						dir_kin_eff_sub[h][i+1][0][0] = dir_kin_eff_sub[h][0][0][0]->mkdir(dirname);
 						if(_ecuts_[i]==_event_){
 							for(int j=0; j<std::distance(std::begin(_top_), std::end(_top_)); j++){
 								if(_top_[j]!=_mnone_ && fun::top_perform(_top_[j],flags_)){
 									//std::cout<<"\tmaking dir at "<<h <<" " <<i <<" " <<0 <<" " <<j+1 <<" in " <<h <<" " <<i <<" " <<0 <<" " <<0 <<"\n";
 									sprintf(dirname,"kinematic_eff_%s_%s_%s",_species_[h],_ecuts_[i],_top_[j]);
-									dir_kin_eff_sub[h][i][0][j+1] = dir_kin_eff_sub[h][i][0][0]->mkdir(dirname);
+									dir_kin_eff_sub[h][i+1][0][j+1] = dir_kin_eff_sub[h][i+1][0][0]->mkdir(dirname);
 									for(int k=0; k<std::distance(std::begin(_cut_), std::end(_cut_)); k++){
 										if(_cut_[k]!=_no_cut_){
 											//std::cout<<"\t\tmaking dir at "<<h <<" " <<i <<" " <<k+1 <<" " <<j+1 <<" in " <<h <<" " <<i <<" " <<0 <<" " <<j+1 <<"\n";
 											sprintf(dirname,"kinematic_eff_%s_%s_%s_%s",_species_[h],_ecuts_[i],_top_[j],_cut_[k]);
-											dir_kin_eff_sub[h][i][k+1][j+1] = dir_kin_eff_sub[h][i][0][j+1]->mkdir(dirname);
+											dir_kin_eff_sub[h][i+1][k+1][j+1] = dir_kin_eff_sub[h][i+1][0][j+1]->mkdir(dirname);
 										}
 									}
 								}
@@ -3692,7 +3692,7 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 								if(_cut_[k]!=_no_cut_ && _ecuts_[i]!=_none_){
 									//std::cout<<"\tmaking dir at "<<h <<" " <<i <<" " <<k+1 <<" " <<0 <<" in " <<h <<" " <<i <<" " <<0 <<" " <<0 <<"\n";
 									sprintf(dirname,"kinematic_eff_%s_%s_%s",_species_[h],_ecuts_[i],_cut_[k]);
-									dir_kin_eff_sub[h][i][k+1][0] = dir_kin_eff_sub[h][i][0][0]->mkdir(dirname);
+									dir_kin_eff_sub[h][i+1][k+1][0] = dir_kin_eff_sub[h][i+1][0][0]->mkdir(dirname);
 								}
 							}
 						}
@@ -3703,18 +3703,18 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 					if(fun::hcut_perform(_species_[h],_hcuts_[i],flags_)){
 						//std::cout<<"making dir at "<<h <<" " <<i <<" " <<0 <<" " <<0 <<" putting in " <<h <<" 0 0 0\n";
 						sprintf(dirname,"kinematic_eff_%s_%s",_species_[h],_hcuts_[i]);
-						dir_kin_eff_sub[h][i][0][0] = dir_kin_eff_sub[h][0][0][0]->mkdir(dirname);
+						dir_kin_eff_sub[h][i+1][0][0] = dir_kin_eff_sub[h][0][0][0]->mkdir(dirname);
 						if(_hcuts_[i]==_event_){
 							for(int j=0; j<std::distance(std::begin(_top_), std::end(_top_)); j++){
 								if(_top_[j]!=_mnone_ && fun::top_perform(_top_[j],flags_)){
 									//std::cout<<"\tmaking dir at "<<h <<" " <<i <<" " <<0 <<" " <<j+1 <<" in " <<h <<" " <<i <<" " <<0 <<" " <<0 <<"\n";
 									sprintf(dirname,"kinematic_eff_%s_%s_%s",_species_[h],_hcuts_[i],_top_[j]);
-									dir_kin_eff_sub[h][i][0][j+1] = dir_kin_eff_sub[h][i][0][0]->mkdir(dirname);
+									dir_kin_eff_sub[h][i+1][0][j+1] = dir_kin_eff_sub[h][i+1][0][0]->mkdir(dirname);
 									for(int k=0; k<std::distance(std::begin(_cut_), std::end(_cut_)); k++){
 										if(_cut_[k]!=_no_cut_){
 											//std::cout<<"\t\tmaking dir at "<<h <<" " <<i <<" " <<k+1 <<" " <<j+1 <<" in " <<h <<" " <<i <<" " <<0 <<" " <<j+1 <<"\n";
 											sprintf(dirname,"kinematic_eff_%s_%s_%s_%s",_species_[h],_hcuts_[i],_top_[j],_cut_[k]);
-											dir_kin_eff_sub[h][i][k+1][j+1] = dir_kin_eff_sub[h][i][0][j+1]->mkdir(dirname);
+											dir_kin_eff_sub[h][i+1][k+1][j+1] = dir_kin_eff_sub[h][i+1][0][j+1]->mkdir(dirname);
 										}
 									}
 								}
@@ -3724,7 +3724,7 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 								if(_cut_[k]!=_no_cut_ && _hcuts_[i]!=_none_){
 									//std::cout<<"\tmaking dir at "<<h <<" " <<i <<" " <<k+1 <<" " <<0 <<" in " <<h <<" " <<i <<" " <<0 <<" " <<0 <<"\n";
 									sprintf(dirname,"kinematic_eff_%s_%s_%s",_species_[h],_hcuts_[i],_cut_[k]);
-									dir_kin_eff_sub[h][i][k+1][0] = dir_kin_eff_sub[h][i][0][0]->mkdir(dirname);
+									dir_kin_eff_sub[h][i+1][k+1][0] = dir_kin_eff_sub[h][i+1][0][0]->mkdir(dirname);
 								}
 							}
 						}
@@ -3759,7 +3759,7 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 				if(fun::ecut_perform(_ecuts_[pcut_idx],flags_)){
 					if(_ecuts_[pcut_idx] == _none_ && _cut_[cut_idx] == _no_cut_ && _top_[top_idx]==_none_){
 					//std::cout<<"Writing In Directory " <<fun::species_idx(_species_[cart[4]]) <<" " <<fun::ecut_idx(_ecuts_[pcut_idx]) <<" 0 0\n"; 
-					dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::ecut_idx(_ecuts_[pcut_idx])][0][0]->cd();
+					dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::ecut_idx(_ecuts_[pcut_idx])+1][0][0]->cd();
 						if(Histogram::OK_Idx(idx1)){
 							//fun::print_vector_idx(idx1);
 							_Kinematic_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]][idx1[4]]->SetXTitle("Momentum (GeV)");
@@ -3777,7 +3777,7 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 					}else if(_ecuts_[pcut_idx] != _none_ && _cut_[cut_idx] != _no_cut_){
 						if(_ecuts_[pcut_idx] != _event_ && _top_[top_idx] == _mnone_){
 							//std::cout<<"Writing In Directory " <<fun::species_idx(_species_[cart[4]]) <<" " <<fun::ecut_idx(_ecuts_[pcut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" 0\n";
-							dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::ecut_idx(_ecuts_[pcut_idx])][fun::cut_idx(_cut_[cut_idx])+1][0]->cd();
+							dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::ecut_idx(_ecuts_[pcut_idx])+1][fun::cut_idx(_cut_[cut_idx])+1][0]->cd();
 							if(Histogram::OK_Idx(idx1)){
 								//fun::print_vector_idx(idx1);
 								_Kinematic_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]][idx1[4]]->SetXTitle("Momentum (GeV)");
@@ -3794,7 +3794,7 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 							}
 						}else if(_ecuts_[pcut_idx] == _event_ && _top_[top_idx] != _mnone_){
 							//std::cout<<"Writing In Directory " <<fun::species_idx(_species_[cart[4]]) <<" " <<fun::ecut_idx(_ecuts_[pcut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" " <<fun::top_idx(_top_[top_idx])+1 <<"\n";
-							dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::ecut_idx(_ecuts_[pcut_idx])][fun::cut_idx(_cut_[cut_idx])+1][fun::top_idx(_top_[top_idx])+1]->cd();
+							dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::ecut_idx(_ecuts_[pcut_idx])+1][fun::cut_idx(_cut_[cut_idx])+1][fun::top_idx(_top_[top_idx])+1]->cd();
 							if(Histogram::OK_Idx(idx1)){
 								//fun::print_vector_idx(idx1);
 								_Kinematic_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]][idx1[4]]->SetXTitle("Momentum (GeV)");
@@ -3818,7 +3818,7 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 				if(fun::hcut_perform(_species_[cart[4]],_hcuts_[pcut_idx],flags_)){
 					if(_hcuts_[pcut_idx] == _none_ && _cut_[cut_idx] == _no_cut_ && _top_[top_idx]==_none_){
 					//std::cout<<"Writing In Directory " <<fun::species_idx(_species_[cart[4]]) <<" " <<fun::hcut_idx(_hcuts_[pcut_idx]) <<" 0 0\n"; 
-					dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::hcut_idx(_hcuts_[pcut_idx])][0][0]->cd();
+					dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::hcut_idx(_hcuts_[pcut_idx])+1][0][0]->cd();
 						if(Histogram::OK_Idx(idx1)){
 							//fun::print_vector_idx(idx1);
 							_Kinematic_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]][idx1[4]]->SetXTitle("Momentum (GeV)");
@@ -3836,7 +3836,7 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 					}else if(_hcuts_[pcut_idx] != _none_ && _cut_[cut_idx] != _no_cut_){
 						if(_hcuts_[pcut_idx] != _event_ && _top_[top_idx] == _mnone_){
 							//std::cout<<"Writing In Directory " <<fun::species_idx(_species_[cart[4]]) <<" " <<fun::hcut_idx(_hcuts_[pcut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" 0\n";
-							dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::hcut_idx(_hcuts_[pcut_idx])][fun::cut_idx(_cut_[cut_idx])+1][0]->cd();
+							dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::hcut_idx(_hcuts_[pcut_idx])+1][fun::cut_idx(_cut_[cut_idx])+1][0]->cd();
 							if(Histogram::OK_Idx(idx1)){
 								//fun::print_vector_idx(idx1);
 								_Kinematic_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]][idx1[4]]->SetXTitle("Momentum (GeV)");
@@ -3853,7 +3853,7 @@ void Histogram::Kinematic_Eff_Write(std::shared_ptr<Flags> flags_){
 							}
 						}else if(_hcuts_[pcut_idx] == _event_ && _top_[top_idx] != _mnone_){
 							//std::cout<<"Writing In Directory " <<fun::species_idx(_species_[cart[4]]) <<" " <<fun::hcut_idx(_hcuts_[pcut_idx]) <<" " <<fun::cut_idx(_cut_[cut_idx])+1 <<" " <<fun::top_idx(_top_[top_idx])+1 <<"\n";
-							dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::hcut_idx(_hcuts_[pcut_idx])][fun::cut_idx(_cut_[cut_idx])+1][fun::top_idx(_top_[top_idx])+1]->cd();
+							dir_kin_eff_sub[fun::species_idx(_species_[cart[4]])][fun::hcut_idx(_hcuts_[pcut_idx])+1][fun::cut_idx(_cut_[cut_idx])+1][fun::top_idx(_top_[top_idx])+1]->cd();
 							if(Histogram::OK_Idx(idx1)){
 								//fun::print_vector_idx(idx1);
 								_Kinematic_Eff1_hist[idx1[0]][idx1[1]][idx1[2]][idx1[3]][idx1[4]]->SetXTitle("Momentum (GeV)");
@@ -3885,47 +3885,65 @@ void Histogram::SC_Eff_Make(std::shared_ptr<Flags> flags_){//Go by
 		return;
 	}
 	std::cout<<"\tMaking SC Efficiency Histograms\n";
-	std::vector<long> space_dims(3);
-	space_dims[2] = std::distance(std::begin(_species_),std::end(_species_));
-	space_dims[1] = std::distance(std::begin(_sector_),std::end(_sector_));
-	space_dims[0] = std::distance(std::begin(_ecuts_),std::end(_ecuts_));
+	std::vector<long> space_dims(4);
+	space_dims[3] = std::distance(std::begin(_species_),std::end(_species_));
+	space_dims[2] = std::distance(std::begin(_sector_),std::end(_sector_));
+	space_dims[1] = std::distance(std::begin(_ecuts_),std::end(_ecuts_));
+	space_dims[0] = std::distance(std::begin(_cut_),std::end(_cut_));//Don't include "no cut"
+	
 
 	TH1F_ptr_1d plot_1d;
 	TH1F_ptr_2d plot_2d;
+	TH1F_ptr_3d plot_3d;
 	char hname[100];
 	CartesianGenerator cart(space_dims);
+	int species_idx = -1;
+	int sec_idx = -1;
+	int pcut_idx = -1;
+	int cut_idx = -1;
 	while(cart.GetNextCombination()){
-		if(_species_[cart[2]]==_ele_){
-			if(fun::ecut_perform(_ecuts_[cart[0]],flags_)){
-				//std::cout<<"species: " <<_species_[cart[2]] <<" sector: " <<_sector_[cart[1]] <<" ecut: " <<_ecuts_[cart[0]] <<" => idx: " <<_SC_Eff_hist.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
-				sprintf(hname,"SC_Paddle_Yield_%s_%s_%s",_species_[cart[2]],_sector_[cart[1]],_ecuts_[cart[0]]);
+		species_idx = cart[3];
+		sec_idx = cart[2];
+		pcut_idx = cart[1];
+		cut_idx = cart[0];
+		if(_species_[species_idx]==_ele_){
+			if(fun::ecut_perform(_ecuts_[pcut_idx],flags_) && ((_ecuts_[pcut_idx]==_none_ && _cut_[cut_idx]==_no_cut_) || ((_ecuts_[pcut_idx]!=_none_ && _cut_[cut_idx]!=_no_cut_)))){
+				sprintf(hname,"SC_Paddle_Yield_%s_%s_%s_%s",_species_[species_idx],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
+				//std::cout<<"hist name: " <<hname <<" |for species: " <<_species_[species_idx] <<" sector: " <<_sector_[sec_idx] <<" ecut: " <<_ecuts_[pcut_idx] <<" cut: " <<_cut_[cut_idx] <<" => idx: " <<_SC_Eff_hist.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 				plot_1d.push_back(new TH1F(hname,hname,_sc_eff_xbin_,_sc_eff_xmin_,_sc_eff_xmax_));
 			}
-		}else if(cart[0]< std::distance(std::begin(_hcuts_), std::end(_hcuts_))){
-			if(fun::hcut_perform(_species_[cart[2]],_hcuts_[cart[0]],flags_)){
-				//std::cout<<"species: " <<_species_[cart[2]] <<" sector: " <<_sector_[cart[1]] <<" hcut: " <<_hcuts_[cart[0]] <<" => idx: " <<_SC_Eff_hist.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
-				sprintf(hname,"SC_Paddle_Yield_%s_%s_%s",_species_[cart[2]],_sector_[cart[1]],_hcuts_[cart[0]]);
+		}else if(pcut_idx< std::distance(std::begin(_hcuts_), std::end(_hcuts_)) && ((_hcuts_[pcut_idx]==_none_ && _cut_[cut_idx]==_no_cut_) || ((_hcuts_[pcut_idx]!=_none_ && _cut_[cut_idx]!=_no_cut_)))){
+			if(fun::hcut_perform(_species_[species_idx],_hcuts_[pcut_idx],flags_)){
+				sprintf(hname,"SC_Paddle_Yield_%s_%s_%s_%s",_species_[species_idx],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
+				//std::cout<<"hist name: " <<hname <<" |for species: " <<_species_[species_idx] <<" sector: " <<_sector_[sec_idx] <<" hcut: " <<_hcuts_[pcut_idx] <<" cut: " <<_cut_[cut_idx] <<" => idx: " <<_SC_Eff_hist.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 				plot_1d.push_back(new TH1F(hname,hname,_sc_eff_xbin_,_sc_eff_xmin_,_sc_eff_xmax_));
 			}
 		}
-		if(cart[0]==space_dims[0]-1){
+		if(cut_idx==space_dims[0]-1){
 			if(plot_1d.size()>0){
 				plot_2d.push_back(plot_1d);
 				plot_1d.clear();
 			}
-			if(cart[1]==space_dims[1]-1){
+			if(pcut_idx==space_dims[1]-1){
 				if(plot_2d.size()>0){
-					_SC_Eff_hist.push_back(plot_2d);
+					plot_3d.push_back(plot_2d);
 					plot_2d.clear();
+				}
+				if(sec_idx==space_dims[2]-1){
+					if(plot_3d.size()>0){
+						_SC_Eff_hist.push_back(plot_3d);
+						plot_3d.clear();
+					}
 				}
 			}
 		}
 	}
 }
 
-std::vector<int> Histogram::SC_Eff_idx(const char * species_, const char * sector_, const char * pcut_, std::shared_ptr<Flags> flags_){
+std::vector<int> Histogram::SC_Eff_idx(const char * species_, const char * sector_, const char * pcut_, const char* cut_, std::shared_ptr<Flags> flags_){
 	std::vector<int> idx;
 	if(!flags_->Flags::Plot_SC_Eff()){
+		idx.push_back(-1);
 		idx.push_back(-1);
 		idx.push_back(-1);
 		idx.push_back(-1);
@@ -3933,7 +3951,7 @@ std::vector<int> Histogram::SC_Eff_idx(const char * species_, const char * secto
 	}
 	idx.push_back(fun::species_idx(species_));
 	idx.push_back(fun::sector_idx(sector_));
-	if(fun::pcut_perform(species_,pcut_,flags_)){
+	if(fun::pcut_perform(species_,pcut_,flags_) && ((pcut_==_none_ && cut_==_no_cut_)||(pcut_!=_none_ && cut_!=_no_cut_))){
 		if(species_==_ele_){
 			idx.push_back(fun::ecut_idx(pcut_)+fun::ecut_offset(pcut_,flags_));
 		}else{
@@ -3942,21 +3960,30 @@ std::vector<int> Histogram::SC_Eff_idx(const char * species_, const char * secto
 	}else{
 		idx.push_back(-1);
 	}
+	if(pcut_==_none_){
+		idx.push_back(0);
+	}else{
+		idx.push_back(fun::cut_idx(cut_));
+	}
+	
 	//std::cout<<"Looking for index of " <<species_ <<" " <<sector_ <<" " <<pcut_ <<" => " <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
 	return idx;
 }
-void Histogram::SC_Eff_Fill(int sc_pd_, float weight_, const char* species_, const char* pcut_, const char * sector_, std::shared_ptr<Flags> flags_){
+void Histogram::SC_Eff_Fill(int sc_pd_, float weight_, const char* species_, const char* pcut_, const char* cut_, const char * sector_, std::shared_ptr<Flags> flags_){
 	if(!flags_->Flags::Plot_SC_Eff()){
 		return;
 	}
-	std::vector<int> idx=SC_Eff_idx(species_,sector_,pcut_,flags_);
+	//std::cout<<"Filling for " <<species_ <<" " <<sector_ <<" " <<pcut_ <<" " <<cut_ <<"\n";
+	std::vector<int> idx=SC_Eff_idx(species_,sector_,pcut_,cut_,flags_);
+	//fun::print_vector_idx(idx);
 	if(Histogram::OK_Idx(idx)){
-		_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->Fill(sc_pd_,weight_);
+		_SC_Eff_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Fill(sc_pd_,weight_);
 	}
 	idx.clear();
-	idx=SC_Eff_idx(species_,_sec_all_,pcut_,flags_);
+	idx=SC_Eff_idx(species_,_sec_all_,pcut_,cut_,flags_);
+	//fun::print_vector_idx(idx);
 	if(Histogram::OK_Idx(idx)){
-		_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->Fill(sc_pd_,weight_);
+		_SC_Eff_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Fill(sc_pd_,weight_);
 	}
 }
 void Histogram::SC_Eff_Write(std::shared_ptr<Flags> flags_){
@@ -3964,35 +3991,46 @@ void Histogram::SC_Eff_Write(std::shared_ptr<Flags> flags_){
 		return;
 	}
 	std::cout<<"Writing SC Efficiency Histograms\n";
-	std::vector<long> space_dims(3);
-	space_dims[2] = std::distance(std::begin(_species_),std::end(_species_));
-	space_dims[1] = std::distance(std::begin(_sector_),std::end(_sector_));
-	space_dims[0] = std::distance(std::begin(_ecuts_),std::end(_ecuts_));
+	std::vector<long> space_dims(4);
+	space_dims[3] = std::distance(std::begin(_species_),std::end(_species_));
+	space_dims[2] = std::distance(std::begin(_sector_),std::end(_sector_));
+	space_dims[1] = std::distance(std::begin(_ecuts_),std::end(_ecuts_));
+	space_dims[0] = std::distance(std::begin(_cut_),std::end(_cut_))-1;//Don't include "no cut";
 	TDirectory* Dir_SC = _RootOutputFile->mkdir("SC_Eff");
-	TDirectory* Dir_SC_sub[space_dims[2]][space_dims[0]+1];
+	TDirectory* Dir_SC_sub[space_dims[3]][space_dims[2]+1][space_dims[1]+1];
 	CartesianGenerator cart(space_dims);
 	char dirname[100];
 	std::vector<int> idx; 
-	for(int i=0; i<space_dims[2]; i++){
+	for(int i=0; i<space_dims[3]; i++){//species
 		sprintf(dirname,"SC_Eff_%s",_species_[i]);
-		Dir_SC_sub[i][0] = Dir_SC->mkdir(dirname);
-		for(int j=0; j<space_dims[1]; j++){
+		Dir_SC_sub[i][0][0] = Dir_SC->mkdir(dirname);
+		for(int j=0; j<space_dims[2]; j++){//Sector
 			sprintf(dirname,"SC_Eff_%s_%s",_species_[i],_sector_[j]);
-			Dir_SC_sub[i][j+1] = Dir_SC_sub[i][0]->mkdir(dirname);
+			Dir_SC_sub[i][j+1][0] = Dir_SC_sub[i][0][0]->mkdir(dirname);
+			for(int k=0; k<space_dims[1]; k++){//Pcut
+				if(_species_[i]==_ele_ && fun::ecut_perform(_ecuts_[k],flags_)){
+					sprintf(dirname,"SC_Eff_%s_%s_%s",_species_[i],_sector_[j],_ecuts_[k]);
+					Dir_SC_sub[i][j+1][k+1] = Dir_SC_sub[i][j+1][0]->mkdir(dirname);
+				}else if((k < std::distance(std::begin(_hcuts_),std::end(_hcuts_))) && fun::hcut_perform(_species_[i],_hcuts_[k],flags_)){
+					sprintf(dirname,"SC_Eff_%s_%s_%s",_species_[i],_sector_[j],_hcuts_[k]);
+					Dir_SC_sub[i][j+1][k+1] = Dir_SC_sub[i][j+1][0]->mkdir(dirname);
+				}
+			}
 		}
 	}
 	while(cart.GetNextCombination()){
-		if(_species_[cart[2]]==_ele_){
-			idx = SC_Eff_idx(_species_[cart[2]],_sector_[cart[1]],_ecuts_[cart[0]],flags_);
+		if(_species_[cart[3]]==_ele_){
+			idx = SC_Eff_idx(_species_[cart[3]],_sector_[cart[2]],_ecuts_[cart[1]],_cut_[cart[0]],flags_);
 		}else{
-			idx = SC_Eff_idx(_species_[cart[2]],_sector_[cart[1]],_hcuts_[cart[0]],flags_);
+			idx = SC_Eff_idx(_species_[cart[3]],_sector_[cart[2]],_hcuts_[cart[1]],_cut_[cart[0]],flags_);
 		}
 		if(Histogram::OK_Idx(idx)){
-			Dir_SC_sub[cart[2]][cart[1]+1]->cd();
-			_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->SetXTitle("SC Paddle");
-			_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->SetYTitle("Yield");
-			_SC_Eff_hist[idx[0]][idx[1]][idx[2]]->Write();
+			Dir_SC_sub[cart[3]][cart[2]+1][cart[1]+1]->cd();
+			_SC_Eff_hist[idx[0]][idx[1]][idx[2]][idx[3]]->SetXTitle("SC Paddle");
+			_SC_Eff_hist[idx[0]][idx[1]][idx[2]][idx[3]]->SetYTitle("Yield");
+			_SC_Eff_hist[idx[0]][idx[1]][idx[2]][idx[3]]->Write();
 		}
+		idx.clear();
 	} 
 }
 //*-------------------------------End SC Eff Plot------------------------------*

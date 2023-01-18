@@ -91,6 +91,7 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 			_sanity_pass[0] = true;
 			_dt_pass[0] = true;
 			_fid_pass[0] = true;
+			_vertex_pass = true;
 			//_beta_pass[0] = true;
 			_id_pass[0] = true;
 		}else{
@@ -99,10 +100,11 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_sf_pass = pid::sf(idx_,data_,flags_);
 				_min_ec_pass = pid::min_ec(idx_,data_,flags_);
 				_cc_pass = pid::min_cc(idx_,data_,flags_);
-				_sanity_pass[0] = pid::sanity_ele(idx_,data_,flags_);
+				_vertex_pass = pid::vertex_e(idx_,data_,flags_);
 				//_dt_pass[0] = pid::delta_t_ele(idx_,data_,flags_);//Maybe implement later
 				_fid_pass[0] = pid::fid_ele(idx_,data_,flags_);
 				//_beta_pass[0] = pid::
+				_sc_eff_pass[0] = pid::sc_eff(0, idx_, data_, flags_);
 				_id_pass[0] = pid::id_bank(idx_,data_,flags_,_ele_);
 			}
 		}
@@ -112,12 +114,14 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_sanity_pass[1] = true;
 				_dt_pass[1] = true;
 				_fid_pass[1] = true;
+				_sc_eff_pass[1] = true;
 				_id_pass[1] = true;
 			}else{
 				_sanity_pass[1] = pid::sanity_pro(idx_,data_,flags_);
 				if(_sanity_pass[1]){
 					_dt_pass[1] = pid::delta_t_pro(idx_,data_,flags_);
 					_fid_pass[1] = pid::fid_pro(idx_,data_,flags_);
+					_sc_eff_pass[1] = pid::sc_eff(1, idx_, data_, flags_);
 				}
 				_id_pass[1] = pid::id_bank(idx_,data_,flags_,_pro_);
 			}
@@ -126,11 +130,13 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_dt_pass[2] = true;
 				_fid_pass[2] = true;
 				_id_pass[2] = true;
+				_sc_eff_pass[2] = true;
 			}else{
 				_sanity_pass[2] = pid::sanity_pip(idx_,data_,flags_);
 				if(_sanity_pass[2]){
 					_dt_pass[2] = pid::delta_t_pip(idx_,data_,flags_);
 					_fid_pass[2] = pid::fid_pip(idx_,data_,flags_);
+					_sc_eff_pass[2] = pid::sc_eff(2, idx_, data_, flags_);
 				}
 				_id_pass[2] = pid::id_bank(idx_,data_,flags_,_pip_);
 			}
@@ -140,11 +146,13 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_dt_pass[3] = true;
 				_fid_pass[3] = true;
 				_id_pass[3] = true;
+				_sc_eff_pass[0] = true;
 			}else{
 				_sanity_pass[3] = pid::sanity_pim(idx_,data_,flags_);
 				if(_sanity_pass[3]){
 					_dt_pass[3] = pid::delta_t_pim(idx_,data_,flags_);
 					_fid_pass[3] = pid::fid_pim(idx_,data_,flags_);
+					_sc_eff_pass[3] = pid::sc_eff(3, idx_, data_, flags_);
 				}
 				_id_pass[3] = pid::id_bank(idx_,data_,flags_,_pim_);
 			}
@@ -175,6 +183,12 @@ bool Particle::Pass_id(int i){
 }
 bool Particle::Pass_pid(int i){
 	return _pid[i];
+}
+bool Particle::Pass_vertex(){
+	return _vertex_pass;
+}
+bool Particle::Pass_SC_Eff(int i){
+	return _sc_eff_pass[i];
 }
 bool Particle::Corr_p(){
 	return _p_corr; 

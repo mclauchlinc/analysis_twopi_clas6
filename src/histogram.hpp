@@ -286,7 +286,7 @@ protected:
 	TH2F_ptr_5d _Kinematic_Eff1_hist;
 
 	//SC Histograms
-	TH1F_ptr_3d _SC_Eff_hist;
+	TH1F_ptr_4d _SC_Eff_hist;
 
 	//MM Histograms
 	TH1F_ptr_5d _MM_hist;
@@ -477,8 +477,8 @@ public:
 	//*-------------------------------End Kinematic Efficiency Plot----------------------------*
 	//*-------------------------------Start SC Eff Plot------------------------------*
 	void SC_Eff_Make(std::shared_ptr<Flags> flags_);
-	std::vector<int> SC_Eff_idx(const char * species_, const char * sector_, const char * pcut_, std::shared_ptr<Flags> flags_);
-	void SC_Eff_Fill(int sc_pd_, float weight_, const char* species_, const char* pcut_, const char * sector_, std::shared_ptr<Flags> flags_);
+	std::vector<int> SC_Eff_idx(const char * species_, const char * sector_, const char * pcut_, const char* cut_, std::shared_ptr<Flags> flags_);
+	void SC_Eff_Fill(int sc_pd_, float weight_, const char* species_, const char* pcut_, const char* cut_, const char * sector_, std::shared_ptr<Flags> flags_);
 	void SC_Eff_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End SC Eff Plot------------------------------*
 	//*-------------------------------Start Friend Plot----------------------------*

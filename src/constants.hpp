@@ -140,6 +140,7 @@ static const  char * _delta_cut_ = "delta";
 static const  char * _sf_cut_ = "sf";
 static const  char * _cc_cut_ = "min_cc";
 static const  char * _ec_cut_ = "min_ec";
+static const  char * _sc_eff_cut_ = "sc_eff";
 static const  char * _vertex_cut_ = "vertex";
 static const  char * _beta_cut_ = "beta";
 static const  char * _id_cut_ = "id";
@@ -187,8 +188,8 @@ static const  char * _false_ = "false";
 static const  char * _truth_[] = {_false_,_true_};
 
 //Parsing Out PID Cuts
-static const  char* _ecuts_[] = {_none_,_sanity_, _fid_cut_, _sf_cut_, _cc_cut_, _ec_cut_, _vertex_cut_,_id_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
-static const  char* _hcuts_[] = {_none_,_sanity_, _fid_cut_, _delta_cut_,_id_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
+static const  char* _ecuts_[] = {_none_,_sanity_, _fid_cut_, _sf_cut_, _cc_cut_, _ec_cut_, _sc_eff_cut_, _vertex_cut_,_id_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
+static const  char* _hcuts_[] = {_none_,_sanity_, _fid_cut_, _delta_cut_,_sc_eff_cut_,_id_cut_,_pid_,_event_};//Be sure to add statements for flags if modified
 static const  char* _top_[] = {_mpro_,_mpip_,_mpim_,_mzero_,_mall_,_mnone_};
 static const  char* _cut_[] = {_cut_applied_,_anti_cut_,_no_cut_};
 static const  char* _species_[] = {_ele_,_pro_,_pip_,_pim_};

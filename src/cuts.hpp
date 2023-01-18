@@ -502,6 +502,13 @@ namespace cuts{
 	bool h_sanity(char* species_, int q_, int dc_, int sc_, int stat_);
 	//Vertex Cut
 	bool vertex_cut(float vz_, int run_);
+	//Efficiency Cuts
+	//These all need to be built up 1/18/23
+	bool sc_eff_ele_cut(float p_, float theta_, int run_);
+	bool sc_eff_pro_cut(float p_, float theta_, int run_);
+	bool sc_eff_pip_cut(float p_, float theta_, int run_);
+	bool sc_eff_pim_cut(float p_, float theta_, int run_);
+	bool sc_eff_cut(float p_, float theta_, int run_, int par_);
 
 
 };
