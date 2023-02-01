@@ -153,6 +153,7 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	std::cout<<"Calculating Radiative Effects\n";
 	_rad_corr = _thrown_7d_no_rad->Projection(1,0);//First make it the projections
 	_rad_corr->Divide(_thrown_7d->Projection(1,0));//Then divide by the according projection
+	_rad_corr->Scale(fun::nSparseIntegral(_thrown_7d)/fun::nSparseIntegral(_thrown_7d_no_rad));
 	/*
 	std::vector<int> rad_corr1;
 	for(int i=0; i<_n_bins_7d[0]; i++){
@@ -164,7 +165,7 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	}*/
 	std::cout<<"Making Directory for W Q2 distributions\n";
 	TDirectory* dir_W = _RootOutputFile->mkdir("W Q2 Distributions");
-	dir_W->cd();
+	dir_W->cd();	
 	TH2D* exp_wq2 = _exp_data_7d->Projection(1,0);
 	sprintf(hname,"Exp_Data_W_vs_Q2");
 	exp_wq2->SetNameTitle(hname,hname);
@@ -177,6 +178,12 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	sim_wq2->SetXTitle("W (GeV)");
 	sim_wq2->SetYTitle("Q2 (GeV^2)");
 	sim_wq2->Write();
+	TH2D* thr_wq2 = _thrown_7d->Projection(1,0);
+	sprintf(hname,"Thrown_Data_W_vs_Q2");
+	thr_wq2->SetNameTitle(hname,hname);
+	thr_wq2->SetXTitle("W (GeV)");
+	thr_wq2->SetYTitle("Q2 (GeV^2)");
+	thr_wq2->Write();
 	if(flags_.Flags::Helicity()){
 		TH2D* exp_pos_wq2 = _exp_data_7d_pos->Projection(1,0);
 		sprintf(hname,"Exp_Data_Pos_W_vs_Q2");
