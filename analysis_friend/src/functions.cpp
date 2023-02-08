@@ -81,3 +81,101 @@ double fun::nSparseIntegral(THnSparseD* nhist_)
    //fIntegralStatus = kValidInt;
    return fIntegral[nhist_->GetNbins()];
 }
+
+
+THnSparseD* fun::Add_THnSparse(THnSparseD* hist1_, THnSparseD* hist2_, int sign_, std::vector<int> num_bins_){
+   long idx = 0;
+   std::vector<long> space_dims;
+   for(int i=0; i<num_bins_.size(); i++){
+      space_dims.push_back(num_bins_[i]);
+   }
+   CartesianGenerator cart(space_dims);
+   int bin[num_bins_.size()];
+   THnSparseD* output = (THnSparseD*)hist1_->Clone();
+   while(cart.GetNextCombination()){
+      for(int j = 0; j<num_bins_.size(); j++){
+         bin[j] = cart[j];
+      }
+      output->AddBinContent(bin,hist2_->GetBinContent(bin)*sign_);
+   }
+   return output; 
+}
+
+THnSparseD* fun::Localized_Holes(THnSparseD* exp_hist_, THnSparseD* sim_hist_, THnSparseD* sim_hole_hist_, std::vector<int> num_bins_){
+   long idx = 0;
+   std::vector<long> space_dims;
+   for(int i=0; i<num_bins_.size(); i++){
+      space_dims.push_back(num_bins_[i]);
+   }
+   CartesianGenerator cart(space_dims);
+   int bin[num_bins_.size()];
+   int bin2[num_bins_.size()];
+   THnSparseD* output = (THnSparseD*)sim_hole_hist_->Clone();
+   double top = NAN; 
+   double bot = NAN;
+   double prev_val = NAN;
+   bool look_further = true;
+   int dist = 0; 
+   std::vector<std::vector<int>> surr_bins; 
+   while(cart.GetNextCombination()){
+      for(int j = 0; j<num_bins_.size(); j++){
+         bin[j] = cart[j];
+      }
+      while(look_further){
+         dist++;
+         surr_bins = fun::Surrounding_Bin(bin,dist,num_bins_);
+         for(int i=0; i<surr_bins.size(); i++){
+            for(int k=0; k<num_bins_.size(); k++){
+               bin2[k] = surr_bins[i][k];
+            }
+            top += exp_hist_->GetBinContent(bin2);
+            bot += sim_hist_->GetBinContent(bin2);
+         }
+         if(top!=0 && bot!=0){
+            look_further=false;
+            prev_val = sim_hole_hist_->GetBinContent(bin);
+            output->SetBinContent(bin,(top/bot)*prev_val);
+         }
+         surr_bins.clear();
+      }
+   }
+   return output; 
+}
+
+std::vector<std::vector<int>> fun::Surrounding_Bin(int* bin_, int dist_, std::vector<int> num_bins_){
+   std::vector<std::vector<int>> surr_bin;
+   std::vector<int> surr_bin1; 
+   std::vector<long> space_dims;
+   for(int i=0; i<num_bins_.size(); i++){
+      space_dims.push_back(1+2*dist_);
+   }
+   CartesianGenerator cart(space_dims);
+   int bin[num_bins_.size()];
+   int bin2[num_bins_.size()];
+   //int not_the_bin = 0;
+   int inside_dist_range = 0;
+   bool in_range = true;
+   while(cart.GetNextCombination()){
+      for(int j=0; j<dist_; j++){
+         //not_the_bin = 0;
+         inside_dist_range = 0;
+         for(int i= 0; i<num_bins_.size(); i++){
+            surr_bin1.push_back(bin_[i] + (-(j+1)+cart[i]));
+            //if((-(j+1)+cart[i])==0){//Not counting the bin itself
+            //   not_the_bin++;
+            //}
+            if(abs(-(j+1)+cart[i])<(j+1)){//Eliminate double counting from previous bouts
+               inside_dist_range++;
+            }
+            if(surr_bin1[i] >= num_bins_[i]){//Stay within the bins that are actually accessible
+               in_range &=false;
+            }         
+         }
+         if(inside_dist_range<num_bins_.size() && in_range){//&&not_the_bin<num_bins_.size() 
+            surr_bin.push_back(surr_bin1);
+            surr_bin1.clear();
+         }
+      }
+   }
+   return surr_bin;
+}

@@ -69,16 +69,19 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 			std::cout<<"Getting Exp THnSparse Pos" <<hname <<"\n";
 			_exp_data_7d_pos = (THnSparseD *)exp_tree_->Get(hname);
 			_empty_7d_pos = (THnSparseD *)empty_tree_->Get(hname);
+			std::cout<<"\tPositive Helicity Yields| \n\t\tfilled: " <<fun::nSparseIntegral(_exp_data_7d_pos) <<"\n\t\tempty: " <<fun::nSparseIntegral(_empty_7d_pos) <<"\n";
 			sprintf(hname,"Scaled_%s_%s_neg",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);//_top_[flags_.Flags::Top_idx()]);
 			std::cout<<"Getting Exp THnSparse Neg" <<hname <<"\n";
 			_exp_data_7d_neg = (THnSparseD *)exp_tree_->Get(hname);
 			_empty_7d_neg = (THnSparseD *)empty_tree_->Get(hname);
+			std::cout<<"\tNegative Helicity Yields| \n\t\tfilled: " <<fun::nSparseIntegral(_exp_data_7d_neg) <<"\n\t\tempty: " <<fun::nSparseIntegral(_empty_7d_neg) <<"\n";
 			std::cout<<"Getting full Exp THnSparse " <<hname <<"\n";
 			sprintf(hname,"Scaled_%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);//_top_[flags_.Flags::Top_idx()]);
 			_exp_data_7d = (THnSparseD *)exp_tree_->Get(hname);//(THnSparseD *)_exp_data_7d_pos->Clone();
 			//_exp_data_7d->Add(_exp_data_7d_neg);//Histogram::Add_Sparse(_exp_data_7d_pos,_exp_data_7d_neg);
 			_empty_7d = (THnSparseD *)empty_tree_->Get(hname);//(THnSparseD *)_empty_7d_pos->Clone();
 			//_empty_7d->Add(_empty_7d_neg);//Histogram::Add_Sparse(_empty_7d_pos,_empty_7d_neg);
+			std::cout<<"\tTotal Helicity Yields| \n\t\tfilled: " <<fun::nSparseIntegral(_exp_data_7d) <<"\n\t\tempty: " <<fun::nSparseIntegral(_empty_7d) <<"\n";
 		}else{
 			sprintf(hname,"Scaled_%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);//_top_[flags_.Flags::Top_idx()]);
 			std::cout<<"Getting Exp THnSparse " <<hname <<"\n";
@@ -144,6 +147,12 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	_exp_corr_7d->Divide(_acceptance_7d);
 	_empty_corr_7d=(THnSparseD*)_empty_7d->Clone();
 	_empty_corr_7d->Divide(_acceptance_7d);
+	if(flags_.Flags::Helicity()){
+		_empty_corr_7d_pos=(THnSparseD*)_empty_7d_pos->Clone();
+		_empty_corr_7d_pos->Divide(_acceptance_7d);
+		_empty_corr_7d_neg=(THnSparseD*)_empty_7d_neg->Clone();
+		_empty_corr_7d_neg->Divide(_acceptance_7d);
+	}
 	std::cout<<"Integral of empty_7d: " <<fun::nSparseIntegral(_empty_7d) <<"\n";
 	std::cout<<"Integral of empty_corr_7d: " <<fun::nSparseIntegral(_empty_corr_7d) <<"\n";
 	//std::cout<<"\nexp_corr integral: " <<fun::nSparseIntegral(_exp_data_7d);
@@ -154,6 +163,28 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	_rad_corr = _thrown_7d_no_rad->Projection(1,0);//First make it the projections
 	_rad_corr->Divide(_thrown_7d->Projection(1,0));//Then divide by the according projection
 	_rad_corr->Scale(fun::nSparseIntegral(_thrown_7d)/fun::nSparseIntegral(_thrown_7d_no_rad));
+	std::cout<<"Calculating Simulated 7d Holes\n";
+	_sim_holes_7d = fun::Add_THnSparse(_thrown_7d,_sim_corr_7d,-1,_n_bins_7d);
+	_exp_holes_7d = (THnSparseD*)_sim_holes_7d->Clone();
+	_exp_holes_7d->Scale(fun::nSparseIntegral(_exp_data_7d)/fun::nSparseIntegral(_sim_data_7d));
+	if(flags_.Flags::Helicity()){
+		_exp_holes_7d_pos = (THnSparseD*)_sim_holes_7d->Clone();
+		_exp_holes_7d_pos->Scale(fun::nSparseIntegral(_exp_data_7d_pos)/fun::nSparseIntegral(_sim_data_7d));
+		_exp_holes_7d_neg = (THnSparseD*)_sim_holes_7d->Clone();
+		_exp_holes_7d_neg->Scale(fun::nSparseIntegral(_exp_data_7d_neg)/fun::nSparseIntegral(_sim_data_7d));
+	}
+	//std::cout<<"Positive Scale Factor 7d: " <<fun::nSparseIntegral(_exp_data_7d_pos)/fun::nSparseIntegral(_sim_data_7d);
+	
+	_exp_corr_sub_7d = fun::Add_THnSparse(_exp_corr_7d,_empty_corr_7d,flags_.Flags::Qr(),_n_bins_7d);
+	if(flags_.Flags::Helicity()){
+		_exp_corr_sub_7d_pos = fun::Add_THnSparse(_exp_corr_7d_pos,_empty_corr_7d_pos,flags_.Flags::Qr()*-1,_n_bins_7d);
+		_exp_corr_sub_7d_neg = fun::Add_THnSparse(_exp_corr_7d_neg,_empty_corr_7d_neg,flags_.Flags::Qr()*-1,_n_bins_7d);
+	}
+	_exp_corr_sub_holes_7d = fun::Add_THnSparse(_exp_corr_sub_7d,_exp_holes_7d,1,_n_bins_7d);
+	if(flags_.Flags::Helicity()){
+		_exp_corr_sub_holes_7d_pos = fun::Add_THnSparse(_exp_corr_sub_7d_pos,_exp_holes_7d_pos,1,_n_bins_7d);
+		_exp_corr_sub_holes_7d_neg = fun::Add_THnSparse(_exp_corr_sub_7d_neg,_exp_holes_7d_neg,1,_n_bins_7d);
+	}
 	/*
 	std::vector<int> rad_corr1;
 	for(int i=0; i<_n_bins_7d[0]; i++){
@@ -239,6 +270,31 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	_rad_corr->SetXTitle("W (GeV)");
 	_rad_corr->SetYTitle("Q2 (GeV^2)");
 	_rad_corr->Write();
+	sprintf(hname,"Hole_Fill_W_vs_Q2");
+	TH2D* exp_hole_wq2= _exp_holes_7d->Projection(1,0);
+	exp_hole_wq2->SetNameTitle(hname,hname);
+	exp_hole_wq2->SetXTitle("W (GeV)");
+	exp_hole_wq2->SetYTitle("Q2 (GeV^2)");
+	exp_hole_wq2->Write();
+	sprintf(hname,"Hole_Fill_Pos_W_vs_Q2");
+	TH2D* exp_hole_pos_wq2= _exp_holes_7d_pos->Projection(1,0);
+	exp_hole_pos_wq2->SetNameTitle(hname,hname);
+	exp_hole_pos_wq2->SetXTitle("W (GeV)");
+	exp_hole_pos_wq2->SetYTitle("Q2 (GeV^2)");
+	exp_hole_pos_wq2->Write();
+	sprintf(hname,"Hole_Fill_Neg_W_vs_Q2");
+	TH2D* exp_hole_neg_wq2= _exp_holes_7d_neg->Projection(1,0);
+	exp_hole_neg_wq2->SetNameTitle(hname,hname);
+	exp_hole_neg_wq2->SetXTitle("W (GeV)");
+	exp_hole_neg_wq2->SetYTitle("Q2 (GeV^2)");
+	exp_hole_neg_wq2->Write();
+	/*sprintf(hname,"Hole_Fill_Frac_W_vs_Q2");
+	THnSparseD* exp_hole_frac_7d = 
+	TH2D* exp_hole_wq2= _exp_holes_7d->Projection(1,0);
+	exp_hole_wq2->SetNameTitle(hname,hname);
+	exp_hole_wq2->SetXTitle("W (GeV)");
+	exp_hole_wq2->SetYTitle("Q2 (GeV^2)");
+	exp_hole_wq2->Write();*/
 }
 
 

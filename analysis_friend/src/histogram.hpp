@@ -135,15 +135,27 @@ protected:
 	double_2d _scale_factor_5d;//5d scale factor of simulation to experimental yields {W,Q2}
 	double _scale_factor_7d;//7d scale factor of simulation to experimental yields 
 	THnSparseD *_exp_holes_7d;//Exp holes
+	THnSparseD *_exp_holes_7d_pos;//Exp holes
+	THnSparseD *_exp_holes_7d_neg;//Exp holes
 	THnSparseD *_sim_holes_7d;//Sim Holes
 	THnSparseD *_exp_corr_7d;//Exp accept corrected
+	THnSparseD *_exp_corr_7d_pos;//Exp accept corrected
+	THnSparseD *_exp_corr_7d_neg;//Exp accept corrected
 	THnSparseD *_empty_corr_7d;//Exp accept corrected
+	THnSparseD *_empty_corr_7d_pos;//Exp accept corrected
+	THnSparseD *_empty_corr_7d_neg;//Exp accept corrected
 	THnSparseD *_sim_corr_7d;//Sim accept corrected
 	THnSparseD *_cross_section_7d;//Cross Section 
 	Sparse_2d_star _cross_section_5d;//;
 	Sparse_2d_star _acceptance_5d;//;
 	TH2D_3d_star _cross_section_2d;//
 	THnSparseD *_acceptance_7d;
+	THnSparseD * _exp_corr_sub_7d;
+	THnSparseD * _exp_corr_sub_7d_pos;
+	THnSparseD * _exp_corr_sub_7d_neg;
+	THnSparseD * _exp_corr_sub_holes_7d;
+	THnSparseD * _exp_corr_sub_holes_7d_pos;
+	THnSparseD * _exp_corr_sub_holes_7d_neg;
 	TH1D_3d_star _exp_corr_holes_3d; //For single differential {W,Q2,Xij}[Xij bins]
 	TH1D_4d_star _exp_corr_holes_4d; //For Polarization Observables {W,Q2,Xij,Xij_bin}[phi bins]
 	THnSparseD *_acceptance_eff_7d; // Acceptance Efficiency? 
