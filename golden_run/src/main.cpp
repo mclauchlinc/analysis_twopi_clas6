@@ -61,10 +61,10 @@ int main(int argc, char **argv){
 	float max_event_seg = 0.0;
 	float max_q_run = 0.0;
 	float max_event_run = 0.0;
-	float min_q_seg = 9999999999.99;
-	float min_event_seg = 9999999999.99;
-	float min_q_run = 9999999999.99;
-	float min_event_run = 9999999999.99;
+	float min_q_seg = NAN;
+	float min_event_seg = NAN;
+	float min_q_run = NAN;
+	float min_event_run = NAN;
 
 
 	std::cout<<"Begin Charge Extraction\n";

@@ -35,6 +35,8 @@ int _hist_par=0;
 int _other_par=0;
 std::string _file_list;
 
+double q_prev = NAN;
+double q_tot = NAN;
 
 
 
@@ -62,12 +64,19 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 				//curr_file_name = 
 				std::cout<<"\r" <<"\t" <<(100*curr_event/num_events) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
 			}
+			if(data->Branches::q_l()>0){
+				if(data->Branches::q_l()>q_prev && data->Branches::q_l()>0){
+					q_tot+= data->Branches::q_l() - q_prev; 
+				}
+				q_prev = data->Branches::q_l();
+			}
 			//Particle ID, Event Selection, and Histogram Filling
 			auto analysis = std::make_shared<Analysis>(data,hists_, thread_id_, run_num, flags_);
 		}else{
 			//std::cout<<"failed\n";
 		}
 	}
+	std::cout<<"For thread " <<thread_id_ <<" the integrated charge is: " <<q_tot <<"\n";
 }
 
 

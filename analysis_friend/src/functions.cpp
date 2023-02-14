@@ -121,6 +121,7 @@ THnSparseD* fun::Localized_Holes(THnSparseD* exp_hist_, THnSparseD* sim_hist_, T
       for(int j = 0; j<num_bins_.size(); j++){
          bin[j] = cart[j];
       }
+      look_further=true;
       while(look_further){
          dist++;
          surr_bins = fun::Surrounding_Bin(bin,dist,num_bins_);
