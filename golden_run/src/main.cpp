@@ -52,8 +52,8 @@ int main(int argc, char **argv){
 	float sum_q;//Summed Faraday Cup Charge
 	int run_seg;//Segment within Run
 	int run_num;//Run number
-	float sum_q_segment;//Faraday Summed Charge on segment
-	float sum_q_run;//Faraday Summed Charge on run
+	float sum_q_segment = 0.0;//Faraday Summed Charge on segment
+	float sum_q_run = 0.0;//Faraday Summed Charge on run
 	int run_seg_size = 0;//Number events on segment
 	int run_num_size = 0;//Number events on Run
 

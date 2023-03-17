@@ -28,6 +28,9 @@ double nSparseIntegral(THnSparseD* nhist_);
 THnSparseD* Add_THnSparse(THnSparseD* hist1_, THnSparseD* hist2_, int sign_, std::vector<int> num_bins_);
 THnSparseD* Localized_Holes(THnSparseD* exp_hist_, THnSparseD* sim_hist_, THnSparseD* sim_hole_hist_, std::vector<int> num_bins_);
 std::vector<std::vector<int>> Surrounding_Bin(int* bin_, int dist_, std::vector<int> num_bins_);
+THnSparseD* Localized_Holes_5d_for_7d(THnSparseD* exp_hist_, THnSparseD* sim_hist_, THnSparseD* sim_hole_hist_, std::vector<int> num_bins_);
+std::vector<std::vector<int>> Surrounding_Bin_5d_for_7d(int* bin_, int dist_, std::vector<int> num_bins_);
+
 
 };
 

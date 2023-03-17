@@ -4070,14 +4070,14 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 				_W_Friend[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
 				_W_Friend[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
 				if(flags_->Flags::Sim()){
-					sprintf(hname,"Weight_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
-					_Weight_Sum[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-					_Weight_Sum[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					_Weight_Sum[i][j]->Sumw2();//Squared weights for the purpose of error analysis for simulation 
-					sprintf(hname,"Thrown_Weight_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
-					_Weight_Sum_Thrown[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-					_Weight_Sum_Thrown[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					_Weight_Sum_Thrown[i][j]->Sumw2();//Squared weights for the purpose of error analysis for simulation 
+					//sprintf(hname,"Weight_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
+					//_Weight_Sum[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					//_Weight_Sum[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					//_Weight_Sum[i][j]->Sumw2();//Squared weights for the purpose of error analysis for simulation 
+					//sprintf(hname,"Thrown_Weight_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
+					//_Weight_Sum_Thrown[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					//_Weight_Sum_Thrown[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					//_Weight_Sum_Thrown[i][j]->Sumw2();//Squared weights for the purpose of error analysis for simulation 
 				}else if(flags_->Flags::Helicity()){
 					sprintf(hname,"2#pi_off_proton_%s_%s_pos",_var_names_[i],_top_[j]);
 					_Friend1[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
@@ -4246,7 +4246,7 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
 					_W_Thrown[var_]->Fill(x,weight_*plus_weight_);
 					_Thrown[var_]->Fill(x,weight_);
-					_Weight_Sum_Thrown[var_][fun::top_idx(top_)]->Fill(x,weight_*weight_);
+					//_Weight_Sum_Thrown[var_][fun::top_idx(top_)]->Fill(x,weight_*weight_);
 				}else{
 					//std::cout<<"Filling Friend!\n";
 					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
@@ -4262,10 +4262,10 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 					_W_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
 					_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
 					//std::cout<<"Done filling friend\n";
-					if(flags_->Flags::Sim()){
-						std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
-						_Weight_Sum[var_][fun::top_idx(top_)]->Fill(x,weight_*weight_);
-					}
+					//if(flags_->Flags::Sim()){
+					//	std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
+					//	_Weight_Sum[var_][fun::top_idx(top_)]->Fill(x,weight_*weight_);
+					//}
 				}
 				//std::cout<<std::endl <<"Filling Friend with " <<x <<" with weight " <<weight_;
 			}
@@ -4278,27 +4278,28 @@ void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
 		std::cout<<"Writing Friend\n";
 		_SparseFile->cd();
 		for(int i = 0; i < 3; i++){
+			if(flags_->Flags::Sim()){
+				_Thrown[i]->Write();
+				_W_Thrown[i]->Write();
+			}
 			for(int j = 0; j < 5; j++){
 				if(fun::top_perform(_top_[j],flags_)){
 					_Friend[i][j]->Write();
 					_W_Friend[i][j]->Write();
-					if(flags_->Flags::Sim()){
-						_Weight_Sum[i][j]->Write();
-						_Weight_Sum_Thrown[i][j]->Write();
-					}else{
+					//if(flags_->Flags::Sim()){
+						//_Weight_Sum[i][j]->Write();
+						//_Weight_Sum_Thrown[i][j]->Write();
+					//}else{
 						if(flags_->Flags::Helicity()){
 							_Friend1[i][j]->Write();
 							_Friend2[i][j]->Write();
 							_W_Friend1[i][j]->Write();
 							_W_Friend2[i][j]->Write();
 						}
-					}
+					//}
 				}
 			}
-			if(flags_->Flags::Sim()){
-				_Thrown[i]->Write();
-				_W_Thrown[i]->Write();
-			}
+			
 		}
 	}
 }

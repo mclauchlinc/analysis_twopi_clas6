@@ -111,56 +111,81 @@ protected:
 
 
 	//Sparse Histograms
-	THnSparseD *_exp_data_7d_pos;//Experimental reconstruction 7d with postitive helicity
-	THnSparseD *_exp_data_7d_neg;//Experimental reconstruction 7d with negative helicity
-	THnSparseD *_exp_data_7d;//Experimental Reconstruction 7 dimension
-	THnSparseD *_sim_data_7d;//Simulated Reconstruction
-	THnSparseD *_thrown_7d_no_rad;//Simulated thrown with no radiative effects
-	THnSparseD *_sim_weight_sq_7d;//summed square of weights for each 7d bin for simulation
-	THnSparseD *_empty_7d;//Empty Reconstruction
-	THnSparseD *_empty_7d_pos;//Empty Reconstruction positive helicity
-	THnSparseD *_empty_7d_neg;//Empty Reconstruction negative helicity
-	
-	Sparse_2d_star _exp_data_5d;//Exp Recon 5 Dimension {W,Q2}
-	Sparse_2d_star _empty_5d;//Exp Empty Recon 5d {W,Q2}
-	Sparse_2d_star _sim_data_5d;//Sim Recon 5 Dimension {W,Q2}
-	THnSparseD *_thrown_7d;//Thrown Simulation
-	Sparse_2d_star _thrown_5d;//Thrown Sim 5d {W,Q2}
-	Sparse_2d_star _sim_holes_5d;//Sim Recon Holes {W,Q2}
-	Sparse_2d_star _exp_holes_5d;//Exp Recon Holes {W,Q2}
-	Sparse_2d_star _exp_corr_5d;//Exp Acceptance Corrected {W,Q2}
-	Sparse_2d_star _empty_corr_5d;//Exp Acceptance Corrected {W,Q2}
-	Sparse_2d_star _sim_corr_5d;//Sim Recon Acceptance Corrected  {W,Q2}
-	Sparse_2d_star _exp_corr_holes_5d;//Experimental Accept Corrected and Hole Filled {W,Q2}
-	double_2d _scale_factor_5d;//5d scale factor of simulation to experimental yields {W,Q2}
-	double _scale_factor_7d;//7d scale factor of simulation to experimental yields 
-	THnSparseD *_exp_holes_7d;//Exp holes
-	THnSparseD *_exp_holes_7d_pos;//Exp holes
-	THnSparseD *_exp_holes_7d_neg;//Exp holes
-	THnSparseD *_sim_holes_7d;//Sim Holes
-	THnSparseD *_exp_corr_7d;//Exp accept corrected
-	THnSparseD *_exp_corr_7d_pos;//Exp accept corrected
-	THnSparseD *_exp_corr_7d_neg;//Exp accept corrected
-	THnSparseD *_empty_corr_7d;//Exp accept corrected
-	THnSparseD *_empty_corr_7d_pos;//Exp accept corrected
-	THnSparseD *_empty_corr_7d_neg;//Exp accept corrected
-	THnSparseD *_sim_corr_7d;//Sim accept corrected
-	THnSparseD *_cross_section_7d;//Cross Section 
-	Sparse_2d_star _cross_section_5d;//;
-	Sparse_2d_star _acceptance_5d;//;
-	TH2D_3d_star _cross_section_2d;//
-	THnSparseD *_acceptance_7d;
-	THnSparseD * _exp_corr_sub_7d;
-	THnSparseD * _exp_corr_sub_7d_pos;
-	THnSparseD * _exp_corr_sub_7d_neg;
-	THnSparseD * _exp_corr_sub_holes_7d;
-	THnSparseD * _exp_corr_sub_holes_7d_pos;
-	THnSparseD * _exp_corr_sub_holes_7d_neg;
-	TH1D_3d_star _exp_corr_holes_3d; //For single differential {W,Q2,Xij}[Xij bins]
-	TH1D_4d_star _exp_corr_holes_4d; //For Polarization Observables {W,Q2,Xij,Xij_bin}[phi bins]
-	THnSparseD *_acceptance_eff_7d; // Acceptance Efficiency? 
-	THnSparseD *_acceptance_err_7d[2];//Last one is Weighted or not
-	 
+	//Experimental Reconstruction
+		//Target Filled
+			//CC Efficiency Applied
+	THnSparseD *_exp_data_7d;
+	THnSparseD *_exp_data_7d_pos;//Positive Helicity
+	THnSparseD *_exp_data_7d_neg;//Negative Helicity
+	Sparse_2d_star _exp_data_5d;
+	Sparse_2d_star _exp_data_5d_pos;//Positive Helicity
+	Sparse_2d_star _exp_data_5d_neg;//Negative Helicity
+			//Raw Yields
+	//THnSparseD *_exp_data_7d_y;
+	//THnSparseD *_exp_data_7d_pos_y;//Positive Helicity
+	//THnSparseD *_exp_data_7d_neg_y;//Negative Helicity
+	//Sparse_2d_star _exp_data_5d_y;
+	//Sparse_2d_star _exp_data_5d_pos_y;//Positive Helicity
+	//Sparse_2d_star _exp_data_5d_neg_y;//Negative Helicity
+			//Summed CC Efficiencies by bin
+	//THnSparseD *_exp_weight_7d;
+	//THnSparseD *_exp_weight_7d_pos;//Positive Helicity
+	//THnSparseD *_exp_weight_7d_neg;//Negative Helicity
+	//Sparse_2d_star _exp_weight_5d;
+	//Sparse_2d_star _exp_weight_5d_pos;//Positive Helicity
+	//Sparse_2d_star _exp_weight_5d_neg;//Negative Helicity
+		//Target Empty
+			//CC Efficiency Applied
+	THnSparseD *_empty_7d;
+	THnSparseD *_empty_7d_pos;//Positive Helicity
+	THnSparseD *_empty_7d_neg;//Negative Helicity
+	Sparse_2d_star _empty_5d;
+	Sparse_2d_star _empty_5d_pos;//Positive Helicity
+	Sparse_2d_star _empty_5d_neg;//Negative Helicity
+			//Raw Yields
+	//THnSparseD *_empty_7d_y;
+	//THnSparseD *_empty_7d_pos_y;//Positive Helicity
+	//THnSparseD *_empty_7d_neg_y;//Negative Helicity
+	//Sparse_2d_star _empty_5d_y;
+	//Sparse_2d_star _empty_5d_pos_y;//Positive Helicity
+	//Sparse_2d_star _empty_5d_neg_y;//Negative Helicity
+			//Summed CC Efficiencies by bin
+	//THnSparseD *_empty_weight_7d;
+	//THnSparseD *_empty_weight_7d_pos;//Positive Helicity
+	//THnSparseD *_empty_weight_7d_neg;//Negative Helicity
+	//Sparse_2d_star _empty_weight_5d;
+	//Sparse_2d_star _empty_weight_5d_pos;//Positive Helicity
+	//Sparse_2d_star _empty_weight_5d_neg;//Negative Helicity
+	//Simulation
+		//Thrown
+	THnSparseD *_thrown_7d;//Weighted
+	//THnSparseD *_thrown_7d_y;//Unweighted
+	THnSparseD *_thrown_7d_no_rad;//No radiative effects, weighted
+	//THnSparseD *_thrown_weight_7d;//Summed weight per bin
+	Sparse_2d_star _thrown_5d;//Weighted
+	//Sparse_2d_star _thrown_5d_y;//Unweighted
+	Sparse_2d_star _thrown_5d_no_rad;//No radiative effects, weighted
+	//Sparse_2d_star _thrown_weight_5d;//Summed weight per bin
+		//Reconstructed
+	THnSparseD *_sim_data_7d;//Weighted
+	//THnSparseD *_sim_data_7d_y;//Unweighted
+	THnSparseD * _sim_holes_7d;//Simulation Holes
+	//THnSparseD *_sim_weight_7d;//summed weights for each 7d bin for simulation
+	Sparse_2d_star _sim_data_5d;//Weighted
+	//Sparse_2d_star _sim_data_5d_y;//Unweighted
+	//Sparse_2d_star _sim_weight_5d;//summed weights for each 7d bin for simulation
+
+	THnSparseD *_acceptance_7d;//Acceptance
+	Sparse_2d_star _acceptance_5d;//Acceptance
+	THnSparseD * _N;//Experimental Weighted and Corrected Yield
+	THnSparseD * _N_pos;//Experimental Weighted and Corrected Yield
+	THnSparseD * _N_neg;//Experimental Weighted and Corrected Yield
+	Sparse_2d_star _N_5d;//Experimental Weighted and Corrected Yield
+	Sparse_2d_star _N_5d_pos;//Experimental Weighted and Corrected Yield
+	Sparse_2d_star _N_5d_neg;//Experimental Weighted and Corrected Yield
+	THnSparseD * _N_holes;//Experimental Holes
+	THnSparseD * _N_holes_pos;//Experimental Holes
+	THnSparseD * _N_holes_neg;//Experimental Holes
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
 	TH1D* _phi_bin_sizes;//Width of phi bins 
@@ -177,9 +202,6 @@ protected:
 	TH1D_2d_star _acc_rel_error_unweighted;//Distribution of Relative error of the Acceptance unweighted {W,Q2}
 
 	TH2D* _rad_corr;//Radiative Corrections
-
-	//std::vector<std::vector<double>> _rad_corr;//Radiative Correction
-	//std::vector<std::vector<double>> _rad_corr2;//Radiative Correction2
 
 	//Topology Yields
 	double_2d _n_exp_corr;
@@ -224,18 +246,18 @@ public:
 	void Sparse_5to4(Flags flags_);//Making Polarization Histograms
 	void Extract_Bin_Info(Flags flags_);//Extract binning information for 7 and 5d histograms
 	void Skeleton_5D(Flags flags_);//Create Empty 5D THnSparse to fill
-	void Calc_Acceptance(Flags flags_);//Calculate acceptance from 5d histograms
-	void Calc_Holes_Sim(Flags flags_);//Calculate Estimated Holes in Simulation
-	void Calc_Holes_Exp(Flags flags_);//Calculate Estimated Holes in Experiment
-	void Calc_Holes(Flags flags_);//Calculate Estimated Holes for Sim and Exp
-	void Calc_Cross_Section(Flags flags_);//Calculate Cross Section
-	void Make_Single_Diff(Flags flags_);//Make Single Differential Cross Section Histograms
-	void Make_Polarization(Flags flags_);//Make Histograms to extract polarization observables
+	//void Calc_Acceptance(Flags flags_);//Calculate acceptance from 5d histograms
+	//void Calc_Holes_Sim(Flags flags_);//Calculate Estimated Holes in Simulation
+	//void Calc_Holes_Exp(Flags flags_);//Calculate Estimated Holes in Experiment
+	//void Calc_Holes(Flags flags_);//Calculate Estimated Holes for Sim and Exp
+	//void Calc_Cross_Section(Flags flags_);//Calculate Cross Section
+	//void Make_Single_Diff(Flags flags_);//Make Single Differential Cross Section Histograms
+	//void Make_Polarization(Flags flags_);//Make Histograms to extract polarization observables
 	void Beam_Spin(Flags flags_);
-	void Make_Integrated(Flags flags_);//Make Integrated Cross Section Histograms
-	void Make_WQ2(Flags flags_);//Make WQ2 histograms to show binnning
+	//void Make_Integrated(Flags flags_);//Make Integrated Cross Section Histograms
+	//void Make_WQ2(Flags flags_);//Make WQ2 histograms to show binnning
 	//void Make_Acceptance_Statistics(Flags flags_);//Make Histograms for determining proper Acceptance Statistics //Cannot make this here in the form the data has already been placed. Need on rootfile level for sim recon
-	void Make_Acceptance(Flags flags_);
+	//void Make_Acceptance(Flags flags_);
 	//void Write_5d_Yield();
 	//void Write_5d_Cross_Section();
 	//void Write_5d_Holes();
@@ -243,13 +265,13 @@ public:
 	//void Write_Single_Diff();
 	//void Write_Polarization();
 	//void Write_Integrated();
-	void Convert_to_Cross(Flags flags_);
-	void Convert_Single_Diff_to_Cross(Flags flags_);
-	void Convert_Polarization_to_Cross(Flags flags_);
-	void Write_WQ2(Flags flags_);
-	void Write_Acceptance(Flags flags_);
-	void Write_Single_Diff(Flags flags_);
-	void Write_Polarization(Flags flags_);
+	//void Convert_to_Cross(Flags flags_);
+	//void Convert_Single_Diff_to_Cross(Flags flags_);
+	//void Convert_Polarization_to_Cross(Flags flags_);
+	//void Write_WQ2(Flags flags_);
+	//void Write_Acceptance(Flags flags_);
+	//void Write_Single_Diff(Flags flags_);
+	//void Write_Polarization(Flags flags_);
 	float Bin_Size( int variable, int bin_7d);
 	float W_Bin_Size( int bin_7d);
 	float Q2_Bin_Size( int bin_7d);
