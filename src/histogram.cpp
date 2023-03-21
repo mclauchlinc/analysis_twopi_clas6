@@ -4114,7 +4114,7 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 
 
 int Histogram::Friend_W_idx(float W_){
-	return Histogram::W_bin(W_); 
+	return Histogram::W_bin(W_)+1; 
 }
 
 int Histogram::Friend_Q2_idx(float Q2_){
@@ -4122,7 +4122,7 @@ int Histogram::Friend_Q2_idx(float Q2_){
   float top, bot; 
   for(int i = 0; i < std::distance(std::begin(_Q2_bins_), std::end(_Q2_bins_)); i++){//constants.hpp
     if(Q2_ < _Q2_bins_[i+1] && Q2_ >= _Q2_bins_[i]){
-      j = i; 
+      j = i+1; 
     }
   }
   return j; 
@@ -4135,7 +4135,7 @@ int Histogram::Friend_MM_idx(float MM_, int var_){
     top = _MM_min_[var_] + (i+1)*((_MM_max_[var_]-_MM_min_[var_])/_MM_bins_);//constants.hpp
     bot = top - ((_MM_max_[var_]-_MM_min_[var_])/_MM_bins_); 
     if(MM_ < top && MM_ >= bot){
-      j = i; 
+      j = i+1; 
     }
   }
   return j; 
@@ -4148,7 +4148,7 @@ int Histogram::Friend_MM2_idx(float MM_, int var_){
     top = _MM2_min_[var_] + (i+1)*((_MM2_max_[var_]-_MM2_min_[var_])/_MM_bins_);//constants.hpp
     bot = top - ((_MM2_max_[var_]-_MM2_min_[var_])/_MM_bins_); 
     if(MM_ < top && MM_ >= bot){
-      j = i; 
+      j = i+1; 
     }
   }
   return j; 
@@ -4161,7 +4161,7 @@ int Histogram::Friend_theta_idx(float theta_){
     top = _theta_min_ + (i+1)*((_theta_max_-_theta_min_)/_theta_bins_);//constants.hpp
     bot = top - ((_theta_max_-_theta_min_)/_theta_bins_); 
     if(theta_ < top && theta_ >= bot){
-      j = i; 
+      j = i+1; 
     }
   }
   return j; 
@@ -4174,7 +4174,7 @@ int Histogram::Friend_alpha_idx(float alpha_){
     top = _alpha_min_ + (i+1)*((_alpha_max_-_alpha_min_)/_alpha_bins_);//constants.hpp
     bot = top - ((_alpha_max_-_alpha_min_)/_alpha_bins_); 
     if(alpha_ < top && alpha_ >= bot){
-      j = i; 
+      j = i+1; 
     }
   }
   return j; 
@@ -4187,7 +4187,7 @@ int Histogram::Friend_phi_idx(float phi_){
     top = _phi_min_ + (i+1)*((_phi_max_-_phi_min_)/_phi_bins_);//constants.hpp
     bot = top - ((_phi_max_-_phi_min_)/_phi_bins_); 
     if(phi_ < top && phi_ >= bot){
-      j = i; 
+      j = i+1; 
     }
   }
   return j; 

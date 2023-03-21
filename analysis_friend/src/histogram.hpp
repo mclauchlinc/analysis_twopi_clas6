@@ -91,6 +91,8 @@ protected:
 	//RootFiles
 	std::shared_ptr<TFile> _RootOutputFile;
 
+	bool _localized_hole_filling=false;
+
 	//Sparse Binning
 	std::vector<int> _n_bins_7d;//Number of bins in a given dimension {W,Q2,MM1,MM2,theta,alpha,phi}
 	std::vector<int> _n_bins_5d; //Number of bins in a given dimension {MM1,MM2,theta,alpha,phi}
@@ -186,6 +188,19 @@ protected:
 	THnSparseD * _N_holes;//Experimental Holes
 	THnSparseD * _N_holes_pos;//Experimental Holes
 	THnSparseD * _N_holes_neg;//Experimental Holes
+
+	THnSparseD * _scale_exp_7d;//The Localized Scale Factor
+	THnSparseD * _scale_sim_7d;//The Localized Scale Factor
+	Sparse_2d_star _scale_exp_5d;//Localized Scale Factor 3d 
+	Sparse_2d_star _scale_sim_5d;//Localized Scale Factor 3d 
+	THnSparseD * _scale_exp_7d_pos;//The Localized Scale Factor
+	THnSparseD * _scale_sim_7d_pos;//The Localized Scale Factor
+	Sparse_2d_star _scale_exp_5d_pos;//Localized Scale Factor 3d 
+	Sparse_2d_star _scale_sim_5d_pos;//Localized Scale Factor 3d 
+	THnSparseD * _scale_exp_7d_neg;//The Localized Scale Factor
+	THnSparseD * _scale_sim_7d_neg;//The Localized Scale Factor
+	Sparse_2d_star _scale_exp_5d_neg;//Localized Scale Factor 3d 
+	Sparse_2d_star _scale_sim_5d_neg;//Localized Scale Factor 3d 
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
 	TH1D* _phi_bin_sizes;//Width of phi bins 
