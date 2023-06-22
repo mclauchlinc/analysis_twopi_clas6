@@ -427,48 +427,53 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 		for(int j=0; j<3; j++){
 			if(flags_->Sim()){
 				hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::Virtual_Photon_Flux(), flags_);
-			}else{
-				hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff()*event_.Event::Virtual_Photon_Flux(), flags_);
-			}
+			}//else{
+				//hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff()*event_.Event::Virtual_Photon_Flux(), flags_);
+			//}
 			
 		}
 	}else{
 		//if(event_.Event::Top()==3){
 			//std::cout<<"Plotting Event: " <<_top_[event_.Event::Top()] <<" w/ MM^2: " <<event_.Event::MM2() <<" Pass: " <<_truth_[fun::truth_idx(event_.Event::Pass())] <<"\n";// <<"\n";
 		//}
-		if(event_.Event::Pass()){
-			//std::cout<<"\tPassed\n";
-			//PID Plots with Event Selection
-			for(int j=0; j<4; j++){//Particle
-				if(j == 0){//Electron
-					//hist_->Fill_SF();
-					//hist_->Fill_CC();
-					//hist_->Fill_EC();
+		for(int l=0; l<4; l++){
+			if(event_.Event::Pass_Top(l)){
+				for(int k=0; k<3; k++){
+					hist_->Histogram::Friend_Fill(_top_[l], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
 				}
-				//hist_->Histogram::Fid_Fill(_species_[j],event_.Event::Theta(j),event_.Event::Phi(j),_event_,_sector_[event_.Event::Sector(j)-1],_cut_applied_,_top_[event_.Event::Top()],flags_,event_.Event::Weight());
-				//hist_->Fill_Delta();
-			}
-			hist_->Histogram::MM_Fill(_top_[event_.Event::Top()],_cut_applied_,_dirty_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
-			//hist_->Fill_MM(i);
-			hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_top_[event_.Event::Top()],_nthrown_,flags_,event_.Event::Weight());
-		}else{
-			//std::cout<<"\tFailed\n";
-			//PID Plots with Event Selection
-			for(int j=0; j<4; j++){//Particle
-				if(j == 0){//Electron
-					//hist_->Fill_SF();
-					//hist_->Fill_CC();
-					//hist_->Fill_EC();
+				//std::cout<<"\tPassed\n";
+				//PID Plots with Event Selection
+				for(int j=0; j<4; j++){//Particle
+					if(j == 0){//Electron
+						//hist_->Fill_SF();
+						//hist_->Fill_CC();
+						//hist_->Fill_EC();
+					}
+					//hist_->Histogram::Fid_Fill(_species_[j],event_.Event::Theta(j),event_.Event::Phi(j),_event_,_sector_[event_.Event::Sector(j)-1],_cut_applied_,_top_[l],flags_,event_.Event::Weight());
+					//hist_->Fill_Delta();
 				}
-				
-				//hist_->Histogram::Fid_Fill(_species_[j],event_.Event::Theta(j),event_.Event::Phi(j),_event_,_sector_[event_.Event::Sector(j)-1],_anti_cut_,_top_[event_.Event::Top()],flags_,event_.Event::Weight());
-				//hist_->Fill_Delta();
+				hist_->Histogram::MM_Fill(_top_[l],_cut_applied_,_dirty_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
+				//hist_->Fill_MM(i);
+				hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_top_[l],_nthrown_,flags_,event_.Event::Weight());
+			}else{
+				//std::cout<<"\tFailed\n";
+				//PID Plots with Event Selection
+				for(int j=0; j<4; j++){//Particle
+					if(j == 0){//Electron
+						//hist_->Fill_SF();
+						//hist_->Fill_CC();
+						//hist_->Fill_EC();
+					}
+					
+					//hist_->Histogram::Fid_Fill(_species_[j],event_.Event::Theta(j),event_.Event::Phi(j),_event_,_sector_[event_.Event::Sector(j)-1],_anti_cut_,_top_[l],flags_,event_.Event::Weight());
+					//hist_->Fill_Delta();
+				}
+				hist_->Histogram::MM_Fill(_top_[l],_anti_cut_,_dirty_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
+				//hist_->Fill_MM(i);
+				hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_anti_cut_,_top_[l],_nthrown_,flags_,event_.Event::Weight());
 			}
-			hist_->Histogram::MM_Fill(_top_[event_.Event::Top()],_anti_cut_,_dirty_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
-			//hist_->Fill_MM(i);
-			hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_anti_cut_,_top_[event_.Event::Top()],_nthrown_,flags_,event_.Event::Weight());
+			hist_->Histogram::MM_Fill(_top_[l],_no_cut_,_dirty_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
 		}
-		hist_->Histogram::MM_Fill(_top_[event_.Event::Top()],_no_cut_,_dirty_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
 	}
 }
 
@@ -480,11 +485,11 @@ void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std:
 		//std::cout<<"Event Passed \n";
 		for(int k=0; k<3; k++){
 			//std::cout<<"Friend Fill \n";
-			if(flags_->Flags::Sim()){
+			/*if(flags_->Flags::Sim()){
 				hist_->Histogram::Friend_Fill(_top_[event_.Event::Top()], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
 			}else{
 				hist_->Histogram::Friend_Fill(_top_[event_.Event::Top()], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff()*event_.Event::Virtual_Photon_Flux(), flags_);
-			}
+			}*/
 		}
 		//std::cout<<"particle Filling\n";
 		for(int j=0; j<4; j++){//Particle
@@ -548,7 +553,7 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 	//int top_idx = -1; 
 	hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mall_,_nthrown_,flags_,event_.Event::Weight());
 	if(event_.Event::Pass()){
-		for(int j=0; j<3; j++){
+		for(int j=0; j<3; j++){//Variable Set
 			if(flags_->Flags::Sim()){
 				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::Virtual_Photon_Flux(), flags_);
 			}else{

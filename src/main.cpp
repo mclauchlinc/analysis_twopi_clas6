@@ -65,9 +65,9 @@ int main(int argc, char **argv){
 		for each thread to finish first so only one thread is writing to the 
 		THnSparse at a time. This will be very slow
 		*/
-		if(flags->Flags::Make_Friend()){
-			threads[i].wait(); 
-		}
+		//if(flags->Flags::Make_Friend()){
+		//	threads[i].wait(); 
+		//}
 	}
 	for(int j = 0; j<flags->Flags::Num_Cores(); j++){//_NUM_THREADS_
 		threads[j].wait(); //Wait until all threads are complete to move on

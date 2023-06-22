@@ -12,11 +12,11 @@
 #include "histogram.hpp"
 #include <sys/stat.h>
 #include <unistd.h>
-#include <experimental/filesystem>
+//#include <experimental/filesystem>
 #include "THnSparse.h"
 #include "CartesianGenerator.hpp"
 
-namespace fs = std::experimental::filesystem;
+//namespace fs = std::experimental::filesystem;
 
 
 namespace fun {
@@ -30,8 +30,9 @@ THnSparseD* Localized_Holes(THnSparseD* exp_hist_, THnSparseD* sim_hist_, THnSpa
 std::vector<std::vector<int>> Surrounding_Bin(int* bin_, int dist_, std::vector<int> num_bins_);
 THnSparseD* Localized_Holes_5d_for_7d(THnSparseD* exp_hist_, THnSparseD* sim_hist_, THnSparseD* sim_hole_hist_, std::vector<int> num_bins_);
 std::vector<std::vector<int>> Surrounding_Bin_5d_for_7d(int* bin_, int dist_, std::vector<int> num_bins_);
-
+double Sparse_Integral(THnSparseD* nhist_);
+double Sparse_Integral_Error2(THnSparseD* nhist_);
+double Sparse_Integral_Error(THnSparseD* nhist_);
 
 };
-
 #endif

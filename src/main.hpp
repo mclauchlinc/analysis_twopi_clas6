@@ -46,11 +46,12 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	int num_events = (long) chain_->GetEntries();
 	//Print out information about the thread
 	std::cout<<"Thread " <<thread_id_ <<": " <<num_events <<" Events\n";
-	
+	q_prev=0.0;
+	q_tot=0.0;
 	//Make a data object which all the branches can be accessed from
 	auto data = std::make_shared<Branches>(chain_,flags_->Flags::Sim());
 
-	int run_num = 0;fun::extract_run_number(chain_->GetFile()->GetName(),flags_); //Not Finished so using temporary run number
+	int run_num = 0;//fun::extract_run_number(chain_->GetFile()->GetName(),flags_); //Not Finished so using temporary run number
 	for(size_t curr_event = 0; curr_event < num_events; curr_event++){
 		//Get singular event
 		chain_->GetEntry(curr_event);
@@ -60,11 +61,12 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			//std::cout<<"passed\n";
 			//std::cout<<"Run Number is: " <<run_num <<" and it: passed";
 			//Update on Progress through Analysis
-			if((thread_id_ == 0 || flags_->Flags::Make_Friend()) && curr_event%(num_events/100) == 0){
+			//if((thread_id_ == 0 || flags_->Flags::Make_Friend()) && curr_event%(num_events/100) == 0){
+			if(thread_id_ == 0 && curr_event%(num_events/100) == 0){
 				//curr_file_name = 
 				std::cout<<"\r" <<"\t" <<(100*curr_event/num_events) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
 			}
-			if(data->Branches::q_l()>0){
+			if(data->Branches::q_l()>0 && !flags_->Flags::Sim()){
 				if(data->Branches::q_l()>q_prev && data->Branches::q_l()>0){
 					q_tot+= data->Branches::q_l() - q_prev; 
 				}
@@ -76,7 +78,7 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			//std::cout<<"failed\n";
 		}
 	}
-	std::cout<<"For thread " <<thread_id_ <<" the integrated charge is: " <<q_tot <<"\n";
+	std::cout<<"\n\n***For thread " <<thread_id_ <<" the integrated charge is: " <<q_tot <<"***\n\n";
 }
 
 

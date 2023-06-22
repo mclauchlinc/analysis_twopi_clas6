@@ -24,7 +24,12 @@ TFile *exp_pos_file2;
 TFile *exp_neg_file2;
 TFile *sim_no_rad_file;
 TFile *sim_no_rad_file2;
-
+TFile *hole_file;
+TFile *hole_file2;
+TFile *hole_pos_file;
+TFile *hole_pos_file2;
+TFile *hole_neg_file;
+TFile *hole_neg_file2;
 
 
 

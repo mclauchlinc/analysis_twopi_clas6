@@ -401,10 +401,17 @@ void physics::COM_gp(int set, TLorentzVector &p0, TLorentzVector &p1, TLorentzVe
 	float b = nstar_mu.Beta();//Get the beta to boost to the rest frame for the center of mass
 	nstar_mu.Boost(0.0,0.0,-b);
 	float phie = physics::Get_phie(set,p0);//Get the angle for the scattering plane of the electrons just to have a consistent definition of phi 
-	physics::Rotate_4Vec(set, thgp,phigp,phie,p0);
-	physics::Rotate_4Vec(set, thgp,phigp,phie,p1);
-	physics::Rotate_4Vec(set, thgp,phigp,phie,p2);
-	physics::Rotate_4Vec(set, thgp,phigp,phie,p3);
+	physics::Rotate_4Vec(set, thgp,phigp,0.0,p0);
+	if(physics::Cross_Product(p0,k_mu)[1]>0.0){
+		physics::Rotate_4Vec(set, thgp,phigp,0.0,p1);
+		physics::Rotate_4Vec(set, thgp,phigp,0.0,p2);
+		physics::Rotate_4Vec(set, thgp,phigp,0.0,p3);
+	}else{
+		physics::Rotate_4Vec(set, 0.0,0.0,TMath::Pi(),p0);
+		physics::Rotate_4Vec(set, thgp,phigp,TMath::Pi(),p1);
+		physics::Rotate_4Vec(set, thgp,phigp,TMath::Pi(),p2);
+		physics::Rotate_4Vec(set, thgp,phigp,TMath::Pi(),p3);
+	}
 	physics::Boost_4Vec(-b,p0);
 	physics::Boost_4Vec(-b,p1);
 	physics::Boost_4Vec(-b,p2);
@@ -414,26 +421,73 @@ void physics::COM_gp(int set, TLorentzVector &p0, TLorentzVector &p1, TLorentzVe
 void COM_gp(TLorentzVector &k0, TLorentzVector &p0, TLorentzVector &p1, TLorentzVector &p2, TLorentzVector &p3){
 	TLorentzVector q_mu = k0 - p0;//Four vector for virtual particle
 	TLorentzVector nstar_mu = _p_mu_ + q_mu; //Combined photon-target system
+	std::cout<<"\nprint k0: ";
+	physics::Print_4Vec(k0);
+	std::cout<<"\nprint p0: ";
+	physics::Print_4Vec(p0);
+	std::cout<<"\nprint p1: ";
+	physics::Print_4Vec(p1);
+	std::cout<<"\nprint p2: ";
+	physics::Print_4Vec(p2);
+	std::cout<<"\nprint p3: ";
+	physics::Print_4Vec(p3);
+	std::cout<<"\nprint q_mu: ";
+	physics::Print_4Vec(q_mu);
+	std::cout<<"\nprint nstar_mu: ";
+	physics::Print_4Vec(nstar_mu);
 	float phigp = TMath::ATan2(nstar_mu[1],nstar_mu[0]);//Phi angle out of the x-plane
+	std::cout<<"phigp = " <<phigp <<"\n";
 	nstar_mu.RotateZ(-phigp);//Get all horizontal momentum on x axis by roating around z axis
 	float thgp = TMath::ATan2(nstar_mu[0],nstar_mu[2]); //Theta angle away from z-axis
 	nstar_mu.RotateY(-thgp);//Rotate towards z-axis so all momentum is in the z direction
+	std::cout<<"thgp = " <<thgp <<"\n";
 	float b = nstar_mu.Beta();//Get the beta to boost to the rest frame for the center of mass
+	std::cout<<"beta from nstar_mu = " <<b <<"\n";
 	nstar_mu.Boost(0.0,0.0,-b);
 	float phie = physics::Get_phie(k0,p0);//Get the angle for the scattering plane of the electrons just to have a consistent definition of phi 
 	physics::Rotate_4Vec(thgp,phigp,phie,p0);
 	physics::Rotate_4Vec(thgp,phigp,phie,p1);
 	physics::Rotate_4Vec(thgp,phigp,phie,p2);
 	physics::Rotate_4Vec(thgp,phigp,phie,p3);
+	std::cout<<"Post Rotate\n";
+	std::cout<<"\nprint k0: ";
+	physics::Print_4Vec(k0);
+	std::cout<<"\nprint p0: ";
+	physics::Print_4Vec(p0);
+	std::cout<<"\nprint p1: ";
+	physics::Print_4Vec(p1);
+	std::cout<<"\nprint p2: ";
+	physics::Print_4Vec(p2);
+	std::cout<<"\nprint p3: ";
+	physics::Print_4Vec(p3);
 	physics::Boost_4Vec(-b,p0);
 	physics::Boost_4Vec(-b,p1);
 	physics::Boost_4Vec(-b,p2);
 	physics::Boost_4Vec(-b,p3);
+	std::cout<<"Post Boost\n";
+	std::cout<<"\nprint k0: ";
+	physics::Print_4Vec(k0);
+	std::cout<<"\nprint p0: ";
+	physics::Print_4Vec(p0);
+	std::cout<<"\nprint p1: ";
+	physics::Print_4Vec(p1);
+	std::cout<<"\nprint p2: ";
+	physics::Print_4Vec(p2);
+	std::cout<<"\nprint p3: ";
+	physics::Print_4Vec(p3);
 }
 
 TLorentzVector physics::COM_gp(int par, TLorentzVector k0, TLorentzVector p0, TLorentzVector p1, TLorentzVector p2, TLorentzVector p3){
-	//std::cout<<"\tMoving " <<_species_[par] <<" to the COM\n";
-	//std::cout<<"Beam 4_vec: " <<k0[0] <<" " <<k0[1] <<" " <<k0[2] <<" " <<k0[3] <<"\n";
+	/*if(par==4){
+		std::cout<<"\tMoving " <<"beam electron" <<" to the COM\n";
+	}else if(par==5){
+		std::cout<<"\tMoving " <<"target proton" <<" to the COM\n";
+	}else{
+		std::cout<<"\tMoving " <<_species_[par] <<" to the COM\n";
+	}*/
+	
+	//std::cout<<"Beam 4_vec: " <<k0[0] <<" " <<k0[1] <<" " <<k0[2] <<" " <<k0[3];
+	float tolerance = 0.0000001;
 	TLorentzVector output;
 	TLorentzVector q_mu = k0 - p0;//Four vector for virtual particle
 	TLorentzVector nstar_mu = _p_mu_ + q_mu; //Combined photon-target system
@@ -452,16 +506,38 @@ TLorentzVector physics::COM_gp(int par, TLorentzVector k0, TLorentzVector p0, TL
 	nstar_mu.RotateY(-thgp);//Rotate towards z-axis so all momentum is in the z direction
 	float b = nstar_mu.Beta();//Get the beta to boost to the rest frame for the center of mass
 	nstar_mu.Boost(0.0,0.0,-b);
-	float phie = physics::Get_phie(k0,output);//Get the angle for the scattering plane of the electrons just to have a consistent definition of phi 
-	physics::Rotate_4Vec(thgp,phigp,phie,output);
-	//physics::Print_4Vec(output);
-	physics::Boost_4Vec(-b,output);
-	//physics::Print_4Vec(output);
-	//std::cout<<"Finished COM for " <<_species_[par] <<"\n";
+	p0.RotateZ(-phigp);
+	p0.RotateY(-thgp);
+	k0.RotateZ(-phigp);
+	k0.RotateY(-thgp);
+	TVector3 electron_plane = physics::Cross_Product(p0,k0);
+	//std::cout<<"\nElectron Plane: ";
+	//physics::Print_3Vec(electron_plane);
+	if(electron_plane[1]>0.0){
+		physics::Rotate_4Vec(thgp,phigp,0.0,output);
+		//physics::Print_4Vec(output);
+		physics::Boost_4Vec(-b,output);
+		//physics::Print_4Vec(output);
+	}else{
+		physics::Rotate_4Vec(thgp,phigp,TMath::Pi(),output);
+		//physics::Print_4Vec(output);
+		physics::Boost_4Vec(-b,output);
+		//physics::Print_4Vec(output);
+	}
+	/*
+	if(par==4){
+		std::cout<<"\n\tFinished COM for " <<"beam electron" <<"\n";
+	}else if(par==5){
+		std::cout<<"\n\tFinished COM for " <<"target proton" <<"\n";
+	}else{
+		std::cout<<"\n\tFinished COM for " <<_species_[par] <<"\n";
+	}*/
+	
 	return output;
 }
 
 float physics::alpha(int top, TLorentzVector p1, TLorentzVector p2, TLorentzVector p3, TLorentzVector p4, int set){
+	//std::cout<<"Doing Alpha\n";
 	//physics::Print_4Vec(p1);
 	//physics::Print_4Vec(p2);
 	//physics::Print_4Vec(p3);
@@ -471,7 +547,7 @@ float physics::alpha(int top, TLorentzVector p1, TLorentzVector p2, TLorentzVect
 	float sin, cos; 
 	float theta_b, phi_b, phi_c; 
 	TVector3 norm1, norm2, delta_v, gamma_v, beta_v, v1, v2, v3, v4, norm3;
-	physics::COM_gp(set,p1,p2,p3,p4);
+	//physics::COM_gp(set,p1,p2,p3,p4);
 	switch(top){
 		//v1 = Target particle (the particle whose theta and phi angles are being measured) {pi-, p, pi+}
 		//v2 = Paired particle for  scattering plane {p, pp, p}
@@ -541,7 +617,7 @@ float physics::alpha(int top, TLorentzVector p1, TLorentzVector p2, TLorentzVect
 	} 
 	//std::cout<<std::endl <<"alpha: " <<alph;
 	
-	//std::cout<<"alpha post = " <<alph <<std::endl;
+	std::cout<<"alpha post = " <<alph <<std::endl;
 	//std::cout<<std::endl <<"aCos(-.5)" <<TMath::ACos(-0.5) <<std::endl;
 
 	
@@ -567,22 +643,22 @@ float physics::alpha(int top, TLorentzVector k0, TLorentzVector p1, TLorentzVect
 		// v3= First particle in other scattering plane {pp, pi+, pp}
 		// v4 = second particle in other scattering plane{pi+, pi-, pi-}
 		case 0://{pi-,p},{pp,pi+}
-		v1 = physics::V4_to_V3(p3);
-		v2 = physics::V4_to_V3(p4);
-		v3 = physics::V4_to_V3(p1);
-		v4 = physics::V4_to_V3(p2);
+			v1 = physics::V4_to_V3(p3);
+			v2 = physics::V4_to_V3(p4);
+			v3 = physics::V4_to_V3(p1);
+			v4 = physics::V4_to_V3(p2);
 		break;
 		case 1://{p,pp},{pi+,pi-}
-		v1 = physics::V4_to_V3(p4);
-		v2 = physics::V4_to_V3(p1);
-		v3 = physics::V4_to_V3(p2);
-		v4 = physics::V4_to_V3(p3);
+			v1 = physics::V4_to_V3(p4);
+			v2 = physics::V4_to_V3(p1);
+			v3 = physics::V4_to_V3(p2);
+			v4 = physics::V4_to_V3(p3);
 		break;
 		case 2://{pi+,p},{pp,pi-}
-		v1 = physics::V4_to_V3(p2);
-		v2 = physics::V4_to_V3(p1);
-		v3 = physics::V4_to_V3(p4);
-		v4 = physics::V4_to_V3(p3);
+			v1 = physics::V4_to_V3(p2);
+			v2 = physics::V4_to_V3(p1);
+			v3 = physics::V4_to_V3(p4);
+			v4 = physics::V4_to_V3(p3);
 		break;
 	}
 	

@@ -281,3 +281,25 @@ std::vector<std::vector<int>> fun::Surrounding_Bin_5d_for_7d(int* bin_, int dist
    }
    return surr_bin;
 }
+
+double fun::Sparse_Integral(THnSparseD* nhist_){
+   double integral=0.0;
+   for(long i=1; i<nhist_->GetNbins()+1; i++){
+      integral += nhist_->GetBinContent(i);
+   }
+   return integral;
+}
+
+double fun::Sparse_Integral_Error2(THnSparseD* nhist_){
+   double integral=0.0;
+   for(long i=1; i<nhist_->GetNbins()+1; i++){
+      integral += nhist_->GetBinError2(i);
+   }
+   return integral;
+}
+
+double fun::Sparse_Integral_Error(THnSparseD* nhist_){
+   double integral=fun::Sparse_Integral_Error2(nhist_);
+   return pow(integral,0.5);
+}
+

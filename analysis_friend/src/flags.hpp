@@ -33,8 +33,19 @@ static std::string _eff_ = "eff";
 static std::string _err_ = "err";
 static std::string _wq2_ = "wq2";
 static std::string _acceptance_ = "accept";
+static std::string _pol_mm1_ = "pol_mm1";
+static std::string _pol_mm2_ = "pol_mm2";
+static std::string _pol_theta_ = "pol_theta";
+static std::string _pol_alpha_ = "pol_alpha";
+static std::string _error_ = "error";
+static std::string _local_holes_ = "local_holes";
+static std::string _plot_local_holes_ = "plot_local_holes";
+
 
 static std::string _output_name_ = "-name=";
+static std::string _output_name1_ = "-name1=";
+static std::string _output_name2_ = "-name2=";
+static std::string _output_name3_ = "-name3=";
 static std::string _sim_file_ = "-sim=";
 static std::string _exp_file_ = "-exp=";
 //static std::string _weight_file_ = "-weight=";
@@ -46,12 +57,14 @@ static std::string _exp_file2_ = "-exp2=";
 static std::string _empty_file2_ = "-empty2=";
 
 static std::string _sim_no_rad_file2_ = "-no_rad2=";
+static std::string _loc_holes1_ = "-holes=";
+static std::string _loc_holes2_ = "-holes2=";
 //static std::string _exp_pos_file_ = "expp=";
 //static std::string _exp_pos_file2_ = "expp2=";
 //static std::string _exp_neg_file_ = "expn=";
 //static std::string _exp_neg_file2_ = "expn2=";
 
-//Other Info about the run
+//Other Info about the runf
 static std::string _info_ = "-i=";
 static std::string _run_e16_ = "e16";
 static std::string _run_e1f_ = "e1f";
@@ -60,10 +73,13 @@ static std::string _var_pim_ = "var_pim";
 static std::string _var_pro_ = "var_pro";
 static std::string _var_pip_ = "var_pip";
 static std::string _flux_included_ = "flux_weighted";
+static std::string _helicity_ = "helicity";
 
 //Luminosity
 static std::string _lumen_ = "-l=";
 static std::string _lumen2_ = "-l2=";
+static std::string _charge1_= "-q1=";
+static std::string _charge2_= "-q2=";
 
 //Charge Ratio
 static std::string _qratio_ = "-qr=";
@@ -100,8 +116,13 @@ private:
 	std::string _exp_neg_loc2 = "";
 	std::string _empty_loc2 = "";
 	std::string _weight_loc2 = "";
-	std::string _output_name = "";
+	std::string _output_name1 = "";
+	std::string _output_name2 = "";
+	std::string _output_name3 = "";
+	std::string _output_name="";
 	std::string _image_name = "";
+	std::string _localized_holes_name = "";
+	std::string _localized_holes_name2 = "";
 
 	//Procedure Flags
 	bool _helicity = false;
@@ -117,6 +138,14 @@ private:
 	bool _plot_err = false;
 	bool _plot_wq2 = false;
 	bool _plot_acceptance = false;
+	bool _plot_pol_mm1 = false;
+	bool _plot_pol_mm2 = false;
+	bool _plot_pol_theta = false;
+	bool _plot_pol_alpha = false;
+	bool _plot_error = false;
+	bool _localized_holes = false;
+	bool _plot_localized_holes = false;
+	bool _has_localized_holes = false;
 
 	std::string _real_top = "";
 	std::string _input_top = "";
@@ -128,6 +157,8 @@ private:
 
 	float _luminosity = NAN;//Integrated luminosity for the given run
 	float _luminosity2 = NAN;
+	double _charge1=NAN;
+	double _charge2=NAN;
 
 
 	float _Qr = NAN; //Integrated Charge Ratio between filled and empty target 
@@ -162,10 +193,12 @@ public:
 	std::string Weight_File2();
 	std::string Output_File();
 	std::string Image_File();
-	std::string Exp_Hel(int i_);
-	std::string Exp_Hel2(int i_);
+	std::string Exp_Hel();
+	std::string Exp_Hel2();
 	std::string Sim_No_Rad();
 	std::string Sim_No_Rad2();
+	std::string Holes_File();
+	std::string Holes_File2();
 	//Have Things
 	bool Has_Weight();
 	bool Has_Sim();
@@ -180,6 +213,13 @@ public:
 	bool Rad_Corr();
 	bool Flux_Included();
 	float Qr();//Charge Ratio for exp target vs. no target
+	float Qr2();
+	double L(int i_);
+	bool Plot_Polarization(int i_);
+	bool Error();
+	bool Localized_Holes();
+	bool Plot_Localized_Holes();
+	bool Has_Localized_Holes();
 };
 
 

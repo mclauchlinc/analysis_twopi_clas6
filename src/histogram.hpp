@@ -19,6 +19,7 @@
 #include <iterator>
 #include "cuts.hpp"
 #include <cmath>
+#include "TThread.h"
 #include "TLatex.h"
 #include <mutex>//For pausing the multithreading for the filling of THnSparse histograms 
 //#include <unistd.h>//to allow us to use chdir
@@ -121,11 +122,11 @@ static float _W_res_ = 0.025;
 static float _Q2_min_ = 2.0;
 static float _Q2_max_ = 5.0;
 static float _Q2_bins_[6] = {2.0,2.4,3.0,3.5,4.2,5.0};
-static float _MM_min_[3] = {1.1,0.3,1.1};
-static float _MM_max_[3] = {2.0,1.1,2.0};
+static float _MM_min_[3] = {_W_min_-_mpi_,_W_min_-_mp_,_W_min_-_mpi_};//{1.1,0.3,1.1};//Changed 5/5/23
+static float _MM_max_[3] = {_W_max_-_mpi_,_W_max_-_mp_,_W_max_-_mpi_};//{2.0,1.1,2.0};//Changed 5/5/23
 static int _MM_bins_ = 14;
-static float _MM2_min_[3] = {0.3,1.1,1.1};
-static float _MM2_max_[3] = {1.1,2.0,2.0};
+static float _MM2_min_[3] = {_W_min_-_mp_,_W_min_-_mpi_,_W_min_-_mpi_};//{0.3,1.1,1.1};//Changed 5/5/23
+static float _MM2_max_[3] = {_W_max_-_mp_,_W_max_-_mpi_,_W_max_-_mpi_};//{1.1,2.0,2.0};//Changed 5/5/23
 static int _theta_bins_ = 10;
 static float _theta_min_ = 0.0;
 static float _theta_max_ = 180.0;
@@ -135,6 +136,8 @@ static float _alpha_max_ = 360.;
 static int _phi_bins_ = 10;
 static float _phi_min_ = 0.0; 
 static float _phi_max_ = 360.0;
+static char * _bin_names_[] = {"W","Q2","MM1","MM2","theta","alpha","phi"};
+//static float _bin_low_ = {_W_min_,_Q2_min_,_MM}
 
 
 //using TH2F_ptr = std::make_shared<TH2F*>;
@@ -170,11 +173,23 @@ using TH1F_ptr_4d = std::vector<std::vector<std::vector<std::vector<TH1F*>>>>;
 using TH1F_ptr_5d = std::vector<std::vector<std::vector<std::vector<std::vector<TH1F*>>>>>;
 using TH1F_ptr_6d = std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<TH1F*>>>>>>;
 
+using TH1D_ptr = std::shared_ptr<TH1D>;
+using TH1D_ptr_1d = std::vector<TH1D*>;
+using TH1D_ptr_2d = std::vector<std::vector<TH1D*>>;
+using TH1D_ptr_3d = std::vector<std::vector<std::vector<TH1D*>>>;
+using TH1D_ptr_4d = std::vector<std::vector<std::vector<std::vector<TH1D*>>>>;
+using TH1D_ptr_5d = std::vector<std::vector<std::vector<std::vector<std::vector<TH1D*>>>>>;
+using TH1D_ptr_6d = std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<TH1D*>>>>>>;
+
 using TDir_ptr_1d = std::vector<TDirectory*>;
 using TDir_ptr_2d = std::vector<std::vector<TDirectory*>>;
 using TDir_ptr_3d = std::vector<std::vector<std::vector<TDirectory*>>>;
 using TDir_ptr_4d = std::vector<std::vector<std::vector<std::vector<TDirectory*>>>>;
 using TDir_ptr_5d = std::vector<std::vector<std::vector<std::vector<std::vector<TDirectory*>>>>>;
+
+using Sparse_ptr = std::shared_ptr<THnSparseD*>;
+using Sparse_ptr_1d = std::vector<THnSparseD*>;
+using Sparse_ptr_2d = std::vector<std::vector<THnSparse*>>;
 
 //Canvas information
 //const Double_t WQ2_cw = 1200;
@@ -305,17 +320,29 @@ protected:
 	TH2F_ptr_6d _Delta_hist;
 
 	//THnSparse Friend Histograms
-	THnSparseD* _Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	THnSparseD* _Friend1[3][5];//For positive Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	THnSparseD* _Friend2[3][5];//For negative Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	THnSparseD* _Thrown[3];//Variable Sets
-	THnSparseD* _W_Thrown[3];//Variable Sets
-	THnSparseD* _Weight_Sum[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	THnSparseD* _Weight_Sum_Thrown[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Friend[3][5];//[30][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Friend1[3][5];//[30][5];//For positive Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Friend2[3][5];//[30][5];//For negative Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Thrown[3];//[30][5];//Variable Sets
+	
+	TH1D* _MM1_Dist[3][5];
+	TH1D* _MM2_Dist[3][5];
+	TH1D* _Theta_Dist[3][5];
+	TH1D* _Alpha_Dist[3][5];
+	TH1D* _Phi_Dist[3][5];
+	
+	//THnSparseD* _W_Thrown[3][30][6];//Variable Sets
+	//THnSparseD* _Weight_Sum[3][5][30][6];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	//THnSparseD* _Weight_Sum_Thrown[3][5][30][6];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	//TH1D_ptr_6d _Friend_Phi;
+	//TH1D_ptr_6d _Friend1_Phi;
+	//TH1D_ptr_6d _Friend2_Phi;
+	//TH1D_ptr_5d _Thrown_Phi;
+	
 	//Weighted with 
-	THnSparseD* _W_Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	THnSparseD* _W_Friend1[3][5];//For positive helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	THnSparseD* _W_Friend2[3][5];//For negative helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	//THnSparseD* _W_Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	//THnSparseD* _W_Friend1[3][5];//For positive helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	//THnSparseD* _W_Friend2[3][5];//For negative helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 
 
 	TH1F_ptr_3d _PCorr_Check_hist;
@@ -409,6 +436,9 @@ public:
 	float W_bot(int bin_);
 	float W_top(int bin_);
 	float W_center(int bin_);
+	int Q2_bin(float Q2_);
+	float Q2_bot(int bin_);
+	float Q2_top(int bin_);
 	int W_binning(float W_);
 	int p_binning(float p_);
 	char Part_cut(int species, int cut);

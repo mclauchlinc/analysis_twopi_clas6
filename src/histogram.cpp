@@ -196,6 +196,24 @@ float Histogram::W_center(int bin_){
 	return  _W_min_ + ((float)bin_+0.5)*_W_res_;
 }
 
+int Histogram::Q2_bin(float Q2_){
+	int Q2_bin = -1;
+	for(int i=0; i<5; i++){
+		if(Q2_>= _Q2_bins_[i] && Q2_ < _Q2_bins_[i+1]){
+			Q2_bin = i;
+		}
+	}
+	return Q2_bin;
+}
+
+float Histogram::Q2_bot(int bin_){
+	return _Q2_bins_[bin_];
+}
+
+float Histogram::Q2_top(int bin_){
+	return _Q2_bins_[bin_+1];
+}	
+
 
 //W Qsquared plots
 int Histogram::W_binning(float W_){
@@ -4051,50 +4069,71 @@ std::vector<int> Histogram::Friend_Bin_Sizes(std::shared_ptr<Flags> flags_){
 
 void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 	if(flags_->Make_Friend()){
+		std::cout<<"Making Friend Histograms\n";
 		char hname[100];
 		Int_t bins[7];
+		Int_t bins_5d[5];
 		std::vector<int> bins_vec = Histogram::Friend_Bin_Sizes(flags_);//A Bit redundant, but I believe it needs to be an Int array rather than a vector
 		for(int k=0; k<7; k++){
 			bins[k] = bins_vec[k];
+			if(k>1){
+				bins_5d[k-2] = bins_vec[k];
+			}
 		}
-		for(int i=0; i<3; i++){//Topologies
+		for(int i=0; i<3; i++){//Variable Sets
 			Double_t xmin[7] = {_W_min_,_Q2_min_,_MM_min_[i],_MM2_min_[i],_theta_min_,_alpha_min_,_phi_min_};
 			Double_t xmax[7] = {_W_max_,_Q2_max_,_MM_max_[i],_MM2_max_[i],_theta_max_,_alpha_max_,_phi_max_};
-			for(int j=0; j<5; j++){//Variable Sets
+			for(int j=0; j<5; j++){//Topologies
 				sprintf(hname,"2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
 				_Friend[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 				_Friend[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
 				_Friend[i][j]->Sumw2();//Weights as normal
-				sprintf(hname,"Scaled_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
-				_W_Friend[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-				_W_Friend[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-				_W_Friend[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
-				if(flags_->Flags::Sim()){
-					//sprintf(hname,"Weight_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
-					//_Weight_Sum[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-					//_Weight_Sum[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					//_Weight_Sum[i][j]->Sumw2();//Squared weights for the purpose of error analysis for simulation 
-					//sprintf(hname,"Thrown_Weight_2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
-					//_Weight_Sum_Thrown[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-					//_Weight_Sum_Thrown[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					//_Weight_Sum_Thrown[i][j]->Sumw2();//Squared weights for the purpose of error analysis for simulation 
-				}else if(flags_->Flags::Helicity()){
+				if(flags_->Flags::Helicity()){
 					sprintf(hname,"2#pi_off_proton_%s_%s_pos",_var_names_[i],_top_[j]);
 					_Friend1[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 					_Friend1[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
 					_Friend1[i][j]->Sumw2();//Normal Weights
-					sprintf(hname,"Scaled_2#pi_off_proton_%s_%s_pos",_var_names_[i],_top_[j]);
-					_W_Friend1[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-					_W_Friend1[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					_W_Friend1[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
+					//sprintf(hname,"Scaled_2#pi_off_proton_%s_%s_pos",_var_names_[i],_top_[j]);
+					//_W_Friend1[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					//_W_Friend1[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					//_W_Friend1[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
 					sprintf(hname,"2#pi_off_proton_%s_%s_neg",_var_names_[i],_top_[j]);
 					_Friend2[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 					_Friend2[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
 					_Friend2[i][j]->Sumw2();//Normal Weights
-					sprintf(hname,"Scaled_2#pi_off_proton_%s_%s_neg",_var_names_[i],_top_[j]);
-					_W_Friend2[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-					_W_Friend2[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					_W_Friend2[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
+					//sprintf(hname,"Scaled_2#pi_off_proton_%s_%s_neg",_var_names_[i],_top_[j]);
+					//_W_Friend2[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					//_W_Friend2[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					//_W_Friend2[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
+				}
+				for(int k=0; k<5; k++){
+					if(k>1){
+						sprintf(hname,"%s_Friend_Dist_%s_%s",_friend_pars_[2+k],_var_names_[i],_top_[j]);
+					}else{
+						if(k==0){
+							sprintf(hname,"%s_Friend_Dist_%s_%s",_MM1_[i],_var_names_[i],_top_[j]);
+						}else if(k==1){
+							sprintf(hname,"%s_Friend_Dist_%s_%s",_MM2_[i],_var_names_[i],_top_[j]);
+						}
+					}
+					
+					switch(k){
+						case 0: 
+							_MM1_Dist[i][j] = new TH1D(hname,hname,_MM_bins_,_MM_min_[i],_MM_max_[i]);
+						break;
+						case 1: 
+							_MM2_Dist[i][j] = new TH1D(hname,hname,_MM_bins_,_MM2_min_[i],_MM2_max_[i]);
+						break;
+						case 2: 
+							_Theta_Dist[i][j] = new TH1D(hname,hname,_theta_bins_,_theta_min_,_theta_max_);
+						break;
+						case 3: 
+							_Alpha_Dist[i][j] = new TH1D(hname,hname,_alpha_bins_,_alpha_min_,_alpha_max_);
+						break;
+						case 4: 
+							_Phi_Dist[i][j] = new TH1D(hname,hname,_phi_bins_,_phi_min_,_phi_max_);
+						break;
+					}
 				}
 			}
 			if(flags_->Flags::Sim()){
@@ -4102,27 +4141,25 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 				_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 				_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
 				_Thrown[i]->Sumw2();//Allow Weights with virtual photon flux, etc. 
-				sprintf(hname,"Scaled_Thrown_2#pi_off_proton_%s",_var_names_[i]);
-				_W_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-				_W_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
-				_W_Thrown[i]->Sumw2();//No modification to weights with virtual photon flux
+				//sprintf(hname,"Scaled_Thrown_2#pi_off_proton_%s",_var_names_[i]);
+				//_W_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+				//_W_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
+				//_W_Thrown[i]->Sumw2();//No modification to weights with virtual photon flux
 			}
-		}
-		
+		} //Making 5d histograms now uggg
 	}
 }
 
 
 int Histogram::Friend_W_idx(float W_){
-	return Histogram::W_bin(W_)+1; 
+	return Histogram::W_bin(W_); 
 }
 
 int Histogram::Friend_Q2_idx(float Q2_){
   int j = -1;
-  float top, bot; 
   for(int i = 0; i < std::distance(std::begin(_Q2_bins_), std::end(_Q2_bins_)); i++){//constants.hpp
     if(Q2_ < _Q2_bins_[i+1] && Q2_ >= _Q2_bins_[i]){
-      j = i+1; 
+      j = i; 
     }
   }
   return j; 
@@ -4135,7 +4172,7 @@ int Histogram::Friend_MM_idx(float MM_, int var_){
     top = _MM_min_[var_] + (i+1)*((_MM_max_[var_]-_MM_min_[var_])/_MM_bins_);//constants.hpp
     bot = top - ((_MM_max_[var_]-_MM_min_[var_])/_MM_bins_); 
     if(MM_ < top && MM_ >= bot){
-      j = i+1; 
+      j = i; 
     }
   }
   return j; 
@@ -4148,7 +4185,7 @@ int Histogram::Friend_MM2_idx(float MM_, int var_){
     top = _MM2_min_[var_] + (i+1)*((_MM2_max_[var_]-_MM2_min_[var_])/_MM_bins_);//constants.hpp
     bot = top - ((_MM2_max_[var_]-_MM2_min_[var_])/_MM_bins_); 
     if(MM_ < top && MM_ >= bot){
-      j = i+1; 
+      j = i; 
     }
   }
   return j; 
@@ -4161,7 +4198,7 @@ int Histogram::Friend_theta_idx(float theta_){
     top = _theta_min_ + (i+1)*((_theta_max_-_theta_min_)/_theta_bins_);//constants.hpp
     bot = top - ((_theta_max_-_theta_min_)/_theta_bins_); 
     if(theta_ < top && theta_ >= bot){
-      j = i+1; 
+      j = i; 
     }
   }
   return j; 
@@ -4174,7 +4211,7 @@ int Histogram::Friend_alpha_idx(float alpha_){
     top = _alpha_min_ + (i+1)*((_alpha_max_-_alpha_min_)/_alpha_bins_);//constants.hpp
     bot = top - ((_alpha_max_-_alpha_min_)/_alpha_bins_); 
     if(alpha_ < top && alpha_ >= bot){
-      j = i+1; 
+      j = i; 
     }
   }
   return j; 
@@ -4187,7 +4224,7 @@ int Histogram::Friend_phi_idx(float phi_){
     top = _phi_min_ + (i+1)*((_phi_max_-_phi_min_)/_phi_bins_);//constants.hpp
     bot = top - ((_phi_max_-_phi_min_)/_phi_bins_); 
     if(phi_ < top && phi_ >= bot){
-      j = i+1; 
+      j = i; 
     }
   }
   return j; 
@@ -4233,7 +4270,7 @@ void Histogram::Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, flo
 
 void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float plus_weight_, std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Make_Friend() && fun::top_perform(top_,flags_)){
-		//std::cout<<"W:" <<W_ <<" Q2:" <<Q2_ <<" MM:" <<MM_ <<" MM2:" <<MM2_ <<" theta:" <<theta_ <<" alpha:" <<alpha_ <<" phi:" <<phi_ <<" weight:" <<weight_ <<" thrown:" <<thrown_ <<"\n";
+		//std::cout<<"top:" <<top_ <<" var:" <<var_ <<" W:" <<W_ <<" Q2:" <<Q2_ <<" MM:" <<MM_ <<" MM2:" <<MM2_ <<" theta:" <<theta_ <<" alpha:" <<alpha_ <<" phi:" <<phi_ <<" weight:" <<weight_ <<" helicity:" <<helicity_ <<" thrown:" <<thrown_ <<"\n";
 		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_) && !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
 			if(Histogram::OK_Idx(Histogram::Friend_idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_))){
 			//int *y = Friend_binning(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
@@ -4241,31 +4278,38 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 				
 				//Histogram::Print_Friend_Bin(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
 				Double_t x[7] = { (double)W_, (double)Q2_, (double)MM_, (double)MM2_, (double)theta_, (double)alpha_, (double)phi_};
-			//if(y[0]>=0){
 				if(thrown_){
 					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
-					_W_Thrown[var_]->Fill(x,weight_*plus_weight_);
+					TThread::Lock();
 					_Thrown[var_]->Fill(x,weight_);
-					//_Weight_Sum_Thrown[var_][fun::top_idx(top_)]->Fill(x,weight_*weight_);
+					TThread::UnLock();
+					//std::cout<<"\tThrown " <<var_  <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}else{
 					//std::cout<<"Filling Friend!\n";
-					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
+					//std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
 					if(flags_->Flags::Helicity()){//If taking Helicity into account then we'll have two output THnSparse
 						if(helicity_ == 1){
-							_W_Friend1[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
+							//std::cout<<"\tPos " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
+							TThread::Lock();
 							_Friend1[var_][fun::top_idx(top_)]->Fill(x,weight_);
+							TThread::UnLock();
 						}else if(helicity_ == -1){
-							_W_Friend2[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
+							//std::cout<<"\tNeg " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
+							TThread::Lock();
 							_Friend2[var_][fun::top_idx(top_)]->Fill(x,weight_);
+							TThread::UnLock();
+							
 						}
 					}
-					_W_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_*plus_weight_);
+					TThread::Lock();
 					_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
-					//std::cout<<"Done filling friend\n";
-					//if(flags_->Flags::Sim()){
-					//	std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
-					//	_Weight_Sum[var_][fun::top_idx(top_)]->Fill(x,weight_*weight_);
-					//}
+					TThread::UnLock();
+					_MM1_Dist[var_][fun::top_idx(top_)]->Fill(MM_,weight_);
+					_MM2_Dist[var_][fun::top_idx(top_)]->Fill(MM2_,weight_);
+					_Theta_Dist[var_][fun::top_idx(top_)]->Fill(theta_,weight_);
+					_Alpha_Dist[var_][fun::top_idx(top_)]->Fill(alpha_,weight_);
+					_Phi_Dist[var_][fun::top_idx(top_)]->Fill(phi_,weight_);
+					//std::cout<<"\tNormal " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}
 				//std::cout<<std::endl <<"Filling Friend with " <<x <<" with weight " <<weight_;
 			}
@@ -4277,29 +4321,53 @@ void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Make_Friend()){
 		std::cout<<"Writing Friend\n";
 		_SparseFile->cd();
-		for(int i = 0; i < 3; i++){
-			if(flags_->Flags::Sim()){
-				_Thrown[i]->Write();
-				_W_Thrown[i]->Write();
-			}
-			for(int j = 0; j < 5; j++){
-				if(fun::top_perform(_top_[j],flags_)){
-					_Friend[i][j]->Write();
-					_W_Friend[i][j]->Write();
-					//if(flags_->Flags::Sim()){
-						//_Weight_Sum[i][j]->Write();
-						//_Weight_Sum_Thrown[i][j]->Write();
-					//}else{
-						if(flags_->Flags::Helicity()){
-							_Friend1[i][j]->Write();
-							_Friend2[i][j]->Write();
-							_W_Friend1[i][j]->Write();
-							_W_Friend2[i][j]->Write();
+		for(int i = 0; i <3; i++){//Variable Set
+			//for(int k=0; k<Histogram::W_bins(); k++){//W
+				//for(int l=0; l<5; l++){//Q2
+					if(flags_->Flags::Sim()){
+						//std::cout<<"Thrown "  <<i <<" integral: " <<_Thrown[i]->ComputeIntegral();
+						
+						_Thrown[i]->Write();
+						
+						//_Thrown[i][k][l]->Write();
+					}
+					for(int j = 0; j<5; j++){//Topology
+						if(fun::top_perform(_top_[j],flags_)){
+							//_Friend[i][j][k][l]->Write();
+							//std::cout<<"Friend "  <<i <<" " <<j <<" integral: " <<_Friend[i][j]->ComputeIntegral();
+							
+							_Friend[i][j]->Write();
+							_MM1_Dist[i][j]->Write();
+							_MM2_Dist[i][j]->Write();
+							_Theta_Dist[i][j]->Write();
+							_Alpha_Dist[i][j]->Write();
+							_Phi_Dist[i][j]->Write();
+							
+							if(flags_->Flags::Helicity()){
+								
+								_Friend1[i][j]->Write();
+								
+								_Friend2[i][j]->Write();
+								
+								//_Friend1[i][j][k][l]->Write();
+								//_Friend2[i][j][k][l]->Write();
+							}
+							//for(int m=0; m<4; m++){
+								//for(int n=0; n<_Friend[0][0][0][0]->GetAxis(m)->GetNbins(); n++){//Xij other than Phi
+									//_Friend_Phi[i][fun::top_idx(_top_[j])+fun::top_offset(_top_[j],flags_)][k][l][m][n]->Write();
+									//if(flags_->Flags::Helicity()){
+									//	_Friend1_Phi[i][fun::top_idx(_top_[j])+fun::top_offset(_top_[j],flags_)][k][l][m][n]->Write();
+									//	_Friend2_Phi[i][fun::top_idx(_top_[j])+fun::top_offset(_top_[j],flags_)][k][l][m][n]->Write();
+									//}
+									//if(flags_->Sim() && j==0){
+									//	_Thrown_Phi[i][k][l][m][n]->Write();
+									//}
+								//}
+							//}
 						}
-					//}
-				}
-			}
-			
+					}
+				//}
+			//}
 		}
 	}
 }

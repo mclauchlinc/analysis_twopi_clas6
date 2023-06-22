@@ -378,10 +378,16 @@ bool Analysis::Half_Wave(int run_num_, std::shared_ptr<Flags> flags_){
 
 //Correct Helicity accoridng to half wave plate status
 float Analysis::Corr_Helicity(float helicity_, int run_num_, std::shared_ptr<Flags> flags_){
+	
+	int eh = 0; 
+	if(helicity_ >= 1000) eh = 1; 
+	if(helicity_ <= -1000) eh = -1; 
+	if(helicity_ < 1000 && helicity_ > -1000) eh = 0; 
+	//if(plate_stat == 0 ) eh = 1; 
 	if(Analysis::Half_Wave(run_num_,flags_)){
-		return helicity_*-1;
+		return eh*-1;
 	}else{
-		return  helicity_;
+		return  eh;
 	}
 }
 
