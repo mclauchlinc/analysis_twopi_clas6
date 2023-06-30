@@ -78,7 +78,9 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			//std::cout<<"failed\n";
 		}
 	}
-	std::cout<<"\n\n***For thread " <<thread_id_ <<" the integrated charge is: " <<q_tot <<"***\n\n";
+	if(!flags_->Flags::Sim()){
+		std::cout<<"\n\n***For thread " <<thread_id_ <<" the integrated charge is: " <<q_tot <<"***\n\n";
+	}
 }
 
 

@@ -12,7 +12,12 @@ int main(int argc, char **argv){
     sim_file = new TFile(flags.Flags::Sim_File().c_str());
     sim_no_rad_file = new TFile(flags.Flags::Sim_No_Rad().c_str());
     empty_file = new TFile(flags.Flags::Empty_File().c_str());
-    hole_file = new TFile(flags.Flags::Holes_File().c_str());
-    auto hist = Histogram(exp_file,sim_file,empty_file,sim_no_rad_file,hole_file,flags);
+    if(flags.Flags::Has_Localized_Holes()){
+        hole_file = new TFile(flags.Flags::Holes_File().c_str());
+        auto hist = Histogram(exp_file,sim_file,empty_file,sim_no_rad_file,hole_file,flags);
+    }else{
+        auto hist = Histogram(exp_file,sim_file,empty_file,sim_no_rad_file,flags);
+    }
+    
 
 }

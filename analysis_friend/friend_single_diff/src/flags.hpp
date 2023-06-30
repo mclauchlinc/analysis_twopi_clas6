@@ -59,6 +59,7 @@ static std::string _empty_file2_ = "-empty2=";
 static std::string _sim_no_rad_file2_ = "-no_rad2=";
 static std::string _loc_holes1_ = "-holes=";
 static std::string _loc_holes2_ = "-holes2=";
+static std::string _no_loc_holes_ = "-nolocalholes";
 //static std::string _exp_pos_file_ = "expp=";
 //static std::string _exp_pos_file2_ = "expp2=";
 //static std::string _exp_neg_file_ = "expn=";
@@ -86,6 +87,8 @@ static std::string _qratio_ = "-qr=";
 static std::string _qratio2_ = "-qr2=";
 
 static std::string _image_name_ = "-image=";
+
+
 
 
 

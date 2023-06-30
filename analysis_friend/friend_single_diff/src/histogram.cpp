@@ -7,6 +7,13 @@ Histogram::Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFi
     Histogram::Single_Diff(flags_);
 }
 
+Histogram::Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_){
+    Histogram::Extract_7d_Histograms(exp_tree_,sim_tree_,empty_tree_,nr_sim_tree_,flags_);
+    Histogram::Rad_Corr();
+    Histogram::Sparse_7to5(flags_);
+    Histogram::Single_Diff(flags_);
+}
+
 
 void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_){
     std::cout<<"Extract 7d Histograms\n";
@@ -54,6 +61,58 @@ void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 	_N_holes = (THnSparseD *)holes_->Get(hname);
 	_N->Add(_N_holes);
 	
+	std::cout<<"First bin content of _N: " <<_N->GetBinContent(1) <<"\n";
+
+}
+
+void Histogram::Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_){
+    std::cout<<"Extract 7d Histograms\n";
+	char hname[100];
+	sprintf(hname,"Thrown_%s",_sparse_names_[flags_.Flags::Var_idx()]);
+	std::cout<<"Getting Thrown THnSparse " <<hname <<"\n";
+	_thrown_7d = (THnSparseD *)sim_tree_->Get(hname);
+	std::cout<<"thrown dimensionality: " <<_thrown_7d->GetNdimensions() <<"\n";
+	for(int i = 0; i<_thrown_7d->GetNdimensions(); i++){
+		_n_bins_7d.push_back(_thrown_7d->GetAxis(i)->GetNbins());
+	}
+	//std::cout<<"printing thrown bin info\n";
+	//Histogram::Print_Histogram_Bin_Info(_thrown_7d);
+	Histogram::Extract_Bin_Info(flags_);
+	std::cout<<"Getting Thrown THnSparse (no rad) " <<hname <<"\n";
+	sprintf(hname,"Thrown_%s",_sparse_names_[flags_.Flags::Var_idx()]);
+	_thrown_7d_no_rad = (THnSparseD *)nr_sim_tree_->Get(hname);//Not sure if I need the raw yield for this
+	std::cout<<"\tdid it\n";
+    sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);
+    std::cout<<"Getting Exp THnSparse " <<hname <<"\n";
+    _exp_data_7d = (THnSparseD *)exp_tree_->Get(hname);
+    std::cout<<"Getting Exp Empty THnSparse " <<hname <<"\n";
+    _empty_7d = (THnSparseD *)empty_tree_->Get(hname);
+	std::cout<<"Getting Sim Recon THnSparse " <<hname <<"\n";
+	sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);
+	_sim_data_7d = (THnSparseD *)sim_tree_->Get(hname);
+	std::cout<<"Calculating Acceptance\n";
+	_acceptance_7d = (THnSparseD*)_sim_data_7d->Clone();
+	_acceptance_7d->Divide(_thrown_7d);
+	long num_are_one=0;
+	std::cout<<"GetNbins() for acceptance_7d: " <<_acceptance_7d->GetNbins() <<"\n";
+	for(long i=0; i<_acceptance_7d->GetNbins(); i++){
+		if(_acceptance_7d->GetBinContent(i+1)==1.0){
+			//_acceptance_7d->SetBinContent(i+1,0.0);
+			num_are_one++;
+		}
+	}
+	std::cout<<"num were one: " <<num_are_one <<"\n";
+	_N=(THnSparseD*)_exp_data_7d->Clone();
+	_N->Add(_empty_7d,-flags_.Flags::Qr());//Empty target subtraction
+	_N->Divide(_acceptance_7d);//Acceptance Correction
+	
+    /*
+	std::cout<<"Adding Holes\n";
+	sprintf(hname,"Localized_Holes_50");
+	_N_holes = (THnSparseD *)holes_->Get(hname);
+	_N->Add(_N_holes);
+	*/
+
 	std::cout<<"First bin content of _N: " <<_N->GetBinContent(1) <<"\n";
 
 }
@@ -203,7 +262,10 @@ void Histogram::Single_Diff(Flags flags_){
 	dir_S->cd();
 	TDirectory* dir_S1[5];
 	TDirectory* dir_S2[5][_n_bins_7d[1]];
+    TDirectory* dir_C1;
 	char dirname[100];
+    sprintf(dirname,"Integrated Check");
+    dir_C1 = dir_S->mkdir(dirname);
 	for(int k=0; k<5; k++){
 		sprintf(dirname,"%s",_five_dim_[k]);
 		dir_S1[k] = dir_S->mkdir(dirname);
@@ -212,7 +274,7 @@ void Histogram::Single_Diff(Flags flags_){
 			sprintf(dirname,"%s_Q2|%.2f-%.2f",_five_dim_[k],_bin_low_7d[1][j],_bin_up_7d[1][j]);
 			dir_S2[k][j] = dir_S1[k]->mkdir(dirname);
 		}
-	}
+	}/*
 	double denom = 1.0;
 	std::cout<<"\tDirectories Made\n\tWriting Histograms\n";
 	for(int i=0; i<_n_bins_7d[0]; i++){//W
@@ -249,7 +311,48 @@ void Histogram::Single_Diff(Flags flags_){
 			//exp_ch_2d.push_back(exp_ch_1d);
 			exp_ch_1d.clear();
 		}
+	}*/
+    std::cout<<"moving on\n";
+    TH1D* check_hist[5];
+    //TH1D* check_hist2[5][_n_bins_7d[0]][_n_bins_7d[1]];
+    dir_C1->cd();
+    std::cout<<"\tCheck Directories Made\n\tWriting Histograms\n";
+	for(int k=0; k<5; k++){
+        sprintf(hname,"full_yield_%s_single_diff_top:%s_var:%s",_five_dim_[k],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+        sprintf(xlabel,"%s %s",_five_dim_[k],_dim_units_[k]);
+        sprintf(ylabel,"Yield)",_dim_units_y_[k]);
+        //std::cout<<"projection of full 7d\n";
+        check_hist[k] = _exp_data_7d->Projection(k+2,"E");
+        //check_hist[k] = _N->Projection(k,"E");
+        check_hist[k]->SetNameTitle(hname,hname);
+        check_hist[k]->GetXaxis()->SetTitle(xlabel);
+        check_hist[k]->GetYaxis()->SetTitle(ylabel);
+        //std::cout<<"Writing Histogram for W:" <<i <<" Q2:" <<j <<" Xij:" <<k <<"\n";
+        check_hist[k]->Write();
+        //denom = 1.0;
+        /*
+        for(int i=0; i<_n_bins_7d[0]; i++){//W
+            for(int j=0; j< _n_bins_7d[1]; j++){//Q2
+                //dir_C1->cd();
+                //std::cout<<"\t\tWriting Histogram for W:" <<i <<" Q2:" <<j <<" Xij:" <<k <<"\n";
+                sprintf(hname,"yield_%s_single_diff_W:%.3f-%.3f_Q2:%.2f-%.2f_top:%s_var:%s",_five_dim_[k],_bin_low_7d[0][i],_bin_up_7d[0][i],_bin_low_7d[1][j],_bin_up_7d[1][j],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
+                sprintf(xlabel,"%s %s",_five_dim_[k],_dim_units_[k]);
+                sprintf(ylabel,"Yield)",_dim_units_y_[k]);
+                //std::cout<<"projection of 5d " <<i <<" " <<j <<"\n";
+                check_hist2[k][i][j] = _N_5d[i][j]->Projection(k+2,"E");
+                
+            
+                check_hist2[k][i][j]->SetNameTitle(hname,hname);
+                check_hist2[k][i][j]->GetXaxis()->SetTitle(xlabel);
+                check_hist2[k][i][j]->GetYaxis()->SetTitle(ylabel);
+                //std::cout<<"Writing Histogram for W:" <<i <<" Q2:" <<j <<" Xij:" <<k <<"\n";
+                check_hist2[k][i][j]->Write();
+                //denom = 1.0;
+            }
+            //exp_ch_2d.push_back(exp_ch_1d);
+            //exp_ch_1d.clear();
+        }*/
 	}
 	_RootOutputFile->Close();
-	std::cout<<"\nComplted Single Differential Cross Sections\n";
+	std::cout<<"\nCompleted Single Differential Cross Sections\n";
 }

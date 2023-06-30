@@ -425,7 +425,8 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 	if(thrown_){
 		hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mzero_,_thrown_,flags_,event_.Event::Weight());
 		for(int j=0; j<3; j++){
-			if(flags_->Sim()){
+			if(flags_->Sim() && thrown_){
+				//memory effort to minimize this 6-28-23
 				hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::Virtual_Photon_Flux(), flags_);
 			}//else{
 				//hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff()*event_.Event::Virtual_Photon_Flux(), flags_);
@@ -439,7 +440,8 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 		for(int l=0; l<4; l++){
 			if(event_.Event::Pass_Top(l)){
 				for(int k=0; k<3; k++){
-					hist_->Histogram::Friend_Fill(_top_[l], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
+					//memory effort to minimize this 6-28-23
+					//hist_->Histogram::Friend_Fill(_top_[l], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
 				}
 				//std::cout<<"\tPassed\n";
 				//PID Plots with Event Selection
@@ -557,7 +559,7 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 			if(flags_->Flags::Sim()){
 				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::Virtual_Photon_Flux(), flags_);
 			}else{
-				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff()*event_.Event::Virtual_Photon_Flux(), flags_);
+				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
 			}	
 		}
 		for(int i=0; i<4; i++){//Species Loop

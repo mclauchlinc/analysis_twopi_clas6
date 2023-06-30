@@ -7,7 +7,7 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	for(int i=0; i<_p_bin_bins_; i++){
 		std::cout<<"\t" <<Histogram::P_Min(i) << " center-> " <<Histogram::P_center(i) <<"\n";
 	}*/
-
+	std::cout<<"Num W bins: " <<Histogram::W_bins() <<"\n";
 	//_RootOutputFile = fun::Name_File(output_file);
 	//def = new TCanvas("def");
 	Histogram::WQ2_Make(flags_);
@@ -4081,63 +4081,146 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 			}
 		}
 		for(int i=0; i<3; i++){//Variable Sets
-			Double_t xmin[7] = {_W_min_,_Q2_min_,_MM_min_[i],_MM2_min_[i],_theta_min_,_alpha_min_,_phi_min_};
-			Double_t xmax[7] = {_W_max_,_Q2_max_,_MM_max_[i],_MM2_max_[i],_theta_max_,_alpha_max_,_phi_max_};
-			for(int j=0; j<5; j++){//Topologies
-				sprintf(hname,"2#pi_off_proton_%s_%s",_var_names_[i],_top_[j]);
-				_Friend[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-				_Friend[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-				_Friend[i][j]->Sumw2();//Weights as normal
-				if(flags_->Flags::Helicity()){
-					sprintf(hname,"2#pi_off_proton_%s_%s_pos",_var_names_[i],_top_[j]);
-					_Friend1[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-					_Friend1[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					_Friend1[i][j]->Sumw2();//Normal Weights
+			//Double_t xmin[7] = {_W_min_,_Q2_min_,_MM_min_[i],_MM2_min_[i],_theta_min_,_alpha_min_,_phi_min_};
+			//Double_t xmax[7] = {_W_max_,_Q2_max_,_MM_max_[i],_MM2_max_[i],_theta_max_,_alpha_max_,_phi_max_};
+			Double_t xmin[5] = {_MM_min_[i],_MM2_min_[i],_theta_min_,_alpha_min_,_phi_min_};
+			Double_t xmax[5] = {_MM_max_[i],_MM2_max_[i],_theta_max_,_alpha_max_,_phi_max_};
+			for(int j=0; j<29; j++){
+				for(int k=0; k<5; k++){
+					sprintf(hname,"2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+					_Friend[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
+					_Friend[i][j][k]->Sumw2();//Weights as normal
+					if(flags_->Flags::Helicity()){
+						sprintf(hname,"2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f_pos",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+						_Friend1[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
+						_Friend1[i][j][k]->Sumw2();//Normal Weights
+						sprintf(hname,"2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f_neg",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+						_Friend2[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
+						_Friend2[i][j][k]->Sumw2();//Normal Weights
+					}
+				
+					for(int l=0; l<5; l++){
+						if(l>1){
+							sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_friend_pars_[l+2],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+						}else if(l==0){
+							sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM1_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+						}else if(l==1){
+							sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM2_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+						}
+							
+						//used to be [i][j] for topologies
+						switch(l){
+							/*case 0: 
+								_W_Dist[i] = new TH1D(hname,hname,Histogram::W_bins(),_W_min_,_W_max_);
+							break;
+							case 1: 
+								//_Q2_Dist[i] = new TH1D(hname,hname,5,_Q2_min_,_Q2_max_);
+								_Q2_Dist[i] = new TH1D(hname,hname,5,_Q2_bins_);
+							break;*/
+							//case 2:
+							case 0: 
+								_MM1_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM_min_[i],_MM_max_[i]);
+							break;
+							//case 3:
+							case 1: 
+								_MM2_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM2_min_[i],_MM2_max_[i]);
+							break;
+							//case 4: 
+							case 2:
+								_Theta_Dist[i][j][k] = new TH1D(hname,hname,_theta_bins_,_theta_min_,_theta_max_);
+							break;
+							//case 5:
+							case 3: 
+								_Alpha_Dist[i][j][k] = new TH1D(hname,hname,_alpha_bins_,_alpha_min_,_alpha_max_);
+							break;
+							//case 6:
+							case 4: 
+								_Phi_Dist[i][j][k] = new TH1D(hname,hname,_phi_bins_,_phi_min_,_phi_max_);
+							break;
+						}
+						if(flags_->Flags::Sim()){
+							sprintf(hname,"Thrown_2#pi_off_proton_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+							_Thrown[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
+							_Thrown[i][j][k]->GetAxis(1)->Set(5,_Q2_bins_);
+							_Thrown[i][j][k]->Sumw2();//Allow Weights with virtual photon flux, etc. 
+							//sprintf(hname,"Scaled_Thrown_2#pi_off_proton_%s",_var_names_[i]);
+							//_W_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+							//_W_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
+							//_W_Thrown[i]->Sumw2();//No modification to weights with virtual photon flux
+						}
+					}
+				}
+			}/*
+			//for(int j=0; j<5; j++){//Topologies
+			sprintf(hname,"2#pi_off_proton_%s_%s",_var_names_[i],_mall_);//_top_[j]);
+				//_Friend[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+				//_Friend[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+				//_Friend[i][j]->Sumw2();//Weights as normal
+			_Friend[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+			_Friend[i]->GetAxis(1)->Set(5,_Q2_bins_);
+			_Friend[i]->Sumw2();//Weights as normal
+			if(flags_->Flags::Helicity()){
+				sprintf(hname,"2#pi_off_proton_%s_%s_pos",_var_names_[i],_mall_);//_top_[j]);
+					//_Friend1[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					//_Friend1[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					//_Friend1[i][j]->Sumw2();//Normal Weights
+				_Friend1[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+				_Friend1[i]->GetAxis(1)->Set(5,_Q2_bins_);
+				_Friend1[i]->Sumw2();//Normal Weights
 					//sprintf(hname,"Scaled_2#pi_off_proton_%s_%s_pos",_var_names_[i],_top_[j]);
 					//_W_Friend1[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 					//_W_Friend1[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
 					//_W_Friend1[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
-					sprintf(hname,"2#pi_off_proton_%s_%s_neg",_var_names_[i],_top_[j]);
-					_Friend2[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-					_Friend2[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
-					_Friend2[i][j]->Sumw2();//Normal Weights
+				sprintf(hname,"2#pi_off_proton_%s_%s_neg",_var_names_[i],_mall_);//_top_[j]);
+					//_Friend2[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+					//_Friend2[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
+					//_Friend2[i][j]->Sumw2();//Normal Weights
+				_Friend2[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+				_Friend2[i]->GetAxis(1)->Set(5,_Q2_bins_);
+				_Friend2[i]->Sumw2();//Normal Weights
 					//sprintf(hname,"Scaled_2#pi_off_proton_%s_%s_neg",_var_names_[i],_top_[j]);
 					//_W_Friend2[i][j] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 					//_W_Friend2[i][j]->GetAxis(1)->Set(5,_Q2_bins_);
 					//_W_Friend2[i][j]->Sumw2();//Normal weights scaled with virtual photon flux (and cc efficiency for exp)
-				}
-				for(int k=0; k<5; k++){
-					if(k>1){
-						sprintf(hname,"%s_Friend_Dist_%s_%s",_friend_pars_[2+k],_var_names_[i],_top_[j]);
-					}else{
-						if(k==0){
-							sprintf(hname,"%s_Friend_Dist_%s_%s",_MM1_[i],_var_names_[i],_top_[j]);
-						}else if(k==1){
-							sprintf(hname,"%s_Friend_Dist_%s_%s",_MM2_[i],_var_names_[i],_top_[j]);
-						}
+			}
+			for(int k=0; k<5; k++){
+				if(k!=0 && k!=1){
+					sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.2f-%.2f_Q2:%.2f-%.2f",_friend_pars_[k],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+				}else{
+					if(k==2){
+						sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.2f-%.2f_Q2:%.2f-%.2f",_MM1_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+					}else if(k==3){
+						sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.2f-%.2f_Q2:%.2f-%.2f",_MM2_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
 					}
-					
-					switch(k){
-						case 0: 
-							_MM1_Dist[i][j] = new TH1D(hname,hname,_MM_bins_,_MM_min_[i],_MM_max_[i]);
-						break;
-						case 1: 
-							_MM2_Dist[i][j] = new TH1D(hname,hname,_MM_bins_,_MM2_min_[i],_MM2_max_[i]);
-						break;
-						case 2: 
-							_Theta_Dist[i][j] = new TH1D(hname,hname,_theta_bins_,_theta_min_,_theta_max_);
-						break;
-						case 3: 
-							_Alpha_Dist[i][j] = new TH1D(hname,hname,_alpha_bins_,_alpha_min_,_alpha_max_);
-						break;
-						case 4: 
-							_Phi_Dist[i][j] = new TH1D(hname,hname,_phi_bins_,_phi_min_,_phi_max_);
-						break;
-					}
+				}	
+				//used to be [i][j] for topologies
+				switch(k){
+					case 0: 
+						_W_Dist[i] = new TH1D(hname,hname,Histogram::W_bins(),_W_min_,_W_max_);
+					break;
+					case 1: 
+						//_Q2_Dist[i] = new TH1D(hname,hname,5,_Q2_min_,_Q2_max_);
+						_Q2_Dist[i] = new TH1D(hname,hname,5,_Q2_bins_);
+					break;
+					case 2: 
+						_MM1_Dist[i] = new TH1D(hname,hname,_MM_bins_,_MM_min_[i],_MM_max_[i]);
+					break;
+					case 3: 
+						_MM2_Dist[i] = new TH1D(hname,hname,_MM_bins_,_MM2_min_[i],_MM2_max_[i]);
+					break;
+					case 4: 
+						_Theta_Dist[i] = new TH1D(hname,hname,_theta_bins_,_theta_min_,_theta_max_);
+					break;
+					case 5: 
+						_Alpha_Dist[i] = new TH1D(hname,hname,_alpha_bins_,_alpha_min_,_alpha_max_);
+					break;
+					case 6: 
+						_Phi_Dist[i] = new TH1D(hname,hname,_phi_bins_,_phi_min_,_phi_max_);
+					break;
 				}
 			}
 			if(flags_->Flags::Sim()){
-				sprintf(hname,"Thrown_2#pi_off_proton_%s",_var_names_[i]);
+				sprintf(hname,"Thrown_2#pi_off_proton_%s_W:%.2f-%.2f_Q2:%.2f-%.2f",_var_names_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 				_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 				_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
 				_Thrown[i]->Sumw2();//Allow Weights with virtual photon flux, etc. 
@@ -4145,7 +4228,7 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 				//_W_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
 				//_W_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
 				//_W_Thrown[i]->Sumw2();//No modification to weights with virtual photon flux
-			}
+			}*/
 		} //Making 5d histograms now uggg
 	}
 }
@@ -4277,11 +4360,18 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 			//std::cout<<std::endl <<"Y binning: " <<y;
 				
 				//Histogram::Print_Friend_Bin(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
-				Double_t x[7] = { (double)W_, (double)Q2_, (double)MM_, (double)MM2_, (double)theta_, (double)alpha_, (double)phi_};
+				Double_t x[5] ;//= { (double)W_, (double)Q2_, (double)MM_, (double)MM2_, (double)theta_, (double)alpha_, (double)phi_};
+				//x[0] = (double)W_;
+				//x[1] = (double)Q2_;
+				x[0] = (double)MM_;
+				x[1] = (double)MM2_;
+				x[2] = (double)theta_;
+				x[3] = (double)alpha_;
+				x[4] = (double)phi_;
 				if(thrown_){
 					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
 					TThread::Lock();
-					_Thrown[var_]->Fill(x,weight_);
+					_Thrown[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_);
 					TThread::UnLock();
 					//std::cout<<"\tThrown " <<var_  <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}else{
@@ -4291,24 +4381,29 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 						if(helicity_ == 1){
 							//std::cout<<"\tPos " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 							TThread::Lock();
-							_Friend1[var_][fun::top_idx(top_)]->Fill(x,weight_);
+							//_Friend1[var_][fun::top_idx(top_)]->Fill(x,weight_);
+							_Friend1[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_);
 							TThread::UnLock();
 						}else if(helicity_ == -1){
 							//std::cout<<"\tNeg " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 							TThread::Lock();
-							_Friend2[var_][fun::top_idx(top_)]->Fill(x,weight_);
+							//_Friend2[var_][fun::top_idx(top_)]->Fill(x,weight_);
+							_Friend2[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_);
 							TThread::UnLock();
 							
 						}
 					}
 					TThread::Lock();
-					_Friend[var_][fun::top_idx(top_)]->Fill(x,weight_);
+					//used to have [var_][fun::top_idx(top_)]
+					_Friend[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_);
+					//_W_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(W_,weight_);
+					//_Q2_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(Q2_,weight_);
+					_MM1_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM_,weight_);
+					_MM2_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM2_,weight_);
+					_Theta_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(theta_,weight_);
+					_Alpha_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha_,weight_);
+					_Phi_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi_,weight_);
 					TThread::UnLock();
-					_MM1_Dist[var_][fun::top_idx(top_)]->Fill(MM_,weight_);
-					_MM2_Dist[var_][fun::top_idx(top_)]->Fill(MM2_,weight_);
-					_Theta_Dist[var_][fun::top_idx(top_)]->Fill(theta_,weight_);
-					_Alpha_Dist[var_][fun::top_idx(top_)]->Fill(alpha_,weight_);
-					_Phi_Dist[var_][fun::top_idx(top_)]->Fill(phi_,weight_);
 					//std::cout<<"\tNormal " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}
 				//std::cout<<std::endl <<"Filling Friend with " <<x <<" with weight " <<weight_;
@@ -4321,37 +4416,55 @@ void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Make_Friend()){
 		std::cout<<"Writing Friend\n";
 		_SparseFile->cd();
+		TH1D* check_7d[3][29][5][5];
+		char hname[100];
+		//TH1D* check_5d[5][Histogram::W_bins()][5];
 		for(int i = 0; i <3; i++){//Variable Set
-			//for(int k=0; k<Histogram::W_bins(); k++){//W
-				//for(int l=0; l<5; l++){//Q2
+			for(int j=0; j<Histogram::W_bins(); j++){//W
+				for(int l=0; l<5; l++){//Q2
 					if(flags_->Flags::Sim()){
 						//std::cout<<"Thrown "  <<i <<" integral: " <<_Thrown[i]->ComputeIntegral();
 						
-						_Thrown[i]->Write();
+						_Thrown[i][j][l]->Write();
 						
 						//_Thrown[i][k][l]->Write();
 					}
-					for(int j = 0; j<5; j++){//Topology
-						if(fun::top_perform(_top_[j],flags_)){
+					//for(int j = 0; j<5; j++){//Topology
+					if(fun::top_perform(_mall_,flags_)){
 							//_Friend[i][j][k][l]->Write();
 							//std::cout<<"Friend "  <<i <<" " <<j <<" integral: " <<_Friend[i][j]->ComputeIntegral();
 							
-							_Friend[i][j]->Write();
-							_MM1_Dist[i][j]->Write();
-							_MM2_Dist[i][j]->Write();
-							_Theta_Dist[i][j]->Write();
-							_Alpha_Dist[i][j]->Write();
-							_Phi_Dist[i][j]->Write();
-							
-							if(flags_->Flags::Helicity()){
-								
-								_Friend1[i][j]->Write();
-								
-								_Friend2[i][j]->Write();
-								
-								//_Friend1[i][j][k][l]->Write();
-								//_Friend2[i][j][k][l]->Write();
+						_Friend[i][j][l]->Write();
+						//_W_Dist[i][j][l]->Write();
+						//_Q2_Dist[i][j][l]->Write();
+						_MM1_Dist[i][j][l]->Write();
+						_MM2_Dist[i][j][l]->Write();
+						_Theta_Dist[i][j][l]->Write();
+						_Alpha_Dist[i][j][l]->Write();
+						_Phi_Dist[i][j][l]->Write();
+						for(int k=0; k<5; k++){
+							check_7d[i][j][l][k] = _Friend[i][j][l]->Projection(k,"E");
+							if(k==0){
+								sprintf(hname,"2#pi_off_proton_%s_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,_MM1_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(l),Histogram::Q2_top(l));
+							}else if(k==1){
+								sprintf(hname,"2#pi_off_proton_%s_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,_MM2_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(l),Histogram::Q2_top(l));
+							}else{
+								sprintf(hname,"2#pi_off_proton_%s_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,_friend_pars_[k+2],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(l),Histogram::Q2_top(l));
 							}
+							check_7d[i][j][l][k]->SetNameTitle(hname,hname);
+							check_7d[i][j][l][k]->Write();
+						}
+							
+							
+						if(flags_->Flags::Helicity()){
+							
+							_Friend1[i][j][l]->Write();
+							
+							_Friend2[i][j][l]->Write();
+							
+							//_Friend1[i][j][k][l]->Write();
+							//_Friend2[i][j][k][l]->Write();
+						}
 							//for(int m=0; m<4; m++){
 								//for(int n=0; n<_Friend[0][0][0][0]->GetAxis(m)->GetNbins(); n++){//Xij other than Phi
 									//_Friend_Phi[i][fun::top_idx(_top_[j])+fun::top_offset(_top_[j],flags_)][k][l][m][n]->Write();
@@ -4364,10 +4477,9 @@ void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
 									//}
 								//}
 							//}
-						}
 					}
-				//}
-			//}
+				}
+			}
 		}
 	}
 }
@@ -4482,1612 +4594,3 @@ void Histogram::PCorr_Check_Write(std::shared_ptr<Flags> flags_){
 }
 
 //*------------------------------- End Check2 ---------------------------------*
-
-
-
-/*float Histogram::Friend_bin_reverse(int variable_, int bin_, int var_){//This only works for equally spaced bins. Will need rework when bins have varied sizes
-	float val = NAN;
-	float max = NAN;
-	float min = NAN;
-	int bins = -1; 
-	switch(var_){
-		/*case 0: 
-			max = 4.5;
-			min = -0.5;
-			bins = _Friend_bins[var_]; 
-		break;*/ //Top
-		/*case 0:
-			max = _W_max;
-			min = _W_min;
-			bins = _Friend_bins[var_] ; 
-		break;//W
-		case 1: 
-			max = _Q2_max;
-			min = _Q2_min;
-			bins = _Friend_bins[var_]; 
-		break;//Q2
-		case 2: 
-			max = _MM_max[channel_];
-			min = _MM_min[channel_];
-			bins = _Friend_bins[var_]; 
-		break;//MM
-		case 3: 
-			max = _MM2_max[channel_];
-			min = _MM2_min[channel_];
-			bins = _Friend_bins[var_]; 
-		break;//MM
-		case 4: 
-			max = _theta_max;
-			min = _theta_min;
-			bins = _Friend_bins[var_]; 
-		break;//Theta
-		case 5: 
-			max = _alpha_max;
-			min = _alpha_min;
-			bins = _Friend_bins[var_]; 
-		break;//Alpha
-		case 6: 
-			max = _phi_max;
-			min = _phi_min;
-			bins = _Friend_bins[var_]; 
-		break;//phi
-	}
-	for(int i = 0; i < bins; i++){
-		if(bin_ == i){
-			val = ((max - min)/bins)*(i + 0.5) + min; 
-		}
-	}
-	return val;
-}*/
-
-
-
-
-
-/*
-
-//Sampling Fraction Cuts
-void Histogram::Delta T_Make(std::shared_ptr<Environment> _envi){
-	if(_envi->was_sf_plot()){
-		char hname[100];
-		std::vector<long> space_dims(5);
-		space_dims[0] = 11; //Electron Cuts
-		space_dims[1] = 30; //W binning
-		space_dims[2] = 7;  //Sector
-		space_dims[3] = 6;  //Topology
-		space_dims[4] = 2; //cut v anti
-
-		float top,bot; 
-
-		CartesianGenerator cart(space_dims);
-
-		while(cart.GetNextCombination()){
-			if((cart[0] == 10 && cart[3] != 0) || (cart[0] != 10 && cart[3] == 0) && fun::hist_fitting(0,cart[0],cart[1],0,_envi->was_fit_type())){//Topology only matters for event selection cut
-				if(cart[1] == 0 ){ //All W 
-					sprintf(hname,"SF_%s_%s_%s_W:ALL_%s",eid_cut[cart[0]],cut_ver[cart[4]],sec_list[cart[2]],topologies[cart[3]]);
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]] = std::make_shared<TH2F>(hname,hname, SFxres, SFxmin, SFxmax, SFyres, SFymin, SFymax);
-					//std::cout<<std::endl <<"Created plot: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3];
-
-				}else{	//Specific W Bins
-					top = Wbin_start + cart[1]*Wbin_res;
-					bot = top - Wbin_res;
-					sprintf(hname,"SF_%s_%s_%s_W:%f-%f_%s",eid_cut[cart[0]],cut_ver[cart[4]],sec_list[cart[2]],bot,top,topologies[cart[3]]);
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]] = std::make_shared<TH2F>(hname,hname, SFxres, SFxmin, SFxmax, SFyres, SFymin, SFymax);
-					//std::cout<<std::endl <<"Created plot: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3];
-				}
-			}
-		}
-	}
-}
-
-void Histogram::SF_Fill(std::shared_ptr<Environment> _envi,int top, float p, float en, int cut, int cva, float W_, int sec, float weight_){
-	if(_envi->was_sf_plot() && fun::hist_fitting(0,cut,Histogram::W_binning(W_),0,_envi->was_fit_type())){
-		if(!std::isnan(p) && !std::isnan(en) && !std::isnan(W_)){
-			SF_hist[cut][Histogram::W_binning(W_)][sec][top][cva]->Fill(p,en/p);
-			SF_hist[cut][Histogram::W_binning(W_)][0][top][cva]->Fill(p,en/p);
-			if(Histogram::W_binning(W_)!=0){
-				if(_envi->was_sim()){
-					SF_hist[cut][0][sec][top][cva]->Fill(p,en/p,weight_);
-					SF_hist[cut][0][0][top][cva]->Fill(p,en/p,weight_);
-				}else{
-					SF_hist[cut][0][sec][top][cva]->Fill(p,en/p);
-					SF_hist[cut][0][0][top][cva]->Fill(p,en/p);
-				}
-			}
-		}
-	}
-}
-
-void Histogram::SF_Write(std::shared_ptr<Environment> _envi){
-	if(_envi->was_sf_plot()){
-		std::cout<<"SF Plots: "; 
-		TDirectory* dir_SF = _RootOutputFile->mkdir("SF Plots");
-		dir_SF->cd();
-		TDirectory* sf_dir[11];//Cut
-		TDirectory* sf_dir_w[11];
-		TDirectory* sf_dir_sec[11][7];
-		TDirectory* sf_dir_top[11][5];
-		//[8][6];// W binning, Sector, Topology
-		char dir_name[100];
-		for(int cut = 0 ; cut < 11; cut++){
-			sprintf(dir_name,"SF_%s",eid_cut[cut]);
-			sf_dir[cut] = dir_SF->mkdir(dir_name);
-			//std::cout<<"Made Directory: " <<cut <<" 0 0 0" <<std::endl; 
-			sprintf(dir_name,"SF_%s_%s",eid_cut[cut],W_dep_list[1]);
-			sf_dir_w[cut] = sf_dir[cut]->mkdir(dir_name);
-			//std::cout<<"Made Directory: " <<cut <<" " <<1 <<" 0 0" <<std::endl;
-			for(int sec = 0; sec < 7 ; sec++){
-				sprintf(dir_name,"SF_%s_%s",eid_cut[cut],sec_list[sec]);
-				sf_dir_sec[cut][sec] = sf_dir[cut]->mkdir(dir_name);
-				//std::cout<<"Made Directory: " <<cut <<" " <<0 <<" " <<sec <<" 0" <<std::endl;
-			}
-			for(int top = 1; top < 6; top++){
-				sprintf(dir_name,"SF_%s_%s",eid_cut[cut],topologies[top]);
-				sf_dir_top[cut][top] = sf_dir[cut]->mkdir(dir_name);
-				//std::cout<<"Made Directory: " <<cut <<" " <<0 <<" " <<0 <<" "<<top <<std::endl;
-			}
-		}
-
-
-		std::vector<long> space_dims(5);
-		space_dims[0] = 11; //Electron Cuts
-		space_dims[1] = 30; //W binning
-		space_dims[2] = 7;  //Sector
-		space_dims[3] = 6;  //Topology
-		space_dims[4] = 2; //Cut v anti
-
-		CartesianGenerator cart(space_dims);
-
-		while(cart.GetNextCombination()){
-			dir_SF->cd();
-			//General Entry
-			//std::cout<<"Curr Vals: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3]<<std::endl ;
-			sf_dir[cart[0]]->cd();
-			//std::cout<<"    Now In: " <<cart[0] /*<<" " <<"0" <<" " <<"0" <<" " <<"0"*///<<std::endl ; 
-			//Want just cuts, so all Sectors, W, and use Combined Topology
-/*			if(fun::hist_fitting(0,cart[0],cart[1],0,_envi->was_fit_type())){
-				if(cart[2]==0 && cart[1]==0 && ((cart[0]!=10 && cart[3]==0)||(cart[0]==10 && cart[3]==5))){
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetXTitle("Momentum (GeV)");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetYTitle("Sampling Fraction");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetOption("COLZ");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->Write();
-				}
-				//W binning
-				if(cart[2]==0 && cart[1]!=0 && ((cart[0]!=10 && cart[3]==0)||(cart[0]==10 && cart[3]==5))){
-					//std::cout<<"    Try In: " <<cart[0] <<" " <<"1" <<" " <<"0" <<" " <<"0"<<std::endl ;
-					sf_dir_w[cart[0]]->cd();
-					//std::cout<<"    Now In: " <<cart[0] <<" " <<"1" <<" " <<"0" <<" " <<"0"<<std::endl ; 
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetXTitle("Momentum (GeV)");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetYTitle("Sampling Fraction");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetOption("COLZ");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->Write();
-				}
-				//Sector Binning
-				if(cart[1]==0 && ((cart[0]!=10 && cart[3]==0)||(cart[0]==10 && cart[3]==5))){
-					//std::cout<<"    Try In: " <<cart[0] <<" " <<"0" <<" " <<cart[2]+1 <<" " <<"0"<<std::endl ; 
-					sf_dir_sec[cart[0]][cart[2]]->cd();
-					//std::cout<<"    Now In: " <<cart[0] <<" " <<"0" <<" " <<cart[2]+1 <<" " <<"0"<<std::endl ; 
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetXTitle("Momentum (GeV)");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetYTitle("Sampling Fraction");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetOption("COLZ");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->Write();
-				}
-				//Topology Binning
-				if(cart[2]==0 && cart[1]==0 && (cart[0]==10 && cart[3]!=0)){
-					//std::cout<<"    Now In: " <<cart[0] <<" " <<"0" <<" " <<"0" <<" " <<cart[3]<<std::endl ;
-					sf_dir_top[cart[0]][cart[3]]->cd();
-					//std::cout<<"    Now In: " <<cart[0] <<" " <<"0" <<" " <<"0" <<" " <<cart[3]<<std::endl ; 
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetXTitle("Momentum (GeV)");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetYTitle("Sampling Fraction");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->SetOption("COLZ");
-					SF_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]]->Write();
-				}
-			}
-		}
-		std::cout<<"Done" <<std::endl;
-	}
-}
-
-
-//Delta T Cuts
-void Histogram::DT_Make(std::shared_ptr<Environment> _envi){
-	char hname[100];
-	std::vector<long> space_dims(6);
-	space_dims[0] = 4;  //species
-	space_dims[1] = 7;  //Cuts
-	space_dims[2] = 30; //W Binning
-	space_dims[3] = 7; //Sector
-	space_dims[4] = 6; //topology
-	space_dims[5] = 2; //cut v anti
-
-
-	float bot,top;
-
-	CartesianGenerator cart(space_dims);
-
-	while(cart.GetNextCombination()){
-		if(_envi->was_dt_plot(cart[0]) && fun::hist_fitting(cart[0],cart[1],cart[2],0,_envi->was_fit_type())){
-			if((cart[1] == 6 && cart[4]!=0) || (cart[1]!=6 && cart[4] ==0)){
-				if(cart[2] == 0){
-					sprintf(hname,"%s_DeltaT_%s_%s_%s_W:ALL_%s",species[cart[0]],hid_cut[cart[1]],cut_ver[cart[5]],sec_list[cart[3]],topologies[cart[4]]);
-					DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]] = std::make_shared<TH2F>(hname,hname, DTxres, DTxmin, DTxmax, DTyres, DTymin, DTymax);
-					DT_made_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]] = true; 	
-				}else if(cart[3]==0 && cart[4] == 0 && cart[1]!=6){//Looking at specific Cuts on fiducial and pre cut regimes 
-					top = Wbin_start + cart[2]*Wbin_res;
-					bot = top - Wbin_res;
-					sprintf(hname,"%s_DeltaT_%s_%s_%s_W:%f-%f_%s",species[cart[0]],hid_cut[cart[1]],cut_ver[cart[5]],sec_list[cart[3]],bot,top,topologies[cart[4]]);
-					DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]] = std::make_shared<TH2F>(hname,hname, DTxres, DTxmin, DTxmax, DTyres, DTymin, DTymax);
-					DT_made_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]] = true;
-				}else{
-					DT_made_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]] = false;
-				}
-			}
-		}
-	}
-}
-
-void Histogram::DT_Fill(std::shared_ptr<Environment> _envi,int top, int part, float p, float d, float t, float d0, float t0, int cut, int anti, float W_, int sec, float weight_){
-	if(_envi->was_dt_plot(part) && fun::hist_fitting(part,cut,Histogram::W_binning(W_),0,_envi->was_fit_type())){
-		if(!std::isnan(p) && !std::isnan(d) && !std::isnan(d) && !std::isnan(t) && !std::isnan(d0) && !std::isnan(t0) && !std::isnan(W_)){
-			float dt = physics::delta_t(part, p, d, t, d0, t0);
-			if(sec < 7){//If sector dependent
-				if(top == 0 && cut!=6){//No event selection in the W variance. 
-					if(DT_made_hist[part][cut][Histogram::W_binning(W_)][0][top][anti]){
-						DT_hist[part][cut][Histogram::W_binning(W_)][0][top][anti]->Fill(p,dt,weight_);
-					}else{
-						std::cout<<"DT Would have segfaulted filling: " <<part <<" " <<cut <<" " <<Histogram::W_binning(W_) <<" " <<"0" <<" " <<top <<" " <<anti <<std::endl;
-					}
-				}
-				if(DT_made_hist[part][cut][0][sec][top][anti]){
-					DT_hist[part][cut][0][sec][top][anti]->Fill(p,dt,weight_);
-				}else{
-					std::cout<<"DT Would have segfaulted filling: " <<part <<" " <<cut <<" " <<0 <<" " <<sec <<" " <<top <<" " <<anti <<std::endl;
-				}
-				if(DT_made_hist[part][cut][0][0][top][anti]){
-					DT_hist[part][cut][0][0][top][anti]->Fill(p,dt,weight_);
-				}else{
-					std::cout<<"DT Would have segfaulted filling: " <<part <<" " <<cut <<" " <<0 <<" " <<0 <<" " <<top <<" " <<anti <<std::endl;
-				}
-			}else{
-				std::cout<<"DT would have had weird nonexistant sectors " <<std::endl;
-			}
-		}
-	}
-}
-			
-void Histogram::DT_Fill(std::shared_ptr<Environment> _envi,int top, int part, float p, float dt, int cut, int anti, float W_, int sec, float weight_){
-	//std::cout<<"Filling DT Plot" <<std::endl;
-	if(_envi->was_dt_plot(part) && fun::hist_fitting(part,cut,Histogram::W_binning(W_),0,_envi->was_fit_type())){
-		if(!std::isnan(p) && !std::isnan(dt) && !std::isnan(W_)){
-			if(sec < 7){
-				if(cut!=6){//No event selection in the W variance. 
-					//if(DT_made_hist[part][cut][Histogram::W_binning(W_)][sec][top][anti]){
-					//	DT_hist[part][cut][Histogram::W_binning(W_)][sec][top][anti]->Fill(p,dt);
-					//}else{
-					//	std::cout<<"DT Would have segfaulted filling: " <<part <<" " <<cut <<" " <<Histogram::W_binning(W_) <<" " <<sec <<" " <<top <<" " <<anti <<std::endl;
-					//}
-					if(DT_made_hist[part][cut][Histogram::W_binning(W_)][0][top][anti]){
-						DT_hist[part][cut][Histogram::W_binning(W_)][0][top][anti]->Fill(p,dt,weight_);
-					}else{
-						std::cout<<"DT Would have segfaulted filling: " <<part <<" " <<cut <<" " <<Histogram::W_binning(W_) <<" " <<sec <<" " <<top <<" " <<anti <<std::endl;
-					}
-				}
-				if(DT_made_hist[part][cut][0][sec][top][anti]){
-					DT_hist[part][cut][0][sec][top][anti]->Fill(p,dt,weight_);
-				}else{
-					std::cout<<"DT Would have segfaulted filling: " <<part <<" " <<cut <<" " <<0 <<" " <<sec <<" " <<top <<" " <<anti <<std::endl;
-				}
-				if(DT_made_hist[part][cut][0][0][top][anti]){
-					DT_hist[part][cut][0][0][top][anti]->Fill(p,dt,weight_);
-				}else{
-					std::cout<<"DT Would have segfaulted filling: " <<part <<" " <<cut <<" " <<0 <<" " <<0 <<" " <<top <<" " <<anti <<std::endl;
-				}
-			}else{
-				std::cout<<"DT would have had weird nonexistant sectors " <<std::endl;
-			}
-		}
-	}
-}
-
-void Histogram::DT_Write(std::shared_ptr<Environment> _envi){
-	bool do_dt_plots = false;
-	for(int i = 0; i< 4; i++){
-		if(_envi->was_dt_plot(i)){
-			do_dt_plots = true;
-		}
-	}
-	if(do_dt_plots){
-		std::cout <<"Writing DT Plots: ";
-		char dir_name[100]; 
-		TDirectory* DT_plot = _RootOutputFile->mkdir("DT_plots");
-		TDirectory* par_dt[4][9][2][8][6];//Particle, cut, W-dep, sector, topology
-		//std::cout<<"Did I get here?" <<std::endl; 
-		DT_plot->cd(); 
-		for(int i = 0; i<4; i++){//Species
-			if(_envi->was_dt_plot(i)){
-				sprintf(dir_name,"%s_DT_plots",species[i]);
-				par_dt[i][0][0][0][0]= DT_plot->mkdir(dir_name);
-				DT_dir_made[i][0][0][0][0]=true;
-				//std::cout<<"Made pointer:" <<i <<" 0 0 0 0" <<std::endl;
-				for(int j = 1; j < 8; j++){//cut
-					sprintf(dir_name,"%s_DT_%s",species[i],hid_cut[j-1]);
-					par_dt[i][j][0][0][0] = par_dt[i][0][0][0][0]->mkdir(dir_name);
-					DT_dir_made[i][j][0][0][0]=true;
-					//std::cout<<"    Made Pointers" <<i <<j <<" 0 0 0"<<std::endl;
-					//W Dependence
-					sprintf(dir_name,"%s_DT_%s_%s",species[i],hid_cut[j-1],W_dep_list[1]);
-					par_dt[i][j][1][0][0] = par_dt[i][j][0][0][0]->mkdir(dir_name);
-					DT_dir_made[i][j][1][0][0]=true;
-					//std::cout<<"    Made Pointers" <<i <<j <<" 1 0 0"<<std::endl;
-					for(int k = 1; k < 8; k++){ //Sector 
-						sprintf(dir_name,"%s_DT_%s_%s",species[i],hid_cut[j-1],sec_list[k-1]);
-						par_dt[i][j][0][k][0] = par_dt[i][j][0][0][0]->mkdir(dir_name);
-						DT_dir_made[i][j][0][k][0]=true;
-						//std::cout<<"    Made Pointers" <<i <<j <<" 0 " <<k <<" 0"<<std::endl;
-						//std::cout<<"Sector Pointer" <<std::endl;
-						if(j == 7){//Event cut
-							for(int l = 1; l < 6; l++){ //topology 
-								sprintf(dir_name,"%s_DT_%s_%s",species[i],hid_cut[j-1],topologies[l]);
-								par_dt[i][j][0][k][l] = par_dt[i][j][0][k][0]->mkdir(dir_name);
-								DT_dir_made[i][j][0][k][l]=true;
-								//std::cout<<"    Made Pointers" <<i <<j <<" 0 0 " <<k<<std::endl;
-								//std::cout<<"Topology Pointer" <<std::endl;
-
-							}
-						}
-					}
-				}
-			}
-		}
-		//std::cout<<"Made it through making directories" <<std::endl;
-
-		std::vector<long> space_dims(6);
-		space_dims[0] = 4;  //species
-		space_dims[1] = 7;  //Cuts
-		space_dims[2] = 30; //W Binning
-		space_dims[3] = 7; //Sector
-		space_dims[4] = 6; //topology
-		space_dims[5] = 2; //Cut v anti
-
-		CartesianGenerator cart(space_dims);
-		while(cart.GetNextCombination()){
-			if(_envi->was_dt_plot(cart[0]) && fun::hist_fitting(cart[0],cart[1],cart[2],0,_envi->was_fit_type())){
-				if(DT_dir_made[0][0][0][0][0]){
-					par_dt[cart[0]][0][0][0][0]->cd();//Main folder for particles
-					if(DT_dir_made[cart[0]][cart[1]+1][0][0][0]){
-						par_dt[cart[0]][cart[1]+1][0][0][0]->cd();//Get into those CUTS
-						//std::cout <<"      Now Writing in " <<cart[0] <<" " <<cart[1]+1 <<" 0 0 0"<<std::endl;
-						//All W, Sectors, and Combined Topology for Event selection, but still by Cut
-						/*if(cart[2] ==0 &&  ((cart[1]!=6 && cart[4]==0)||(cart[1]==6 && cart[4]==5))){//got rid of cart[3]==0
-							if(DT_made_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]){
-								//std::cout<<"DT shouldn't have segfaulted Writing: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-								DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetXTitle("Momentum (GeV)");
-								DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetYTitle("Delta T (ns)");
-								DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetOption("COLZ");
-								DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->Write();	
-							}else{
-								std::cout<<"DT Would have segfaulted Writing: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-							}		
-						}*/
-						
-						//For W Range, but all sectors, combine topology for event selection, all sectors
-		/*				if(_envi->was_W_dep_plot()){	
-							if(cart[2]!=0 && cart[3] == 0 && ((cart[1]!=6 && cart[4]==0))){//||(cart[1]==6 && cart[4]==5))){ //Issue when trying to look at event selection for this. Not sure why, but getting rid of it solved it *shrug* 9/12/19
-								//std::cout <<"          trying to Write in " <<cart[0] <<" " <<cart[1]+1 <<" 1 0 0"<<std::endl;
-								if(DT_dir_made[cart[0]][cart[1]+1][1][0][0]){
-									par_dt[cart[0]][cart[1]+1][0][0][0]->cd();//Get into those CUTS
-									par_dt[cart[0]][cart[1]+1][1][0][0]->cd();
-									//std::cout <<"   We are writing" <<std::endl;
-									if(DT_made_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]){
-										//std::cout<<"DT shouldn't have segfaulted Writing: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-										DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetXTitle("Momentum (GeV)");
-										DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetYTitle("Delta T (ns)");
-										DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetOption("COLZ");
-										DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->Write();	
-									}else{
-										std::cout<<"DT Would have segfaulted Writing: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-									}	
-								}else{
-									std::cout<<"cart values: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-									std::cout<<"DTWould have filled nonexistant dir on: " <<cart[0] <<" " <<cart[1]+1 <<" " <<1 <<" " <<0 <<" " <<0 <<" " <<0 <<std::endl;
-								}
-										
-							}
-						}
-						//For Sector Range, but all W, combine topology for event selection
-						if(cart[2] ==0 && ((cart[1]!=6 && cart[4]==0)||(cart[1]==6 && cart[4] > 0))){
-							//std::cout <<"          Trying to Write in " <<cart[0] <<" " <<cart[1]+1 <<" 0 " <<cart[3]+1 <<" 0"<<std::endl;
-							if(DT_dir_made[cart[0]][cart[1]+1][0][cart[3]+1][cart[4]]){
-								par_dt[cart[0]][cart[1]+1][0][cart[3]+1][cart[4]]->cd();//Get into those CUTS
-								par_dt[cart[0]][cart[1]+1][0][cart[3]+1][cart[4]]->cd();
-								//std::cout <<"  We are writing "<<std::endl;
-								if(DT_made_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]){
-									//std::cout<<"DT shouldn't have segfaulted Writing: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-									DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetXTitle("Momentum (GeV)");
-									DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetYTitle("Delta T (ns)");
-									DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetOption("COLZ");
-									DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->Write();	
-								}else{
-									std::cout<<"DT Would have segfaulted Writing: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-								}
-							}else{
-								std::cout<<"cart values: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-								std::cout<<"DTWould have filled nonexistant dir on: " <<cart[0] <<" " <<cart[1]+1 <<" " <<0 <<" " <<cart[3]+1 <<" " <<0 <<" " <<0 <<std::endl;
-							}		
-						}
-						//For topology Range, but all W, all sector
-						/*if(cart[2] ==0 && cart[3] == 0 && cart[1] == 6 && cart[4]!=0){
-							//std::cout <<"          Trying to Write in " <<cart[0] <<" " <<cart[1]+1 <<" 0 0 " <<cart[4]+1<<std::endl;
-							if(DT_dir_made[cart[0]][cart[1]+1][0][cart[3]+1][cart[4]]){//Changed cart[4] + 1 to just cart[4] 5/5/20
-								par_dt[cart[0]][cart[1]+1][0][cart[3]+1][cart[4]]->cd();//Get into those CUTS
-								par_dt[cart[0]][cart[1]+1][0][cart[3]+1][cart[4]]->cd();
-								//std::cout <<"  we are writing"<<std::endl;
-								if(DT_made_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]){
-									//std::cout<<"DT shouldn't have segfaulted Writing: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-									DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetXTitle("Momentum (GeV)");
-									DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetYTitle("Delta T (ns)");
-									DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->SetOption("COLZ");
-									DT_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]->Write();	
-								}else{
-									std::cout<<"DT Would have segfaulted Writing: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-								}
-							}else{
-								std::cout<<"cart values: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-								std::cout<<"DTWould have filled nonexistant dir on: " <<cart[0] <<" " <<cart[1]+1 <<" " <<cart[3]+1 <<" " <<0 <<" " <<0 <<" " <<0 <<std::endl;
-							}		
-						}*/
-	/*				}else{
-						std::cout<<"cart values: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-						std::cout<<"DTWould have filled nonexistant dir on: " <<cart[0] <<" " <<cart[1]+1 <<" " <<0 <<" " <<0 <<" " <<0 <<" " <<cart[4]+1 <<std::endl;
-					}
-								
-				}else{
-						std::cout<<"cart values: " <<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-						std::cout<<"DTWould have filled nonexistant dir on: " <<0 <<" " <<0 <<" " <<0 <<" " <<0 <<" " <<0 <<" " <<cart[4]+1 <<std::endl;
-				}
-			}
-		}
-		std::cout<<" Done" <<std::endl;
-	}
-}
-
-//Min CC Cuts
-void Histogram::CC_Make(std::shared_ptr<Environment> _envi){
-	
-	if(_envi->was_cc_plot() && !(_envi->was_sim())){
-		char hname[100];
-		std::vector<long> space_dims(6);
-		space_dims[0] = 6;  //Sector
-		space_dims[1] = 18; //Segment
-		space_dims[2] = 11;  //Cut
-		space_dims[3] = 4;  //Side of detector
-		space_dims[4] = 6;  //Topology
-		space_dims[5] = 2; //cut v anti
-
-		CartesianGenerator cart(space_dims);
-
-		while(cart.GetNextCombination()){
-			if((cart[2] == 10 && cart[4]!=0) || (cart[2]!=10 && cart[4] ==0)){//Making sure event selection lines up with topologies
-					sprintf(hname,"MinCC_%s_%s_%s_Seg%d_%s_%s",eid_cut[cart[2]],cut_ver[cart[5]],sec_list[cart[0]+1],cart[1]+1,CC_det_side[cart[3]],topologies[cart[4]]);
-					CC_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]] = std::make_shared<TH1F>(hname,hname, MinCCres, MinCCmin, MinCCmax);
-					CC_made_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]=true;//std::cout<<std::endl<<"Making CC plot: ";
-					//std::cout<<" Made CC plot: "<<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-			}
-			if(!CC_made_hist[cart[0]][cart[1]][cart[2]][cart[3]][cart[4]][cart[5]]){
-				//std::cout<<"Didn't Make CC plot: "<<cart[0] <<" " <<cart[1] <<" " <<cart[2] <<" " <<cart[3] <<" " <<cart[4] <<" " <<cart[5] <<std::endl;
-			}
-		}
-	}
-}
-
-void Histogram::CC_Fill(std::shared_ptr<Environment> _envi,int top, int sec, int segm, int nphe, int cut, int anti){
-	//std::cout<<std::endl <<"top: " <<top <<" sec: " <<sec <<" segm: " <<segm <<" nphe: " <<nphe <<" cut: " <<cut <<" anti: " <<anti <<std::endl;
-	//std::cout<<"filling plot";
-	//std::cout<<std::endl <<sec <<" " <<detect::cc_segment(segm) <<" " <<cut <<" " <<detect::cc_lrc(segm) <<" " <<top <<" " <<anti <<std::endl;
-	if(_envi->was_cc_plot() && !(_envi->was_sim())){
-		if((cut == 10 && top!=0) || (cut!=10 && top ==0)){
-			//if(((sec-1) < 6) && ((detect::cc_segment(segm)) <18)&& (cut < 11) && (detect::cc_lrc(segm)<4) && (top < 6) && (anti < 2)){
-			if(CC_made_hist[sec-1][detect::cc_segment(segm)][cut][detect::cc_lrc(segm)][top][anti]){
-				//CC_fill_hist[sec-1][detect::cc_segment(segm)][cut][detect::cc_lrc(segm)][top][anti]=true;
-				//if(CC_fill_hist[sec-1][detect::cc_segment(segm)][cut][detect::cc_lrc(segm)][top][anti] && ){
-					CC_hist[sec-1][detect::cc_segment(segm)][cut][detect::cc_lrc(segm)][top][anti]->Fill(nphe);
-					CC_hist[sec-1][detect::cc_segment(segm)][cut][3][top][anti]->Fill(nphe);
-				
-				//}
-				
-			}else{
-					std::cout<<std::endl <<"Would have segfaulted in CC filling";
-					std::cout<<std::endl <<"for CC Plot: " <<sec-1 <<" " <<detect::cc_segment(segm) <<" " <<cut <<" " <<detect::cc_lrc(segm) <<" " <<top <<" " <<anti <<std::endl;
-			}
-		}else{
-			//std::cout<<std::endl <<"You're trying to fill an event thing that doesn't correspond to the correct cut";
-		}
-	}
-
-}
-void Histogram::CC_Write(std::shared_ptr<Environment> _envi){
-	if(_envi->was_cc_plot() && !(_envi->was_sim())){
-		char dir_name[100]; 
-		TDirectory* CC_plot = _RootOutputFile->mkdir("CC_plots");
-		TDirectory* par_cc[6][12][5][6];
-		for(int i = 0; i< 6; i++){//Sectors
-			sprintf(dir_name,"CC_%s",sec_list[i+1]);
-			par_cc[i][0][0][0] = CC_plot->mkdir(dir_name);//By sector
-			//for(int j = 1; j < 19 ; j++){//Segments
-				//sprintf(dir_name,"CC_%s_Segm%d",sec_list[i+1],j);
-				//par_cc[i][j][0][0][0] = par_cc[i][0][0][0][0]->mkdir(dir_name);
-				for(int k = 1; k < 5; k++){//Part of CC hit
-					sprintf(dir_name,"CC_%s_%s",sec_list[i+1],CC_det_side[k-1]);
-					par_cc[i][0][k][0] = par_cc[i][0][0][0]->mkdir(dir_name);
-					for(int l = 1; l<12; l++){//EID Cuts
-						sprintf(dir_name,"CC_%s_%s_%s",sec_list[i+1],CC_det_side[k-1],eid_cut[l-1]);
-						par_cc[i][l][k][0] = par_cc[i][0][k][0]->mkdir(dir_name);
-						if(l == 11){
-							for(int m = 1; m<6; m++){//Topologies
-								sprintf(dir_name,"CC_%s_%s_%s_%s",sec_list[i+1],CC_det_side[k-1],eid_cut[l-1],topologies[m]);
-								par_cc[i][l][k][m] = par_cc[i][l][k][0]->mkdir(dir_name);
-							}
-						}
-					}
-				}
-			//}
-		}
-
-		CC_plot->cd();
-		for(int i = 0; i< 6; i++){//Sectors
-			//std::cout<<" Trying to Enter: " <<i <<std::endl;
-			par_cc[i][0][0][0]->cd();
-			//std::cout<<" Did do it Enter: " <<i <<std::endl;
-			for(int j = 0; j < 18 ; j++){//Segments
-				//std::cout<<" Trying to Enter: " <<i <<" " <<j <<std::endl;
-				//par_cc[i][0][0][0]->cd();
-				//std::cout<<" Did do it Enter: " <<i <<" " <<j <<std::endl;
-				for(int k = 1; k < 5; k++){//Part of CC hit
-					//std::cout<<" Trying to Enter: " <<i <<" " <<j <<" 0 " <<k <<std::endl;
-					par_cc[i][0][k][0]->cd();
-					//std::cout<<" Did do it Enter: " <<i <<" " <<j <<" 0 " <<k <<std::endl;
-					for(int l = 1; l<12; l++){//EID Cuts
-						//std::cout<<" Trying to Enter: " <<i <<" " <<j <<" "<<l <<" " <<k <<std::endl;
-						par_cc[i][l][k][0]->cd();
-						//std::cout<<" Did do it Enter: " <<i <<" " <<j <<" "<<l <<" " <<k <<std::endl;
-						for(int m = 0; m<6; m++){
-							for(int n = 0; n<2; n++){//cut v anti-cut
-								if(l == 11 && m!=0){//Event selected
-									//std::cout<<" Trying to Enter: " <<i <<" " <<j <<" "<<l <<" " <<k <<" " <<m <<std::endl;
-									par_cc[i][l][k][m]->cd();
-									//std::cout<<" Did do it Enter: " <<i <<" " <<j <<" "<<l <<" " <<k <<" " <<m <<std::endl;
-									CC_hist[i][j][l-1][k-1][m][n]->SetXTitle("num photoelectrons");
-									CC_hist[i][j][l-1][k-1][m][n]->SetYTitle("Counts");
-									CC_hist[i][j][l-1][k-1][m][n]->Write();
-								}else if( l != 11 && m==0){//Not event selected
-									//std::cout<<" Trying to Enter: " <<i <<" " <<j <<" "<<l <<" " <<k <<" " <<m <<std::endl;
-									par_cc[i][l][k][m]->cd();
-									//std::cout<<" Did do it Enter: " <<i <<" " <<j <<" "<<l <<" " <<k <<" " <<m <<std::endl;
-									CC_hist[i][j][l-1][k-1][m][n]->SetXTitle("num photoelectrons");
-									CC_hist[i][j][l-1][k-1][m][n]->SetYTitle("Counts");
-									CC_hist[i][j][l-1][k-1][m][n]->Write();
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	
-
-}
-//Missing Mass Cuts
-void Histogram::MM_Make(std::shared_ptr<Environment> _envi){
-	bool do_mm_plots = false;
-	for(int i = 0; i< 4; i++){
-		if(_envi->was_MM_plot(i)){
-			do_mm_plots = true;
-		}
-	}
-	if(do_mm_plots){
-		char hname[100];
-		std::vector<long> space_dims(4);
-		space_dims[0] = 4;  //Topology
-		space_dims[1] = 3;  //Cuts {pre, cut, anti}
-		space_dims[2] = 2; //squared vs linear
-		space_dims[3] = 2; //Fitting vs. not fitting plots
-
-		float MMmin = NAN; 
-		float MMmax = NAN; 
-
-		CartesianGenerator cart(space_dims);
-
-		while(cart.GetNextCombination()){
-			if(_envi->was_MM_plot(cart[0])){
-				sprintf(hname,"%s_MM_%s_%s_%s",topologies[cart[0]+1],basic_cut[cart[1]],MM_sq[cart[2]],fit_q[cart[3]]);
-				MMmin = MMxmin2[cart[0]];
-				MMmax = MMxmax2[cart[0]];
-				MM_hist[cart[0]][cart[1]][cart[2]][cart[3]] = std::make_shared<TH1F>(hname,hname,MMxres,MMmin,MMmax);
-			}
-		}
-	}
-}
-void Histogram::MM_Fill(std::shared_ptr<Environment> _envi,int top, float mm, int cut, int square,bool fit, float weight_){
-	if(_envi->was_MM_plot(top)){
-		if(!std::isnan(mm)){
-			MM_hist[top][cut][square][1]->Fill(mm,weight_);
-			if(fit){
-				MM_hist[top][cut][square][0]->Fill(mm,weight_);
-			}
-		}
-	}
-}
-void Histogram::MM_Write(std::shared_ptr<Environment> _envi){
-	bool do_mm_plots = false;
-	for(int i = 0; i< 4; i++){
-		if(_envi->was_MM_plot(i)){
-			do_mm_plots = true;
-		}
-	}
-	if(do_mm_plots){
-		char dir_name[100];
-		TDirectory * MM_plot = _RootOutputFile->mkdir("MM plots");
-		MM_plot->cd();
-		TDirectory * MM_dir[4][3][2];//top, cut, fit
-		for(int k = 0; k<2; k++){
-			for(int i = 0; i < 4; i++ ){
-				if(_envi->was_MM_plot(i)){
-					sprintf(dir_name,"MM %s %s",topologies[i+1],fit_q[k]);
-					MM_dir[i][0][k] = MM_plot->mkdir(dir_name);
-					for(int j = 1; j <3; j++){
-						sprintf(dir_name,"MM %s %s %s",topologies[i+1],MM_sq[j-1],fit_q[k]);
-						MM_dir[i][j][k] = MM_dir[i][0][k]->mkdir(dir_name);
-					}
-				}
-			}
-		}
-		for(int p = 0; p<2 ; p++){
-			for(int i = 0; i < 4; i++ ){//Topology without "All"
-				if(_envi->was_MM_plot(i)){
-					MM_dir[i][0][p]->cd();
-					for(int j = 1; j <3; j++){//linear vs squared
-						MM_dir[i][j][p]->cd();
-						for( int k = 0 ; k<3; k++){//Cuts
-							sprintf(dir_name,"MM %s (GeV %s)",MM_sq[j-1],MM_sq[j-1]);
-							MM_hist[i][k][j-1][p]->SetXTitle(dir_name);
-							MM_hist[i][k][j-1][p]->SetYTitle("Events");
-							MM_hist[i][k][j-1][p]->Write();
-						}
-					}
-				}
-			}
-		}
-	}
-	
-
-}
-
-void Histogram::XY_Make(std::shared_ptr<Environment> envi_){
-	char hname[100];
-	std::vector<long> space_dims(3);
-	space_dims[0] = 3;  //Detectors {CC,SC,EC}
-	space_dims[1] = 2;  //Simulation {Recon,Thrown}
-	space_dims[2] = 4; //species
-
-	CartesianGenerator cart(space_dims);
-	if(envi_->was_xy_plot()){
-		while(cart.GetNextCombination()){
-			if(cart[1]==0){
-				sprintf(hname,"XY_%s_%s",detectors[cart[0]+1],species[cart[2]]);
-				XY_hist[cart[0]][cart[1]][cart[2]]= std::make_shared<TH2F>(hname,hname,XYres,-XYmax[cart[0]],XYmax[cart[0]],XYres,-XYmax[cart[0]],XYmax[cart[0]]);
-			}else if(envi_->was_sim() && cart[0]==0){
-				sprintf(hname,"XY_%s_Thrown",species[cart[2]]);
-				XY_hist[cart[0]][cart[1]][cart[2]]= std::make_shared<TH2F>(hname,hname,XYres,-XYmax[cart[0]],XYmax[cart[0]],XYres,-XYmax[cart[0]],XYmax[cart[0]]);
-			}
-		}
-	}
-}
-
-void Histogram::XY_Fill(std::shared_ptr<Environment> envi_, int species_, float x_, float y_, int detector_ , bool thrown_){
-	//{1,2,3} -> {cc,sc,ed}
-	if(envi_->was_xy_plot()){
-		if(!std::isnan(x_) && !std::isnan(y_)){
-			if(thrown_ && envi_->was_sim()){
-				XY_hist[0][1][species_]->Fill(x_,y_);
-			}else if(!thrown_){
-				XY_hist[detector_][0][species_]->Fill(x_,y_);
-			}
-		}
-	}
-}
-
-void Histogram::XY_Write(std::shared_ptr<Environment> envi_){
-	if(envi_->was_xy_plot()){
-		char dir_name[100];
-		TDirectory * XY_plot = _RootOutputFile->mkdir("XY plots");
-		XY_plot->cd();
-		for(int l = 0; l < 4; l++){
-			for(int k = 0; k<3; k++){
-				XY_hist[k][0][l]->SetXTitle("X Position (mm)");//Check what these actual units are...
-				XY_hist[k][0][l]->SetYTitle("Y Position (mm)");
-				XY_hist[k][0][l]->Write();
-			}
-			if(envi_->was_sim()){
-				XY_hist[0][1][l]->SetXTitle("X Position (mm)");//Check what these actual units are...
-				XY_hist[0][1][l]->SetYTitle("Y Position (mm)");
-				XY_hist[0][1][l]->Write();
-			}
-		}
-	}
-}
-
-void Histogram::Fid_Det_Make(std::shared_ptr<Environment> envi_){
-	char hname[100];
-	std::vector<long> space_dims(3);//[3][4][7][2]
-	space_dims[0] = 3;  //Detectors {CC,SC,EC}
-	space_dims[1] = 4;  //Species
-	space_dims[2] = 7; //All, Sector
-
-	CartesianGenerator cart(space_dims);
-
-	if(envi_->was_fid_det_plot()){
-		while(cart.GetNextCombination()){
-			if(cart[2]==0){
-				if(envi_->was_sim()){
-					sprintf(hname,"%sFid_%s_Sector:All_Sim",detectors[cart[0]+1],species[cart[1]]);
-					Fid_Det_hist[cart[0]][cart[1]][cart[2]]= std::make_shared<TH2F>(hname,hname,FIDxres, FIDxmin, FIDxmax, FIDyres, FIDymin, FIDymax);
-				}else{
-					sprintf(hname,"%sFid_%s_Sector:All",detectors[cart[0]+1],species[cart[1]]);
-					Fid_Det_hist[cart[0]][cart[1]][cart[2]]= std::make_shared<TH2F>(hname,hname,FIDxres, FIDxmin, FIDxmax, FIDyres, FIDymin, FIDymax);
-				}
-			}else{
-				if(envi_->was_sim()){
-					sprintf(hname,"%sFid_%s_Sector:%d_Sim",detectors[cart[0]+1],species[cart[1]],cart[2]);
-					Fid_Det_hist[cart[0]][cart[1]][cart[2]]= std::make_shared<TH2F>(hname,hname,FIDxres, FIDxmin, FIDxmax, FIDyres, FIDymin, FIDymax);
-				}else{
-					sprintf(hname,"%sFid_%s_Sector:%d",detectors[cart[0]+1],species[cart[1]],cart[2]);
-					Fid_Det_hist[cart[0]][cart[1]][cart[2]]= std::make_shared<TH2F>(hname,hname,FIDxres, FIDxmin, FIDxmax, FIDyres, FIDymin, FIDymax);
-				}
-			}
-			
-		}
-	}
-}
-
-void Histogram::Fid_Det_Fill(std::shared_ptr<Environment> envi_, int species_, float theta_, float phi_, int sector_, int detector_){
-	if(envi_->was_fid_det_plot()){
-		if(!std::isnan(theta_) && !std::isnan(phi_)){
-			Fid_Det_hist[detector_][species_][sector_]->Fill(phi_,theta_);
-			Fid_Det_hist[detector_][species_][0]->Fill(phi_,theta_);
-		}
-	}
-}
-
-void Histogram::Fid_Det_Write(std::shared_ptr<Environment> envi_){
-	char dir_name[100];
-	if(envi_->was_fid_det_plot()){
-		TDirectory * FidD_plot = _RootOutputFile->mkdir("Fid Detector plots");
-		FidD_plot->cd();
-		TDirectory * FidD_dir[4][4];
-		for(int spe = 0; spe < 4; spe++){
-			FidD_dir[spe][0] = FidD_plot->mkdir(species[spe]);
-			FidD_dir[spe][0]->cd();
-			for(int det = 0; det < 3; det++){
-				sprintf(dir_name,"Det_%s_%s",detectors[det+1],species[spe]);
-				FidD_dir[spe][det+1] = FidD_dir[spe][0]->mkdir(dir_name);
-				FidD_dir[spe][det+1]->cd();
-				for(int sec = 0; sec < 7; sec++){
-				Fid_Det_hist[det][spe][sec]->SetXTitle("Phi (deg)");
-				Fid_Det_hist[det][spe][sec]->SetYTitle("Theta (deg)");
-				Fid_Det_hist[det][spe][sec]->Write();
-				}
-			}
-		}
-	}
-}
-
-
-
-
-void Histogram::Friend_Make(std::shared_ptr<Environment> _envi){
-	//If we decide we want to fill this stuff
-	if(_envi->was_Friend_plot()){
-		for(int i=0; i<5; i++){
-			for(int j=0; j<3; j++){
-				char hname[100];
-				sprintf(hname,"2#pi_off_proton_%s_%s",inter_had[j],topologies[i+1]);
-				Double_t xmin[7] = {_W_min,_Q2_min,_MM_min[j],_MM2_min[j],_theta_min,_alpha_min,_phi_min};
-				Double_t xmax[7] = {_W_max,_Q2_max,_MM_max[j],_MM2_max[j],_theta_max,_alpha_max,_phi_max};
-				
-				Friend[j][i] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,xmin,xmax);
-				//Friend[j][i] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,&{W_bins,_Q2_bins,MM1_bins,MM2_bins,theta_bins,alpha_bins,phi_bins});
-				Friend[j][i]->GetAxis(1)->Set(5,_Q2_bins);
-				//Friend[0]->Sumw2();//Must be called before error bars can be placed. 
-				sprintf(hname,"2#pi_off_proton_#rho_%s",topologies[i+1]);
-				Friend[1][i] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,xmin2,xmax2);
-				//Friend[1]->Sumw2();//Must be called before error bars can be placed. 
-				sprintf(hname,"2#pi_off_proton_#Delta^{0}_%s",topologies[i+1]);
-				Friend[2][i] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,xmin3,xmax3);
-				//Friend[2]->Sumw2();//Must be called before error bars can be placed. */ /*
-			}
-		}
-	}
-}
-
-int Histogram::Friend_W_binning(float W_){
-	int j = -1;
-	float top, bot; 
-	for(int i = 0; i < _Friend_bins[0]; i++){//constants.hpp
-		top = _W_min + (i+1)*((_W_max-_W_min)/_Friend_bins[0]);//constants.hpp
-	    bot = top - ((_W_max-_W_min)/_Friend_bins[0]); 
-		if(W_ < top && W_ >= bot){
-	    	j = i; 
-	 	}
-	}
-	return j; 
-}
-
-int Histogram::Friend_Q2_binning(float Q2_){
-  int j = -1;
-  float top, bot; 
-  for(int i = 0; i < _Friend_bins[1]; i++){//constants.hpp
-    top = _Q2_min + (i+1)*((_Q2_max-_Q2_min)/_Friend_bins[1]);//constants.hpp
-    bot = top - ((_Q2_max-_Q2_min)/_Friend_bins[1]); 
-    if(Q2_ < top && Q2_ >= bot){
-      j = i; 
-    }
-  }
-  return j; 
-}
-
-int Histogram::Friend_MM_binning(float MM_, int chan){
-  int j = -1;
-  float top, bot; 
-  for(int i = 0; i < _Friend_bins[2]; i++){//constants.hpp
-    top = _MM_min[chan] + (i+1)*((_MM_max[chan]-_MM_min[chan])/_Friend_bins[2]);//constants.hpp
-    bot = top - ((_MM_max[chan]-_MM_min[chan])/_Friend_bins[2]); 
-    if(MM_ < top && MM_ >= bot){
-      j = i; 
-    }
-  }
-  return j; 
-}
-
-int Histogram::Friend_MM2_binning(float MM_, int chan){
-  int j = -1;
-  float top, bot; 
-  for(int i = 0; i < _Friend_bins[3]; i++){//constants.hpp
-    top = _MM2_min[chan] + (i+1)*((_MM2_max[chan]-_MM2_min[chan])/_Friend_bins[3]);//constants.hpp
-    bot = top - ((_MM2_max[chan]-_MM2_min[chan])/_Friend_bins[3]); 
-    if(MM_ < top && MM_ >= bot){
-      j = i; 
-    }
-  }
-  return j; 
-}
-
-int Histogram::Friend_theta_binning(float theta_){
-  int j = -1;
-  float top, bot; 
-  for(int i = 0; i < _Friend_bins[4]; i++){//constants.hpp
-    top = _theta_min + (i+1)*((_theta_max-_theta_min)/_Friend_bins[4]);//constants.hpp
-    bot = top - ((_theta_max-_theta_min)/_Friend_bins[4]); 
-    if(theta_ < top && theta_ >= bot){
-      j = i; 
-    }
-  }
-  return j; 
-}
-
-int Histogram::Friend_alpha_binning(float alpha_){
-  int j = -1;
-  float top, bot; 
-  for(int i = 0; i < _Friend_bins[5]; i++){//constants.hpp
-    top = _alpha_min + (i+1)*((_alpha_max-_alpha_min)/_Friend_bins[5]);//constants.hpp
-    bot = top - ((_alpha_max-_alpha_min)/_Friend_bins[5]); 
-    if(alpha_ < top && alpha_ >= bot){
-      j = i; 
-    }
-  }
-  return j; 
-}
-
-int Histogram::Friend_phi_binning(float phi_){
-  int j = -1;
-  float top, bot; 
-  for(int i = 0; i < _Friend_bins[6]; i++){//constants.hpp
-    top = _phi_min + (i+1)*((_phi_max-_phi_min)/_Friend_bins[6]);//constants.hpp
-    bot = top - ((_phi_max-_phi_min)/_Friend_bins[6]); 
-    if(phi_ < top && phi_ >= bot){
-      j = i; 
-    }
-  }
-  return j; 
-}
-
-
-int * Histogram::Friend_binning( float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int channel){
-	int x[7]; 
-	int test = 0; 
-	bool in_region = false; 
-	//x[0] = top; //{pmiss,pipmiss,pimmiss,zeromiss,all}
-	x[0] = Friend_W_binning(W_);
-	x[1] = Friend_Q2_binning(Q2_);
-	x[2] = Friend_MM_binning(MM_,channel);
-	x[3] = Friend_MM2_binning(MM2_,channel);
-	x[4] = Friend_theta_binning(theta_);
-	x[5] = Friend_alpha_binning(alpha_);
-	x[6] = Friend_phi_binning(phi_);
-	/*std::cout<<std::endl <<"Filling Friend in channel " <<channel <<std::endl; 
-	std::cout<<"top = " <<top <<" bin: " <<x[0] <<std::endl;
-	std::cout<<"W = " <<W_ <<" bin: " <<x[1] <<std::endl;
-	std::cout<<"Q2 = " <<Q2_ <<" bin: " <<x[2] <<std::endl;
-	std::cout<<"MM = " <<MM_ <<" bin: " <<x[3] <<std::endl;
-	std::cout<<"theta = " <<theta_ <<" bin: " <<x[4] <<std::endl;
-	std::cout<<"alpha = " <<alpha_ <<" bin: " <<x[5] <<std::endl;
-	std::cout<<"phi = " <<phi_ <<" bin: " <<x[6] <<std::endl;
-	*/   /*
-	for(int i = 0; i < 7; i++){
-		if(x[i] >= 0){
-			test++;
-		}
-	}
-	if(test < 7){
-		x[0] = -1;
-	}
-	return x; 
-}
-
-void Histogram::Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_, int chan_){
-	std::cout<<std::endl <<"--Printing Friend Binning--" <<std::endl;
-	std::cout<<"W: " <<W_ <<" in bin: " <<Friend_W_binning(W_) <<std::endl;
-	std::cout<<"Q2: " <<Q2_ <<" in bin: " <<Friend_Q2_binning(Q2_) <<std::endl;
-	std::cout<<"MM: " <<MM_ <<" in bin: " <<Friend_MM_binning(MM_,chan_) <<std::endl;
-	std::cout<<"MM2: " <<MM2_ <<" in bin: " <<Friend_MM2_binning(MM2_,chan_) <<std::endl;
-	std::cout<<"Theta: " <<theta_ <<" in bin: " <<Friend_theta_binning(theta_) <<std::endl;
-	std::cout<<"Alpha: " <<alpha_ <<" in bin: " <<Friend_alpha_binning(alpha_) <<std::endl;
-	std::cout<<"Phi: " <<phi_ <<" in bin: " <<Friend_phi_binning(phi_) <<std::endl;
-	std::cout<<"Total Bin: " <<Friend_binning(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,0) <<std::endl;
-}
-
-bool Histogram::In_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_, int chan_){
-	bool pass = false;
-	if(Friend_W_binning(W_) >= 0){
-		if(Friend_Q2_binning(Q2_) >= 0){
-			if(Friend_MM_binning(MM_,chan_) >= 0){
-				if(Friend_MM2_binning(MM2_,chan_) >= 0){
-					if(Friend_theta_binning(theta_) >= 0){
-						if(Friend_alpha_binning(alpha_) >= 0){
-							if(Friend_phi_binning(phi_) >= 0){
-								pass = true;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return pass;
-}
-
-void Histogram::Friend_Fill(std::shared_ptr<Environment> _envi, int top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int chan_, float weight_){
-	if(_envi->was_Friend_plot()){
-		//std::cout<<std::endl <<"W:" <<W_ <<" Q2:" <<Q2_ <<" MM:" <<MM_ <<" theta:" <<theta_ <<" alpha:" <<alpha_ <<" phi:" <<phi_ <<" weight:" <<weight_;
-		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_) && !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
-			if(Histogram::In_Friend_Bin(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,chan_)){
-			//int *y = Friend_binning(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,chan_);
-			//std::cout<<std::endl <<"Y binning: " <<y;
-				//Histogram::Print_Friend_Bin(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,chan_);
-				Double_t x[7] = { W_, Q2_, MM_, MM2_, theta_, alpha_, phi_};
-			//if(y[0]>=0){
-				Friend[chan_][top_]->Fill(x,weight_);
-				//std::cout<<std::endl <<"Filling Friend with " <<x <<" with weight " <<weight_;
-			}
-		}
-	}
-}
-
-void Histogram::Friend_Write(std::shared_ptr<Environment> _envi){
-	/*if(_envi->Environment::was_Friend_plot()){
-		char dir_name[100];
-		TDirectory * Friend_plot = _RootOutputFile->mkdir("Friend plots");
-		Friend_plot->cd();
-		TH1D* MM_proj[3]; 
-		TH1D* alpha_proj[3];
-		TH1D* theta_proj[3];
-
-		for(int i = 0; i< 3; i++){
-			MM_proj[i] = Friend[i]->Projection(3);
-			alpha_proj[i] = Friend[i]->Projection(5);
-			theta_proj[i] = Friend[i]->Projection(4);
-			Friend[i]->Write(); 
-			MM_proj[i]->Draw();
-			MM_proj[i]->Write();
-			alpha_proj[i]->Draw();
-			alpha_proj[i]->Write();
-			theta_proj[i]->Draw();
-			theta_proj[i]->Write();
-		}
-	}*/		/*
-	if(_envi->Environment::was_Friend_plot()){
-		SparseFile->cd();
-		for(int i = 0; i< 3; i++){
-			for(int j = 0; j<5; j++){
-				Friend[i][j]->Write();
-			}
-		}
-	}
-}
-
-float Histogram::Friend_bin_reverse(int var_, int bin_, int channel_){//This only works for equally spaced bins. Will need rework when bins have varied sizes
-	float val = NAN;
-	float max = NAN;
-	float min = NAN;
-	int bins = -1; 
-	switch(var_){
-		/*case 0: 
-			max = 4.5;
-			min = -0.5;
-			bins = _Friend_bins[var_]; 
-		break;*/ //Top
-/*		case 0:
-			max = _W_max;
-			min = _W_min;
-			bins = _Friend_bins[var_] ; 
-		break;//W
-		case 1: 
-			max = _Q2_max;
-			min = _Q2_min;
-			bins = _Friend_bins[var_]; 
-		break;//Q2
-		case 2: 
-			max = _MM_max[channel_];
-			min = _MM_min[channel_];
-			bins = _Friend_bins[var_]; 
-		break;//MM
-		case 3: 
-			max = _MM2_max[channel_];
-			min = _MM2_min[channel_];
-			bins = _Friend_bins[var_]; 
-		break;//MM
-		case 4: 
-			max = _theta_max;
-			min = _theta_min;
-			bins = _Friend_bins[var_]; 
-		break;//Theta
-		case 5: 
-			max = _alpha_max;
-			min = _alpha_min;
-			bins = _Friend_bins[var_]; 
-		break;//Alpha
-		case 6: 
-			max = _phi_max;
-			min = _phi_min;
-			bins = _Friend_bins[var_]; 
-		break;//phi
-	}
-	for(int i = 0; i < bins; i++){
-		if(bin_ == i){
-			val = ((max - min)/bins)*(i + 0.5) + min; 
-		}
-	}
-	return val;
-}
-
-void Histogram::Cross_Make(std::shared_ptr<Environment> envi_){
-	char hname[100];
-	
-	/*
-	0 - Pmiss Only
-	1 - Pipmiss Only
-	2 - Pimmiss Only
-	3 - Zeromiss Only
-	4 - Zeromiss + 3
-	5 - Zeromiss + 2
-	6 - Zeromiss + 1
-	7 - Pmiss + Pipmiss
-	8 - Pmiss + Pimmiss
-	9 - Pipmiss + Pimmiss
-	10 - No Zeromiss + 3
-	11 - Multiples Pmiss
-	12 - Multiples Pipmiss
-	13 - Multiples Pimmiss
-	14 - Multiples Zeromiss
-	*/		/*
-	if(envi_->was_cross_plot()){
-		sprintf(hname,"Topology_Crossing_no_weights");
-		Cross_hist[0] = std::make_shared<TH1F>(hname,hname, 15, -0.5, 14.5);
-		sprintf(hname,"Topology_Crossing__weights");
-		Cross_hist[1] = std::make_shared<TH1F>(hname,hname, 15, -0.5, 14.5);
-	}
-}
-
-void Histogram::Cross_Fill(std::shared_ptr<Environment> envi_, int gevnt_[4], float weight_){
-	bool top_pass[4] = {false,false,false,false};
-	bool top_mult[4] = {false,false,false,false};
-	int num_hadmiss = 0;
-	int tot_evnt = 0; 
-	for(int i = 0; i< 4; i++){
-		if(gevnt_[i] > 0){
-			top_pass[i] = true;
-			if(i != 3){
-				num_hadmiss += 1; 
-			}
-			if(gevnt_[i] > 1){
-				top_mult[i] = true;
-			}
-		}
-		tot_evnt += gevnt_[i];
-	}
-	if(envi_->was_cross_plot()){
-		if(top_pass[0] && !top_pass[1] && !top_pass[2] && !top_pass[3] && !top_mult[0]){//Pmiss Only
-			Cross_hist[0]->Fill(0.0);
-			Cross_hist[1]->Fill(0.0,weight_);
-		}else if(!top_pass[0] && top_pass[1] && !top_pass[2] && !top_pass[3] && !top_mult[1]){//Pipmiss only
-			Cross_hist[0]->Fill(1.0);
-			Cross_hist[1]->Fill(1.0,weight_);
-		}else if(!top_pass[0] && !top_pass[1] && top_pass[2] && !top_pass[3] && !top_mult[2]){//Pimmiss only
-			Cross_hist[0]->Fill(2.0);
-			Cross_hist[1]->Fill(2.0,weight_);
-		}else if(!top_pass[0] && !top_pass[1] && !top_pass[2] && top_pass[3] && !top_mult[3]){//Zeromiss only
-			Cross_hist[0]->Fill(3.0);
-			Cross_hist[1]->Fill(3.0,weight_);
-		}else if(top_pass[0] && top_pass[1] && top_pass[2] && top_pass[3] && !top_mult[3]){//Zeromiss +3
-			Cross_hist[0]->Fill(4.0);
-			Cross_hist[1]->Fill(4.0,weight_);
-		}else if((num_hadmiss == 2) && top_pass[3] && !top_mult[3]){//Zeromiss +2
-			Cross_hist[0]->Fill(5.0);
-			Cross_hist[1]->Fill(5.0,weight_);
-		}else if((num_hadmiss == 1) && top_pass[3] && !top_mult[3]){//Zeromiss +1
-			Cross_hist[0]->Fill(6.0);
-			Cross_hist[1]->Fill(6.0,weight_);
-		}else if(top_pass[0] && top_pass[1]){//P + Pip
-			Cross_hist[0]->Fill(7.0);
-			Cross_hist[1]->Fill(7.0,weight_);
-		}else if(top_pass[0] && top_pass[2]){//P + Pip
-			Cross_hist[0]->Fill(8.0);
-			Cross_hist[1]->Fill(8.0,weight_);
-		}else if(top_pass[1] && top_pass[2]){//P + Pip
-			Cross_hist[0]->Fill(9.0);
-			Cross_hist[1]->Fill(9.0,weight_);
-		}else if(!top_pass[3] && (num_hadmiss == 3)){//P + Pip
-			Cross_hist[0]->Fill(10.0);
-			Cross_hist[1]->Fill(10.0,weight_);
-		}else if(top_mult[0]){//P + Pip
-			Cross_hist[0]->Fill(11.0);
-			Cross_hist[1]->Fill(11.0,weight_);
-		}else if(top_mult[1]){//P + Pip
-			Cross_hist[0]->Fill(12.0);
-			Cross_hist[1]->Fill(12.0,weight_);
-		}else if(top_mult[2]){//P + Pip
-			Cross_hist[0]->Fill(13.0);
-			Cross_hist[1]->Fill(13.0,weight_);
-		}else if(top_mult[3]){//P + Pip
-			Cross_hist[0]->Fill(14.0);
-			Cross_hist[1]->Fill(14.0,weight_);
-		}
-	}
-}
-
-void Histogram::Cross_Write(std::shared_ptr<Environment> envi_){
-	//char dir_name[100];
-	if(envi_->was_cross_plot()){
-		std::cout<<"Cross Plots: ";
-		TDirectory * Cross_plot = _RootOutputFile->mkdir("Cross Plots");
-		Cross_plot->cd();
-		Cross_hist[0]->SetXTitle("Event Topology Mixing");
-		Cross_hist[0]->SetYTitle("Events");
-		Cross_hist[0]->Write();
-		Cross_hist[1]->SetXTitle("Event Topology Mixing");
-		Cross_hist[1]->SetYTitle("Events");
-		Cross_hist[1]->Write();
-		std::cout<<"Done" <<std::endl;
-	}
-}
-
-void Histogram::Thrown_Make(std::shared_ptr<Environment> _envi){
-	//If we decide we want to fill this stuff
-	if(_envi->was_Friend_plot() && _envi->was_sim()){
-		char hname[100];
-		sprintf(hname,"Thrown_2#pi_off_proton_#Delta^{++}");
-		Double_t xmin1[7] = {_W_min,_Q2_min,_MM_min[0],_MM2_min[0],_theta_min,_alpha_min,_phi_min};
-		Double_t xmax1[7] = {_W_max,_Q2_max,_MM_max[0],_MM2_max[0],_theta_max,_alpha_max,_phi_max};
-		Double_t xmin2[7] = {_W_min,_Q2_min,_MM_min[1],_MM2_min[1],_theta_min,_alpha_min,_phi_min};
-		Double_t xmax2[7] = {_W_max,_Q2_max,_MM_max[1],_MM2_max[1],_theta_max,_alpha_max,_phi_max};
-		Double_t xmin3[7] = {_W_min,_Q2_min,_MM_min[2],_MM2_min[2],_theta_min,_alpha_min,_phi_min};
-		Double_t xmax3[7] = {_W_max,_Q2_max,_MM_max[2],_MM2_max[2],_theta_max,_alpha_max,_phi_max};
-		Thrown[0] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,xmin1,xmax1);
-		//Friend[0]->Sumw2();//Must be called before error bars can be placed. 
-		sprintf(hname,"Thrown_2#pi_off_proton_#rho");
-		Thrown[1] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,xmin2,xmax2);
-		//Friend[1]->Sumw2();//Must be called before error bars can be placed. 
-		sprintf(hname,"Thrown_2#pi_off_proton_#Delta^{0}");
-		Thrown[2] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,xmin3,xmax3);
-		//Friend[2]->Sumw2();//Must be called before error bars can be placed. 
-	}
-}
-
-//Fill this with Thrown data after having already made the Friend
-void Histogram::Thrown_Fill(std::shared_ptr<Environment> _envi, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int chan_, float weight_){
-	if(_envi->was_Friend_plot() && _envi->was_sim()){
-		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_)&& !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
-			if(Histogram::In_Friend_Bin(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,chan_)){
-			//int *y = Friend_binning(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,chan_);
-				Double_t x[7] = { W_, Q2_, MM_,MM2_, theta_, alpha_, phi_};
-			//if(y[0]>=0){
-				Thrown[chan_]->Fill(x,weight_);
-			}
-		}
-	}
-}
-
-void Histogram::Thrown_Write(std::shared_ptr<Environment> _envi){
-	//if(_envi->Environment::was_Friend_plot()){
-		SparseFile->cd();
-		for(int i = 0; i< 3; i++){
-			Thrown[i]->Write();
-		}
-	//}
-}
-
-
-void Histogram::Acceptance_Make(std::shared_ptr<Environment> _envi){
-	//If we decide we want to fill this stuff
-	if(_envi->was_Friend_plot() && _envi->was_sim()){
-		for(int i = 0; i< 5; i++){
-			char hname[100];
-			sprintf(hname,"2#pi_off_proton_#Delta^{++}_%s",topologies[i+1]);
-			Double_t xmin1[7] = {_W_min,_Q2_min,_MM_min[0],_MM2_min[0],_theta_min,_alpha_min,_phi_min};
-			Double_t xmax1[7] = {_W_max,_Q2_max,_MM_max[0],_MM2_max[0],_theta_max,_alpha_max,_phi_max};
-			Double_t xmin2[7] = {_W_min,_Q2_min,_MM_min[1],_MM2_min[1],_theta_min,_alpha_min,_phi_min};
-			Double_t xmax2[7] = {_W_max,_Q2_max,_MM_max[1],_MM2_max[1],_theta_max,_alpha_max,_phi_max};
-			Double_t xmin3[7] = {_W_min,_Q2_min,_MM_min[2],_MM2_min[2],_theta_min,_alpha_min,_phi_min};
-			Double_t xmax3[7] = {_W_max,_Q2_max,_MM_max[2],_MM2_max[2],_theta_max,_alpha_max,_phi_max};
-			Acceptance[0][i] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,xmin1,xmax1);
-			//Friend[0]->Sumw2();//Must be called before error bars can be placed. 
-			sprintf(hname,"2#pi_off_proton_#rho_%s",topologies[i+1]);
-			Acceptance[1][i] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,xmin2,xmax2);
-			//Friend[1]->Sumw2();//Must be called before error bars can be placed. 
-			sprintf(hname,"2#pi_off_proton_#Delta^{0}_%s",topologies[i+1]);
-			Acceptance[2][i] = std::make_shared<THnSparseD>(hname,hname,7,_Friend_bins,xmin3,xmax3);
-			//Friend[2]->Sumw2();//Must be called before error bars can be placed. 
-		}
-	}
-}
-
-//Fill this with Thrown data after having already made the Friend
-void Histogram::Acceptance_Fill(std::shared_ptr<Environment> _envi, int top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int chan_, float weight_){
-	if(_envi->was_Friend_plot() && _envi->was_sim()){
-		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_)&& !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
-			int *y = Friend_binning(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,chan_);
-			Double_t x[7] = { W_, Q2_, MM_,MM2_, theta_, alpha_, phi_};
-			if(y[0]>=0){
-				Acceptance[chan_][top_]->Fill(x,weight_);
-			}
-		}
-	}
-}
-
-
-void Histogram::Charge_Make(std::shared_ptr<Environment> envi_){
-	char hname[100];
-	sprintf(hname,"Normalized Faraday Cup Yield");
-	Charge_hist = std::make_shared<TH1F>(hname,hname, Charge_res, Charge_min, Charge_max);
-}
-
-void Histogram::Charge_Graph1(std::shared_ptr<Environment> envi_, std::vector<int> run_num_, std::vector<float> charge_, std::vector<float> run_size_){
-	std::string file_name;
-	  if(envi_->was_cluster()){
-	    std::string path = fs::current_path().string();
-	    //file_name = "/home/mclauchc/analysis/bin/analysis_runs/$name/$name.root";
-	    file_name = "$boop/integrated_charge.root";
-	    fun::replace(file_name,"$boop",path);
-	    //replace(file_name, "$name", a_file_name);
-	  }else{
-	    file_name = "/Users/cmc/Desktop/analysis/analysis_clas6/bin/test/integrated_charge.root";
-	    //file_name = "$name.root";
-	    //replace(file_name, "$name", a_file_name);
-	    //replace(file_name, "$name", a_file_name);
-	  }
-	OtherFile = std::make_shared<TFile>(file_name.c_str(),"RECREATE");
-	//TFile OtherFile = TFile(file_name.c_str(),"RECREATE");
-	def = new TCanvas("def1");
-	OtherFile->cd();
-	//OtherFile.cd();
-	int size = run_num_.size();
-	Float_t q_here[size];
-	Float_t run_n[size]; 
-	//Check to make sure they're the same size
-	if(run_num_.size() == charge_.size() && charge_.size() == run_size_.size()){
-		for(int i = 0; i<run_num_.size(); i++){
-			q_here[i]=charge_[i]/run_size_[i];
-			run_n[i]=run_num_[i];
-			std::cout<<"\nRun: " <<run_n[i] << " Norm Q: " <<q_here[i];
-		}
-
-		TGraph* IntCharge = new TGraph(size,run_n,q_here);
-		IntCharge->SetLineWidth(0);
-		IntCharge->SetMarkerColor(2);
-		IntCharge->SetMarkerStyle(21);
-		IntCharge->GetXaxis()->SetTitle("Run Number");
-		IntCharge->GetYaxis()->SetTitle("Normalized Charge (micro C/Event)");
-		std::cout<<"Faraday Graph: ";
-		TDirectory* Charge2_plot = OtherFile->mkdir("Normed Faraday Cup");
-		//TDirectory* Charge2_plot = OtherFile.mkdir("Normed Faraday Cup");
-		Charge2_plot->cd();
-		//Charge2_plot.cd();
-		IntCharge->SetTitle("Normalized Faraday Cup Charge per Run");
-		//IntCharge->SetPointX("Run Number");
-		//IntCharge->SetPointY("Faraday Cup Charge Normalized by Num Events");
-		IntCharge->Write();
-		//IntCharge.Write();
-		std::cout<<"Done" <<std::endl;
-	}else{
-		std::cout<<"\nRun size: " <<run_num_.size() <<"\tCharge Size: " <<charge_.size();
-	}
-	
-	
-}
-void Histogram::Charge_Graph2(std::shared_ptr<Environment> envi_, std::vector<std::vector<float>> run_num_, std::vector<std::vector<float>> charge_, std::vector<std::vector<float>> run_size_){
-	std::string file_name;
-	std::vector<float> run_num; 
-	std::vector<float> charge; 
-	std::vector<float> run_size;
-	char hname[100];
-	
-	if(!envi_->was_sim()){
-		sprintf(hname,"Normalized_Faraday_Cup_Yield");
-		Find_Gold = std::make_shared<TH1F>(hname,hname, 80, 0.00002, 0.00006);
-
-
-		  if(envi_->was_cluster()){
-		    std::string path = fs::current_path().string();
-		    //file_name = "/home/mclauchc/analysis/bin/analysis_runs/$name/$name.root";
-		    file_name = "$boop/integrated_charge.root";
-		    fun::replace(file_name,"$boop",path);
-		    //replace(file_name, "$name", a_file_name);
-		  }else{
-		    file_name = "/Users/cmc/Desktop/analysis/analysis_clas6/bin/test/integrated_charge.root";
-		    //file_name = "$name.root";
-		    //replace(file_name, "$name", a_file_name);
-		    //replace(file_name, "$name", a_file_name);
-		  }
-		OtherFile = std::make_shared<TFile>(file_name.c_str(),"RECREATE");
-		//TFile OtherFile = TFile(file_name.c_str(),"RECREATE");
-		def = new TCanvas("def1");
-		OtherFile->cd();
-		//OtherFile.cd();
-		
-		//Check to make sure they're the same size
-		if(run_num_.size() == charge_.size() && charge_.size() == run_size_.size()){
-			for(int j=0; j<run_num_.size(); j++){
-				if(run_num_[j].size() == charge_[j].size() && charge_[j].size() == run_size_[j].size()){
-					for(int k=0; k<run_num_[j].size(); k++){
-						run_num.push_back(run_num_[j][k]);
-						charge.push_back(charge_[j][k]);
-						run_size.push_back(run_size_[j][k]);
-					}
-				}
-			}
-		}
-		int size = run_num.size();
-		Float_t q_here[size];
-		Float_t run_n[size]; 
-		if(run_num.size() == charge.size() && charge.size() == run_size.size()){
-			for(int i = 0; i<run_num.size(); i++){
-				q_here[i]=charge[i]/run_size[i];
-				run_n[i]=run_num[i];
-				//std::cout<<"\nRun: " <<run_n[i] << " Norm Q: " <<q_here[i];
-				Find_Gold->Fill(q_here[i]);
-			}
-
-			TGraph* IntCharge = new TGraph(size,run_n,q_here);
-			IntCharge->SetLineWidth(0);
-			IntCharge->SetMarkerColor(2);
-			IntCharge->SetMarkerStyle(21);
-			IntCharge->GetXaxis()->SetTitle("Run Number");
-			IntCharge->GetYaxis()->SetTitle("Normalized Charge (micro C/Event)");
-			//std::cout<<"Faraday Graph: ";
-			TDirectory* Charge2_plot = OtherFile->mkdir("Normed Faraday Cup");
-			//TDirectory* Charge2_plot = OtherFile.mkdir("Normed Faraday Cup");
-			Charge2_plot->cd();
-			//Charge2_plot.cd();
-			IntCharge->SetTitle("Normalized Faraday Cup Charge per Run");
-			//IntCharge->SetPointX("Run Number");
-			//IntCharge->SetPointY("Faraday Cup Charge Normalized by Num Events");
-			Find_Gold->SetTitle("Normalized Faraday Cup Charge");
-			IntCharge->Write();
-			Find_Gold->Write();
-			//IntCharge.Write();
-			std::cout<<"Done" <<std::endl;
-		}else{
-			std::cout<<"\nRun size: " <<run_num_.size() <<"\tCharge Size: " <<charge_.size();
-		}
-
-		
-		
-	}
-}
-
-void Histogram::Charge_Fill(std::shared_ptr<Environment> envi_, int run_num_, float charge_, int events_){
-	if(charge_ > 0){
-		Charge_hist->Fill(run_num_,(float)events_/charge_);//treat the events/charge as a weight
-	}else{
-		Charge_hist->Fill(run_num_,0.0);//treat the events/charge as a weight
-	}
-	
-}
-
-void Histogram::Charge_Write(std::shared_ptr<Environment> envi_){
-	std::cout<<"Faraday Plot: ";
-	TDirectory* Charge_plot = _RootOutputFile->mkdir("Faraday Cup");
-	Charge_plot->cd();
-	Charge_hist->SetXTitle("Run Number");
-	Charge_hist->SetYTitle("Faraday Cup Charge Normalized by Num Events");
-	Charge_hist->Write();
-	std::cout<<"Done" <<std::endl;
-}
-
-
-/*
-void Histogram::WQ2_sf_Make(std::shared_ptr<Environment> envi_){
-	char hname[100];
-	sprintf(hname,"W_Q2_sf_elep<3.5GeV"); //constants.h and otherwise writing the specific cut to the right plot
-	WQ2_hist_sf[0] = std::make_shared<TH2F>( hname, hname, WQxres, WQxmin, WQxmax, WQyres, WQymin, WQymax); // constants.h
-	sprintf(hname,"W_Q2_sf_elep>3.5GeV"); //constants.h and otherwise writing the specific cut to the right plot
-	WQ2_hist_sf[1] = std::make_shared<TH2F>( hname, hname, WQxres, WQxmin, WQxmax, WQyres, WQymin, WQymax); // constants.h
-}
-void Histogram::WQ2_sf_Fill(std::shared_ptr<Environment> envi_, float W_, float Q2_, float p_){
-	if(p_ > 3.5){
-		WQ2_hist_sf[1]->Fill(W_,Q2_);
-	}else if(p_ < 3.5){
-		WQ2_hist_sf[0]->Fill(W_,Q2_);
-	}else{
-		std::cout<<"what p is getting bad stuff? " <<p_ <<std::endl;
-	}
-}
-void Histogram::WQ2_sf_Write(std::shared_ptr<Environment> envi_){
-	char dir_name[100];
-	TDirectory* dir_WQ2_sf = _RootOutputFile->mkdir("W vs. Q2 for simSF");
-	dir_WQ2_sf->cd();
-	for(int i = 0; i < 2; i++){
-		WQ2_hist_sf[i]->SetXTitle("W (GeV)");
-		WQ2_hist_sf[i]->SetYTitle("Q^{2} (GeV^{2}");
-		WQ2_hist_sf[i]->SetOption("Colz");
-		WQ2_hist_sf[i]->Write();
-	}
-}*/
-
-/*
-void Histogram::Event_Particle_Hist(std::shared_ptr<Environment> envi_, const Particle p1, float W_, int top_, int par_, bool pass_){
-	std::cout<<"		Filling Particle Event" <<std::endl;
-	int pass = -1; 
-	if(pass_){
-		pass = 0; 
-	}else{
-		pass = 1; 
-	}
-	//Electron
-	if(pass != -1){
-		if(par_ == 0 && _pid[0]){
-			std::cout<<"			Electron cc_segm: " <<_cc_seg <<std::endl;
-			Fid_Fill(envi_,top_+1,_theta,_phi,0,10,pass,W_,_p);
-			SF_Fill(envi_,top_+1,_p,_etot,10,pass,W_,physics::get_sector(_phi));
-			CC_Fill(envi_,top_+1,physics::get_sector(_phi),_cc_seg,_nphe,10,pass);
-		}else if(par_ ==0){
-			std::cout<<"			Electron issue, friend" <<std::endl;
-		}
-		if(par_ != 0 && _pid[par_]){
-			Fid_Fill(envi_,top_+1,_theta,_phi,par_,6,pass,W_,_p);
-			DT_Fill(envi_,top_+1,par_,_p,_dt[par_],6,pass,W_,physics::get_sector(_phi));
-		}else if(par_ !=0){
-			std::cout<<"			Hadron issue, friend" <<std::endl;
-		}
-	}
-}
-/*
-void Histogram::Fill_EID(std::shared_ptr<Particle> par, float W_, float Q2_){
-	bool san, fid, cc, sf;
-	if(par->Particle::Is_sanity_pass(0)){
-		Histogram::WQ2_Fill(0,1,W_,Q2_);
-		Histogram::Fid_Fill(0,par->Particle::par_theta(),par->Particle::par_phi(),0,1,0,W_,par->Particle::par_p());
-		Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),1,0,W_,sector[0]);
-		Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),1,0);
-		if(par->Particle::Is_fid_pass(0)){
-			fid = true;
-			Histogram::WQ2_Fill(0,2,W_,Q2_);
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,2,0,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),2,0,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),2,0);
-		}else{
-			fid = false;
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,2,1,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),2,1,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),2,1);
-		}
-		if(par->Particle::Is_cc_pass()){
-			cc = true;
-			Histogram::WQ2_Fill(0,4,W_,Q2_);
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,4,0,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),4,0,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),4,0);
-		}else{
-			cc = false;
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,4,1,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),4,1,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),4,1);
-		}
-		if(par->Is_sf_pass() && par->Is_min_cc_pass()){
-			sf = true;
-			Histogram::WQ2_Fill(0,3,W_,Q2_);
-			Histogram::Fid_Fill(0,par->Particle::par_theta(),par->Particle::par_phi(),0,3,0,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),3,0,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),3,0);
-		}else{
-			sf = false;
-			Histogram::Fid_Fill(0,par->Particle::par_theta(),par->Particle::par_phi(),0,3,1,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),3,1,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),3,1);
-		}
-		if(fid && sf){
-			Histogram::WQ2_Fill(0,5,W_,Q2_);
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,5,0,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),5,0,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),5,0);
-		}else{
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,5,1,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),5,1,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),5,1);
-		}
-		if(fid && cc){
-			Histogram::WQ2_Fill(0,6,W_,Q2_);
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,6,0,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),6,0,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),6,0);
-		}else{
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,6,1,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),6,1,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),6,1);
-		}
-		if(sf && cc){
-			Histogram::WQ2_Fill(0,7,W_,Q2_);
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,7,0,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),7,0,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),7,0);
-		}else{
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,7,1,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),7,1,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),7,1);
-		}
-		if(sf && fid && cc){
-			Histogram::WQ2_Fill(0,8,W_,Q2_);
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,8,0,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),8,0,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),8,0);
-			_elec = physics::Make_4Vector(par->Particle::par_p(),data->Branches::cx(0),data->Branches::cy(0),data->Branches::cz(0),me);
-			good_electron++;
-		}else{
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,8,1,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),8,1,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),8,1);
-		}
-		if(par->Particle::Bank()==ELECTRON){
-			Histogram::WQ2_Fill(0,9,W_,Q2_);
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,9,0,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),9,0,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),9,0);
-		}
-		else{
-			Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,9,1,W_,par->Particle::par_p());
-			Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),9,1,W_,sector[0]);
-			Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),9,1);
-		}
-	}else{
-		san = false;
-		Histogram::Fid_Fill(0,Particle::par_theta(),par->Particle::par_phi(),0,1,1,W_,par->Particle::par_p());
-		Histogram::SF_Fill(0,par->Particle::par_p(),par->Particle::par_etot(),1,1,W_,sector[0]);
-		Histogram::CC_Fill(0,par->Particle::par_cc_sect(),par->Particle::par_cc_segm(),par->Particle::par_nphe(),1,1);
-	}
-}
-
-void Histogram::Fill_HID(std::shared_ptr<Particle> par){
-
-}*/
-

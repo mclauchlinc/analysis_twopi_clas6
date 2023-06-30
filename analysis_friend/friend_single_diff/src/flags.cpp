@@ -213,6 +213,12 @@ Flags::Flags(){}
 				std::cout<<"\tIDed: Sim No Rad File2 is " <<_sim_no_rad_loc2 <<"\n"; 
 			}
 		}
+        if(str_len >= 13){
+            if(str.substr(0,13) == _no_loc_holes_){
+				_has_localized_holes = false;
+				std::cout<<"\tIDed: Sim No Rad File2 is " <<_sim_no_rad_loc2 <<"\n"; 
+			}
+        }
 	}
 
 	void Flags::Plot_Flag(std::string str_){

@@ -122,10 +122,10 @@ static float _W_res_ = 0.025;
 static float _Q2_min_ = 2.0;
 static float _Q2_max_ = 5.0;
 static float _Q2_bins_[6] = {2.0,2.4,3.0,3.5,4.2,5.0};
-static float _MM_min_[3] = {_W_min_-_mpi_,_W_min_-_mp_,_W_min_-_mpi_};//{1.1,0.3,1.1};//Changed 5/5/23
+static float _MM_min_[3] = {1.1000,0.2780,1.1000};//{1.1,0.3,1.1};//Changed 5/5/23
 static float _MM_max_[3] = {_W_max_-_mpi_,_W_max_-_mp_,_W_max_-_mpi_};//{2.0,1.1,2.0};//Changed 5/5/23
 static int _MM_bins_ = 14;
-static float _MM2_min_[3] = {_W_min_-_mp_,_W_min_-_mpi_,_W_min_-_mpi_};//{0.3,1.1,1.1};//Changed 5/5/23
+static float _MM2_min_[3] = {0.2780,1.1000,1.1000};//{0.3,1.1,1.1};//Changed 5/5/23
 static float _MM2_max_[3] = {_W_max_-_mp_,_W_max_-_mpi_,_W_max_-_mpi_};//{1.1,2.0,2.0};//Changed 5/5/23
 static int _theta_bins_ = 10;
 static float _theta_min_ = 0.0;
@@ -320,106 +320,22 @@ protected:
 	TH2F_ptr_6d _Delta_hist;
 
 	//THnSparse Friend Histograms
-	THnSparseD* _Friend[3][5];//[30][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	THnSparseD* _Friend1[3][5];//[30][5];//For positive Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	THnSparseD* _Friend2[3][5];//[30][5];//For negative Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	THnSparseD* _Thrown[3];//[30][5];//Variable Sets
+	THnSparseD* _Friend[3][29][5];//Only doing mall for memory issues 6-28-23[5];//[30][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Friend1[3][29][5];//Only doing mall for memory issues 6-28-23[5];//[30][5];//For positive Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Friend2[3][29][5];//Only doing mall for memory issues 6-28-23[5];//[30][5];//For negative Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	THnSparseD* _Thrown[3][29][5];//[30][5];//Variable Sets
 	
-	TH1D* _MM1_Dist[3][5];
-	TH1D* _MM2_Dist[3][5];
-	TH1D* _Theta_Dist[3][5];
-	TH1D* _Alpha_Dist[3][5];
-	TH1D* _Phi_Dist[3][5];
-	
-	//THnSparseD* _W_Thrown[3][30][6];//Variable Sets
-	//THnSparseD* _Weight_Sum[3][5][30][6];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	//THnSparseD* _Weight_Sum_Thrown[3][5][30][6];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	//TH1D_ptr_6d _Friend_Phi;
-	//TH1D_ptr_6d _Friend1_Phi;
-	//TH1D_ptr_6d _Friend2_Phi;
-	//TH1D_ptr_5d _Thrown_Phi;
-	
-	//Weighted with 
-	//THnSparseD* _W_Friend[3][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	//THnSparseD* _W_Friend1[3][5];//For positive helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
-	//THnSparseD* _W_Friend2[3][5];//For negative helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
+	//TH1D* _W_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	//TH1D* _Q2_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _MM1_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _MM2_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _Theta_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _Alpha_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _Phi_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
 
 
 	TH1F_ptr_3d _PCorr_Check_hist;
 
-	//TH2F_ptr_5d _Made_Fid_hist;//[7][4][11][30][26][6][2][2];//sector, species, cut, W binning, p binning, topology, anti, weight
-	/*TH2F_ptr _SF_hist[10][30][7][6][2];//cuts, W Binning, Sector, topology, anti, weight
-	TH2F_ptr _Delta_hist[4][7][30][7][6][2]; //particle, cuts, W binning, sector, topology, anti, weight
-	TH1F_ptr _CC_hist[6][18][11][4][6][2]; //Sector, segment, cut, side of detector, topology, anti, weight
-	TH1F_ptr _MM_hist[4][3][2][2];//topology, cut, squared v linear, fitting vs. not fitting plots, weight
-	TH1F_ptr _Cross_hist[2]; //Showing how many events counted in mulitiple topologies,weight
-	TH2F_ptr _Delta_2_hist[4][48][7][6][6][2][2];////particle, paddle, cuts, sector, topology, anti, weight
-
-	//Other Misc
-	TH1F_ptr Charge_hist;
-	double Charge_max = 31500.5;
-	double Charge_min = 30499.5;
-	int Charge_res = 1001;
-
-	//Checking Detector Hits
-	TH2F_ptr XY_hist[3][2][4];//Show distribution of hits in detector systems {detector systems},{recon/thrown},species
-	TH2F_ptr Fid_Det_hist[3][4][7];//{cc,sc,ec},{species},{all,sector}{recon/thrown}
-
-	bool Fid_made_hist[7][4][11][30][26][6][2][2];
-	bool Fid_fill_hist[7][4][11][30][26][6][2][2];
-	bool Fid_write_hist[7][4][11][30][26][6][2][2];
-
-	bool CC_made_hist[6][18][11][4][6][2];
-	bool CC_fill_hist[6][18][11][4][6][2];
-	bool CC_write_hist[6][18][11][4][6][2];
-
-	bool DT_made_hist[4][7][30][7][6][2];//Added one to the second bin for cuts to all for the electron WQ2
-	bool DT_fill_hist[4][7][30][7][6][2];
-	bool DT_dir_hist[4][7][30][7][6][2];
-	bool DT_dir_made[4][8][2][8][6];
-	bool DT_2_made_hist[4][48][7][7][6][2];//Added one to the second bin for cuts to all for the electron WQ2
-	bool DT_2_fill_hist[4][48][7][7][6][2];
-	bool DT_2_dir_hist[4][48][7][7][6][2];
-	bool DT_2_dir_made[4][48][8][8][6];
-
-	bool WQ2_made_hist[11][6][2][2];
-	bool WQ2_dir_made[11][6][2];
-
-	THn_ptr Friend[3][5];//This will be the 7 dimensional histogram from which I can project out different pieces
-
-	Int_t _Friend_bins[7] = {29,5,14,14,10,10,10}; //topology, W, Q2, MM1, MM2, Theta, Alpha, Phi
-	THn_ptr Friend_5d[3][5][29][5];//[_Friend_bins[0]][_Friend_bins[1]];//These are the 5D histograms separated into W,Q2 bins
-	float _W_min = 1.4;
-	float _W_max = 2.125;
-	float _Q2_min = 2.0;
-	float _Q2_max = 5.0;
-	float _Q2_bins[6] = {2.0,2.4,3.0,3.5,4.2,5.0};
-	float _MM_min[3] = {1.1,0.3,1.1};
-	float _MM_max[3] = {2.0,1.1,2.0};
-	float _MM2_min[3] = {0.3,1.1,1.1};
-	float _MM2_max[3] = {1.1,2.0,2.0};
-	float _theta_min = 0.0;
-	float _theta_max = 180.0;
-	float _alpha_min = 0.0;
-	float _alpha_max = 360.;
-	float _phi_min = 0.0; 
-	float _phi_max = 360.0;
-
-	THn_ptr Thrown[3];
-	THn_ptr Reconstructed[3][5];
-	THn_ptr Acceptance[3][5]; 
-	THn_ptr Bin_Sizes[3];
-	THn_ptr Virtual_Flux[3];
-	//Int_t _Accepance_bins[7] = {5,29,5,14,10,10,10}; //topology, W, Q2, MM, Theta, Alpha, Phi
-
-	//Exploring SF valley of death
-	TH2F_ptr WQ2_hist_sf[2];
-	//TGraph_ptr IntCharge;
-	std::shared_ptr<TFile> OtherFile;
-	TH1F_ptr Find_Gold;
-
-	//TGraph_ptr NormFaraCharge;
-	*/
 
 public:
 	Histogram(std::shared_ptr<Flags> flags_);

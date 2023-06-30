@@ -178,7 +178,9 @@ protected:
 	
 public:
 	Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
+    Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
 	void Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
+    void Extract_7d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
 	void Extract_Bin_Info(Flags flags_);//Extract binning information for 7 and 5d histograms
 	void Sparse_7to5(Flags flags_);//Convert 7d histograms to 5d histograms
     void Rad_Corr();
