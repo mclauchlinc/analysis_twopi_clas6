@@ -162,23 +162,42 @@ protected:
     */
 
     THnSparseD *_exp_data_5d[29][5];
+	THnSparseD *_exp_data_5d_pos[29][5];
+	THnSparseD *_exp_data_5d_neg[29][5];
     THnSparseD *_sim_data_5d[29][5];
     THnSparseD *_empty_5d[29][5];
+	THnSparseD *_empty_5d_pos[29][5];
+	THnSparseD *_empty_5d_neg[29][5];
     THnSparseD *_thrown_5d[29][5];
     THnSparseD *_thrown_no_rad_5d[29][5];
     THnSparseD *_sim_holes_5d[29][5];
     THnSparseD *_sim_holes_tmp_5d[29][5];
     THnSparseD *_N_holes_5d[29][5];
+	THnSparseD *_N_holes_5d_pos[29][5];
+	THnSparseD *_N_holes_5d_neg[29][5];
+	THnSparseD *_N_holes_fifty_5d[29][5];
+	THnSparseD *_N_holes_fifty_5d_pos[29][5];
+	THnSparseD *_N_holes_fifty_5d_neg[29][5];
     THnSparseD *_acceptance_5d[29][5];
-    THnSparseD *_N_5d[29][5];
+
+	THnSparseD *_scale_exp_5d[29][5];
+	THnSparseD *_scale_exp_5d_pos[29][5];
+	THnSparseD *_scale_exp_5d_neg[29][5];
+	THnSparseD *_scale_sim_5d[29][5];
+	THnSparseD *_scale_sim_5d_pos[29][5];
+	THnSparseD *_scale_sim_5d_neg[29][5];
+	THnSparseD *_scale_5d[29][5];
+	THnSparseD *_scale_5d_pos[29][5];
+	THnSparseD *_scale_5d_neg[29][5];
+    //THnSparseD *_N_5d[29][5];
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
 	TH1D* _phi_bin_sizes;//Width of phi bins 
 
-	TH2D* _rad_corr;//Radiative Corrections
-	double_2d _rad_corr_array;
-	double _rad_corr_mu;//integral thrown over integral thrown no-radiative effects
-	double_2d _rad_error;//Statistical Error for radiative corrections
+	//TH2D* _rad_corr;//Radiative Corrections
+	//double_2d _rad_corr_array;
+	//double _rad_corr_mu;//integral thrown over integral thrown no-radiative effects
+	//double_2d _rad_error;//Statistical Error for radiative corrections
 	
 
 	//Topology Yields
@@ -191,15 +210,16 @@ protected:
 
 	
 public:
-	Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
+	//Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
     Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
-	void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
+	//void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
     void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
 	//void Extract_Bin_Info(Flags flags_);//Extract binning information for 7 and 5d histograms
 	//void Sparse_7to5(Flags flags_);//Convert 7d histograms to 5d histograms
-    void Rad_Corr();
-	void Single_Diff(Flags flags_);//Making Single Differential Histograms
-    float W_low(int i_);
+    //void Rad_Corr();
+	//void Single_Diff(Flags flags_);//Making Single Differential Histograms
+    void Localized_Holes(Flags flags_, int min_dist_, int max_dist_);//Localized Holes!
+	float W_low(int i_);
     float W_top(int i_);
     float Q2_low(int i_);
     float Q2_top(int i_);
