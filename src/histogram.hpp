@@ -333,6 +333,14 @@ protected:
 	TH1D* _Alpha_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
 	TH1D* _Phi_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
 
+	//TH1D* _W_Dist_thr[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	//TH1D* _Q2_Dist_thr[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _MM1_Dist_thr[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _MM2_Dist_thr[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _Theta_Dist_thr[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _Alpha_Dist_thr[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+	TH1D* _Phi_Dist_thr[3][29][5];//Only doing mall for memory issues 6-28-23[5];
+
 
 	TH1F_ptr_3d _PCorr_Check_hist;
 

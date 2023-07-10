@@ -442,12 +442,17 @@ Flags::Flags(){}
 	}
 
 	double Flags::L(int i_){
-		double l_base = 1.36252*pow(10.0,12);// (1/microbarns)*(1/Coulombs) 
+        if(i_==0){
+			return _luminosity; 
+		}else if(i_==1){
+			return _luminosity2;
+		}
+		/*double l_base = 1.36252*pow(10.0,12);// (1/microbarns)*(1/Coulombs) 
 		if(i_==0){
 			return _charge1*l_base; 
 		}else if(i_==1){
 			return _charge2*l_base;
-		}
+		}*/
 	}
 
 	bool Flags::Plot_Polarization(int i_){

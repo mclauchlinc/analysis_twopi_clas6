@@ -803,7 +803,7 @@ float physics::Ev_MM(int top, TLorentzVector k0, TLorentzVector p1, TLorentzVect
 	//}
 	switch(top){
 		case 0: event_MM = physics::MM_2(p2,p3); break;//looking for pim -> pro/pip
-		case 1: event_MM = physics::MM_2(p3,p4); break;//looking for pro -> pro/pip//Changed 1/22/21
+		case 1: event_MM = physics::MM_2(p3,p4); break;//looking for pro -> pip/pim//Changed 7-10-23//Changed 1/22/21
 		case 2: event_MM = physics::MM_2(p2,p4); break;//looking for pip -> pro/pip
 	}
 	return event_MM;
@@ -816,9 +816,9 @@ float physics::Ev_MM2(int top, TLorentzVector k0, TLorentzVector p1, TLorentzVec
 	//	physics::COM_gp(k0,p1,p2,p3,p4);
 	//}
 	switch(top){
-		case 0: event_MM = physics::MM_2(p3,p4); break;//looking for pim -> pro/pip
-		case 1: event_MM = physics::MM_2(p2,p3); break;//looking for pro -> pip/pim
-		case 2: event_MM = physics::MM_2(p2,p3); break;//looking for pip -> pro/pim
+		case 0: event_MM = physics::MM_2(p3,p4); break;//looking for pim -> pip/pim
+		case 1: event_MM = physics::MM_2(p2,p4); break;//looking for pro -> pro/pim
+		case 2: event_MM = physics::MM_2(p2,p3); break;//looking for pip -> pro/pip
 	}
 	return event_MM;
 }

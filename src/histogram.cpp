@@ -4071,6 +4071,7 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 	if(flags_->Make_Friend()){
 		std::cout<<"Making Friend Histograms\n";
 		char hname[100];
+		char hname2[100];
 		Int_t bins[7];
 		Int_t bins_5d[5];
 		std::vector<int> bins_vec = Histogram::Friend_Bin_Sizes(flags_);//A Bit redundant, but I believe it needs to be an Int array rather than a vector
@@ -4102,10 +4103,13 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 					for(int l=0; l<5; l++){
 						if(l>1){
 							sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_friend_pars_[l+2],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+							sprintf(hname2,"Thrown_%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_friend_pars_[l+2],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
 						}else if(l==0){
 							sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM1_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+							sprintf(hname2,"Thrown_%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM1_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
 						}else if(l==1){
 							sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM2_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+							sprintf(hname2,"Thrown_%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM2_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
 						}
 							
 						//used to be [i][j] for topologies
@@ -4120,28 +4124,43 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 							//case 2:
 							case 0: 
 								_MM1_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM_min_[i],_MM_max_[i]);
+								if(flags_->Flags::Sim()){
+									_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM_min_[i],_MM_max_[i]);
+								}
 							break;
 							//case 3:
 							case 1: 
 								_MM2_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM2_min_[i],_MM2_max_[i]);
+								if(flags_->Flags::Sim()){
+									_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM2_min_[i],_MM2_max_[i]);
+								}
 							break;
 							//case 4: 
 							case 2:
 								_Theta_Dist[i][j][k] = new TH1D(hname,hname,_theta_bins_,_theta_min_,_theta_max_);
+								if(flags_->Flags::Sim()){
+									_Theta_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_theta_bins_,_theta_min_,_theta_max_);
+								}
 							break;
 							//case 5:
 							case 3: 
 								_Alpha_Dist[i][j][k] = new TH1D(hname,hname,_alpha_bins_,_alpha_min_,_alpha_max_);
+								if(flags_->Flags::Sim()){
+									_Alpha_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_alpha_bins_,_alpha_min_,_alpha_max_);
+								}
 							break;
 							//case 6:
 							case 4: 
 								_Phi_Dist[i][j][k] = new TH1D(hname,hname,_phi_bins_,_phi_min_,_phi_max_);
+								if(flags_->Flags::Sim()){
+									_Phi_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_phi_bins_,_phi_min_,_phi_max_);
+								}
 							break;
 						}
 						if(flags_->Flags::Sim()){
 							sprintf(hname,"Thrown_2#pi_off_proton_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 							_Thrown[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
-							_Thrown[i][j][k]->GetAxis(1)->Set(5,_Q2_bins_);
+							//_Thrown[i][j][k]->GetAxis(1)->Set(5,_Q2_bins_);
 							_Thrown[i][j][k]->Sumw2();//Allow Weights with virtual photon flux, etc. 
 							//sprintf(hname,"Scaled_Thrown_2#pi_off_proton_%s",_var_names_[i]);
 							//_W_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
@@ -4358,7 +4377,6 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 			if(Histogram::OK_Idx(Histogram::Friend_idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_))){
 			//int *y = Friend_binning(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
 			//std::cout<<std::endl <<"Y binning: " <<y;
-				
 				//Histogram::Print_Friend_Bin(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
 				Double_t x[5] ;//= { (double)W_, (double)Q2_, (double)MM_, (double)MM2_, (double)theta_, (double)alpha_, (double)phi_};
 				//x[0] = (double)W_;
@@ -4369,9 +4387,14 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 				x[3] = (double)alpha_;
 				x[4] = (double)phi_;
 				if(thrown_){
-					std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
+					//std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
 					TThread::Lock();
 					_Thrown[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_);
+					_MM1_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM_,weight_);
+					_MM2_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM2_,weight_);
+					_Theta_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(theta_,weight_);
+					_Alpha_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha_,weight_);
+					_Phi_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi_,weight_);
 					TThread::UnLock();
 					//std::cout<<"\tThrown " <<var_  <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}else{
@@ -4417,6 +4440,7 @@ void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
 		std::cout<<"Writing Friend\n";
 		_SparseFile->cd();
 		TH1D* check_7d[3][29][5][5];
+		TH1D* thr_check_7d[3][29][5][5];
 		char hname[100];
 		//TH1D* check_5d[5][Histogram::W_bins()][5];
 		for(int i = 0; i <3; i++){//Variable Set
@@ -4426,8 +4450,24 @@ void Histogram::Friend_Write(std::shared_ptr<Flags> flags_){
 						//std::cout<<"Thrown "  <<i <<" integral: " <<_Thrown[i]->ComputeIntegral();
 						
 						_Thrown[i][j][l]->Write();
-						
+						_MM1_Dist_thr[i][j][l]->Write();
+						_MM2_Dist_thr[i][j][l]->Write();
+						_Theta_Dist_thr[i][j][l]->Write();
+						_Alpha_Dist_thr[i][j][l]->Write();
+						_Phi_Dist_thr[i][j][l]->Write();
 						//_Thrown[i][k][l]->Write();
+						for(int k=0; k<5; k++){
+							thr_check_7d[i][j][l][k] = _Thrown[i][j][l]->Projection(k,"E");
+							if(k==0){
+								sprintf(hname,"Thrown_2#pi_off_proton_%s_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,_MM1_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(l),Histogram::Q2_top(l));
+							}else if(k==1){
+								sprintf(hname,"Thrown_2#pi_off_proton_%s_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,_MM2_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(l),Histogram::Q2_top(l));
+							}else{
+								sprintf(hname,"Thrown_2#pi_off_proton_%s_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,_friend_pars_[k+2],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(l),Histogram::Q2_top(l));
+							}
+							thr_check_7d[i][j][l][k]->SetNameTitle(hname,hname);
+							thr_check_7d[i][j][l][k]->Write();
+						}
 					}
 					//for(int j = 0; j<5; j++){//Topology
 					if(fun::top_perform(_mall_,flags_)){

@@ -425,7 +425,7 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 	if(thrown_){
 		hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mzero_,_thrown_,flags_,event_.Event::Weight());
 		for(int j=0; j<3; j++){
-			if(flags_->Sim() && thrown_){
+			if(flags_->Sim()){
 				//memory effort to minimize this 6-28-23
 				hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::Virtual_Photon_Flux(), flags_);
 			}//else{
