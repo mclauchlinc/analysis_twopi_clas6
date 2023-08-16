@@ -122,11 +122,11 @@ static float _W_res_ = 0.025;
 static float _Q2_min_ = 2.0;
 static float _Q2_max_ = 5.0;
 static float _Q2_bins_[6] = {2.0,2.4,3.0,3.5,4.2,5.0};
-static float _MM_min_[3] = {1.1000,0.2780,1.1000};//{1.1,0.3,1.1};//Changed 5/5/23
+static float _MM_min_[3] = {1.077835,0.309141,1.077835};//changed 7-12-23//{1.1,0.3,1.1};//Changed 5/5/23
 static float _MM_max_[3] = {_W_max_-_mpi_,_W_max_-_mp_,_W_max_-_mpi_};//{2.0,1.1,2.0};//Changed 5/5/23
-static int _MM_bins_ = 14;
-static float _MM2_min_[3] = {0.2780,1.1000,1.1000};//{0.3,1.1,1.1};//Changed 5/5/23
-static float _MM2_max_[3] = {_W_max_-_mp_,_W_max_-_mpi_,_W_max_-_mpi_};//{1.1,2.0,2.0};//Changed 5/5/23
+static int _MM_bins_ = 10;//changed 7-13-23//14;
+static float _MM2_min_[3] = {_MM_min_[1],_MM_min_[2],_MM_min_[0]};//changed 7-12-23//{0.3,1.1,1.1};//Changed 5/5/23
+static float _MM2_max_[3] = {_MM_max_[1],_MM_max_[2],_MM_max_[0]};//{1.1,2.0,2.0};//Changed 5/5/23
 static int _theta_bins_ = 10;
 static float _theta_min_ = 0.0;
 static float _theta_max_ = 180.0;
@@ -137,6 +137,11 @@ static int _phi_bins_ = 10;
 static float _phi_min_ = 0.0; 
 static float _phi_max_ = 360.0;
 static char * _bin_names_[] = {"W","Q2","MM1","MM2","theta","alpha","phi"};
+static float _ppi_offset_ = 0.012565; //changed 7-12-23//GeV offset from threshold MM value of missing pion
+static float _pipi_offset_ = 0.0324895; //changed 7-12-23//GeV offset from threshold MM value of missing proton
+static float _MM_offset_[3] = {_mpi_+_ppi_offset_,_mp_+_pipi_offset_,_mpi_+_ppi_offset_};
+static float _MM2_offset_[3] = {_MM_offset_[1],_MM_offset_[2],_MM_offset_[0]};
+
 //static float _bin_low_ = {_W_min_,_Q2_min_,_MM}
 
 
@@ -445,8 +450,11 @@ public:
 	int Friend_theta_idx(float theta_);
 	int Friend_alpha_idx(float alpha_);
 	int Friend_phi_idx(float phi_);
+	double MM_max(int W_bin_, int var_set_);
+	double MM2_max(int W_bin_, int var_set_);
 	std::vector<int>  Friend_idx( float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_);
 	void Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_, int var_);
+	bool Good_Friend_Idx(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_);
 	void Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float cc_eff_, std::shared_ptr<Flags> flags_);
 	void Friend_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End Friend Plot----------------------------*

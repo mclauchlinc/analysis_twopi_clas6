@@ -40,6 +40,7 @@ static const char * _topo_[] = {"Pmiss","PIPmiss","PIMmiss","Zeromiss","ALLmiss"
 static const char * _var_set_[] = {"PIM","Pro","PIP"};
 static const bool _cluster_loc_[] = {false,true};
 static const char * _five_dim_[] = {"MM1","MM2","Theta","Alpha","Phi"};
+static const char * _cross_five_dim_[] = {"MM1","MM2","Theta)","Alpha","Phi"};
 static const char * _dim_units_[] = {"GeV","GeV","Angle (deg)","Angle (deg)","Angle (deg)"};
 static const char * _dim_units_y_[] = {"GeV","GeV","rad","rad","rad"};
 

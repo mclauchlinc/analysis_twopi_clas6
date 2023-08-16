@@ -37,7 +37,7 @@ int main(int argc, char **argv){
 	//Define variable for total number of events
 	size_t events = 0; 
 
-
+	std::shared_ptr<double> q_tot;
 
 	//Make histograms objects as a shared pointer that all threads will have
 	std::cout<<"Making Histogram\n";
@@ -55,7 +55,7 @@ int main(int argc, char **argv){
 		//Set the thread to run asynchronously
 		//The function running is the first argument
 		//The functions arguments are all remaining arguments
-		threads[i] = std::async(run_files, hists, i, file_num, flags);//, num_mixed_p_pip[i]);infilenames.at(i)
+		threads[i] = std::async(run_files, hists, i, file_num, q_tot,flags);//, num_mixed_p_pip[i]);infilenames.at(i)
 		/*
 		I keep running into issues with putting all the files onto one chain
 		It says "illegal instruction" when trying to GetEntries() for the chain
@@ -78,7 +78,8 @@ int main(int argc, char **argv){
 		events += threads[i].get();
 	}
 	//std::cout<<std::endl <<"Total Number of Files: " <<envi->Environment::was_num_file() <<std::endl; 
-	
+	std::cout<<"***Integrated Charge was " <<q_tot <<"**\n";
+
 	std::cout<<"\nWriting Histograms\n";
 	hists->Histogram::Write(flags);
 	//hists->Histogram::Print(output_name,envi);

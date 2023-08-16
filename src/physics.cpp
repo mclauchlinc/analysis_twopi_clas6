@@ -614,7 +614,10 @@ float physics::alpha(int top, TLorentzVector p1, TLorentzVector p2, TLorentzVect
 	alph = TMath::ATan2(gamma_v[1],gamma_v[0])*180/TMath::Pi();
 	if(alph < 0.0){
 		alph = 360.0 + alph; 
-	} 
+	}
+	if(alph>=360.0){
+		alph = alph - 360.0;
+	}
 	//std::cout<<std::endl <<"alpha: " <<alph;
 	
 	std::cout<<"alpha post = " <<alph <<std::endl;
@@ -704,6 +707,9 @@ float physics::alpha(int top, TLorentzVector k0, TLorentzVector p1, TLorentzVect
 	if(alph < 0.0){
 		alph = 360.0 + alph; 
 	} 
+	if(alph>=360.0){
+		alph = alph - 360.0;
+	}
 	//std::cout<<std::endl <<"alpha: " <<alph;
 	
 	//std::cout<<"alpha post = " <<alph <<std::endl;
@@ -724,14 +730,14 @@ float physics::epsilon(int set, float Energy, float Q_2){
 		break;
 	}
 	omega = event_energy - Energy;
-	return 1.0/(1+2*(Q_2+omega)/(4*event_energy*Energy-Q_2));
+	return 1.0/(1+2*(Q_2+omega*omega)/(4*event_energy*Energy-Q_2));
 } //Virtual photon transverse polarization 
 
 float physics::epsilon(TLorentzVector k0, float Energy, float Q_2){
 	float event_energy, omega; 
 	event_energy = k0[3];
 	omega = event_energy - Energy;
-	return 1.0/(1+2*(Q_2+omega)/(4*event_energy*Energy-Q_2));
+	return 1.0/(1+2*(Q_2+omega*omega)/(4*event_energy*Energy-Q_2));
 } //Virtual photon transverse polarization 
 
 float physics::MM_2(TLorentzVector p1, TLorentzVector p2){
@@ -804,7 +810,7 @@ float physics::Ev_MM(int top, TLorentzVector k0, TLorentzVector p1, TLorentzVect
 	switch(top){
 		case 0: event_MM = physics::MM_2(p2,p3); break;//looking for pim -> pro/pip
 		case 1: event_MM = physics::MM_2(p3,p4); break;//looking for pro -> pip/pim//Changed 7-10-23//Changed 1/22/21
-		case 2: event_MM = physics::MM_2(p2,p4); break;//looking for pip -> pro/pip
+		case 2: event_MM = physics::MM_2(p2,p4); break;//looking for pip -> pro/pim
 	}
 	return event_MM;
 }

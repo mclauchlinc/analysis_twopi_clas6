@@ -286,7 +286,7 @@ void Event::Calc_Error(){
 			m = _mpi_;
 		break;
 		case 3:
-			m = 0.0;
+			m = 0.000001;
 		break;
 		default:
 		break;
@@ -373,9 +373,6 @@ int Event::nphe(){
 }
 
 float Event::MMb(int i){
-	if(std::isnan(_MMb[i])){
-
-	}
 	return _MMb[i];
 }
 
@@ -388,11 +385,19 @@ float Event::Thetab(int i){
 }
 
 float Event::Phib(int i){
-	return _phib[i];
+	if(_phib[i] == 360.0){
+		return 0.0;
+	}else{
+		return _phib[i];
+	}
 }
 
 float Event::Alphab(int i){
-	return _alphab[i];
+	if(_alphab[i] == 360.0){
+		return 0.0;
+	}else{
+		return _alphab[i];
+	}
 }
 
 void Event::Missing_Hadron(){
@@ -455,6 +460,27 @@ void Event::Vars(){
 			std::cout<<"You need to get your 4-Momenta into center of mass" <<std::endl;
 		}
 	}
+	if(_MMb[0] != _MM2b[2] ){
+		std::cout<<"Difference in M(p,pip)!" <<_MMb[0] <<" " <<_MM2b[2] <<"\n";
+	}
+	if(_MMb[1] != _MM2b[0] ){
+		std::cout<<"Difference in M(pip,pim)!" <<_MMb[1] <<" " <<_MM2b[0] <<"\n";
+	}
+	if(_MMb[2] != _MM2b[1] ){
+		std::cout<<"Difference in M(p,pim)!" <<_MMb[2] <<" " <<_MM2b[1] <<"\n";
+	}
+	for(int j=0; j<3; j++){
+		if(_thetab[j] < 0.0 || _thetab[j] >=180.0 || isnan(_thetab[j])){
+			std::cout<<"thetab " <<j <<" is bad: " <<_thetab[j] <<"\n";
+		}
+		if(_alphab[j] < 0.0 || _alphab[j] >=360.0 || isnan(_alphab[j])){
+			std::cout<<"Alphab " <<j <<" is bad: " <<_alphab[j] <<"\n";
+		}
+		if(_phib[j] < 0.0 || _phib[j] >=360.0 || isnan(_phib[j])){
+			std::cout<<"phib " <<j <<" is bad: " <<_phib[j] <<"\n";
+		}
+	}
+	//std::cout<<"++++Event Diff in MM++++" <<"\n\tM(p,pip):" <<_MMb[0]-_MM2b[2] <<"\n\tM(pip,pim):" <<_MMb[1]-_MM2b[0] <<"\n\tM(p,pim):" <<_MMb[2]-_MM2b[1] <<"\n"; 
 }
 
 int Event::Helicity(){

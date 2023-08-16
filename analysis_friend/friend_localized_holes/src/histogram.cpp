@@ -161,7 +161,7 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 								}else{
 									_exp_data_5d[i][j]->GetAxis(n)->SetRange(bin_low[n],bin_top[n]);
 								}
-								std::cout<<"In  bin:" <<bin[n] <<" Low bin:" <<bin_low[n] <<" Top bin:" <<bin_top[n] <<"\n";
+								//std::cout<<"In  bin:" <<bin[n] <<" Low bin:" <<bin_low[n] <<" Top bin:" <<bin_top[n] <<"\n";
 							}
 							
 							//std::cout<<"Integral of post sim_7d " <<fun::Sparse_Integral(_sim_data_7d) <<"\n";
@@ -176,7 +176,7 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 									loc_exp_pos=_exp_data_5d_pos[i][j]->ComputeIntegral();//fun::Sparse_Integral(_exp_data_5d_pos[i][j]);
 									loc_sim_pos=_sim_data_5d[i][j]->ComputeIntegral();//fun::Sparse_Integral(_sim_data_5d[i][j]);
 									if(loc_exp_pos>0.0 && loc_sim_pos>0.0){
-										std::cout<<"exp_pos: " <<loc_exp_pos <<"  sim_pos: " <<loc_sim_pos <<" for bin:" <<bin[0] <<" " <<bin[1] <<" " <<bin[2] <<" " <<bin[3] <<" " <<bin[4] <<"\n";
+										//std::cout<<"exp_pos: " <<loc_exp_pos <<"  sim_pos: " <<loc_sim_pos <<" for bin:" <<bin[0] <<" " <<bin[1] <<" " <<bin[2] <<" " <<bin[3] <<" " <<bin[4] <<"\n";
 										//std::cout<<"\tIntegrating exp pos\n";
 										_scale_exp_5d_pos[i][j]->SetBinContent(bin,loc_exp_pos);
 										//std::cout<<"\tIntegrating sim pos\n";
@@ -195,7 +195,7 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 									//std::cout<<"Look further sim neg\n";
 									loc_sim_neg=_sim_data_5d[i][j]->ComputeIntegral();//fun::Sparse_Integral(_sim_data_5d[i][j]);
 									if(loc_exp_neg>0.0 && loc_sim_neg>0.0){
-										std::cout<<"exp_neg: " <<loc_exp_neg <<"  sim_neg: " <<loc_sim_neg <<" for bin:" <<bin[0] <<" " <<bin[1] <<" " <<bin[2] <<" " <<bin[3] <<" " <<bin[4] <<"\n";
+										//std::cout<<"exp_neg: " <<loc_exp_neg <<"  sim_neg: " <<loc_sim_neg <<" for bin:" <<bin[0] <<" " <<bin[1] <<" " <<bin[2] <<" " <<bin[3] <<" " <<bin[4] <<"\n";
 										//std::cout<<"\tIntegrating exp neg\n";
 										_scale_exp_5d_neg[i][j]->SetBinContent(bin,loc_exp_neg);
 										//std::cout<<"\tIntegrating sim neg\n";
@@ -222,7 +222,7 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 									//std::cout<<"with dist=" <<dist <<"\n\t\tscale_exp: " <<fun::Sparse_Integral(scale_exp);
 									//std::cout<<"with Integral function: " <<_exp_data_7d->ComputeIntegral() <<"\n";
 									if(loc_exp>0.0 && loc_sim>0.0){
-										std::cout<<"exp: " <<loc_exp <<"  sim: " <<loc_sim <<" for bin:" <<bin[0] <<" " <<bin[1] <<" " <<bin[2] <<" " <<bin[3] <<" " <<bin[4] <<"\n";
+										//std::cout<<"exp: " <<loc_exp <<"  sim: " <<loc_sim <<" for bin:" <<bin[0] <<" " <<bin[1] <<" " <<bin[2] <<" " <<bin[3] <<" " <<bin[4] <<"\n";
 										//std::cout<<"Setting exp\n";
 										_scale_exp_5d[i][j]->SetBinContent(bin,loc_exp);
 										//std::cout<<"Setting Sim\n";

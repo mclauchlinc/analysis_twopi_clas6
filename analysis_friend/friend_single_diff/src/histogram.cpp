@@ -106,14 +106,18 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
     for(int i=0; i<_W_nbins_; i++){
         for(int j=0; j<_Q2_nbins_; j++){
             sprintf(hname,"Thrown_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-            _thrown_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
+            std::cout<<"Getting Thrown THnSparses " <<hname <<"\n";
+			_thrown_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
             _thrown_no_rad_5d[i][j] = (THnSparseD *)nr_sim_tree_->Get(hname);
             sprintf(hname,"%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-            _sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
+            std::cout<<"Getting Reconstructed THnSparses " <<hname <<"\n";
+			_sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
             _exp_data_5d[i][j] = (THnSparseD *)exp_tree_->Get(hname);
             _empty_5d[i][j] = (THnSparseD *)empty_tree_->Get(hname);
+			std::cout<<"Making Acceptance \n";
             _acceptance_5d[i][j] = (THnSparseD*)_sim_data_5d[i][j]->Clone();
             _acceptance_5d[i][j]->Divide(_thrown_5d[i][j]);
+			std::cout<<"Making Yield\n";
             _N_5d[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
             _N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
 	        _N_5d[i][j]->Divide(_acceptance_5d[i][j]);
@@ -364,6 +368,9 @@ void Histogram::Single_Diff(Flags flags_){
 				//std::cout<<"\tDenominator time\n\t\tvirtual photon flux\n";
                 denom *= physics::Virtual_Photon_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]);
 				std::cout<<"Scaling Denominator post flux: " <<denom <<"\n";
+				//std::cout<<"What it would have been with old flux: " <<denom/physics::ratio_Virtual_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]) <<"\n";
+				//std::cout<<"\tThe ratio of difference is: " <<physics::ratio_Virtual_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]) <<"\n";
+				//std::cout<<"Old virtual flux: " <<physics::old_Virtual_Photon_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]) <<" vs new: " <<physics::Virtual_Photon_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]) <<"\n";
                 //std::cout<<"\t\tluminosity\n";
                 denom *=flags_.Flags::L(0);
                 std::cout<<"Scaling Denominator post Luminosity: " <<denom <<"\n";
@@ -379,7 +386,9 @@ void Histogram::Single_Diff(Flags flags_){
 			    denom *=(_Q2_bins_[j+1]-_Q2_bins_[j]);
                 std::cout<<"Scaling Denominator post Q2: " <<denom <<"\n";
 				if(k>1){
+					//For Theta this will need to be undone and then modified for cosine theta
 					denom *=(_thrown_5d[i][j]->GetAxis(k)->GetBinUpEdge(2)-_thrown_5d[i][j]->GetAxis(k)->GetBinLowEdge(2))*TMath::Pi()/180.0;//Divide by angle bins in radians
+                    //denom *= Histogram::CosTheta()
                     std::cout<<"Scaling Denominator post Xij: " <<denom <<"\n";
                 }else{
                     //std::cout<<"\t\txij bin\n";
@@ -461,4 +470,17 @@ float Histogram::Q2_mid(int i_){
         return NAN;
     }
     return (_Q2_bins_[i_] + _Q2_bins_[i_+1])/2.0;
+}
+
+double Histogram::MM_max(int W_bin_, int var_set_){
+	return _W_min_+_W_res_*(W_bin_+1)-_MM_offset[var_set_];
+}
+
+double Histogram::MM2_max(int W_bin_, int var_set_){
+	return _W_min_+_W_res_*(W_bin_+1)-_MM2_offset[var_set_];
+}
+
+double Histogram::CosTheta(int theta_bin_){
+    double theta_res = ((double)_theta_max_ - (double)_theta_min_)/(double)_theta_bins_;
+    return abs(TMath::Cos((_theta_min_+(theta_res*theta_bin_))*TMath::Pi()/180.0)-TMath::Cos((_theta_min_+(theta_res*theta_bin_+1))*TMath::Pi()/180.0));
 }

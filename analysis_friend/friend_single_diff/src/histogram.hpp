@@ -89,20 +89,21 @@ using TH2F_1d_star = std::vector<TH2F*>;
 //static const float _mpi_ = 0.1395; //Mass of Pion in GeV
 
 //Copied from the Event Selection 
+//THnSparse Binning
 static int _n_var_ = 3; //Number of variable sets
 static float _W_min_ = 1.4;
 static float _W_max_ = 2.125;
 static float _W_res_ = 0.025;
 static int _W_nbins_ = 29;
+static int _Q2_nbins_ = 5; 
 static float _Q2_min_ = 2.0;
 static float _Q2_max_ = 5.0;
 static float _Q2_bins_[6] = {2.0,2.4,3.0,3.5,4.2,5.0};
-static int _Q2_nbins_ = 5;
-static float _MM_min_[3] = {_W_min_-_mpi_,_W_min_-_mp_,_W_min_-_mpi_};//{1.1,0.3,1.1};//Changed 6/19/23
-static float _MM_max_[3] = {_W_max_-_mpi_,_W_max_-_mp_,_W_max_-_mpi_};//{2.0,1.1,2.0};//Changed 6/19/23
-static int _MM_bins_ = 14;
-static float _MM2_min_[3] = {_W_min_-_mp_,_W_min_-_mpi_,_W_min_-_mpi_};//{0.3,1.1,1.1};//Changed 6/19/23
-static float _MM2_max_[3] = {_W_max_-_mp_,_W_max_-_mpi_,_W_max_-_mpi_};
+static float _MM_min_[3] = {1.077835,0.309141,1.077835};//changed 7-12-23//{1.1,0.3,1.1};//Changed 5/5/23
+static float _MM_max_[3] = {_W_max_-_mpi_,_W_max_-_mp_,_W_max_-_mpi_};//{2.0,1.1,2.0};//Changed 5/5/23
+static int _MM_bins_ = 10;//changed 7-13-23//14;
+static float _MM2_min_[3] = {0.309141,1.077835,1.077835};//changed 7-12-23//{0.3,1.1,1.1};//Changed 5/5/23
+static float _MM2_max_[3] = {_W_max_-_mp_,_W_max_-_mpi_,_W_max_-_mpi_};//{1.1,2.0,2.0};//Changed 5/5/23
 static int _theta_bins_ = 10;
 static float _theta_min_ = 0.0;
 static float _theta_max_ = 180.0;
@@ -113,6 +114,10 @@ static int _phi_bins_ = 10;
 static float _phi_min_ = 0.0; 
 static float _phi_max_ = 360.0;
 static char * _bin_names_[] = {"W","Q2","MM1","MM2","theta","alpha","phi"};
+static float _ppi_offset_ = 0.012565; //changed 7-12-23//GeV offset from threshold MM value of missing pion
+static float _pipi_offset_ = 0.0324895; //changed 7-12-23//GeV offset from threshold MM value of missing proton
+static float _MM_offset[3] = {_mpi_+_ppi_offset_,_mp_+_pipi_offset_,_mpi_+_ppi_offset_};
+static float _MM2_offset[3] = {_mp_+_pipi_offset_,_mpi_+_ppi_offset_,_mpi_+_ppi_offset_};
 
 
 class Histogram{
@@ -172,6 +177,8 @@ protected:
     THnSparseD *_acceptance_5d[29][5];
     THnSparseD *_N_5d[29][5];
 
+
+
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
 	TH1D* _phi_bin_sizes;//Width of phi bins 
 
@@ -188,6 +195,7 @@ protected:
 
 	//Single Differential Histograms
 	TH1D_3d_star _single_diff_hist;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+	TH1D_3d_star _single_difference_hist;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
 
 	
 public:
@@ -205,6 +213,9 @@ public:
     float Q2_top(int i_);
     float W_mid(int i_);
     float Q2_mid(int i_);
+    double MM_max(int W_bin_, int var_set_);
+	double MM2_max(int W_bin_, int var_set_);
+    double CosTheta(int theta_bin_);
 	
 
 	

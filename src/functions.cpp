@@ -31,17 +31,59 @@ std::shared_ptr<TFile> fun::Name_Sparse(std::shared_ptr<Flags> flags_){
   }
 }
 
-std::vector<std::string> fun::read_file_list(std::string path, int thread_num, std::shared_ptr<Flags> flags_){
+std::vector<std::string> fun::read_file_list(std::string path, int thread_num, int max_, std::shared_ptr<Flags> flags_){
   std::ifstream infile(path.c_str()); // in file stream
   std::vector<std::string> result;
+  std::vector<std::string> filelist;
   std::string line;
+  /*while(getline(infile,line)) { //getline sees if there is a line available
+    filelist.push_back(line);//Gets the current line
+  }
+  int test = filelist.size();
+  std::cout<<"****filelist size is " <<test <<"\n";
+  if(max_ > test)
+  {
+    std::cout<< "You tried to add too many files. This has been corrected" <<std::endl <<"Remember that you may only add " <<test <<" files" <<std::endl;
+    max_ = filelist.size();
+  }*/
+  std::cout<<"max files : " <<max_ <<"\n";
   int t = 0;
-  while(getline(infile,line)) { //getline sees if there is a line available
-    if(thread_num == (t%flags_->Flags::Num_Cores())){//_NUM_THREADS_)){
+  bool limit = true;
+  while(getline(infile,line) && limit) { //getline sees if there is a line available
+    if(thread_num == (t%(flags_->Flags::Num_Cores()))){//_NUM_THREADS_)){
       result.push_back(line);//Gets the current line
     }
     t++;
+    if(t >= max_ && max_>0){
+      limit = false;
+    }
   }
+  //if(max_ == -1 || max_ > test) {//In case one tries to add too many files
+    
+  //}
+  /*if(max_ == -1){
+    std::cout<<"max is -1 so we'll do it the old way\n";
+    std::cout<<"Num cores:" <<flags_->Flags::Num_Cores() <<"\n";
+    int t = 0;
+    bool limit = true;
+    while(getline(infile,line) && limit) { //getline sees if there is a line available
+      if(thread_num == (t%(flags_->Flags::Num_Cores()))){//_NUM_THREADS_)){
+        result.push_back(line);//Gets the current line
+      }
+      t++;
+      if(t >= max_){
+        limit = false;
+      }
+    }
+  }else{
+    std::cout<<"Max is not -1 so we'll do size of " <<max_ <<" cool \n";
+    for(int i=0; i<max_; i++){
+      if(thread_num == (i%flags_->Flags::Num_Cores())){//_NUM_THREADS_)){
+        result.push_back(line);//Gets the current line
+      }
+    }
+  }*/
+  
   return result;
 }
 void fun::removeTree(std::string file_name){
@@ -59,19 +101,19 @@ void fun::removeTree(std::string file_name){
 
 void fun::loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_, int max_, std::shared_ptr<Flags> flags_){
   std::cout<<"Loading up the vector\n";
-  std::vector<std::string> filelist = fun::read_file_list(file_,thread_id_,flags_);//read_file_list(file); //creates a vector of file names
-  std::cout<<"Vector Loaded\n";
+  std::vector<std::string> filelist = fun::read_file_list(file_,thread_id_,max_,flags_);//read_file_list(file); //creates a vector of file names
+  std::cout<<"Vector Loaded\n" <<"\tit has a length of " <<filelist.size() <<"\n";
   //If not specified will take in all the files in the text file
-  int test = filelist.size();
+  /*int test = filelist.size();
   if(max_ > test)
   {
     std::cout<< "You tried to add too many files. This has been corrected" <<std::endl <<"Remember that you may only add " <<test <<" files" <<std::endl;
   }
   if(max_ == -1 || max_ > test) {//In case one tries to add too many files
     max_ = filelist.size();
-  }
+  }*/
   //If specified then it will take in that number of files 
-  for(int i = 0; i < max_; i++) {
+  for(int i = 0; i < filelist.size(); i++) {
     //if(run_type ==3 || run_type == 4){//With some of the larger sim files this seems to be an issue where there are multiple trees in the sim files..?
     //  fun::removeTree(filelist[i]);
     //}

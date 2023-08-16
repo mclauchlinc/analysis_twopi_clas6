@@ -35,19 +35,18 @@ int _hist_par=0;
 int _other_par=0;
 std::string _file_list;
 
-double q_prev = NAN;
-double q_tot = NAN;
+//double q_prev = NAN;
+//double q_tot = NAN;
 
 
-
-size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, int thread_id_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
+size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, int thread_id_, std::shared_ptr<double> qtot_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
 	//Number of events in this thread
 	std::cout<<"Time to run!\n\tCalculating number of events for this thread\n";
 	int num_events = (long) chain_->GetEntries();
 	//Print out information about the thread
 	std::cout<<"Thread " <<thread_id_ <<": " <<num_events <<" Events\n";
-	q_prev=0.0;
-	q_tot=0.0;
+	double q_prev=0.0;
+	double q_tot=0.0;
 	//Make a data object which all the branches can be accessed from
 	auto data = std::make_shared<Branches>(chain_,flags_->Flags::Sim());
 
@@ -68,7 +67,8 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			}
 			if(data->Branches::q_l()>0 && !flags_->Flags::Sim()){
 				if(data->Branches::q_l()>q_prev && data->Branches::q_l()>0){
-					q_tot+= data->Branches::q_l() - q_prev; 
+					//qtot_ = std::make_shared<double>((double)data->Branches::q_l() - q_prev) + qtot_; 
+					q_tot += data->Branches::q_l() - q_prev;
 				}
 				q_prev = data->Branches::q_l();
 			}
@@ -80,11 +80,12 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	}
 	if(!flags_->Flags::Sim()){
 		std::cout<<"\n\n***For thread " <<thread_id_ <<" the integrated charge is: " <<q_tot <<"***\n\n";
+		//It seems like the q_tot is adding up between all the threads, but separately too? So whatever the last thread to truly finish is ends up having the true q_tot
 	}
 }
 
 
-size_t run_files( std::shared_ptr<Histogram> hists_, int thread_id_, int max_, std::shared_ptr<Flags> flags_){//, int &num_ppip){std::vector<std::string> files_,
+size_t run_files( std::shared_ptr<Histogram> hists_, int thread_id_, int max_, std::shared_ptr<double> qtot_, std::shared_ptr<Flags> flags_){//, int &num_ppip){std::vector<std::string> files_,
 	//Called once per thread
 	//Make a new chain to process for this thread
 	auto chain = std::make_shared<TChain>("h10");
@@ -93,7 +94,7 @@ size_t run_files( std::shared_ptr<Histogram> hists_, int thread_id_, int max_, s
 	fun::loadChain(chain, flags_->Flags::Files(), thread_id_, flags_->Flags::Num_Files(),flags_);
 	//for(auto in:files_) chain->Add(in.c_str());
 	//Run the function over each thread
-	return run(chain,hists_,thread_id_,flags_);//,num_ppip);
+	return run(chain,hists_,thread_id_,qtot_,flags_);//,num_ppip);
 }
 
 #endif

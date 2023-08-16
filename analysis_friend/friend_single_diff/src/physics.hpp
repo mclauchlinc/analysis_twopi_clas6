@@ -19,6 +19,8 @@ double Luminosity(double Qtot_, double corr_factor_=1.0);
 //double Radiative_Corr();
 double Error(double N_gen_, double N_rec_, double weight_sum_);//Weighted
 double Error(double N_gen_, double N_rec_);//Unweighted
+double old_Virtual_Photon_Flux(double W_, double Q2_, double E_);
+double ratio_Virtual_Flux(double W_, double Q2_, double E_);
 };
 
 

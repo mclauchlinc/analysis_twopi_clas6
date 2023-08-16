@@ -35,7 +35,7 @@ std::shared_ptr<TFile> Name_File(std::shared_ptr<Flags> flag_);
 std::shared_ptr<TFile> Name_Image(std::shared_ptr<Flags> flag_);
 std::shared_ptr<TFile> Name_Sparse(std::shared_ptr<Flags> flag_);
 
-std::vector<std::string> read_file_list(std::string path, int thread_num, std::shared_ptr<Flags> flags_);
+std::vector<std::string> read_file_list(std::string path, int thread_num, int max_, std::shared_ptr<Flags> flags_);
 
 void removeTree(std::string file_name);
 

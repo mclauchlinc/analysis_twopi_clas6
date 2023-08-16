@@ -4058,8 +4058,8 @@ std::vector<int> Histogram::Friend_Bin_Sizes(std::shared_ptr<Flags> flags_){
 		std::vector<int> bin_sizes(7);
 		bin_sizes[0] = Histogram::W_bins();
 		bin_sizes[1] = std::distance(std::begin(_Q2_bins_), std::end(_Q2_bins_));
-		bin_sizes[2] = _MM_bins_;
-		bin_sizes[3] = _MM_bins_;
+		bin_sizes[2] = _MM_bins_+6;
+		bin_sizes[3] = _MM_bins_+6;
 		bin_sizes[4] = _theta_bins_;
 		bin_sizes[5] = _alpha_bins_;
 		bin_sizes[6] = _phi_bins_;
@@ -4081,13 +4081,32 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 				bins_5d[k-2] = bins_vec[k];
 			}
 		}
+		double xmin[5];
+		double xmax[5];
+		xmin[2]=_theta_min_;
+		xmin[3]=_alpha_min_;
+		xmin[4]=_phi_min_;
+		xmax[2]=_theta_max_;
+		xmax[3]=_alpha_max_;
+		xmax[4]=_phi_max_;
+		int wider = 5;
 		for(int i=0; i<3; i++){//Variable Sets
 			//Double_t xmin[7] = {_W_min_,_Q2_min_,_MM_min_[i],_MM2_min_[i],_theta_min_,_alpha_min_,_phi_min_};
 			//Double_t xmax[7] = {_W_max_,_Q2_max_,_MM_max_[i],_MM2_max_[i],_theta_max_,_alpha_max_,_phi_max_};
-			Double_t xmin[5] = {_MM_min_[i],_MM2_min_[i],_theta_min_,_alpha_min_,_phi_min_};
-			Double_t xmax[5] = {_MM_max_[i],_MM2_max_[i],_theta_max_,_alpha_max_,_phi_max_};
-			for(int j=0; j<29; j++){
-				for(int k=0; k<5; k++){
+			//Double_t xmin[5] = {_MM_min_[i],_MM2_min_[i],_theta_min_,_alpha_min_,_phi_min_};
+			//Double_t xmax[5] = {_MM_max_[i],_MM2_max_[i],_theta_max_,_alpha_max_,_phi_max_};
+			for(int j=0; j<29; j++){//W
+				//float MM_res = ((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
+				//float MM2_res = ((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
+				xmin[0] = _MM_min_[i]-wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
+				xmin[1] = _MM2_min_[i]-wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
+				xmax[0] = Histogram::MM_max(j,i)+wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
+				xmax[1] = Histogram::MM2_max(j,i)+wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
+				std::cout<<"W Bin: " <<j <<" var set: " <<i <<"\n";
+				for(int l=0; l<5; l++){
+					std::cout<<"xmin[" <<l <<"]: " <<xmin[l] <<"  xmax[" <<l <<"]: " <<xmax[l] <<"\n";
+				}
+				for(int k=0; k<5; k++){//Q2
 					sprintf(hname,"2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 					_Friend[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
 					_Friend[i][j][k]->Sumw2();//Weights as normal
@@ -4123,16 +4142,20 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 							break;*/
 							//case 2:
 							case 0: 
-								_MM1_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM_min_[i],_MM_max_[i]);
+								//_MM1_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM_min_[i],Histogram::MM_max(j,i));
+								_MM1_Dist[i][j][k] = new TH1D(hname,hname,140,_MM_min_[i]-wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_),Histogram::MM_max(j,i)+wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_));
 								if(flags_->Flags::Sim()){
-									_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM_min_[i],_MM_max_[i]);
+									//_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM_min_[i],Histogram::MM_max(j,i));
+									_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM_min_[i]-wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_),Histogram::MM_max(j,i)+wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_));
 								}
 							break;
 							//case 3:
 							case 1: 
-								_MM2_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM2_min_[i],_MM2_max_[i]);
+								//_MM2_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM2_min_[i],Histogram::MM2_max(j,i));
+								_MM2_Dist[i][j][k] = new TH1D(hname,hname,140,_MM2_min_[i]-wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_),Histogram::MM2_max(j,i)+wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_));
 								if(flags_->Flags::Sim()){
-									_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM2_min_[i],_MM2_max_[i]);
+									//_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM2_min_[i],Histogram::MM2_max(j,i));
+									_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM2_min_[i]-wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_),Histogram::MM2_max(j,i)+wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_));
 								}
 							break;
 							//case 4: 
@@ -4157,16 +4180,16 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 								}
 							break;
 						}
-						if(flags_->Flags::Sim()){
-							sprintf(hname,"Thrown_2#pi_off_proton_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
-							_Thrown[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
-							//_Thrown[i][j][k]->GetAxis(1)->Set(5,_Q2_bins_);
-							_Thrown[i][j][k]->Sumw2();//Allow Weights with virtual photon flux, etc. 
-							//sprintf(hname,"Scaled_Thrown_2#pi_off_proton_%s",_var_names_[i]);
-							//_W_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
-							//_W_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
-							//_W_Thrown[i]->Sumw2();//No modification to weights with virtual photon flux
-						}
+					}
+					if(flags_->Flags::Sim()){
+						sprintf(hname,"Thrown_2#pi_off_proton_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+						_Thrown[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
+						//_Thrown[i][j][k]->GetAxis(1)->Set(5,_Q2_bins_);
+						_Thrown[i][j][k]->Sumw2();//Allow Weights with virtual photon flux, etc. 
+						//sprintf(hname,"Scaled_Thrown_2#pi_off_proton_%s",_var_names_[i]);
+						//_W_Thrown[i] = new THnSparseD(hname,hname,7,bins,xmin,xmax);
+						//_W_Thrown[i]->GetAxis(1)->Set(5,_Q2_bins_);
+						//_W_Thrown[i]->Sumw2();//No modification to weights with virtual photon flux
 					}
 				}
 			}/*
@@ -4332,6 +4355,14 @@ int Histogram::Friend_phi_idx(float phi_){
   return j; 
 }
 
+double Histogram::MM_max(int W_bin_, int var_set_){
+	return _W_min_+_W_res_*(W_bin_+1)-_MM_offset_[var_set_];
+}
+
+double Histogram::MM2_max(int W_bin_, int var_set_){
+	return _W_min_+_W_res_*(W_bin_+1)-_MM2_offset_[var_set_];
+}
+
 
 std::vector<int>  Histogram::Friend_idx( float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_){
 	std::vector<int> x(7); 
@@ -4357,6 +4388,47 @@ std::vector<int>  Histogram::Friend_idx( float W_, float Q2_, float MM_, float M
 	return x; 
 }
 
+bool Histogram::Good_Friend_Idx(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_){
+	bool pass = true;
+	pass &= (W_ >= _W_min_);
+	pass &= (W_ < _W_max_);
+	pass &= (Q2_ >= _Q2_min_);
+	pass &= (Q2_ < _Q2_max_);
+	pass &= (MM_ >= _MM_min_[var_]-2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
+	pass &= (MM_ < _MM_max_[var_]+2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
+	pass &= (MM2_ >= _MM2_min_[var_]-2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
+	pass &= (MM2_ < _MM2_max_[var_]+2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
+	pass &= (theta_ >= _theta_min_);
+	pass &= (theta_ < _theta_max_);
+	pass &= (alpha_ >= _alpha_min_);
+	pass &= (alpha_ < _alpha_max_);
+	pass &= (phi_ >= _phi_min_);
+	pass &= (phi_ < _phi_max_);
+	/*if(!pass){
+		std::cout<<"----fail----\n";
+		std::cout<<"W:" <<W_ <<" Q2:" <<Q2_ <<" MM1:" <<MM_ <<" MM2:" <<MM2_ <<" theta:" <<theta_ <<" alpha:" <<alpha_ <<" phi:" <<phi_ <<"\n";
+		std::cout<<"W min:" <<(W_ >= _W_min_) <<"\n";
+		std::cout<<"W max:" <<(W_ < _W_max_) <<"\n";
+		std::cout<<"Q2 min:" <<(Q2_ >= _Q2_min_) <<"\n";
+		std::cout<<"Q2 max:" <<(Q2_ < _Q2_max_) <<"\n";
+		std::cout<<"MM min:" <<(MM_ >= _MM_min_[var_]-2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_)) <<"\n";
+		std::cout<<"MM max:" <<(MM_ < _MM_max_[var_]+2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_)) <<"\n";
+		std::cout<<"MM2 min:" <<(MM2_ >= _MM2_min_[var_]-2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_)) <<"\n";
+		std::cout<<"MM2 max:" <<(MM2_ < _MM2_max_[var_]+2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_)) <<"\n";
+		std::cout<<"theta min:" <<(theta_ >= _theta_min_) <<"\n";
+		std::cout<<"theta max:" <<(theta_ < _theta_max_) <<"\n";
+		std::cout<<"alpha min:" <<(alpha_ >= _alpha_min_) <<"\n";
+		std::cout<<"alpha max:" <<(alpha_ < _alpha_max_) <<"\n";
+		std::cout<<"phi min:" <<(phi_ >= _phi_min_) <<"\n";
+		std::cout<<"phi max:" <<(phi_ < _phi_max_) <<"\n";
+		std::cout<<"\tMM1: " <<MM_ <<" bounds:" <<_MM_min_[var_]-2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_) <<"-" <<_MM_max_[var_]+2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_) <<"\n\tMM2: " <<MM2_ <<" bounds:" <<_MM2_min_[var_]-2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_) <<"-" <<_MM2_max_[var_]+2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_) <<"\n\tpass:" <<pass <<"\n";}
+	*/
+	//if(pass){
+	//	std::cout<<"++++pass++++\n";
+	//	std::cout<<"\tMM1: " <<MM_ <<" bounds:" <<_MM_min_[var_]-2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_) <<"-" <<_MM_max_[var_]+2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_) <<"\n\tMM2: " <<MM2_ <<" bounds:" <<_MM2_min_[var_]-2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_) <<"-" <<_MM2_max_[var_]+2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_) <<"\n\tpass:" <<pass <<"\n";}
+	return pass;
+}
+
 void Histogram::Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_, int var_){
 	std::cout<<std::endl <<"--Printing Friend idx--" <<std::endl;
 	std::cout<<"W: " <<W_ <<" in bin: " <<Histogram::Friend_W_idx(W_) <<std::endl;
@@ -4371,10 +4443,11 @@ void Histogram::Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, flo
 
 
 void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float plus_weight_, std::shared_ptr<Flags> flags_){
-	if(flags_->Flags::Make_Friend() && fun::top_perform(top_,flags_)){
+	if(flags_->Flags::Make_Friend() && ((fun::top_perform(top_,flags_)) || (top_==_mzero_ && thrown_))){
 		//std::cout<<"top:" <<top_ <<" var:" <<var_ <<" W:" <<W_ <<" Q2:" <<Q2_ <<" MM:" <<MM_ <<" MM2:" <<MM2_ <<" theta:" <<theta_ <<" alpha:" <<alpha_ <<" phi:" <<phi_ <<" weight:" <<weight_ <<" helicity:" <<helicity_ <<" thrown:" <<thrown_ <<"\n";
 		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_) && !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
-			if(Histogram::OK_Idx(Histogram::Friend_idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_))){
+			if(Histogram::Good_Friend_Idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_)){
+			//if(Histogram::OK_Idx(Histogram::Friend_idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_))){
 			//int *y = Friend_binning(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
 			//std::cout<<std::endl <<"Y binning: " <<y;
 				//Histogram::Print_Friend_Bin(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
@@ -4389,12 +4462,12 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 				if(thrown_){
 					//std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
 					TThread::Lock();
-					_Thrown[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_);
-					_MM1_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM_,weight_);
-					_MM2_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM2_,weight_);
-					_Theta_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(theta_,weight_);
-					_Alpha_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha_,weight_);
-					_Phi_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi_,weight_);
+					_Thrown[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_*plus_weight_);
+					_MM1_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM_,weight_*plus_weight_);
+					_MM2_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM2_,weight_*plus_weight_);
+					_Theta_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(theta_,weight_*plus_weight_);
+					_Alpha_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha_,weight_*plus_weight_);
+					_Phi_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi_,weight_*plus_weight_);
 					TThread::UnLock();
 					//std::cout<<"\tThrown " <<var_  <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}else{
@@ -4405,27 +4478,27 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 							//std::cout<<"\tPos " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 							TThread::Lock();
 							//_Friend1[var_][fun::top_idx(top_)]->Fill(x,weight_);
-							_Friend1[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_);
+							_Friend1[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_*plus_weight_);
 							TThread::UnLock();
 						}else if(helicity_ == -1){
 							//std::cout<<"\tNeg " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 							TThread::Lock();
 							//_Friend2[var_][fun::top_idx(top_)]->Fill(x,weight_);
-							_Friend2[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_);
+							_Friend2[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_*plus_weight_);
 							TThread::UnLock();
 							
 						}
 					}
 					TThread::Lock();
 					//used to have [var_][fun::top_idx(top_)]
-					_Friend[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_);
+					_Friend[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_*plus_weight_);
 					//_W_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(W_,weight_);
 					//_Q2_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(Q2_,weight_);
-					_MM1_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM_,weight_);
-					_MM2_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM2_,weight_);
-					_Theta_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(theta_,weight_);
-					_Alpha_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha_,weight_);
-					_Phi_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi_,weight_);
+					_MM1_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM_,weight_*plus_weight_);
+					_MM2_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM2_,weight_*plus_weight_);
+					_Theta_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(theta_,weight_*plus_weight_);
+					_Alpha_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha_,weight_*plus_weight_);
+					_Phi_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi_,weight_*plus_weight_);
 					TThread::UnLock();
 					//std::cout<<"\tNormal " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}

@@ -424,10 +424,29 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 	//std::cout<<"Plotting Event \n";
 	if(thrown_){
 		hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mzero_,_thrown_,flags_,event_.Event::Weight());
+		if(event_.MMb(0) != event_.MM2b(2) ){
+			std::cout<<"Difference in M(p,pip)!" <<event_.MMb(0) <<" " <<event_.MM2b(2) <<"\n";
+		}
+		if(event_.MMb(1) != event_.MM2b(0) ){
+			std::cout<<"Difference in M(pip,pim)!" <<event_.MMb(1) <<" " <<event_.MM2b(0) <<"\n";
+		}
+		if(event_.MMb(2) != event_.MM2b(1) ){
+			std::cout<<"Difference in M(p,pim)!" <<event_.MMb(2) <<" " <<event_.MM2b(1) <<"\n";
+		}
+		//check theta
+		if(event_.Event::Thetab(0)<0.0 || event_.Event::Thetab(0)>=180.0 || event_.Event::Thetab(1)<0.0 || event_.Event::Thetab(1)>=180.0 || event_.Event::Thetab(2)<0.0 || event_.Event::Thetab(2)>=180.0){
+			std::cout<<"Pim Theta: " <<event_.Event::Thetab(0) <<" Pro Theta: " <<event_.Event::Thetab(1) <<"  Pip Theta: " <<event_.Event::Thetab(2) <<"\n";
+		}
+		if(event_.Event::Alphab(0)<0.0 || event_.Event::Alphab(0)>=360.0 || event_.Event::Alphab(1)<0.0 || event_.Event::Alphab(1)>=360.0 || event_.Event::Alphab(2)<0.0 || event_.Event::Alphab(2)>=360.0){
+			std::cout<<"Pim Alpha: " <<event_.Event::Alphab(0) <<" Pro Alpha: " <<event_.Event::Alphab(1) <<"  Pip Alpha: " <<event_.Event::Alphab(2) <<"\n";
+		}
+		if(event_.Event::Phib(0)<0.0 || event_.Event::Phib(0)>=360.0 || event_.Event::Phib(1)<0.0 || event_.Event::Phib(1)>=360.0 || event_.Event::Phib(2)<0.0 || event_.Event::Phib(2)>=360.0){
+			std::cout<<"Pim Phi: " <<event_.Event::Phib(0) <<" Pro Phi: " <<event_.Event::Phib(1) <<"  Pip Phi: " <<event_.Event::Phib(2) <<"\n";
+		}
 		for(int j=0; j<3; j++){
 			if(flags_->Sim()){
 				//memory effort to minimize this 6-28-23
-				hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::Virtual_Photon_Flux(), flags_);
+				hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), 1.0, flags_);
 			}//else{
 				//hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff()*event_.Event::Virtual_Photon_Flux(), flags_);
 			//}
@@ -555,9 +574,18 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 	//int top_idx = -1; 
 	hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mall_,_nthrown_,flags_,event_.Event::Weight());
 	if(event_.Event::Pass()){
+		if(event_.Event::Thetab(0)<0.0 || event_.Event::Thetab(0)>=180.0 || event_.Event::Thetab(1)<0.0 || event_.Event::Thetab(1)>=180.0 || event_.Event::Thetab(2)<0.0 || event_.Event::Thetab(2)>=180.0){
+			std::cout<<"Pim Theta: " <<event_.Event::Thetab(0) <<" Pro Theta: " <<event_.Event::Thetab(1) <<"  Pip Theta: " <<event_.Event::Thetab(2) <<"\n";
+		}
+		if(event_.Event::Alphab(0)<0.0 || event_.Event::Alphab(0)>=360.0 || event_.Event::Alphab(1)<0.0 || event_.Event::Alphab(1)>=360.0 || event_.Event::Alphab(2)<0.0 || event_.Event::Alphab(2)>=360.0){
+			std::cout<<"Pim Alpha: " <<event_.Event::Alphab(0) <<" Pro Alpha: " <<event_.Event::Alphab(1) <<"  Pip Alpha: " <<event_.Event::Alphab(2) <<"\n";
+		}
+		if(event_.Event::Phib(0)<0.0 || event_.Event::Phib(0)>=360.0 || event_.Event::Phib(1)<0.0 || event_.Event::Phib(1)>=360.0 || event_.Event::Phib(2)<0.0 || event_.Event::Phib(2)>=360.0){
+			std::cout<<"Pim Phi: " <<event_.Event::Phib(0) <<" Pro Phi: " <<event_.Event::Phib(1) <<"  Pip Phi: " <<event_.Event::Phib(2) <<"\n";
+		}
 		for(int j=0; j<3; j++){//Variable Set
 			if(flags_->Flags::Sim()){
-				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::Virtual_Photon_Flux(), flags_);
+				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), 1.0, flags_);
 			}else{
 				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
 			}	
