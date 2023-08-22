@@ -63,13 +63,15 @@ private:
 	float _weight = 1.0;//with event considerations
 	float _pweight = 1.0;//Pre-event considerations
 
+	int _top_passed = -1;
+
 
 
 public:
 	Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, int thread_id_, int run_num_, std::shared_ptr<Flags> flags_);
 	//(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Environment> envi_, int run_type_, std::shared_ptr<forest> a_forest_, int thread_id_, int run_num_);
 	//Number of potential events given identified particles
-	void Num_top();
+	void Num_top(std::shared_ptr<Flags> flags_);
 	//Particle ID
 	void PID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
 	//Event ID
@@ -82,9 +84,9 @@ public:
 	int Event_idx(int top_, int top_idx);
 	int gEvent_idx(int top_, int top_idx_);
 	//Number of good events
-	int Gevts();
+	//int Gevts();
 	//Number of possible events in given topology
-	int Ntop(int i);
+	//int Ntop(int i);
 	//Determine whether half wave plate is in or out
 	bool Half_Wave(int run_num_, std::shared_ptr<Flags> flags_);
 	//Correct Helicity accoridng to half wave plate status

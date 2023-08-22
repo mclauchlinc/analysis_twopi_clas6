@@ -60,6 +60,7 @@ static std::string _sim_no_rad_file2_ = "-no_rad2=";
 static std::string _loc_holes1_ = "-holes=";
 static std::string _loc_holes2_ = "-holes2=";
 static std::string _no_loc_holes_ = "-nolocalholes";
+static std::string _nonlocal_holes_ = "-nonlocalholes";
 //static std::string _exp_pos_file_ = "expp=";
 //static std::string _exp_pos_file2_ = "expp2=";
 //static std::string _exp_neg_file_ = "expn=";
@@ -149,6 +150,7 @@ private:
 	bool _localized_holes = false;
 	bool _plot_localized_holes = false;
 	bool _has_localized_holes = false;
+	bool _nonlocal_holes = false;
 
 	std::string _real_top = "";
 	std::string _input_top = "";
@@ -223,6 +225,7 @@ public:
 	bool Localized_Holes();
 	bool Plot_Localized_Holes();
 	bool Has_Localized_Holes();
+	bool Nonlocal_Holes();
 };
 
 

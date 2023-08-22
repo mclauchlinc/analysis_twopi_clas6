@@ -363,6 +363,10 @@ void Flags::Plot_Flag(std::string str, bool include){
 			std::cout<<"Will Plot SF\n";
 			_plot_check = true;
 		}
+		if(str == _plot_bin_centering_){
+			std::cout<<"Will Plot SF\n";
+			_plot_bin_centering = true;
+		}
 	}
 	if(!include && _plot_all){
 		if(str == _plot_wq2_){
@@ -424,6 +428,9 @@ void Flags::Plot_Flag(std::string str, bool include){
 		}
 		if(str == _plot_check_){
 			_plot_check = false;
+		}
+		if(str == _plot_bin_centering_){
+			_plot_bin_centering = false;
 		}
 	}
 }
@@ -681,6 +688,9 @@ bool Flags::Plot_Elastic(){
 }
 bool Flags::Plot_Check(){
 	return _plot_check;
+}
+bool Flags::Plot_Bin_Centering(){
+	return _plot_bin_centering;
 }
 //Histogram Separation
 

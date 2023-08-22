@@ -219,6 +219,13 @@ Flags::Flags(){}
 				std::cout<<"\tIDed: Sim No Rad File2 is " <<_sim_no_rad_loc2 <<"\n"; 
 			}
         }
+		if(str_len >= 14){
+			if(str.substr(0,14) == _nonlocal_holes_){
+				//_output_name1 = str.substr(7,str_len);
+				_nonlocal_holes = true;
+				std::cout<<"\tIDed: output file is " <<"nonlocal holes" <<"\n"; 
+			}
+		}
 	}
 
 	void Flags::Plot_Flag(std::string str_){
@@ -490,4 +497,8 @@ Flags::Flags(){}
 
 	bool Flags::Has_Localized_Holes(){
 		return _has_localized_holes;
+	}
+
+	bool Flags::Nonlocal_Holes(){
+		return _nonlocal_holes;
 	}

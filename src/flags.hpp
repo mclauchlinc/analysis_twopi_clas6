@@ -82,6 +82,7 @@ static std::string _plot_vertex_ = "vertex";
 static std::string _plot_e_pcorr_ = "e_pcorr";
 static std::string _plot_elastic_ = "elastic";
 static std::string _plot_check_ = "check";
+static std::string _plot_bin_centering_ = "bin_centering";
 //Histogram Separation
 //Will have space for this
 //THnSparse
@@ -158,6 +159,7 @@ private:
 	bool _plot_e_pcorr = false;
 	bool _plot_elastic = false;
 	bool _plot_check = false;
+	bool _plot_bin_centering = false;
 
 	//Histogram Separation
 		//Will have space for this
@@ -235,6 +237,7 @@ public:
 	bool Plot_E_PCorr();
 	bool Plot_Elastic();
 	bool Plot_Check();
+	bool Plot_Bin_Centering();
 	//Portions of Histograms
 	bool Ele_Cut(const char * ecut_);
 

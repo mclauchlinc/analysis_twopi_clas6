@@ -116,11 +116,24 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
             _empty_5d[i][j] = (THnSparseD *)empty_tree_->Get(hname);
 			std::cout<<"Making Acceptance \n";
             _acceptance_5d[i][j] = (THnSparseD*)_sim_data_5d[i][j]->Clone();
+			std::cout<<"\tDividing by Thrown\n";
             _acceptance_5d[i][j]->Divide(_thrown_5d[i][j]);
 			std::cout<<"Making Yield\n";
             _N_5d[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
             _N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
 	        _N_5d[i][j]->Divide(_acceptance_5d[i][j]);
+			if(flags_.Flags::Nonlocal_Holes()){
+				_sim_holes_tmp_5d[i][j] = (THnSparseD*)_sim_data_5d[i][j]->Clone();
+				_sim_holes_tmp_5d[i][j]->Divide(_acceptance_5d[i][j]);
+				_sim_holes_5d[i][j] = (THnSparseD*)_thrown_5d[i][j]->Clone();
+				_sim_holes_5d[i][j]->Add(_sim_holes_tmp_5d[i][j],-1.0);
+				for(long k=0; k<_sim_holes_5d[i][j]->GetNbins(); k++){
+					_sim_holes_5d[i][j]->SetBinError(k,(_sim_holes_5d[i][j]->GetBinContent(k))/2.0);
+				}
+				_N_holes_5d[i][j] = (THnSparseD*)_sim_holes_5d[i][j]->Clone();
+				_N_holes_5d[i][j]->Scale(fun::nSparseIntegral(_exp_data_5d[i][j])/fun::nSparseIntegral(_sim_data_5d[i][j]));
+				_N_5d[i][j]->Add(_N_holes_5d[i][j],1.0);
+			}
         }
     }
     for(int i = 0; i<_thrown_5d[0][0]->GetNdimensions(); i++){
@@ -286,10 +299,13 @@ void Histogram::Rad_Corr(){
     _rad_corr->GetYaxis()->Set(5,_Q2_bins_);
     for(int i=0; i<_W_nbins_; i++){
 		for(int j=0; j<_Q2_nbins_; j++){
-            std::cout<<i <<" " <<j <<"\nthrown integral:" <<fun::Sparse_Integral(_thrown_no_rad_5d[i][j]) <<" no_rad integral:" <<fun::Sparse_Integral(_thrown_5d[i][j]) <<"\n";
-            _rad_corr->Fill(Histogram::W_mid(i),Histogram::Q2_mid(j),fun::Sparse_Integral(_thrown_no_rad_5d[i][j])/fun::Sparse_Integral(_thrown_5d[i][j]));
-            rad_corr_top+= fun::Sparse_Integral(_thrown_5d[i][j]);
-            rad_corr_bot+= fun::Sparse_Integral(_thrown_no_rad_5d[i][j]);
+            //std::cout<<i <<" " <<j <<"\nthrown integral:" <<fun::Sparse_Integral(_thrown_no_rad_5d[i][j]) <<" no_rad integral:" <<fun::Sparse_Integral(_thrown_5d[i][j]) <<"\n";
+            //_rad_corr->Fill(Histogram::W_mid(i),Histogram::Q2_mid(j),fun::Sparse_Integral(_thrown_no_rad_5d[i][j])/fun::Sparse_Integral(_thrown_5d[i][j]));
+			_rad_corr->Fill(Histogram::W_mid(i),Histogram::Q2_mid(j),fun::Sparse_Integral(_thrown_5d[i][j])/fun::Sparse_Integral(_thrown_no_rad_5d[i][j]));
+            //rad_corr_top+= fun::Sparse_Integral(_thrown_5d[i][j]);
+            //rad_corr_bot+= fun::Sparse_Integral(_thrown_no_rad_5d[i][j]);
+			rad_corr_top+= fun::Sparse_Integral(_thrown_no_rad_5d[i][j]);
+            rad_corr_bot+= fun::Sparse_Integral(_thrown_5d[i][j]);
         }
     }
 	//_rad_corr = _thrown_7d_no_rad->Projection(1,0);//First make it the projections
@@ -304,7 +320,7 @@ void Histogram::Rad_Corr(){
 	for(int i=0; i<_W_nbins_; i++){
 		for(int j=0; j<_Q2_nbins_; j++){
 			corr_tmp.push_back(_rad_corr->GetBinContent(i+1,j+1));
-            std::cout<<"\t" <<i <<" " <<j <<" rad_corr: " <<_rad_corr->GetBinContent(i+1,j+1) <<"\n";
+            //std::cout<<"\t" <<i <<" " <<j <<" rad_corr: " <<_rad_corr->GetBinContent(i+1,j+1) <<"\n";
 		}
 		_rad_corr_array.push_back(corr_tmp);
 		corr_tmp.clear();
@@ -367,39 +383,39 @@ void Histogram::Single_Diff(Flags flags_){
 				exp_ch_1d.push_back(_N_5d[i][j]->Projection(k,"E"));
 				//std::cout<<"\tDenominator time\n\t\tvirtual photon flux\n";
                 denom *= physics::Virtual_Photon_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]);
-				std::cout<<"Scaling Denominator post flux: " <<denom <<"\n";
+				//std::cout<<"Scaling Denominator post flux: " <<denom <<"\n";
 				//std::cout<<"What it would have been with old flux: " <<denom/physics::ratio_Virtual_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]) <<"\n";
 				//std::cout<<"\tThe ratio of difference is: " <<physics::ratio_Virtual_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]) <<"\n";
 				//std::cout<<"Old virtual flux: " <<physics::old_Virtual_Photon_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]) <<" vs new: " <<physics::Virtual_Photon_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]) <<"\n";
                 //std::cout<<"\t\tluminosity\n";
                 denom *=flags_.Flags::L(0);
-                std::cout<<"Scaling Denominator post Luminosity: " <<denom <<"\n";
+                //std::cout<<"Scaling Denominator post Luminosity: " <<denom <<"\n";
                 //std::cout<<"\t\trad corr\n";
 				if(flags_.Flags::Rad_Corr()){
 					denom *= _rad_corr_array[i][j];
-                    std::cout<<"Scaling Denominator post rad corr: " <<denom <<"\n";
+                    //std::cout<<"Scaling Denominator post rad corr: " <<denom <<"\n";
 				}
                 //std::cout<<"\t\tW bin\n";
 				denom *=_W_res_;
-                std::cout<<"Scaling Denominator post W: " <<denom <<"\n";
+                //std::cout<<"Scaling Denominator post W: " <<denom <<"\n";
                 //std::cout<<"\t\tQ2 bin\n";
 			    denom *=(_Q2_bins_[j+1]-_Q2_bins_[j]);
-                std::cout<<"Scaling Denominator post Q2: " <<denom <<"\n";
+                //std::cout<<"Scaling Denominator post Q2: " <<denom <<"\n";
 				if(k>1){
 					//For Theta this will need to be undone and then modified for cosine theta
 					denom *=(_thrown_5d[i][j]->GetAxis(k)->GetBinUpEdge(2)-_thrown_5d[i][j]->GetAxis(k)->GetBinLowEdge(2))*TMath::Pi()/180.0;//Divide by angle bins in radians
                     //denom *= Histogram::CosTheta()
-                    std::cout<<"Scaling Denominator post Xij: " <<denom <<"\n";
+                    //std::cout<<"Scaling Denominator post Xij: " <<denom <<"\n";
                 }else{
                     //std::cout<<"\t\txij bin\n";
 					denom *=(_thrown_5d[i][j]->GetAxis(k)->GetBinUpEdge(2)-_thrown_5d[i][j]->GetAxis(k)->GetBinLowEdge(2));//Phi in radians
-                    std::cout<<"Scaling Denominator post Xij: " <<denom <<"\n";
+                    //std::cout<<"Scaling Denominator post Xij: " <<denom <<"\n";
 				}
 				//std::cout<<"\tScaling\n";
-                std::cout<<"Current Integral" <<exp_ch_1d[k]->Integral() <<"\n";
-                std::cout<<"Scaling Denominator: " <<denom <<"\n";
+                //std::cout<<"Current Integral" <<exp_ch_1d[k]->Integral() <<"\n";
+                //std::cout<<"Scaling Denominator: " <<denom <<"\n";
 				exp_ch_1d[k]->Scale(1.0/denom);
-                std::cout<<"Post Integral" <<exp_ch_1d[k]->Integral() <<"\n";
+                //std::cout<<"Post Integral" <<exp_ch_1d[k]->Integral() <<"\n";
 			
 				exp_ch_1d[k]->SetNameTitle(hname,hname);
 				exp_ch_1d[k]->GetXaxis()->SetTitle(xlabel);

@@ -34,6 +34,7 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, s
 			_thrown = thrown_;
 		}
 		if(thrown_ && top_ == fun::top_idx(_mzero_)){
+			//std::cout<<"Thrown Event doin stuff\n";
 			_top[top_] = true;
 			_pass_top = top_;
 			_hel = hel_; 
@@ -385,19 +386,19 @@ float Event::Thetab(int i){
 }
 
 float Event::Phib(int i){
-	if(_phib[i] == 360.0){
-		return 0.0;
-	}else{
-		return _phib[i];
-	}
+	//if(_phib[i] == 360.0){
+	//	return 0.0;
+	//}else{
+	return _phib[i];
+	//}
 }
 
 float Event::Alphab(int i){
-	if(_alphab[i] == 360.0){
+	/*if(_alphab[i] == 360.0){
 		return 0.0;
-	}else{
-		return _alphab[i];
-	}
+	}else{*/
+	return _alphab[i];
+	//}
 }
 
 void Event::Missing_Hadron(){

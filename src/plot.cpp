@@ -443,10 +443,23 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 		if(event_.Event::Phib(0)<0.0 || event_.Event::Phib(0)>=360.0 || event_.Event::Phib(1)<0.0 || event_.Event::Phib(1)>=360.0 || event_.Event::Phib(2)<0.0 || event_.Event::Phib(2)>=360.0){
 			std::cout<<"Pim Phi: " <<event_.Event::Phib(0) <<" Pro Phi: " <<event_.Event::Phib(1) <<"  Pip Phi: " <<event_.Event::Phib(2) <<"\n";
 		}
+		if(event_.Event::W() < _W_min_ || event_.Event::W() >= _W_max_){
+			std::cout<<"W:" <<event_.Event::W() <<"\n";
+		}
+		if(event_.Event::Q2() < _Q2_min_ || event_.Event::Q2() >= _Q2_max_){
+			std::cout<<"Q2:" <<event_.Event::Q2() <<"\n";
+		}
 		for(int j=0; j<3; j++){
 			if(flags_->Sim()){
 				//memory effort to minimize this 6-28-23
-				hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), 1.0, flags_);
+				hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), 1.0, -1,flags_);
+				for(int k=0; k<3; k++){
+					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 0, event_.Event::MMb(j), k, event_.Event::Weight(), flags_);
+					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 1, event_.Event::MM2b(j), k, event_.Event::Weight(), flags_);
+					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 2, event_.Event::Thetab(j), k, event_.Event::Weight(), flags_);
+					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 3, event_.Event::Alphab(j), k, event_.Event::Weight(), flags_);
+					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 4, event_.Event::Phib(j), k, event_.Event::Weight(), flags_);
+				}
 			}//else{
 				//hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff()*event_.Event::Virtual_Photon_Flux(), flags_);
 			//}
@@ -569,7 +582,7 @@ void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std:
 	//hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,event_.Event::Top(),_nthrown_,flags_,event_.Event::Weight());
 }
 
-void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
+void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int top_passed_){
 	//std::cout<<"\tPlotting Isolated event " <<_top_[event_.Event::Top()] <<" " <<_truth_[event_.Event::Pass()] <<"\n";
 	//int top_idx = -1; 
 	hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_mall_,_nthrown_,flags_,event_.Event::Weight());
@@ -585,9 +598,9 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 		}
 		for(int j=0; j<3; j++){//Variable Set
 			if(flags_->Flags::Sim()){
-				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), 1.0, flags_);
+				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), 1.0, top_passed_, flags_);
 			}else{
-				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
+				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), top_passed_,flags_);
 			}	
 		}
 		for(int i=0; i<4; i++){//Species Loop

@@ -27,8 +27,25 @@ Analysis::Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> h
 			}
 		}
 		//Thrown Event
+		
 		_tEvent.push_back(Event(fun::top_idx(_mzero_),_tParticle[thr_idx[0]],_tParticle[thr_idx[1]],_tParticle[thr_idx[2]],_tParticle[thr_idx[3]],flags_,_weight,1,true));
-		plot::plot_event(_tEvent[0],hist_,flags_,true);
+		/*if(!_tEvent[0].Event::W() >= _W_min_ || !_tEvent[0].Event::W() < _W_max_){
+			std::cout<<"Thrown W:" <<_tEvent[0].Event::W() <<"\n";
+		}
+		if(!_tEvent[0].Event::Q2() >= _Q2_bins_[0] || !_tEvent[0].Event::Q2() < _Q2_bins_[5]){
+			std::cout<<"Thrown Q2:" <<_tEvent[0].Event::Q2() <<"\n";
+		}*/
+		/*double thr_W = _tEvent[0].Event::W();
+		double thr_Q2 = _tEvent[0].Event::Q2();
+		bool plot_thrown = true;
+		plot_thrown &= (thr_W >= _W_min_);
+		plot_thrown &= (thr_W >= _W_max_);
+		plot_thrown &= (thr_Q2 >= _Q2_min_);
+		plot_thrown &= (thr_Q2 < _Q2_max_);
+
+		if(plot_thrown){	
+			plot::plot_event(_tEvent[0],hist_,flags_,true);
+		}*/
 	}else{
 		_npart = data_->Branches::gpart();
 		_weight = 1.0;
@@ -58,73 +75,83 @@ Analysis::Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> h
 	}
 }
 
-void Analysis::Num_top(){
+void Analysis::Num_top(std::shared_ptr<Flags> flags_){
 	//Pro Missing
 	if(_rParticle.size()>0){
 		if(_rParticle[0].Particle::Is_Elec()){
 			//Proton Missing
-			if(_pip_idx.size() > 0 && _pim_idx.size() > 0){
-				std::vector<int> pro_tmp;
-				_ntop[0] = _pip_idx.size() * _pim_idx.size();
-				for(int i=0; i<_pip_idx.size(); i++){
-					for(int j=0; j<_pim_idx.size(); j++){
-						pro_tmp.push_back(_pip_idx[i]);
-						pro_tmp.push_back(_pim_idx[j]);
-						_idx_mpro.push_back(pro_tmp);
-						pro_tmp.clear();
+			if(flags_->Flags::MM_Cut(0)){
+				if(_pip_idx.size() > 0 && _pim_idx.size() > 0){
+					std::vector<int> pro_tmp;
+					_ntop[0] = _pip_idx.size() * _pim_idx.size();
+					for(int i=0; i<_pip_idx.size(); i++){
+						for(int j=0; j<_pim_idx.size(); j++){
+							pro_tmp.push_back(_pip_idx[i]);
+							pro_tmp.push_back(_pim_idx[j]);
+							_idx_mpro.push_back(pro_tmp);
+							pro_tmp.clear();
+						}
 					}
 				}
 			}
 			//Pip Missing
-			if(_pro_idx.size() > 0 && _pim_idx.size() > 0){
-				std::vector<int> pip_tmp;
-				_ntop[1] = _pim_idx.size() * _pro_idx.size();
-				for(int i=0; i<_pro_idx.size(); i++){
-					for(int j=0; j<_pim_idx.size(); j++){
-						pip_tmp.push_back(_pro_idx[i]);
-						pip_tmp.push_back(_pim_idx[j]);
-						_idx_mpip.push_back(pip_tmp);
-						pip_tmp.clear();
+			if(flags_->Flags::MM_Cut(1)){
+				if(_pro_idx.size() > 0 && _pim_idx.size() > 0){
+					std::vector<int> pip_tmp;
+					_ntop[1] = _pim_idx.size() * _pro_idx.size();
+					for(int i=0; i<_pro_idx.size(); i++){
+						for(int j=0; j<_pim_idx.size(); j++){
+							pip_tmp.push_back(_pro_idx[i]);
+							pip_tmp.push_back(_pim_idx[j]);
+							_idx_mpip.push_back(pip_tmp);
+							pip_tmp.clear();
+						}
 					}
 				}
 			}
 			//Pim Missing
-			if(_pro_idx.size() > 0 && _pip_idx.size() > 0){
-				std::vector<int> pim_tmp;
-				for(int i=0; i<_pip_idx.size(); i++){
-					for(int j=0; j<_pro_idx.size(); j++){
-						if(_pro_idx[j] != _pip_idx[i]){
-							_ntop[2]+=1;
-							pim_tmp.push_back(_pro_idx[j]);
-							pim_tmp.push_back(_pip_idx[i]);
-							_idx_mpim.push_back(pim_tmp);
-							pim_tmp.clear();
+			if(flags_->Flags::MM_Cut(2)){
+				if(_pro_idx.size() > 0 && _pip_idx.size() > 0){
+					std::vector<int> pim_tmp;
+					for(int i=0; i<_pip_idx.size(); i++){
+						for(int j=0; j<_pro_idx.size(); j++){
+							if(_pro_idx[j] != _pip_idx[i]){
+								_ntop[2]+=1;
+								pim_tmp.push_back(_pro_idx[j]);
+								pim_tmp.push_back(_pip_idx[i]);
+								_idx_mpim.push_back(pim_tmp);
+								pim_tmp.clear();
+							}
 						}
 					}
 				}
 			}
 			//Zero Missing
-			if(_pro_idx.size() > 0 && _pip_idx.size() > 0 && _pim_idx.size() > 0){
-				//std::cout<<"Looking at a Potential Exclusive topology\t";
-				std::vector<int> zero_tmp;
-				for(int i=0; i<_pip_idx.size(); i++){
-					for(int j=0; j<_pro_idx.size(); j++){
-						if(_pro_idx[j] != _pip_idx[i]){
-							_ntop[3]+=1;
-							for(int k=0; k<_pim_idx.size(); k++){
-								zero_tmp.push_back(_pro_idx[j]);
-								zero_tmp.push_back(_pip_idx[i]);
-								zero_tmp.push_back(_pim_idx[k]);
-								_idx_mzero.push_back(zero_tmp);
-								zero_tmp.clear();
+			if(flags_->Flags::MM_Cut(3)){
+				if(_pro_idx.size() > 0 && _pip_idx.size() > 0 && _pim_idx.size() > 0){
+					//std::cout<<"Looking at a Potential Exclusive topology\t";
+					std::vector<int> zero_tmp;
+					for(int i=0; i<_pip_idx.size(); i++){
+						for(int j=0; j<_pro_idx.size(); j++){
+							if(_pro_idx[j] != _pip_idx[i]){
+								_ntop[3]+=1;
+								for(int k=0; k<_pim_idx.size(); k++){
+									zero_tmp.push_back(_pro_idx[j]);
+									zero_tmp.push_back(_pip_idx[i]);
+									zero_tmp.push_back(_pim_idx[k]);
+									_idx_mzero.push_back(zero_tmp);
+									zero_tmp.clear();
+								}
 							}
 						}
 					}
+					_ntop[3] = _ntop[3]*_pim_idx.size();
+					//std::cout<<"Found: " <<_ntop[3] <<" possibilities\n";
 				}
-				_ntop[3] = _ntop[3]*_pim_idx.size();
-				//std::cout<<"Found: " <<_ntop[3] <<" possibilities\n";
 			}
-			//std::cout<<"\tNum Possible Topoogies: " <<_ntop[0] <<_ntop[1] <<_ntop[2] <<_ntop[3] <<"\n";
+			if(_ntop[0] + _ntop[1] +  _ntop[2] + _ntop[3]>1 ){
+				//std::cout<<"\tNum Possible Topoogies: " <<_ntop[0] <<_ntop[1] <<_ntop[2] <<_ntop[3] <<"\n";
+			}
 		}
 	}
 }
@@ -154,13 +181,16 @@ void Analysis::PID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> h
 			}
 		}
 	}
+	if(_pro_idx.size()*_pip_idx.size()>0 || _pro_idx.size()*_pim_idx.size()>0 || _pip_idx.size()*_pim_idx.size()>0 ){
+		//std::cout<<"\tEvent PID\t# particles IDed: " <<_pro_idx.size() <<" " <<_pip_idx.size() <<" " <<_pim_idx.size() <<"\n";
+	}
 }
 
 void Analysis::Event_ID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
-	Analysis::Num_top();
-	for(int i=0; i<4; i++){
-		if(_ntop[i]>0){
-			for(int j=0; j<_ntop[i]; j++){
+	Analysis::Num_top(flags_);
+	for(int i=0; i<4; i++){//Topologies
+		if(_ntop[i]>0){//If there are any possible events for a given topology
+			for(int j=0; j<_ntop[i]; j++){//loop through those possibilities 
 				switch(i){
 					case 0:
 						//std::cout<<"\t\tidx: " <<i <<" pip idx:" <<_idx_mpro[j][0] <<" pim idx:" <<_idx_mpro[j][1] <<"\n";
@@ -190,7 +220,7 @@ void Analysis::Event_ID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogr
 		}
 	}
 	for(int idx=0; idx<_rEvent.size(); idx++){
-		if(_rEvent[idx].Event::Pass()){
+		if(_rEvent[idx].Event::Pass() && (_rEvent[idx].Event::W() >= _W_min_ && _rEvent[idx].Event::W() < _W_max_) && (_rEvent[idx].Event::Q2() >= _Q2_bins_[0] && _rEvent[idx].Event::Q2() < _Q2_bins_[5])){
 			_gevts+=1;
 			_gevt_idx.push_back(idx);
 			switch(_rEvent[idx].Event::Top()){
@@ -235,45 +265,73 @@ void Analysis::Event_ID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogr
 
 void Analysis::Isolate_Event(std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
 	if(_gevts>0){
-		//std::cout<<"Isolating Events: "<<_gtop[0] <<" " <<_gtop[1] <<" " <<_gtop[2] <<" " <<_gtop[3] <<"\n";
-		//std::cout<<"Isolating Events with " <<_gevts <<" good events => " <<_gtop[0] <<_gtop[1] <<_gtop[2] <<_gtop[3]  <<"\n";
+		if(_gevts>1){
+			//std::cout<<"Isolating Events: "<<_gtop[0] <<" " <<_gtop[1] <<" " <<_gtop[2] <<" " <<_gtop[3] <<"\n";
+			//std::cout<<"Isolating Events with " <<_gevts <<" good events => " <<_gtop[0] <<_gtop[1] <<_gtop[2] <<_gtop[3]  <<"\n";
+		}else{
+			//std::cout<<"\tonly one good event\n";
+		}
 		if(_gtop[3]>0){
+			_top_passed = 3;
+			hist_->Histogram::Top_Increment(3);
+			for(int i=0; i<3; i++){
+				if(_gtop[i]>0){
+					hist_->Histogram::Top_Pot_Increment(i);
+				}
+			}
 			if(_gtop[3]>1){
 				Analysis::Isolate_Top(3,hist_,flags_);
 			}else{
+				_iEvent.push_back(_gEvent[Analysis::gEvent_idx(3,0)]);
 				if(_gEvent[Analysis::gEvent_idx(3,0)].Event::Pass()){
-					_iEvent.push_back(_rEvent[Analysis::gEvent_idx(3,0)]);
+					
+					//std::cout<<"isolated to Zero Missing\n";
+				}else{
+					std::cout<<"We have a weird problem with the event passage\n";
 				}
 			}
 		}else{
 			if(_gtop[2]>0){
+				_top_passed = 2;
+				hist_->Histogram::Top_Increment(2);
+				for(int i=0; i<2; i++){
+					if(_gtop[i]>0){
+						hist_->Histogram::Top_Pot_Increment(i);
+					}
+				}
 				if(_gtop[2]>1){
 					Analysis::Isolate_Top(2,hist_,flags_);
 				}else{
 					_iEvent.push_back(_gEvent[Analysis::gEvent_idx(2,0)]);
+					//std::cout<<"isolated to PIM Missing\n";
 				}
 			}else{
 				if(_gtop[1]>0){
+					_top_passed = 1;
+					hist_->Histogram::Top_Increment(1);
+					if(_gtop[0]>0){
+						hist_->Histogram::Top_Pot_Increment(0);
+					}
 					if(_gtop[1]>1){
 						Analysis::Isolate_Top(1,hist_,flags_);
 					}else{
 						_iEvent.push_back(_gEvent[Analysis::gEvent_idx(1,0)]);
+						//std::cout<<"isolated to PIP Missing\n";
 					}
 				}else{
 					if(_gtop[0]>0){
+						hist_->Histogram::Top_Increment(0);
+						_top_passed = 0;
 						if(_gtop[0]>1){
 							Analysis::Isolate_Top(0,hist_,flags_);
 						}else{
 							_iEvent.push_back(_gEvent[Analysis::gEvent_idx(0,0)]);
+							//std::cout<<"isolated to Proton Missing\n";
+							
 						}
 					}
 				}
 			}
-		}
-		if(_iEvent.size()==1){
-			plot::plot_isolated_event(_iEvent[0],hist_,flags_);
-		}else{
-			std::cout<<"size: " <<_iEvent.size() <<"  Didn't isolate event: there's more than one here!\n";
 		}
 	}
 }
@@ -295,6 +353,7 @@ void Analysis::Isolate_Top(int top_, std::shared_ptr<Histogram> hist_, std::shar
 		}
 		if(idx>=0){
 			_iEvent.push_back(_gEvent[idx]);
+			//std::cout<<"isolated to " <<topologies[top_+1] <<" Index " <<idx <<"\n";
 		}else{
 			std::cout<<"Bad Index for Good Event\n";
 		}
@@ -403,11 +462,11 @@ void Analysis::Plot_Events(std::shared_ptr<Histogram> hist_, std::shared_ptr<Fla
 	if(_rEvent.size() == 1){
 		//std::cout<<"\nPlot Clean event\n";
 		plot::plot_clean_event(_rEvent[0],hist_,flags_);
-		plot::plot_event(_rEvent[0],hist_,flags_);
+		plot::plot_event(_rEvent[0],hist_,flags_,false);
 	}else{
 		for(int i=0; i<_rEvent.size(); i++){
 			//std::cout<<"\nPlot dirty events\n";
-			plot::plot_event(_rEvent[i],hist_,flags_);
+			plot::plot_event(_rEvent[i],hist_,flags_,false);
 			if(_top_[_rEvent[i].Event::Top()]==_mzero_){
 				if(_ntop[3]==1){
 					plot::plot_clean_event(_rEvent[i],hist_,flags_);
@@ -415,8 +474,15 @@ void Analysis::Plot_Events(std::shared_ptr<Histogram> hist_, std::shared_ptr<Fla
 			}
 		}
 	}
-	if(flags_->Flags::Sim()){
+	if(flags_->Flags::Sim() && _tEvent[0].Event::W()>= _W_min_ && _tEvent[0].Event::W() < _W_max_ && _tEvent[0].Event::Q2()>= _Q2_min_ && _tEvent[0].Event::Q2() < _Q2_max_){
 		plot::plot_event(_tEvent[0],hist_,flags_,true);
+	}
+	if(_iEvent.size()>0){
+		if(_iEvent.size()==1){
+			plot::plot_isolated_event(_iEvent[0],hist_,flags_, _top_passed);
+		}else{
+			std::cout<<"size: " <<_iEvent.size() <<"  Didn't isolate event: there's more than one here!\n";
+		}
 	}
 }
 

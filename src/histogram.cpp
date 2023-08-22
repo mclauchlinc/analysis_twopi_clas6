@@ -27,6 +27,7 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	//Histogram::Charge_Make(flags_);
 	//Histogram::Thrown_Make(flags_);
 	//Histogram::WQ2_sf_Make(_envi);
+	Histogram::Bin_Centering_Make(flags_);
 }
 
 bool Histogram::OK_Idx(std::vector<int> idx_){
@@ -63,6 +64,7 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	Histogram::Kinematic_Eff_Write(flags_);
 	Histogram::PCorr_Check_Write(flags_);
 	Histogram::SC_Eff_Write(flags_);
+	Histogram::Bin_Centering_Write(flags_);
 	//Histogram::XY_Write(_envi);
 	//Histogram::Fid_Det_Write(_envi);
 	//Friend_Write(_envi);
@@ -4089,7 +4091,7 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 		xmax[2]=_theta_max_;
 		xmax[3]=_alpha_max_;
 		xmax[4]=_phi_max_;
-		int wider = 5;
+		//int _wider_ = 5;
 		for(int i=0; i<3; i++){//Variable Sets
 			//Double_t xmin[7] = {_W_min_,_Q2_min_,_MM_min_[i],_MM2_min_[i],_theta_min_,_alpha_min_,_phi_min_};
 			//Double_t xmax[7] = {_W_max_,_Q2_max_,_MM_max_[i],_MM2_max_[i],_theta_max_,_alpha_max_,_phi_max_};
@@ -4098,13 +4100,13 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 			for(int j=0; j<29; j++){//W
 				//float MM_res = ((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
 				//float MM2_res = ((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
-				xmin[0] = _MM_min_[i]-wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
-				xmin[1] = _MM2_min_[i]-wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
-				xmax[0] = Histogram::MM_max(j,i)+wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
-				xmax[1] = Histogram::MM2_max(j,i)+wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
-				std::cout<<"W Bin: " <<j <<" var set: " <<i <<"\n";
+				xmin[0] = _MM_min_[i]-_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
+				xmin[1] = _MM2_min_[i]-_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
+				xmax[0] = Histogram::MM_max(j,i)+_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
+				xmax[1] = Histogram::MM2_max(j,i)+_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
+				//std::cout<<"W Bin: " <<j <<" var set: " <<i <<"\n";
 				for(int l=0; l<5; l++){
-					std::cout<<"xmin[" <<l <<"]: " <<xmin[l] <<"  xmax[" <<l <<"]: " <<xmax[l] <<"\n";
+					//std::cout<<"xmin[" <<l <<"]: " <<xmin[l] <<"  xmax[" <<l <<"]: " <<xmax[l] <<"\n";
 				}
 				for(int k=0; k<5; k++){//Q2
 					sprintf(hname,"2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
@@ -4143,19 +4145,19 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 							//case 2:
 							case 0: 
 								//_MM1_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM_min_[i],Histogram::MM_max(j,i));
-								_MM1_Dist[i][j][k] = new TH1D(hname,hname,140,_MM_min_[i]-wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_),Histogram::MM_max(j,i)+wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_));
+								_MM1_Dist[i][j][k] = new TH1D(hname,hname,140,_MM_min_[i]-_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_),Histogram::MM_max(j,i)+_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_));
 								if(flags_->Flags::Sim()){
 									//_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM_min_[i],Histogram::MM_max(j,i));
-									_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM_min_[i]-wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_),Histogram::MM_max(j,i)+wider*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_));
+									_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM_min_[i]-_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_),Histogram::MM_max(j,i)+_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_));
 								}
 							break;
 							//case 3:
 							case 1: 
 								//_MM2_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM2_min_[i],Histogram::MM2_max(j,i));
-								_MM2_Dist[i][j][k] = new TH1D(hname,hname,140,_MM2_min_[i]-wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_),Histogram::MM2_max(j,i)+wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_));
+								_MM2_Dist[i][j][k] = new TH1D(hname,hname,140,_MM2_min_[i]-_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_),Histogram::MM2_max(j,i)+_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_));
 								if(flags_->Flags::Sim()){
 									//_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM2_min_[i],Histogram::MM2_max(j,i));
-									_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM2_min_[i]-wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_),Histogram::MM2_max(j,i)+wider*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_));
+									_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM2_min_[i]-_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_),Histogram::MM2_max(j,i)+_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_));
 								}
 							break;
 							//case 4: 
@@ -4363,6 +4365,33 @@ double Histogram::MM2_max(int W_bin_, int var_set_){
 	return _W_min_+_W_res_*(W_bin_+1)-_MM2_offset_[var_set_];
 }
 
+int Histogram::Friend_MM_idx(float MM_, int var_, int W_bin_){
+  int j = -1;
+  float top, bot; 
+  float res = ((Histogram::MM_max(W_bin_,var_)-_MM_min_[var_])/_MM_bins_);
+  for(int i = 0; i < (_MM_bins_+2*_wider_); i++){//constants.hpp
+    top = _MM_min_[var_]-(_wider_-(i+1))*res;//constants.hpp
+    bot = top - res; 
+    if(MM_ < top && MM_ >= bot){
+      j = i; 
+    }
+  }
+  return j; 
+}
+int Histogram::Friend_MM2_idx(float MM_, int var_, int W_bin_){
+  int j = -1;
+  float top, bot; 
+  float res = ((Histogram::MM2_max(W_bin_,var_)-_MM2_min_[var_])/_MM_bins_);
+  for(int i = 0; i < (_MM_bins_+2*_wider_); i++){//constants.hpp
+    top = _MM2_min_[var_]-(_wider_-(i+1))*res;//constants.hpp
+    bot = top - res; 
+    if(MM_ < top && MM_ >= bot){
+      j = i; 
+    }
+  }
+  return j; 
+}
+
 
 std::vector<int>  Histogram::Friend_idx( float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_){
 	std::vector<int> x(7); 
@@ -4394,10 +4423,10 @@ bool Histogram::Good_Friend_Idx(float W_, float Q2_, float MM_, float MM2_, floa
 	pass &= (W_ < _W_max_);
 	pass &= (Q2_ >= _Q2_min_);
 	pass &= (Q2_ < _Q2_max_);
-	pass &= (MM_ >= _MM_min_[var_]-2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
-	pass &= (MM_ < _MM_max_[var_]+2*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
-	pass &= (MM2_ >= _MM2_min_[var_]-2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
-	pass &= (MM2_ < _MM2_max_[var_]+2*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
+	pass &= (MM_ >= _MM_min_[var_]-_wider_*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
+	pass &= (MM_ < _MM_max_[var_]+_wider_*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
+	pass &= (MM2_ >= _MM2_min_[var_]-_wider_*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
+	pass &= (MM2_ < _MM2_max_[var_]+_wider_*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
 	pass &= (theta_ >= _theta_min_);
 	pass &= (theta_ < _theta_max_);
 	pass &= (alpha_ >= _alpha_min_);
@@ -4442,9 +4471,50 @@ void Histogram::Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, flo
 }
 
 
-void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float plus_weight_, std::shared_ptr<Flags> flags_){
+void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float plus_weight_, int top_passed_, std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Make_Friend() && ((fun::top_perform(top_,flags_)) || (top_==_mzero_ && thrown_))){
-		//std::cout<<"top:" <<top_ <<" var:" <<var_ <<" W:" <<W_ <<" Q2:" <<Q2_ <<" MM:" <<MM_ <<" MM2:" <<MM2_ <<" theta:" <<theta_ <<" alpha:" <<alpha_ <<" phi:" <<phi_ <<" weight:" <<weight_ <<" helicity:" <<helicity_ <<" thrown:" <<thrown_ <<"\n";
+		bool check_vals = true;
+		check_vals &= (W_ >= _W_min_);
+		check_vals &= (W_ < _W_max_);
+		if(!check_vals){
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" W:" <<W_ <<" thrown:" <<thrown_ <<"\n";
+		}
+		check_vals = true;
+		check_vals &= (Q2_ >= _Q2_min_);
+		check_vals &= (Q2_ < _Q2_max_);
+		if(!check_vals){
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" Q2:" <<Q2_ <<" thrown:" <<thrown_ <<"\n";
+		}
+		check_vals = true;
+		check_vals &= (MM_ >= _MM_min_[var_]-_wider_*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
+		check_vals &= (MM_ < _MM_max_[var_]+_wider_*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
+		if(!check_vals){
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" MM:" <<MM_ <<" thrown:" <<thrown_ <<"\n";
+		}
+		check_vals = true;
+		check_vals &= (MM2_ >= _MM2_min_[var_]-_wider_*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
+		check_vals &= (MM2_ < _MM2_max_[var_]+_wider_*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
+		if(!check_vals){
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" MM2:" <<MM2_ <<" thrown:" <<thrown_ <<"\n";
+		}
+		check_vals = true;
+		check_vals &= (theta_ >= _theta_min_);
+		check_vals &= (theta_ < _theta_max_);
+		if(!check_vals){
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" theta:" <<theta_ <<" thrown:" <<thrown_ <<"\n";
+		}
+		check_vals = true;
+		check_vals &= (alpha_ >= _alpha_min_);
+		check_vals &= (alpha_ < _alpha_max_);
+		if(!check_vals){
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" alpha:" <<alpha_ <<" thrown:" <<thrown_ <<"\n";
+		}
+		check_vals = true;
+		check_vals &= (phi_ >= _phi_min_);
+		check_vals &= (phi_ < _phi_max_);
+		if(!check_vals){
+			std::cout<<"top:" <<top_ <<" var:" <<var_  <<" phi:" <<phi_ <<" weight:" <<weight_ <<" helicity:" <<helicity_ <<" thrown:" <<thrown_ <<"\n";
+		}
 		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_) && !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
 			if(Histogram::Good_Friend_Idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_)){
 			//if(Histogram::OK_Idx(Histogram::Friend_idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_))){
@@ -4492,6 +4562,7 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 					TThread::Lock();
 					//used to have [var_][fun::top_idx(top_)]
 					_Friend[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(x,weight_*plus_weight_);
+					_n_wq2[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)][top_passed_]+=1;
 					//_W_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(W_,weight_);
 					//_Q2_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(Q2_,weight_);
 					_MM1_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM_,weight_*plus_weight_);
@@ -4503,7 +4574,26 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 					//std::cout<<"\tNormal " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}
 				//std::cout<<std::endl <<"Filling Friend with " <<x <<" with weight " <<weight_;
+			}else{
+				_event_npass[var_][top_passed_]+=1;
+				if(theta_ >= _theta_max_){
+					_nbad_angles[var_][top_passed_][0]+=1;
+				}else if(isnan(theta_)){
+					_nbad_angles[var_][top_passed_][0]+=1;
+				}
+				if(alpha_ >= _alpha_max_){
+					_nbad_angles[var_][top_passed_][1]+=1;
+				}else if(isnan(alpha_)){
+					_nbad_angles[var_][top_passed_][1]+=1;
+				}
+				if(phi_ >= _phi_max_){
+					_nbad_angles[var_][top_passed_][2]+=1;
+				}else if(isnan(phi_)){
+					_nbad_angles[var_][top_passed_][2]+=1;
+				}
 			}
+		}else{
+			_event_npass[var_][top_passed_]+=1;
 		}
 	}
 }
@@ -4707,3 +4797,314 @@ void Histogram::PCorr_Check_Write(std::shared_ptr<Flags> flags_){
 }
 
 //*------------------------------- End Check2 ---------------------------------*
+//*------------------------------Start Bin Centering Corrections------------------*
+double Histogram::Xij_Bin_Min(int bin_, int Xij_, double W_bin_, int var_set_){
+	if(Xij_>1){
+		if(Xij_ == 2){
+			return bin_*18.0;
+		}else{
+			return bin_*36.0;
+		}
+	}else{
+		if(Xij_==0){
+			return _MM_min_[var_set_]-(_wider_-bin_)*((Histogram::MM_max(W_bin_,var_set_)-_MM_min_[var_set_])/_MM_bins_);
+		}else if(Xij_==1){
+			return _MM2_min_[var_set_]-(_wider_-bin_)*((Histogram::MM2_max(W_bin_,var_set_)-_MM2_min_[var_set_])/_MM_bins_);
+		}
+	}
+}
+
+double Histogram::Xij_Bin_Max(int bin_, int Xij_, double W_bin_, int var_set_){
+	if(Xij_>1){
+		if(Xij_ == 2){
+			return (bin_+1)*18.0;
+		}else{
+			return (bin_+1)*36.0;
+		}
+	}else{
+		if(Xij_==0){
+			return _MM_min_[var_set_]-(_wider_-bin_-1)*((Histogram::MM_max(W_bin_,var_set_)-_MM_min_[var_set_])/_MM_bins_);
+		}else if(Xij_==1){
+			return _MM2_min_[var_set_]-(_wider_-bin_-1)*((Histogram::MM2_max(W_bin_,var_set_)-_MM2_min_[var_set_])/_MM_bins_);
+		}
+	}
+}
+
+void Histogram::Bin_Centering_Make(std::shared_ptr<Flags> flags_){
+	//[W][Q2][Var Set][Xij][Bin Xij][W,Q2,Xij projection]
+	if(!flags_->Plot_Bin_Centering()){
+		return;
+	}
+	std::cout<<"Making Bin Centering Correction Histograms\n";
+	std::vector<long> space_dims(4);
+	space_dims[3] = 29; //W Bins
+	space_dims[2] = 5; //Q2 Bins
+	space_dims[1] = 3; //Var Set
+	space_dims[0] = 5; //Xij
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+	TH1D_ptr_1d hist_1d;
+	TH1D_ptr_2d hist_2d;
+	TH1D_ptr_3d hist_3d;
+	TH1D_ptr_4d hist_4d;
+	TH1D_ptr_5d hist_5d;
+	double bot;
+	double top;
+	int num_bins_xij[5] = {_MM_bins_+2*_wider_,_MM_bins_+2*_wider_,_theta_bins_,_alpha_bins_,_phi_bins_};
+	int num_bins_fin = 0;
+	int Wbin = 0;
+	int Q2bin = 0;
+	int Xij=0;
+	int var=0;
+	char proj_name[100];
+	char* xij_names[] = {"MM1","MM2","theta","alpha","phi"};
+	while(cart.GetNextCombination()){
+		Wbin = cart[3];
+		Q2bin=cart[2];
+		Xij=cart[0];
+		var=cart[1];
+		for(int j=0; j<num_bins_xij[Xij]; j++){
+			for(int i=0; i<3; i++){
+				switch(i){
+					case 0: 
+						num_bins_fin = 29;//W
+						sprintf(proj_name,"W");
+						bot = Histogram::W_bot(Wbin);
+						top = Histogram::W_top(Wbin);
+					break;
+					case 1: 
+						num_bins_fin = 5;//Q2
+						sprintf(proj_name,"Q2");
+						bot = Histogram::Q2_bot(Q2bin);
+						top = Histogram::Q2_top(Q2bin);
+					break;
+					case 2: 
+						num_bins_fin = num_bins_xij[Xij];//Xij
+						sprintf(proj_name,"%s_%s",_var_names_[var],xij_names[Xij]);
+						bot = Histogram::Xij_Bin_Min(j,Xij,Wbin,var);
+						top = Histogram::Xij_Bin_Max(j,Xij,Wbin,var);
+					break;
+					default:
+						std::cout<<"Improper variable choice for bin centering\n";
+					break;
+				}
+				sprintf(hname,"%s_Bin_Center_W:%.3f-%.3f_Q2:%.2f-%.2f_%s_%s:%.4f-%.4f",proj_name,Histogram::W_bot(Wbin),Histogram::W_top(Wbin),Histogram::Q2_bot(Q2bin),Histogram::Q2_top(Q2bin),_var_names_[var],xij_names[Xij],Histogram::Xij_Bin_Min(j,Xij,Wbin,var),Histogram::Xij_Bin_Max(j,Xij,Wbin,var));
+				hist_1d.push_back(new TH1D(hname,hname,11,bot,top));
+			}
+			hist_2d.push_back(hist_1d);
+			hist_1d.clear();
+		}
+		if(hist_2d.size()>0){
+			hist_3d.push_back(hist_2d);
+			hist_2d.clear();
+		}
+		if(cart[0] == space_dims[0]-1){
+			if(hist_3d.size()>0){
+				hist_4d.push_back(hist_3d);
+				hist_3d.clear();
+			}
+			if(cart[1] == space_dims[1]-1){
+				if(hist_4d.size()>0){
+					hist_5d.push_back(hist_4d);
+					hist_4d.clear();
+				}
+				if(cart[2] == space_dims[2]-1){
+					if(hist_5d.size()>0){
+						_Bin_Center_hist.push_back(hist_5d);
+						hist_5d.clear();
+					}
+				}
+			}
+		}
+	}
+	std::cout<<"\tFinished Making Bin Centering Histograms\n";
+}
+
+std::vector<int> Histogram::Bin_Centering_idx(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, int variable_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx;
+	idx.push_back(Histogram::W_bin(W_));
+	idx.push_back(Histogram::Q2_bin(Q2_));
+	idx.push_back(var_set_);
+	idx.push_back(Xij_);
+	switch(Xij_){
+		case 0:
+			idx.push_back(Histogram::Friend_MM_idx(Xij_val_,var_set_,Histogram::W_bin(W_)));
+		break;
+		case 1:
+			idx.push_back(Histogram::Friend_MM2_idx(Xij_val_,var_set_,Histogram::W_bin(W_)));
+		break;
+		case 2:
+			idx.push_back(Histogram::Friend_theta_idx(Xij_val_));
+		break;
+		case 3:
+			idx.push_back(Histogram::Friend_alpha_idx(Xij_val_));
+		break;
+		case 4:
+			idx.push_back(Histogram::Friend_phi_idx(Xij_val_));
+		break;
+		default:
+			idx.push_back(-1);
+		break;
+	}
+	idx.push_back(variable_);
+	return idx;
+}
+
+void Histogram::Bin_Centering_Fill(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, int variable_, double weight_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Plot_Bin_Centering()){
+		return;
+	}
+	std::vector<int> idx = Histogram::Bin_Centering_idx(W_,Q2_,var_set_,Xij_,Xij_val_,variable_,flags_);
+	//std::cout<<"Filling Bin Centering Corrections with W:" <<W_ <<" Q2:" <<Q2_ <<" var_set:" <<var_set_ <<" Xij:" <<Xij_ <<" Xij_val:" <<Xij_val_ <<" variable:" <<variable_ <<" weight:" <<weight_ <<"\n";
+	if(Histogram::OK_Idx(idx)){
+		switch(variable_){
+			case 0:
+				_Bin_Center_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Fill(W_,weight_);
+			break;
+			case 1:
+				_Bin_Center_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Fill(Q2_,weight_);
+			break;
+			case 2:
+				_Bin_Center_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Fill(Xij_val_,weight_);
+			break;
+			default:
+				std::cout<<"Improper Variable designation for Bin Centering Corrections\n";
+			break;
+		}
+	}
+}
+
+void Histogram::Bin_Centering_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Plot_Bin_Centering()){ return; }
+	std::cout<<"Writing Bin Centering Plots\n";
+	char dir_name[100];
+	//std::cout<<"Making Large Directory:";
+	TDirectory* dir_bc = _RootOutputFile->mkdir("Bin Centering Plots");
+	//std::cout<<" Done\n";
+	dir_bc->cd();
+	//std::cout<<"Making Sub Directories: ";
+	TDirectory* dir_bc_sub[29][5+1][3+1][5+1][3+1];//{sector,proton_thesh}
+	//Histogram::W_bot(Wbin),Histogram::W_top(Wbin),Histogram::Q2_bot(Q2bin),Histogram::Q2_top(Q2bin),Histogram::Xij_Bin_Min(j,Xij,Wbin,var),Histogram::Xij_Bin_Max(j,Xij,Wbin,var)
+	char* xij_names[] = {"MM1","MM2","theta","alpha","phi"};
+	char proj_name[100];
+	for(int i=0; i<29; i++){//W
+		sprintf(dir_name,"Bin Centering W:%.3f-%.3f",Histogram::W_bot(i),Histogram::W_top(i));
+		dir_bc_sub[i][0][0][0][0] = dir_bc->mkdir(dir_name);
+		dir_bc_sub[i][0][0][0][0]->cd();
+		for(int j=0; j<5; j++){//Q2
+			sprintf(dir_name,"Bin Centering W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_bot(i),Histogram::W_top(i),Histogram::Q2_bot(j),Histogram::Q2_top(j));
+			dir_bc_sub[i][j+1][0][0][0] = dir_bc_sub[i][0][0][0][0]->mkdir(dir_name);
+			dir_bc_sub[i][j+1][0][0][0]->cd();
+			for(int k=0; k<3; k++){//var set
+				sprintf(dir_name,"Bin Centering W:%.3f-%.3f Q2:%.2f-%.2f var:%s",Histogram::W_bot(i),Histogram::W_top(i),Histogram::Q2_bot(j),Histogram::Q2_top(j),_var_names_[k]);
+				dir_bc_sub[i][j+1][k+1][0][0] = dir_bc_sub[i][j+1][0][0][0]->mkdir(dir_name);
+				dir_bc_sub[i][j+1][k+1][0][0]->cd();
+				for(int l=0; l<5; l++){//Xij
+					sprintf(dir_name,"Bin Centering W:%.3f-%.3f Q2:%.2f-%.2f var:%s Xij:%s",Histogram::W_bot(i),Histogram::W_top(i),Histogram::Q2_bot(j),Histogram::Q2_top(j),_var_names_[k],xij_names[l]);
+					dir_bc_sub[i][j+1][k+1][l+1][0] = dir_bc_sub[i][j+1][k+1][0][0]->mkdir(dir_name);
+					dir_bc_sub[i][j+1][k+1][l+1][0]->cd();
+					for(int m=0; m<3; m++){//{W,Q2,Xij}
+						switch(m){
+							case 0:
+								sprintf(proj_name,"W");
+							break;
+							case 1:
+								sprintf(proj_name,"Q2");
+							break;
+							case 2:
+								sprintf(proj_name,"%s",xij_names[l]);
+							break;
+							default:
+								sprintf(proj_name,"wrong");
+							break;
+						}
+						sprintf(dir_name,"Bin Centering W:%.3f-%.3f Q2:%.2f-%.2f var:%s Xij:%s proj:%s",Histogram::W_bot(i),Histogram::W_top(i),Histogram::Q2_bot(j),Histogram::Q2_top(j),_var_names_[k],xij_names[l],proj_name);
+						dir_bc_sub[i][j+1][k+1][l+1][m+1] = dir_bc_sub[i][j+1][k+1][l+1][0]->mkdir(dir_name);
+					}
+				}
+			}
+		}
+	}
+	std::vector<long> space_dims(4);
+	space_dims[3] = 29; //W Bins
+	space_dims[2] = 5; //Q2 Bins
+	space_dims[1] = 3; //Var Set
+	space_dims[0] = 5; //Xij
+	CartesianGenerator cart(space_dims);
+	char hname[100];
+	std::vector<int> idx;
+	int Wbin, Q2bin, Xij, var;
+	double val, Xij_val;
+	int num_bins_xij[5] = {_MM_bins_+2*_wider_,_MM_bins_+2*_wider_,_theta_bins_,_alpha_bins_,_phi_bins_};
+	char * xij_units[5] = {"GeV","GeV","Degrees","Degrees","Degrees"};
+	double top,bot;
+	char xlabel[100];
+	while(cart.GetNextCombination()){
+		Wbin = cart[3];
+		Q2bin=cart[2];
+		Xij=cart[0];
+		var=cart[1];
+		//std::cout<<"W bin:" <<Wbin <<" Q2 bin:" <<Q2bin <<" var:" <<var <<" Xij:" <<Xij <<" going into loop\n";
+		for(int j=0; j<num_bins_xij[Xij]; j++){
+			Xij_val = (Xij_Bin_Min(j,Xij,Wbin,var)+Xij_Bin_Max(j,Xij,Wbin,var))/2.0;
+			
+			for(int i=0; i<3; i++){//Variable projection
+				switch(i){
+					case 0: 
+						bot = Histogram::W_bot(Wbin);
+						top = Histogram::W_top(Wbin);
+						sprintf(xlabel,"W (GeV)");
+					break;
+					case 1: 
+						bot = Histogram::Q2_bot(Q2bin);
+						top = Histogram::Q2_top(Q2bin);
+						sprintf(xlabel,"Q2 (GeV^2)");
+					break;
+					case 2: 
+						bot = Histogram::Xij_Bin_Min(j,Xij,Wbin,var);
+						top = Histogram::Xij_Bin_Max(j,Xij,Wbin,var);
+						sprintf(xlabel,"%s %s",xij_names[Xij],xij_units[Xij]);
+					break;
+				}
+				val = (top+bot)/2.0;
+				//std::cout<<"W: " <<W_center(Wbin) <<" Q2:" <<(Q2_bot(Q2bin)+Q2_top(Q2bin))/2.0 <<" var:" <<var <<" Xij:" <<Xij <<" Xij_val:" <<Xij_val <<" variable:" <<i <<"\n";
+				idx = Histogram::Bin_Centering_idx(W_center(Wbin),(Q2_bot(Q2bin)+Q2_top(Q2bin))/2.0,var,Xij,Xij_val,i,flags_);
+				//fun::print_vector_idx(idx);
+				if(Histogram::OK_Idx(idx)){
+					dir_bc_sub[Wbin][Q2bin+1][var+1][Xij+1][i+1]->cd();
+					_Bin_Center_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->SetXTitle(xlabel);
+					_Bin_Center_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->SetYTitle("Yield");
+					_Bin_Center_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Write();
+				}
+			}
+		}
+	}
+	std::cout<<"\tFinished Writing Bin Centering Plots\n";
+}
+
+void Histogram::Top_Increment(int i_){
+	_ntop[i_]+=1;
+}
+
+void Histogram::Top_Pot_Increment(int i_){
+	_nptop[i_]+=1;
+}
+long Histogram::NTop(int i_){
+	return _ntop[i_];
+}
+
+long Histogram::NPTop(int i_){
+	return _nptop[i_];
+}
+
+long Histogram::N_Yield(int var_, int Wbin_, int Q2bin_, int top_){
+	return _n_wq2[var_][Wbin_][Q2bin_][top_];
+}
+
+long Histogram::Bad_Angles(int var_, int top_, int angle_){
+	return _nbad_angles[var_][top_][angle_];
+}
+
+long Histogram::Ev_No_Pass(int var_, int top_){
+	return _event_npass[var_][top_];
+}

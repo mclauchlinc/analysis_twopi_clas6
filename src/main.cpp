@@ -49,6 +49,8 @@ int main(int argc, char **argv){
 
 	std::future<bool> fut;
 
+
+	std::cout<<"Am i makign bin centering plots? " <<flags->Flags::Plot_Bin_Centering() <<"\n";
 	//For each thread
 	std::cout<<"Running Multithreaded\n";
 	for(int i = 0; i<flags->Flags::Num_Cores(); i++){
@@ -80,6 +82,24 @@ int main(int argc, char **argv){
 	//std::cout<<std::endl <<"Total Number of Files: " <<envi->Environment::was_num_file() <<std::endl; 
 	std::cout<<"***Integrated Charge was " <<q_tot <<"**\n";
 
+	long total_passed_events[3][4] = {{0,0,0,0},{0,0,0,0},{0,0,0,0}};
+	long total_bad_angles[3][4] = {{0,0,0,0},{0,0,0,0},{0,0,0,0}};
+	for(int i=0; i<4; i++){
+		std::cout<<topologies[i+1] <<" measured:" <<hists->Histogram::NTop(i) <<" missed:" <<hists->Histogram::NPTop(i) <<"\n";
+		for(int l=0; l<3; l++){
+			for(int j=0; j<29; j++){
+				for(int k=0; k<5; k++){
+					total_passed_events[l][i]+= hists->Histogram::N_Yield(l,j,k,i);
+				}
+			}
+			std::cout<<"\tin defined range for var " <<l <<": " <<total_passed_events[l][i] <<"\n";
+			std::cout<<"\tBad Theta Angles in var " <<l <<":" <<hists->Bad_Angles(l,i,0) <<"\n";
+			std::cout<<"\tBad Alpha Angles in var " <<l <<":" <<hists->Bad_Angles(l,i,1) <<"\n";
+			std::cout<<"\tBad Phi Angles in var " <<l <<":" <<hists->Bad_Angles(l,i,2) <<"\n";
+			std::cout<<"*Events not passed in var " <<l <<":" <<hists->Ev_No_Pass(l,i) <<"\n";
+		}
+		
+	}
 	std::cout<<"\nWriting Histograms\n";
 	hists->Histogram::Write(flags);
 	//hists->Histogram::Print(output_name,envi);
