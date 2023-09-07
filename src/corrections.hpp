@@ -171,8 +171,8 @@ namespace corr{
 											{	{0.1,0.2,0.3},{0.1,0.2,0.3},{0.1,0.2,0.3},{0.1,0.2,0.3}}}};
 	float power_10(float num_, int power_of_ten_);
 	float power(float num_, int power_);
-	float p_corr_e(float p_e_, float theta_e_, float phi_e_, int run_, bool centered_ = false, int sector_=0);
-	float theta_e_corr(float theta_e_, float phi_e_, int run_, bool centered_ = false, int sector_=0);
+	float p_corr_e(float p_e_, float theta_e_, float phi_e_, int run_, bool centered_ = false, int sector_idx_=0);
+	float theta_e_corr(float theta_e_, float phi_e_, int run_, bool centered_ = false, int sector_idx_=0);
 }
 
 

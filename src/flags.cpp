@@ -367,6 +367,14 @@ void Flags::Plot_Flag(std::string str, bool include){
 			std::cout<<"Will Plot SF\n";
 			_plot_bin_centering = true;
 		}
+		if(str == _plot_ecorr_angle_){
+			std::cout<<"Will Plot Electron Angle Corrections\n";
+			_plot_ecorr_angle = true;
+		}
+		if(str == _plot_ecorr_mag_){
+			std::cout<<"Will Plot Electron Mag Corrections\n";
+			_plot_ecorr_mag = true;
+		}
 	}
 	if(!include && _plot_all){
 		if(str == _plot_wq2_){
@@ -431,6 +439,12 @@ void Flags::Plot_Flag(std::string str, bool include){
 		}
 		if(str == _plot_bin_centering_){
 			_plot_bin_centering = false;
+		}
+		if(str == _plot_ecorr_angle_){
+			_plot_ecorr_angle = false;
+		}
+		if(str == _plot_ecorr_angle_){
+			_plot_ecorr_angle = false;
 		}
 	}
 }
@@ -691,6 +705,12 @@ bool Flags::Plot_Check(){
 }
 bool Flags::Plot_Bin_Centering(){
 	return _plot_bin_centering;
+}
+bool Flags::Plot_Electron_Angle_Corr(){
+	return _plot_ecorr_angle;
+}
+bool Flags::Plot_Electron_Mag_Corr(){
+	return _plot_ecorr_mag;
 }
 //Histogram Separation
 

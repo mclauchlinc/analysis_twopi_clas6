@@ -28,6 +28,8 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	//Histogram::Thrown_Make(flags_);
 	//Histogram::WQ2_sf_Make(_envi);
 	Histogram::Bin_Centering_Make(flags_);
+	Histogram::Ele_Angle_Corr_Make(flags_);
+	Histogram::Ele_Mag_Corr_Make(flags_);
 }
 
 bool Histogram::OK_Idx(std::vector<int> idx_){
@@ -65,6 +67,8 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	Histogram::PCorr_Check_Write(flags_);
 	Histogram::SC_Eff_Write(flags_);
 	Histogram::Bin_Centering_Write(flags_);
+	Histogram::Ele_Angle_Corr_Write(flags_);
+	Histogram::Ele_Mag_Corr_Write(flags_);
 	//Histogram::XY_Write(_envi);
 	//Histogram::Fid_Det_Write(_envi);
 	//Friend_Write(_envi);
@@ -4060,8 +4064,8 @@ std::vector<int> Histogram::Friend_Bin_Sizes(std::shared_ptr<Flags> flags_){
 		std::vector<int> bin_sizes(7);
 		bin_sizes[0] = Histogram::W_bins();
 		bin_sizes[1] = std::distance(std::begin(_Q2_bins_), std::end(_Q2_bins_));
-		bin_sizes[2] = _MM_bins_+6;
-		bin_sizes[3] = _MM_bins_+6;
+		bin_sizes[2] = _MM_bins_+2*_MM_wider_;
+		bin_sizes[3] = _MM_bins_+2*_MM_wider_;
 		bin_sizes[4] = _theta_bins_;
 		bin_sizes[5] = _alpha_bins_;
 		bin_sizes[6] = _phi_bins_;
@@ -4100,10 +4104,10 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 			for(int j=0; j<29; j++){//W
 				//float MM_res = ((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
 				//float MM2_res = ((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
-				xmin[0] = _MM_min_[i]-_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
-				xmin[1] = _MM2_min_[i]-_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
-				xmax[0] = Histogram::MM_max(j,i)+_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_);
-				xmax[1] = Histogram::MM2_max(j,i)+_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_);
+				xmin[0] = _MM_min_[i]-_MM_wider_*((_MM_max_[i][j]-_MM_min_[i])/_MM_bins_);
+				xmin[1] = _MM2_min_[i]-_MM_wider_*((_MM2_max_[i][j]-_MM2_min_[i])/_MM_bins_);
+				xmax[0] = _MM_max_[i][j]+_MM_wider_*((_MM_max_[i][j]-_MM_min_[i])/_MM_bins_);
+				xmax[1] = _MM2_max_[i][j]+_MM_wider_*((_MM2_max_[i][j]-_MM2_min_[i])/_MM_bins_);
 				//std::cout<<"W Bin: " <<j <<" var set: " <<i <<"\n";
 				for(int l=0; l<5; l++){
 					//std::cout<<"xmin[" <<l <<"]: " <<xmin[l] <<"  xmax[" <<l <<"]: " <<xmax[l] <<"\n";
@@ -4145,19 +4149,19 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 							//case 2:
 							case 0: 
 								//_MM1_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM_min_[i],Histogram::MM_max(j,i));
-								_MM1_Dist[i][j][k] = new TH1D(hname,hname,140,_MM_min_[i]-_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_),Histogram::MM_max(j,i)+_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_));
+								_MM1_Dist[i][j][k] = new TH1D(hname,hname,140,_MM_min_[i]-_MM_wider_*((_MM_max_[i][j]-_MM_min_[i])/_MM_bins_),_MM_max_[i][j]+_MM_wider_*((_MM_max_[i][j]-_MM_min_[i])/_MM_bins_));
 								if(flags_->Flags::Sim()){
-									//_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM_min_[i],Histogram::MM_max(j,i));
-									_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM_min_[i]-_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_),Histogram::MM_max(j,i)+_wider_*((Histogram::MM_max(j,i)-_MM_min_[i])/_MM_bins_));
+									//_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM_min_[i],_MM_max_[i][j]);
+									_MM1_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM_min_[i]-_MM_wider_*((_MM_max_[i][j]-_MM_min_[i])/_MM_bins_),_MM_max_[i][j]+_MM_wider_*((_MM_max_[i][j]-_MM_min_[i])/_MM_bins_));
 								}
 							break;
 							//case 3:
 							case 1: 
 								//_MM2_Dist[i][j][k] = new TH1D(hname,hname,_MM_bins_,_MM2_min_[i],Histogram::MM2_max(j,i));
-								_MM2_Dist[i][j][k] = new TH1D(hname,hname,140,_MM2_min_[i]-_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_),Histogram::MM2_max(j,i)+_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_));
+								_MM2_Dist[i][j][k] = new TH1D(hname,hname,140,_MM2_min_[i]-_MM_wider_*((_MM2_max_[i][j]-_MM2_min_[i])/_MM_bins_),_MM2_max_[i][j]+_MM_wider_*((_MM2_max_[i][j]-_MM2_min_[i])/_MM_bins_));
 								if(flags_->Flags::Sim()){
-									//_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM2_min_[i],Histogram::MM2_max(j,i));
-									_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM2_min_[i]-_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_),Histogram::MM2_max(j,i)+_wider_*((Histogram::MM2_max(j,i)-_MM2_min_[i])/_MM_bins_));
+									//_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,_MM_bins_,_MM2_min_[i],_MM2_max_[i][j]);
+									_MM2_Dist_thr[i][j][k] = new TH1D(hname2,hname2,140,_MM2_min_[i]-_MM_wider_*((_MM2_max_[i][j]-_MM2_min_[i])/_MM_bins_),_MM2_max_[i][j]+_MM_wider_*((_MM2_max_[i][j]-_MM2_min_[i])/_MM_bins_));
 								}
 							break;
 							//case 4: 
@@ -4291,13 +4295,13 @@ int Histogram::Friend_Q2_idx(float Q2_){
   }
   return j; 
 }
-
-int Histogram::Friend_MM_idx(float MM_, int var_){
+/*
+int Histogram::Friend_MM_idx(float MM_, int var_, int Wbin_){
   int j = -1;
   float top, bot; 
   for(int i = 0; i < _MM_bins_; i++){//constants.hpp
-    top = _MM_min_[var_] + (i+1)*((_MM_max_[var_]-_MM_min_[var_])/_MM_bins_);//constants.hpp
-    bot = top - ((_MM_max_[var_]-_MM_min_[var_])/_MM_bins_); 
+    top = _MM_min_[var_] + (i+1)*((_MM_max_[var_][Wbin_]-_MM_min_[var_])/_MM_bins_);//constants.hpp
+    bot = top - ((_MM_max_[var_][Wbin_]-_MM_min_[var_])/_MM_bins_); 
     if(MM_ < top && MM_ >= bot){
       j = i; 
     }
@@ -4305,18 +4309,18 @@ int Histogram::Friend_MM_idx(float MM_, int var_){
   return j; 
 }
 
-int Histogram::Friend_MM2_idx(float MM_, int var_){
+int Histogram::Friend_MM2_idx(float MM_, int var_, int Wbin_){
   int j = -1;
   float top, bot; 
   for(int i = 0; i < _MM_bins_; i++){//constants.hpp
-    top = _MM2_min_[var_] + (i+1)*((_MM2_max_[var_]-_MM2_min_[var_])/_MM_bins_);//constants.hpp
-    bot = top - ((_MM2_max_[var_]-_MM2_min_[var_])/_MM_bins_); 
+    top = _MM2_min_[var_] + (i+1)*((_MM2_max_[var_][Wbin_]-_MM2_min_[var_])/_MM_bins_);//constants.hpp
+    bot = top - ((_MM2_max_[var_][Wbin_]-_MM2_min_[var_])/_MM_bins_); 
     if(MM_ < top && MM_ >= bot){
       j = i; 
     }
   }
   return j; 
-}
+}*/
 
 int Histogram::Friend_theta_idx(float theta_){
   int j = -1;
@@ -4357,20 +4361,13 @@ int Histogram::Friend_phi_idx(float phi_){
   return j; 
 }
 
-double Histogram::MM_max(int W_bin_, int var_set_){
-	return _W_min_+_W_res_*(W_bin_+1)-_MM_offset_[var_set_];
-}
-
-double Histogram::MM2_max(int W_bin_, int var_set_){
-	return _W_min_+_W_res_*(W_bin_+1)-_MM2_offset_[var_set_];
-}
 
 int Histogram::Friend_MM_idx(float MM_, int var_, int W_bin_){
   int j = -1;
   float top, bot; 
-  float res = ((Histogram::MM_max(W_bin_,var_)-_MM_min_[var_])/_MM_bins_);
-  for(int i = 0; i < (_MM_bins_+2*_wider_); i++){//constants.hpp
-    top = _MM_min_[var_]-(_wider_-(i+1))*res;//constants.hpp
+  float res = ((_MM_max_[var_][W_bin_]-_MM_min_[var_])/_MM_bins_);
+  for(int i = 0; i < (_MM_bins_+2*_MM_wider_); i++){//constants.hpp
+    top = _MM_min_[var_]-(_MM_wider_-(i+1))*res;//constants.hpp
     bot = top - res; 
     if(MM_ < top && MM_ >= bot){
       j = i; 
@@ -4381,9 +4378,9 @@ int Histogram::Friend_MM_idx(float MM_, int var_, int W_bin_){
 int Histogram::Friend_MM2_idx(float MM_, int var_, int W_bin_){
   int j = -1;
   float top, bot; 
-  float res = ((Histogram::MM2_max(W_bin_,var_)-_MM2_min_[var_])/_MM_bins_);
-  for(int i = 0; i < (_MM_bins_+2*_wider_); i++){//constants.hpp
-    top = _MM2_min_[var_]-(_wider_-(i+1))*res;//constants.hpp
+  float res = ((_MM2_max_[var_][W_bin_]-_MM2_min_[var_])/_MM_bins_);
+  for(int i = 0; i < (_MM_bins_+2*_MM_wider_); i++){//constants.hpp
+    top = _MM2_min_[var_]-(_MM_wider_-(i+1))*res;//constants.hpp
     bot = top - res; 
     if(MM_ < top && MM_ >= bot){
       j = i; 
@@ -4400,8 +4397,8 @@ std::vector<int>  Histogram::Friend_idx( float W_, float Q2_, float MM_, float M
 	//x[0] = top; //{pmiss,pipmiss,pimmiss,zeromiss,all}
 	x[0] = Histogram::Friend_W_idx(W_);
 	x[1] = Histogram::Friend_Q2_idx(Q2_);
-	x[2] = Histogram::Friend_MM_idx(MM_,var_);
-	x[3] = Histogram::Friend_MM2_idx(MM2_,var_);
+	x[2] = Histogram::Friend_MM_idx(MM_,var_,x[0]);
+	x[3] = Histogram::Friend_MM2_idx(MM2_,var_,x[0]);
 	x[4] = Histogram::Friend_theta_idx(theta_);
 	x[5] = Histogram::Friend_alpha_idx(alpha_);
 	x[6] = Histogram::Friend_phi_idx(phi_);
@@ -4423,10 +4420,10 @@ bool Histogram::Good_Friend_Idx(float W_, float Q2_, float MM_, float MM2_, floa
 	pass &= (W_ < _W_max_);
 	pass &= (Q2_ >= _Q2_min_);
 	pass &= (Q2_ < _Q2_max_);
-	pass &= (MM_ >= _MM_min_[var_]-_wider_*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
-	pass &= (MM_ < _MM_max_[var_]+_wider_*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
-	pass &= (MM2_ >= _MM2_min_[var_]-_wider_*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
-	pass &= (MM2_ < _MM2_max_[var_]+_wider_*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
+	pass &= (MM_ >= _MM_min_[var_]-_MM_wider_*((_MM_max_[var_][Histogram::W_bin(W_)]-_MM_min_[var_])/_MM_bins_));
+	pass &= (MM_ < _MM_max_[var_][Histogram::W_bin(W_)]+_MM_wider_*((_MM_max_[var_][Histogram::W_bin(W_)]-_MM_min_[var_])/_MM_bins_));
+	pass &= (MM2_ >= _MM2_min_[var_]-_MM_wider_*((_MM2_max_[var_][Histogram::W_bin(W_)]-_MM2_min_[var_])/_MM_bins_));
+	pass &= (MM2_ < _MM2_max_[var_][Histogram::W_bin(W_)]+_MM_wider_*((_MM2_max_[var_][Histogram::W_bin(W_)]-_MM2_min_[var_])/_MM_bins_));
 	pass &= (theta_ >= _theta_min_);
 	pass &= (theta_ < _theta_max_);
 	pass &= (alpha_ >= _alpha_min_);
@@ -4462,8 +4459,8 @@ void Histogram::Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, flo
 	std::cout<<std::endl <<"--Printing Friend idx--" <<std::endl;
 	std::cout<<"W: " <<W_ <<" in bin: " <<Histogram::Friend_W_idx(W_) <<std::endl;
 	std::cout<<"Q2: " <<Q2_ <<" in bin: " <<Histogram::Friend_Q2_idx(Q2_) <<std::endl;
-	std::cout<<"MM: " <<MM_ <<" in bin: " <<Histogram::Friend_MM_idx(MM_,var_) <<std::endl;
-	std::cout<<"MM2: " <<MM2_ <<" in bin: " <<Histogram::Friend_MM2_idx(MM2_,var_) <<std::endl;
+	std::cout<<"MM: " <<MM_ <<" in bin: " <<Histogram::Friend_MM_idx(MM_,var_,Histogram::W_bin(W_)) <<std::endl;
+	std::cout<<"MM2: " <<MM2_ <<" in bin: " <<Histogram::Friend_MM2_idx(MM2_,var_,Histogram::W_bin(W_)) <<std::endl;
 	std::cout<<"Theta: " <<theta_ <<" in bin: " <<Histogram::Friend_theta_idx(theta_) <<std::endl;
 	std::cout<<"Alpha: " <<alpha_ <<" in bin: " <<Histogram::Friend_alpha_idx(alpha_) <<std::endl;
 	std::cout<<"Phi: " <<phi_ <<" in bin: " <<Histogram::Friend_phi_idx(phi_) <<std::endl;
@@ -4486,34 +4483,34 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" Q2:" <<Q2_ <<" thrown:" <<thrown_ <<"\n";
 		}
 		check_vals = true;
-		check_vals &= (MM_ >= _MM_min_[var_]-_wider_*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
-		check_vals &= (MM_ < _MM_max_[var_]+_wider_*((Histogram::MM_max(Histogram::W_bin(W_),var_)-_MM_min_[var_])/_MM_bins_));
+		check_vals &= (MM_ >= _MM_min_[var_]-_MM_wider_*((_MM_max_[var_][Histogram::W_bin(W_)]-_MM_min_[var_])/_MM_bins_));
+		check_vals &= (MM_ < _MM_max_[var_][Histogram::W_bin(W_)]+_MM_wider_*((_MM_max_[var_][Histogram::W_bin(W_)]-_MM_min_[var_])/_MM_bins_));
 		if(!check_vals){
-			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" MM:" <<MM_ <<" thrown:" <<thrown_ <<"\n";
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" MM:" <<MM_ <<" MM bounds:" <<_MM_min_[var_]-_MM_wider_*((_MM_max_[var_][Histogram::W_bin(W_)]-_MM_min_[var_])/_MM_bins_) <<"-" <<_MM_max_[var_][Histogram::W_bin(W_)]+_MM_wider_*((_MM_max_[var_][Histogram::W_bin(W_)]-_MM_min_[var_])/_MM_bins_) <<" thrown:" <<thrown_ <<"\n";
 		}
 		check_vals = true;
-		check_vals &= (MM2_ >= _MM2_min_[var_]-_wider_*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
-		check_vals &= (MM2_ < _MM2_max_[var_]+_wider_*((Histogram::MM2_max(Histogram::W_bin(W_),var_)-_MM2_min_[var_])/_MM_bins_));
+		check_vals &= (MM2_ >= _MM2_min_[var_]-_MM_wider_*((_MM2_max_[var_][Histogram::W_bin(W_)]-_MM2_min_[var_])/_MM_bins_));
+		check_vals &= (MM2_ < _MM2_max_[var_][Histogram::W_bin(W_)]+_MM_wider_*((_MM2_max_[var_][Histogram::W_bin(W_)]-_MM2_min_[var_])/_MM_bins_));
 		if(!check_vals){
-			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" MM2:" <<MM2_ <<" thrown:" <<thrown_ <<"\n";
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" MM2:" <<MM2_ <<" MM2 bounds:" <<_MM2_min_[var_]-_MM_wider_*((_MM2_max_[var_][Histogram::W_bin(W_)]-_MM2_min_[var_])/_MM_bins_) <<"-" <<_MM2_max_[var_][Histogram::W_bin(W_)]+_MM_wider_*((_MM2_max_[var_][Histogram::W_bin(W_)]-_MM2_min_[var_])/_MM_bins_) <<" thrown:" <<thrown_ <<"\n";
 		}
 		check_vals = true;
 		check_vals &= (theta_ >= _theta_min_);
 		check_vals &= (theta_ < _theta_max_);
 		if(!check_vals){
-			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" theta:" <<theta_ <<" thrown:" <<thrown_ <<"\n";
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" theta:" <<theta_ <<" theta bounds:" <<_theta_min_ <<"-" <<_theta_max_ <<" thrown:" <<thrown_ <<"\n";
 		}
 		check_vals = true;
 		check_vals &= (alpha_ >= _alpha_min_);
 		check_vals &= (alpha_ < _alpha_max_);
 		if(!check_vals){
-			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" alpha:" <<alpha_ <<" thrown:" <<thrown_ <<"\n";
+			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" alpha:" <<alpha_ <<" alpha bounds:" <<_alpha_min_ <<"-" <<_alpha_max_ <<" thrown:" <<thrown_ <<"\n";
 		}
 		check_vals = true;
 		check_vals &= (phi_ >= _phi_min_);
 		check_vals &= (phi_ < _phi_max_);
 		if(!check_vals){
-			std::cout<<"top:" <<top_ <<" var:" <<var_  <<" phi:" <<phi_ <<" weight:" <<weight_ <<" helicity:" <<helicity_ <<" thrown:" <<thrown_ <<"\n";
+			std::cout<<"top:" <<top_ <<" var:" <<var_  <<" phi:" <<phi_ <<" phi bounds:" <<_phi_min_ <<"-" <<_phi_max_ <<" weight:" <<weight_ <<" helicity:" <<helicity_ <<" thrown:" <<thrown_ <<"\n";
 		}
 		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_) && !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
 			if(Histogram::Good_Friend_Idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_)){
@@ -4709,7 +4706,7 @@ void Histogram::PCorr_Check_Make(std::shared_ptr<Flags> flags_){
 			//
 		}else{
 			sprintf(hname,"Ele_PCorr_Check_%s_%s_Sector:%d",_top_[cart[1]],_ele_corr_[cart[2]],cart[0]+1);
-			plot_1d.push_back(new TH1F(hname,hname,_mm2_bin_[cart[1]],_mm2_min_[cart[1]],_mm2_max_[cart[1]]));
+			plot_1d.push_back(new TH1F(hname,hname,_mm_bin_[cart[1]],_mm_min_[cart[1]],_mm_max_[cart[1]]));
 			if(cart[0] == space_dims[0]-1){
 				if(plot_1d.size()>0){
 					plot_2d.push_back(plot_1d);
@@ -4798,7 +4795,7 @@ void Histogram::PCorr_Check_Write(std::shared_ptr<Flags> flags_){
 
 //*------------------------------- End Check2 ---------------------------------*
 //*------------------------------Start Bin Centering Corrections------------------*
-double Histogram::Xij_Bin_Min(int bin_, int Xij_, double W_bin_, int var_set_){
+double Histogram::Xij_Bin_Min(int bin_, int Xij_, int W_bin_, int var_set_){
 	if(Xij_>1){
 		if(Xij_ == 2){
 			return bin_*18.0;
@@ -4807,14 +4804,14 @@ double Histogram::Xij_Bin_Min(int bin_, int Xij_, double W_bin_, int var_set_){
 		}
 	}else{
 		if(Xij_==0){
-			return _MM_min_[var_set_]-(_wider_-bin_)*((Histogram::MM_max(W_bin_,var_set_)-_MM_min_[var_set_])/_MM_bins_);
+			return _MM_min_[var_set_]-(_MM_wider_-bin_)*((_MM_max_[var_set_][W_bin_]-_MM_min_[var_set_])/_MM_bins_);
 		}else if(Xij_==1){
-			return _MM2_min_[var_set_]-(_wider_-bin_)*((Histogram::MM2_max(W_bin_,var_set_)-_MM2_min_[var_set_])/_MM_bins_);
+			return _MM2_min_[var_set_]-(_MM_wider_-bin_)*((_MM2_max_[var_set_][W_bin_]-_MM2_min_[var_set_])/_MM_bins_);
 		}
 	}
 }
 
-double Histogram::Xij_Bin_Max(int bin_, int Xij_, double W_bin_, int var_set_){
+double Histogram::Xij_Bin_Max(int bin_, int Xij_, int W_bin_, int var_set_){
 	if(Xij_>1){
 		if(Xij_ == 2){
 			return (bin_+1)*18.0;
@@ -4823,9 +4820,9 @@ double Histogram::Xij_Bin_Max(int bin_, int Xij_, double W_bin_, int var_set_){
 		}
 	}else{
 		if(Xij_==0){
-			return _MM_min_[var_set_]-(_wider_-bin_-1)*((Histogram::MM_max(W_bin_,var_set_)-_MM_min_[var_set_])/_MM_bins_);
+			return _MM_min_[var_set_]-(_MM_wider_-bin_-1)*((_MM_max_[var_set_][W_bin_]-_MM_min_[var_set_])/_MM_bins_);
 		}else if(Xij_==1){
-			return _MM2_min_[var_set_]-(_wider_-bin_-1)*((Histogram::MM2_max(W_bin_,var_set_)-_MM2_min_[var_set_])/_MM_bins_);
+			return _MM2_min_[var_set_]-(_MM_wider_-bin_-1)*((_MM2_max_[var_set_][W_bin_]-_MM2_min_[var_set_])/_MM_bins_);
 		}
 	}
 }
@@ -4850,7 +4847,7 @@ void Histogram::Bin_Centering_Make(std::shared_ptr<Flags> flags_){
 	TH1D_ptr_5d hist_5d;
 	double bot;
 	double top;
-	int num_bins_xij[5] = {_MM_bins_+2*_wider_,_MM_bins_+2*_wider_,_theta_bins_,_alpha_bins_,_phi_bins_};
+	int num_bins_xij[5] = {_MM_bins_+2*_MM_wider_,_MM_bins_+2*_MM_wider_,_theta_bins_,_alpha_bins_,_phi_bins_};
 	int num_bins_fin = 0;
 	int Wbin = 0;
 	int Q2bin = 0;
@@ -5035,7 +5032,7 @@ void Histogram::Bin_Centering_Write(std::shared_ptr<Flags> flags_){
 	std::vector<int> idx;
 	int Wbin, Q2bin, Xij, var;
 	double val, Xij_val;
-	int num_bins_xij[5] = {_MM_bins_+2*_wider_,_MM_bins_+2*_wider_,_theta_bins_,_alpha_bins_,_phi_bins_};
+	int num_bins_xij[5] = {_MM_bins_+2*_MM_wider_,_MM_bins_+2*_MM_wider_,_theta_bins_,_alpha_bins_,_phi_bins_};
 	char * xij_units[5] = {"GeV","GeV","Degrees","Degrees","Degrees"};
 	double top,bot;
 	char xlabel[100];
@@ -5108,3 +5105,227 @@ long Histogram::Bad_Angles(int var_, int top_, int angle_){
 long Histogram::Ev_No_Pass(int var_, int top_){
 	return _event_npass[var_][top_];
 }
+
+//*------------------------------Start Electron Angle Corrections------------------*
+void Histogram::Ele_Angle_Corr_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Electron_Angle_Corr()){ return;}
+	std::cout<<"Making Electron Angle Correction Histograms\n";
+	std::vector<long> space_dims(3);
+	space_dims[2] = 6; //Sector
+	space_dims[1] = (int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr); //Theta
+	space_dims[0] = (int)((max_phi_pecorr-min_phi_pecorr)/res_phi_pecorr); //phi
+	char hname[100];
+	CartesianGenerator cart(space_dims);
+	TH1F_ptr_1d tmp_1d;
+	TH1F_ptr_2d tmp_2d;
+	while(cart.GetNextCombination()){
+		sprintf(hname,"Electron_Angle_Diff_Theta:%.1f-%.1f_Phi:%.1f-%.1f_Sec:%d",min_theta_pecorr+cart[1]*res_theta_pecorr,min_theta_pecorr+(cart[1]+1)*res_theta_pecorr,min_phi_pecorr+cart[0]*res_phi_pecorr,min_phi_pecorr+(cart[0]+1)*res_phi_pecorr,cart[2]+1);
+		tmp_1d.push_back(new TH1F(hname,hname,bins_delta_theta,min_delta_theta,max_delta_theta));
+		if(cart[0] == space_dims[0]-1){
+			if(tmp_1d.size()>0){
+				tmp_2d.push_back(tmp_1d);
+				tmp_1d.clear();
+			}
+			if(cart[1] == space_dims[1]-1){
+				if(tmp_2d.size()>0){
+					_Pecorr_Angle_hist.push_back(tmp_2d);
+					tmp_2d.clear();
+				}
+			}
+		}
+	}
+	std::cout<<"\tFinished Making Electron Angle Correction Histograms\n";
+}
+int Histogram::Ele_Angle_Corr_Theta_idx(float theta_){
+	int output = -1;
+	for(int i=0; i<(int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr); i++){
+		if(theta_ >= min_theta_pecorr+i*res_theta_pecorr && theta_ < min_theta_pecorr+(i+1)*res_theta_pecorr){
+			output = i;
+		}
+	}
+	return output;
+}
+int Histogram::Ele_Angle_Corr_Phi_idx(float phi_){
+	int output = -1;
+	for(int i=0; i<(int)((max_phi_pecorr-min_phi_pecorr)/res_phi_pecorr); i++){
+		if(phi_ >= min_phi_pecorr+i*res_phi_pecorr && phi_ < min_phi_pecorr+(i+1)*res_phi_pecorr){
+			output = i;
+		}
+	}
+	return output;
+}
+std::vector<int> Histogram::Ele_Angle_Corr_idx(int sector_, float theta_, float phi_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx; 
+	if(!flags_->Flags::Plot_Electron_Angle_Corr()){ 
+		idx.push_back(-1);
+		idx.push_back(-1);
+		idx.push_back(-1);
+		return idx;
+	}
+	idx.push_back(sector_-1);
+	idx.push_back(Histogram::Ele_Angle_Corr_Theta_idx(theta_));
+	idx.push_back(Histogram::Ele_Angle_Corr_Phi_idx(phi_));
+	return idx;
+}
+void Histogram::Ele_Angle_Corr_Fill(int sector_, float theta_, float phi_, float W_, float thetap_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Electron_Angle_Corr()){ return;}
+	if(W_>= 0.7 && W_ < 1.05){
+		if(thetap_ >= 35.0){
+			std::vector<int> idx = Histogram::Ele_Angle_Corr_idx(sector_,theta_,phi_,flags_);
+			if(Histogram::OK_Idx(idx)){
+				//std::cout<<"filling Ele_Mag_Corr W:" <<W_ <<" theta:" <<theta_ <<" phi:" <<phi_ <<" sector: " <<sector_ <<" to get index:" <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
+				_Pecorr_Angle_hist[idx[0]][idx[1]][idx[2]]->Fill(physics::delta_theta_e(theta_, thetap_, flags_->Flags::Run()));
+			}
+		}
+	}
+}
+
+void Histogram::Ele_Angle_Corr_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Electron_Angle_Corr()){ return;}
+	std::cout<<"Writing Electron Angle Correction Histograms\n";
+	char dirname[100];
+	TDirectory* dir_pecorr_angle = _RootOutputFile->mkdir("Electron Angle Corrections");
+	//std::cout<<" Done\n";
+	dir_pecorr_angle->cd();
+	//std::cout<<"Making Sub Directories: ";
+	TDirectory* dir_pecorr_angle_sub[6][(int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr)+1];//{sector,proton_thesh}
+	//Histogram::W_bot(Wbin),Histogram::W_top(Wbin),Histogram::Q2_bot(Q2bin),Histogram::Q2_top(Q2bin),Histogram::Xij_Bin_Min(j,Xij,Wbin,var),Histogram::Xij_Bin_Max(j,Xij,Wbin,var)
+	for(int i=0; i<6; i++){
+		sprintf(dirname,"Ele Angle Corr Sector:%d",i+1);
+		dir_pecorr_angle_sub[i][0] = dir_pecorr_angle->mkdir(dirname);
+		for(int j=0; j<(int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr); j++){
+			sprintf(dirname,"Ele Angle Corr Sector:%d Theta:%.1f-%.1f",i+1,min_theta_pecorr+j*res_theta_pecorr,min_theta_pecorr+(j+1)*res_theta_pecorr);
+			dir_pecorr_angle_sub[i][j+1] = dir_pecorr_angle_sub[i][0]->mkdir(dirname);
+		}
+	}
+
+
+	std::vector<long> space_dims(3);
+	space_dims[2] = 6; //Sector
+	space_dims[1] = (int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr); //Theta
+	space_dims[0] = (int)((max_phi_pecorr-min_phi_pecorr)/res_phi_pecorr); //phi
+	char hname[100];
+	CartesianGenerator cart(space_dims);
+	TH1F_ptr_1d tmp_1d;
+	TH1F_ptr_2d tmp_2d;
+	while(cart.GetNextCombination()){
+		dir_pecorr_angle_sub[cart[2]][cart[1]+1]->cd();
+		_Pecorr_Angle_hist[cart[2]][cart[1]][cart[0]]->SetXTitle("Delta Theta (deg)");
+		_Pecorr_Angle_hist[cart[2]][cart[1]][cart[0]]->SetYTitle("Yield");
+		_Pecorr_Angle_hist[cart[2]][cart[1]][cart[0]]->Write();
+	}
+	std::cout<<"Finished Writing Electron Angle Correction Histograms\n";
+}
+//*------------------------------End Electron Angle Corrections------------------*
+//*------------------------------Start Electron Momentum Magnitude Corrections------------------*
+void Histogram::Ele_Mag_Corr_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Electron_Mag_Corr()){ return;}
+	std::cout<<"Making Electron Mag Correction Histograms\n";
+	std::vector<long> space_dims(3);
+	space_dims[2] = 6; //Sector
+	space_dims[1] = (int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr); //Theta
+	space_dims[0] = (int)((max_phi_pecorr-min_phi_pecorr)/res_phi_pecorr); //phi
+	char hname[100];
+	CartesianGenerator cart(space_dims);
+	TH1F_ptr_1d tmp_1d;
+	TH1F_ptr_2d tmp_2d;
+	while(cart.GetNextCombination()){
+		sprintf(hname,"Electron_Mag_Diff_Theta:%.1f-%.1f_Phi:%.1f-%.1f_Sec:%d",min_theta_pecorr+cart[1]*res_theta_pecorr,min_theta_pecorr+(cart[1]+1)*res_theta_pecorr,min_phi_pecorr+cart[0]*res_phi_pecorr,min_phi_pecorr+(cart[0]+1)*res_phi_pecorr,cart[2]+1);
+		tmp_1d.push_back(new TH1F(hname,hname,bins_delta_theta,min_delta_theta,max_delta_theta));
+		if(cart[0] == space_dims[0]-1){
+			if(tmp_1d.size()>0){
+				tmp_2d.push_back(tmp_1d);
+				tmp_1d.clear();
+			}
+			if(cart[1] == space_dims[1]-1){
+				if(tmp_2d.size()>0){
+					_Pecorr_Mag_hist.push_back(tmp_2d);
+					tmp_2d.clear();
+				}
+			}
+		}
+	}
+	std::cout<<"\tFinished Making Electron Mag Correction Histograms\n";
+}
+int Histogram::Ele_Mag_Corr_Theta_idx(float theta_){
+	int output = -1;
+	for(int i=0; i<(int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr); i++){
+		if(theta_ >= min_theta_pecorr+i*res_theta_pecorr && theta_ < min_theta_pecorr+(i+1)*res_theta_pecorr){
+			output = i;
+		}
+	}
+	return output;
+}
+int Histogram::Ele_Mag_Corr_Phi_idx(float phi_){
+	int output = -1;
+	for(int i=0; i<(int)((max_phi_pecorr-min_phi_pecorr)/res_phi_pecorr); i++){
+		if(phi_ >= min_phi_pecorr+i*res_phi_pecorr && phi_ < min_phi_pecorr+(i+1)*res_phi_pecorr){
+			output = i;
+		}
+	}
+	return output;
+}
+std::vector<int> Histogram::Ele_Mag_Corr_idx(int sector_, float theta_, float phi_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx; 
+	if(!flags_->Flags::Plot_Electron_Mag_Corr()){ 
+		idx.push_back(-1);
+		idx.push_back(-1);
+		idx.push_back(-1);
+		return idx;
+	}
+	idx.push_back(sector_-1);
+	idx.push_back(Histogram::Ele_Mag_Corr_Theta_idx(theta_));
+	idx.push_back(Histogram::Ele_Mag_Corr_Phi_idx(phi_));
+	return idx;
+}
+void Histogram::Ele_Mag_Corr_Fill(float pe_, int sector_, float theta_, float phi_, float W_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Electron_Mag_Corr()){ return;}
+	if(W_>= 0.7 && W_ < 1.05){
+		std::vector<int> idx = Histogram::Ele_Mag_Corr_idx(sector_,theta_,phi_,flags_);
+		if(Histogram::OK_Idx(idx)){
+			//std::cout<<"filling Ele_Mag_Corr W:" <<W_ <<" theta:" <<theta_ <<" phi:" <<phi_ <<" sector: " <<sector_ <<" to get index:" <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
+			_Pecorr_Mag_hist[idx[0]][idx[1]][idx[2]]->Fill(physics::delta_p_e(pe_,theta_, flags_->Flags::Run()));
+		}
+	}
+}
+
+void Histogram::Ele_Mag_Corr_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Electron_Mag_Corr()){ return;}
+	std::cout<<"Writing Electron Mag Correction Histograms\n";
+	char dirname[100];
+	TDirectory* dir_pecorr_Mag = _RootOutputFile->mkdir("Electron Mag Corrections");
+	//std::cout<<" Done\n";
+	dir_pecorr_Mag->cd();
+	//std::cout<<"Making Sub Directories: ";
+	TDirectory* dir_pecorr_Mag_sub[6][(int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr)+1];//{sector,proton_thesh}
+	//Histogram::W_bot(Wbin),Histogram::W_top(Wbin),Histogram::Q2_bot(Q2bin),Histogram::Q2_top(Q2bin),Histogram::Xij_Bin_Min(j,Xij,Wbin,var),Histogram::Xij_Bin_Max(j,Xij,Wbin,var)
+	for(int i=0; i<6; i++){
+		sprintf(dirname,"Ele Mag Corr Sector:%d",i+1);
+		dir_pecorr_Mag_sub[i][0] = dir_pecorr_Mag->mkdir(dirname);
+		for(int j=0; j<(int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr); j++){
+			sprintf(dirname,"Ele Mag Corr Sector:%d Theta:%.1f-%.1f",i+1,min_theta_pecorr+j*res_theta_pecorr,min_theta_pecorr+(j+1)*res_theta_pecorr);
+			dir_pecorr_Mag_sub[i][j+1] = dir_pecorr_Mag_sub[i][0]->mkdir(dirname);
+		}
+	}
+
+
+	std::vector<long> space_dims(3);
+	space_dims[2] = 6; //Sector
+	space_dims[1] = (int)((max_theta_pecorr-min_theta_pecorr)/res_theta_pecorr); //Theta
+	space_dims[0] = (int)((max_phi_pecorr-min_phi_pecorr)/res_phi_pecorr); //phi
+	char hname[100];
+	CartesianGenerator cart(space_dims);
+	TH1F_ptr_1d tmp_1d;
+	TH1F_ptr_2d tmp_2d;
+	while(cart.GetNextCombination()){
+		dir_pecorr_Mag_sub[cart[2]][cart[1]+1]->cd();
+		_Pecorr_Mag_hist[cart[2]][cart[1]][cart[0]]->SetXTitle("Delta Theta (deg)");
+		_Pecorr_Mag_hist[cart[2]][cart[1]][cart[0]]->SetYTitle("Yield");
+		_Pecorr_Mag_hist[cart[2]][cart[1]][cart[0]]->Write();
+	}
+	std::cout<<"Finished Writing Electron Mag Correction Histograms\n";
+}
+//*------------------------------End Electron Momentum Magnitude Corrections------------------*
+//*------------------------------Start Proton Energy Loss Corrections------------------*
+
+//*------------------------------End Proton Energy Loss Corrections------------------*

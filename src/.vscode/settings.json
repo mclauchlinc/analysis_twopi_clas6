@@ -80,6 +80,7 @@
         "memory_resource": "cpp",
         "utility": "cpp",
         "stop_token": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "__verbose_abort": "cpp"
     }
 }

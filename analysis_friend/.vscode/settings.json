@@ -75,6 +75,9 @@
         "queue": "cpp",
         "*.tcc": "cpp",
         "functional": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "filesystem": "cpp",
+        "__verbose_abort": "cpp",
+        "bit": "cpp"
     }
 }

@@ -84,7 +84,9 @@ namespace physics{
 
 	//float virtual_photon_flux(float W_, float Q2_, float Eprime_, std::shared_ptr<Environment> envi_);
 	
-
+	//Electron Momentum Correction 
+	float delta_theta_e(float theta_meas_, float theta_p_, int set_);
+	float delta_p_e(float p_meas_, float theta_meas_, int set_);
 
 }
 

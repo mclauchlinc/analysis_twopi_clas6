@@ -34,14 +34,14 @@ float corr::power(float num_, int power_){
 	return out;
 }
 
-float corr::p_corr_e(float p_e_, float theta_e_, float phi_e_, int run_, bool centered_, int sector_){//Will need exponential stuff
+float corr::p_corr_e(float p_e_, float theta_e_, float phi_e_, int run_, bool centered_, int sector_idx_){//Will need exponential stuff
 	float phi_const[4] = {0.0,0.0,0.0,0.0};
 	if(centered_){
 		for(int i=0; i<4; i++){
 			for(int j=0; j<3; j++){
 				//phi_const[i] += corr::power_10(_p_e_part[run_][sector_][i][j],_angle_e_expon[run_][sector_][i][j])*pow(theta_e_,2-j);
 				//phi_const[i] += corr::power_10(_p_e_part[run_][sector_][i][j],_angle_e_expon[run_][sector_][i][j])*corr::power(theta_e_,2-j);
-				phi_const[i] += _p_e_part[run_][sector_][i][j]*corr::power(theta_e_,2-j);
+				phi_const[i] += _p_e_part[run_][sector_idx_][i][j]*corr::power(theta_e_,2-j);
 			}
 		}
 		return fun::poly_3(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3]);
@@ -51,7 +51,7 @@ float corr::p_corr_e(float p_e_, float theta_e_, float phi_e_, int run_, bool ce
 		for(int j=0; j<3; j++){
 			//phi_const[i] += corr::power_10(_p_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*pow(theta_e_,2-j);
 			//phi_const[i] += corr::power_10(_p_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*corr::power(theta_e_,2-j);
-			phi_const[i] += _p_e_part[run_][sector][i][j]*corr::power(theta_e_,2-j);
+			phi_const[i] += _p_e_part[run_][sector-1][i][j]*corr::power(theta_e_,2-j);
 		}
 	}
 	float phi = physics::phi_center(phi_e_);
@@ -60,6 +60,9 @@ float corr::p_corr_e(float p_e_, float theta_e_, float phi_e_, int run_, bool ce
 
 float corr::theta_e_corr(float theta_e_, float phi_e_, int run_, bool centered_, int sector_){
 	//std::cout<<"Correcting Theta:" <<theta_e_ <<"\n";
+	if(theta_e_ >= 35.0 ){
+		return theta_e_;
+	}
 	float phi_const[5] = {0.0,0.0,0.0,0.0,0.0};
 	if(centered_){
 		for(int i=0; i<5; i++){

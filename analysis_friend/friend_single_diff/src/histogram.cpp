@@ -31,7 +31,12 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
             _acceptance_5d[i][j]->Divide(_thrown_5d[i][j]);
             sprintf(hname,"Acceptance_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
             _acceptance_5d[i][j]->SetNameTitle(hname,hname);
-            sprintf(hname,"N_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+            for(long k=0; k<_acceptance_5d[i][j]->GetNbins(); k++){
+				if(_acceptance_5d[i][j]->GetBinError(k)/_acceptance_5d[i][j]->GetBinContent(k) > 0.98){
+					_acceptance_5d[i][j]->SetBinContent(k,0.0);
+				}
+			}
+			sprintf(hname,"N_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
             _N_5d[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
             _acceptance_5d[i][j]->SetNameTitle(hname,hname);
             _N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
@@ -48,54 +53,6 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
         std::cout<<"Dimension " <<i <<" " <<_n_bins_5d[i] <<"\n";
 	}
     std::cout<<"Dimensions extracted\n";
-    /*
-    std::cout<<"Extract 7d Histograms\n";
-	char hname[100];
-	sprintf(hname,"Thrown_%s",_sparse_names_[flags_.Flags::Var_idx()]);
-	std::cout<<"Getting Thrown THnSparse " <<hname <<"\n";
-	_thrown_7d = (THnSparseD *)sim_tree_->Get(hname);
-	std::cout<<"thrown dimensionality: " <<_thrown_7d->GetNdimensions() <<"\n";
-	for(int i = 0; i<_thrown_7d->GetNdimensions(); i++){
-		_n_bins_7d.push_back(_thrown_7d->GetAxis(i)->GetNbins());
-	}
-	//std::cout<<"printing thrown bin info\n";
-	//Histogram::Print_Histogram_Bin_Info(_thrown_7d);
-	Histogram::Extract_Bin_Info(flags_);
-	std::cout<<"Getting Thrown THnSparse (no rad) " <<hname <<"\n";
-	sprintf(hname,"Thrown_%s",_sparse_names_[flags_.Flags::Var_idx()]);
-	_thrown_7d_no_rad = (THnSparseD *)nr_sim_tree_->Get(hname);//Not sure if I need the raw yield for this
-	std::cout<<"\tdid it\n";
-    sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);
-    std::cout<<"Getting Exp THnSparse " <<hname <<"\n";
-    _exp_data_7d = (THnSparseD *)exp_tree_->Get(hname);
-    std::cout<<"Getting Exp Empty THnSparse " <<hname <<"\n";
-    _empty_7d = (THnSparseD *)empty_tree_->Get(hname);
-	std::cout<<"Getting Sim Recon THnSparse " <<hname <<"\n";
-	sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);
-	_sim_data_7d = (THnSparseD *)sim_tree_->Get(hname);
-	std::cout<<"Calculating Acceptance\n";
-	_acceptance_7d = (THnSparseD*)_sim_data_7d->Clone();
-	_acceptance_7d->Divide(_thrown_7d);
-	long num_are_one=0;
-	std::cout<<"GetNbins() for acceptance_7d: " <<_acceptance_7d->GetNbins() <<"\n";
-	for(long i=0; i<_acceptance_7d->GetNbins(); i++){
-		if(_acceptance_7d->GetBinContent(i+1)==1.0){
-			//_acceptance_7d->SetBinContent(i+1,0.0);
-			num_are_one++;
-		}
-	}
-	std::cout<<"num were one: " <<num_are_one <<"\n";
-	_N=(THnSparseD*)_exp_data_7d->Clone();
-	_N->Add(_empty_7d,-flags_.Flags::Qr());//Empty target subtraction
-	_N->Divide(_acceptance_7d);//Acceptance Correction
-	
-	std::cout<<"Adding Holes\n";
-	sprintf(hname,"Localized_Holes_50");
-	_N_holes = (THnSparseD *)holes_->Get(hname);
-	_N->Add(_N_holes);
-	
-	std::cout<<"First bin content of _N: " <<_N->GetBinContent(1) <<"\n";
-    */
 }
 
 void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_){
@@ -114,10 +71,19 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 			_sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
             _exp_data_5d[i][j] = (THnSparseD *)exp_tree_->Get(hname);
             _empty_5d[i][j] = (THnSparseD *)empty_tree_->Get(hname);
+			//std::cout<<"Number of bins per axis\nSim\tExp\tEmp\tSim_no_rad\n";
+			//for(int k=0; k<5; k++){
+			//	std::cout<<_sim_data_5d[i][j]->GetAxis(k)->GetNbins() <<"\t" <<_exp_data_5d[i][j]->GetAxis(k)->GetNbins() <<"\t" <<_empty_5d[i][j]->GetAxis(k)->GetNbins() <<"\t" <<_thrown_no_rad_5d[i][j]->GetAxis(k)->GetNbins() <<"\n";
+			//}
 			std::cout<<"Making Acceptance \n";
             _acceptance_5d[i][j] = (THnSparseD*)_sim_data_5d[i][j]->Clone();
 			std::cout<<"\tDividing by Thrown\n";
             _acceptance_5d[i][j]->Divide(_thrown_5d[i][j]);
+			for(long k=0; k<_acceptance_5d[i][j]->GetNbins(); k++){
+				if(_acceptance_5d[i][j]->GetBinError(k)/_acceptance_5d[i][j]->GetBinContent(k) > 0.98){
+					_acceptance_5d[i][j]->SetBinContent(k,0.0);
+				}
+			}
 			std::cout<<"Making Yield\n";
             _N_5d[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
             _N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
@@ -140,156 +106,7 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 		//_n_bins_7d.push_back(_thrown_7d->GetAxis(i)->GetNbins());
         _n_bins_5d.push_back(_thrown_5d[0][0]->GetAxis(i)->GetNbins());
 	}
-    /*
-	_thrown_7d = (THnSparseD *)sim_tree_->Get(hname);
-	std::cout<<"thrown dimensionality: " <<_thrown_7d->GetNdimensions() <<"\n";
-	for(int i = 0; i<_thrown_5d->GetNdimensions(); i++){
-		//_n_bins_7d.push_back(_thrown_7d->GetAxis(i)->GetNbins());
-        _n_bins_5d.push_back(_thrown_7d->GetAxis(i)->GetNbins());
-	}
-	//std::cout<<"printing thrown bin info\n";
-	//Histogram::Print_Histogram_Bin_Info(_thrown_7d);
-	Histogram::Extract_Bin_Info(flags_);
-	std::cout<<"Getting Thrown THnSparse (no rad) " <<hname <<"\n";
-	sprintf(hname,"Thrown_%s",_sparse_names_[flags_.Flags::Var_idx()]);
-	_thrown_no_rad = (THnSparseD *)nr_sim_tree_->Get(hname);//Not sure if I need the raw yield for this
-	std::cout<<"\tdid it\n";
-    sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);
-    std::cout<<"Getting Exp THnSparse " <<hname <<"\n";
-    _exp_data_7d = (THnSparseD *)exp_tree_->Get(hname);
-    std::cout<<"Getting Exp Empty THnSparse " <<hname <<"\n";
-    _empty_7d = (THnSparseD *)empty_tree_->Get(hname);
-	std::cout<<"Getting Sim Recon THnSparse " <<hname <<"\n";
-	sprintf(hname,"%s_%s",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);
-	_sim_data_7d = (THnSparseD *)sim_tree_->Get(hname);
-	std::cout<<"Calculating Acceptance\n";
-	_acceptance_7d = (THnSparseD*)_sim_data_7d->Clone();
-	_acceptance_7d->Divide(_thrown_7d);
-	long num_are_one=0;
-	std::cout<<"GetNbins() for acceptance_7d: " <<_acceptance_7d->GetNbins() <<"\n";
-	for(long i=0; i<_acceptance_7d->GetNbins(); i++){
-		if(_acceptance_7d->GetBinContent(i+1)==1.0){
-			//_acceptance_7d->SetBinContent(i+1,0.0);
-			num_are_one++;
-		}
-	}
-	std::cout<<"num were one: " <<num_are_one <<"\n";
-	_N=(THnSparseD*)_exp_data_7d->Clone();
-	_N->Add(_empty_7d,-flags_.Flags::Qr());//Empty target subtraction
-	_N->Divide(_acceptance_7d);//Acceptance Correction
-	/*
-    /*
-	std::cout<<"Adding Holes\n";
-	sprintf(hname,"Localized_Holes_50");
-	_N_holes = (THnSparseD *)holes_->Get(hname);
-	_N->Add(_N_holes);
-	*/
-
-	//std::cout<<"First bin content of _N: " <<_N->GetBinContent(1) <<"\n";
-
 }
-/*
-void Histogram::Extract_Bin_Info(Flags flags_){
-	std::cout<<"Extract Bin Info\n";
-	int DIM = -1;
-	std::vector<int> n_bins_5d;
-	double_1d bin_lowside_7d_1d;
-	double_1d bin_topside_7d_1d;
-	double_1d bin_lowside_5d_1d;
-	double_1d bin_topside_5d_1d;
-	double_1d bin_low_7d_1d;
-	double_1d bin_up_7d_1d;
-	double_1d bin_mid_7d_1d;
-	double_1d bin_size_7d_1d;
-	double_1d bin_edges_7d_1d;
-	double_1d bin_low_5d_1d;
-	double_1d bin_up_5d_1d;
-	double_1d bin_mid_5d_1d;
-	double_1d bin_size_5d_1d;
-	double_1d bin_edges_5d_1d;
-	//Get the 7dimensional bins ready
-	for(int bin_fun=0; bin_fun<5; bin_fun++){
-		_n_bins_5d.push_back(_thrown_7d->GetAxis(bin_fun+2)->GetNbins());
-	}
-	DIM = _thrown_7d->GetNdimensions();
-	for(int i = 0; i<DIM; i++){
-		bin_lowside_7d_1d.push_back(_thrown_7d->GetAxis(i)->GetBinLowEdge(1));
-		bin_topside_7d_1d.push_back(_thrown_7d->GetAxis(i)->GetBinUpEdge(_n_bins_7d[i]));
-		for(int j=0; j<_n_bins_7d[i];j++){
-			bin_low_7d_1d.push_back(_thrown_7d->GetAxis(i)->GetBinLowEdge(j+1));
-			bin_up_7d_1d.push_back(_thrown_7d->GetAxis(i)->GetBinUpEdge(j+1));
-			bin_mid_7d_1d.push_back((bin_up_7d_1d[j]+bin_low_7d_1d[j])/2.0);
-			bin_size_7d_1d.push_back(bin_up_7d_1d[j]-bin_low_7d_1d[j]);
-			bin_edges_7d_1d.push_back(_thrown_7d->GetAxis(i)->GetBinLowEdge(j+1));
-			if(j==_n_bins_7d[i]-1){
-				bin_edges_7d_1d.push_back(_thrown_7d->GetAxis(i)->GetBinUpEdge(j+1));
-			}
-		}
-		_bin_low_7d.push_back(bin_low_7d_1d);
-		bin_low_7d_1d.clear();
-		_bin_up_7d.push_back(bin_up_7d_1d);
-		bin_up_7d_1d.clear();
-		_bin_mid_7d.push_back(bin_mid_7d_1d);
-		bin_mid_7d_1d.clear();
-		_bin_size_7d.push_back(bin_size_7d_1d);
-		bin_size_7d_1d.clear();
-		_bin_edges_7d.push_back(bin_edges_7d_1d);
-		bin_edges_7d_1d.clear();
-	}
-	//Get the 5d bins ready
-	for(int j=0; j<DIM-2; j++){
-		bin_lowside_5d_1d.push_back(_thrown_7d->GetAxis(j+2)->GetBinLowEdge(1));
-		bin_topside_5d_1d.push_back(_thrown_7d->GetAxis(j+2)->GetBinUpEdge(_n_bins_5d[j]));
-		for(int k=0; k<_n_bins_5d[j];k++){
-			bin_low_5d_1d.push_back(_thrown_7d->GetAxis(j+2)->GetBinLowEdge(k+1));
-			bin_up_5d_1d.push_back(_thrown_7d->GetAxis(j+2)->GetBinUpEdge(k+1));
-			bin_mid_5d_1d.push_back((bin_up_5d_1d[k]+bin_low_5d_1d[k])/2.0);
-			bin_size_5d_1d.push_back(bin_up_5d_1d[k]-bin_low_5d_1d[k]);
-			bin_edges_5d_1d.push_back(_thrown_7d->GetAxis(j+2)->GetBinUpEdge(k+1));
-			if(k==_n_bins_5d[j]-1){
-				bin_edges_5d_1d.push_back(_thrown_7d->GetAxis(j+2)->GetBinUpEdge(k+1));
-			}
-		}
-		_bin_low_5d.push_back(bin_low_5d_1d);
-		bin_low_5d_1d.clear();
-		_bin_up_5d.push_back(bin_up_5d_1d);
-		bin_up_5d_1d.clear();
-		_bin_mid_5d.push_back(bin_mid_5d_1d);
-		bin_mid_5d_1d.clear();
-		_bin_size_5d.push_back(bin_size_5d_1d);
-		bin_size_5d_1d.clear();
-		_bin_edges_5d.push_back(bin_edges_5d_1d);
-		bin_edges_5d_1d.clear();
-	}
-}*/
-/*
-void Histogram::Sparse_7to5(Flags flags_){
-	std::cout<<"Sparse_7to5\n";
-	std::cout<<"\tFilling Those Sparse Friends\n";
-	int bin_5d[5];
-	int bin_7d[7] = {1,1,1,1,1,1,1};
-	int out_n = 0;
-	std::cout<<"N bins: " <<_N->GetNbins() <<"\n";
-	char hname[100];
-
-	Sparse_1d_star N_1d;
-	int num_bins=5;
-	int bins[5]={2,3,4,5,6};
-
-	for(int i=0; i<_W_nbins_; i++){
-		for(int j=0; j<_Q2_nbins_; j++){
-			_N->GetAxis(0)->SetRange(i+1,i+1);
-			_N->GetAxis(1)->SetRange(j+1,j+1);
-			N_1d.push_back((THnSparseD*)_N->Projection(num_bins,bins,"E"));
-			sprintf(hname,"N_5d_W:%.3f-%.3f_Q2:%.3f-%.3f_top:%s_var:%s",_bin_low_7d[0][i],_bin_up_7d[0][i],_bin_low_7d[1][j],_bin_up_7d[1][j],flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
-			N_1d[j]->SetNameTitle(hname,hname);
-		}
-		//std::cout<<"\tPushing back all of W:" <<i <<"\n";
-		//std::cout<<"\t\tPushing back N\n";
-		_N_5d.push_back(N_1d);
-		N_1d.clear();
-	}
-}*/
 
 void Histogram::Rad_Corr(){
 	std::cout<<"Calculating Radiative Effects\n";
@@ -297,7 +114,8 @@ void Histogram::Rad_Corr(){
     double rad_corr_bot = 0.0;
     _rad_corr = new TH2D("Radiative_Correction","Radiative_Correction",_W_nbins_,_W_min_,_W_max_,_Q2_nbins_,_Q2_min_,_Q2_max_);
     _rad_corr->GetYaxis()->Set(5,_Q2_bins_);
-    for(int i=0; i<_W_nbins_; i++){
+    
+	for(int i=0; i<_W_nbins_; i++){
 		for(int j=0; j<_Q2_nbins_; j++){
             //std::cout<<i <<" " <<j <<"\nthrown integral:" <<fun::Sparse_Integral(_thrown_no_rad_5d[i][j]) <<" no_rad integral:" <<fun::Sparse_Integral(_thrown_5d[i][j]) <<"\n";
             //_rad_corr->Fill(Histogram::W_mid(i),Histogram::Q2_mid(j),fun::Sparse_Integral(_thrown_no_rad_5d[i][j])/fun::Sparse_Integral(_thrown_5d[i][j]));
@@ -317,14 +135,45 @@ void Histogram::Rad_Corr(){
 	_rad_corr_mu = rad_corr_top/rad_corr_bot;
     _rad_corr->Scale(_rad_corr_mu);//Another place for localized hole filling?
 	double_1d corr_tmp; 
+
 	for(int i=0; i<_W_nbins_; i++){
 		for(int j=0; j<_Q2_nbins_; j++){
 			corr_tmp.push_back(_rad_corr->GetBinContent(i+1,j+1));
-            //std::cout<<"\t" <<i <<" " <<j <<" rad_corr: " <<_rad_corr->GetBinContent(i+1,j+1) <<"\n";
+            std::cout<<"\t" <<i <<" " <<j <<" rad_corr: " <<_rad_corr->GetBinContent(i+1,j+1) <<"\n";
 		}
 		_rad_corr_array.push_back(corr_tmp);
 		corr_tmp.clear();
 	}
+	
+	/*_rad_corr_array = {	{ 0.775198,0.804581,0.811479,0.827047,0.829292 },
+						{ 0.801247,0.821275,0.8326,0.844744,0.847486 },
+						{ 0.821424,0.844058,0.85292,0.866613,0.866408 },
+						{ 0.82837,0.848081,0.859096,0.868395,0.867181 },
+						{ 0.861027,0.876247,0.890575,0.900434,0.896546 },
+						{ 0.897684,0.911136,0.925244,0.93331,0.931846 },
+						{ 0.911673,0.928591,0.948998,0.951515,0.947982 },
+						{ 0.911908,0.92964,0.946975,0.95579,0.949468 },
+						{ 0.927066,0.945327,0.961685,0.973025,0.972856 },
+						{ 0.916798,0.936385,0.94859,0.955167,0.954566 },
+						{ 0.923384,0.937913,0.952937,0.957886,0.95534 },
+						{ 0.91669,0.924544,0.946102,0.94554,0.943438 },
+						{ 0.919028,0.932221,0.956098,0.952331,0.950898 },
+						{ 0.955865,0.968143,0.985961,0.991604,0.988503 },
+						{ 0.9859,0.999213,1.02054,1.02307,1.01847 },
+						{ 1.00696,1.01742,1.03747,1.04853,1.04314 },
+						{ 1.01343,1.02234,1.04499,1.04835,1.04683 },
+						{ 1.02198,1.04165,1.06371,1.05543,1.04857 },
+						{ 1.03396,1.04435,1.06156,1.0582,1.05141 },
+						{ 1.04005,1.05093,1.06718,1.06875,1.05725 },
+						{ 1.04582,1.05348,1.07145,1.06954,1.05521 },
+						{ 1.04437,1.05481,1.06588,1.07046,1.05948 },
+						{ 1.05205,1.05808,1.08109,1.07789,1.06357 },
+						{ 1.06119,1.07059,1.08582,1.08439,1.0787 },
+						{ 1.07078,1.08555,1.10033,1.09523,1.0894 },
+						{ 1.08771,1.09323,1.11688,1.10747,1.10258 },
+						{ 1.0951,1.09919,1.11463,1.11389,1.10763 },
+						{ 1.0888,1.10881,1.12096,1.11695,1.10986 },
+						{ 1.09727,1.11428,1.12647,1.12352,1.11474 }};*/
 }
 
 void Histogram::Single_Diff(Flags flags_){
@@ -487,14 +336,14 @@ float Histogram::Q2_mid(int i_){
     }
     return (_Q2_bins_[i_] + _Q2_bins_[i_+1])/2.0;
 }
-
+/*
 double Histogram::MM_max(int W_bin_, int var_set_){
 	return _W_min_+_W_res_*(W_bin_+1)-_MM_offset[var_set_];
 }
 
 double Histogram::MM2_max(int W_bin_, int var_set_){
 	return _W_min_+_W_res_*(W_bin_+1)-_MM2_offset[var_set_];
-}
+}*/
 
 double Histogram::CosTheta(int theta_bin_){
     double theta_res = ((double)_theta_max_ - (double)_theta_min_)/(double)_theta_bins_;

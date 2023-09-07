@@ -122,12 +122,19 @@ static float _W_res_ = 0.025;
 static float _Q2_min_ = 2.0;
 static float _Q2_max_ = 5.0;
 static float _Q2_bins_[6] = {2.0,2.4,3.0,3.5,4.2,5.0};
-static float _MM_min_[3] = {1.077835,0.309141,1.077835};//changed 7-12-23//{1.1,0.3,1.1};//Changed 5/5/23
-static float _MM_max_[3] = {_W_max_-_mpi_,_W_max_-_mp_,_W_max_-_mpi_};//{2.0,1.1,2.0};//Changed 5/5/23
-static int _MM_bins_ = 10;//changed 7-13-23//14;
+//Changed to these arrays to match Arjun's binning 
+static float _MM_min_[3] = {1.07784,0.27914,1.07784};//{1.077835,0.309141,1.077835};//changed 7-12-23//{1.1,0.3,1.1};//Changed 5/5/23 //Changed 8-28-23 to match Arjun
+//static float _MM_max_[3] = {_W_max_-_mpi_,_W_max_-_mp_,_W_max_-_mpi_};//{2.0,1.1,2.0};//Changed 5/5/23
+static float _MM_max_[3][29] = {	{1.28543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.71043, 1.71043, 1.71043, 1.71043, 1.71043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.98543, 1.98543, 1.98543, 1.98543, 1.98543}, 
+									{0.486728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.911728, 0.911728, 0.911728, 0.911728, 0.911728, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.18673, 1.18673, 1.18673, 1.18673, 1.18673}, 
+									{1.28543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.71043, 1.71043, 1.71043, 1.71043, 1.71043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.98543, 1.98543, 1.98543, 1.98543, 1.98543}};
+static int _MM_bins_ = 14;//8/28/23 to Arjun's actual binning;
 static int _MM_wider_ = 5; 
-static float _MM2_min_[3] = {_MM_min_[1],_MM_min_[2],_MM_min_[0]};//changed 7-12-23//{0.3,1.1,1.1};//Changed 5/5/23
-static float _MM2_max_[3] = {_MM_max_[1],_MM_max_[2],_MM_max_[0]};//{1.1,2.0,2.0};//Changed 5/5/23
+static float _MM2_min_[3] = {_MM_min_[1],_MM_min_[2],_MM_min_[0]};//changed 7-12-23//{0.3,1.1,1.1};//Changed 5/5/23//Changed 8-28-23 to match Arjun
+//static float _MM2_max_[3][29] = {_MM_max_[1],_MM_max_[2],_MM_max_[0]};//{1.1,2.0,2.0};//Changed 5/5/23
+static float _MM2_max_[3][29] = {	{0.486728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.911728, 0.911728, 0.911728, 0.911728, 0.911728, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.18673, 1.18673, 1.18673, 1.18673, 1.18673},
+									{1.28543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.71043, 1.71043, 1.71043, 1.71043, 1.71043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.98543, 1.98543, 1.98543, 1.98543, 1.98543},  
+									{1.28543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.71043, 1.71043, 1.71043, 1.71043, 1.71043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.98543, 1.98543, 1.98543, 1.98543, 1.98543}};
 static int _theta_bins_ = 10;
 static float _theta_min_ = 0.0;
 static float _theta_max_ = 180.0;
@@ -277,6 +284,17 @@ protected:
 	 double MinCCmin = -0.5;
 	 double MinCCmax = 501.5;
 	 int MinCCres = 502;
+	//Electron Angle Corrections
+	double min_theta_pecorr = 13.0;
+	double max_theta_pecorr = 26.0;
+	double res_theta_pecorr = 1.0;
+	double min_phi_pecorr = -25.0;
+	double max_phi_pecorr = 25.0;
+	double res_phi_pecorr = 1.0;
+	float min_delta_theta = -0.2;
+	float max_delta_theta = 0.2;
+	int bins_delta_theta = 200;
+
 
 	//binning
 	 float Wbin_res = 0.025;//The width of a W bin //30 steps
@@ -335,6 +353,13 @@ protected:
 
 	//Delta Histograms
 	TH2F_ptr_6d _Delta_hist;
+
+	//Electron Momentum Correction
+	TH1F_ptr_3d _Pecorr_Angle_hist;
+	TH1F_ptr_3d _Pecorr_Mag_hist;
+
+	//Proton Energy Loss Correction
+	TH1F_ptr_3d _Proton_ELoss_hist;
 
 	//THnSparse Friend Histograms
 	THnSparseD* _Friend[3][29][5];//Only doing mall for memory issues 6-28-23[5];//[30][5];//{Variable sets,topologies} => top->{pro,pip,pim,zero,all}
@@ -459,13 +484,11 @@ public:
 	void Friend_Make(std::shared_ptr<Flags> flags_);
 	int Friend_W_idx(float W_);
 	int Friend_Q2_idx(float Q2_);
-	int Friend_MM_idx(float MM_, int var_);
-	int Friend_MM2_idx(float MM_, int var_);
+	//int Friend_MM_idx(float MM_, int var_);
+	//int Friend_MM2_idx(float MM_, int var_);
 	int Friend_theta_idx(float theta_);
 	int Friend_alpha_idx(float alpha_);
 	int Friend_phi_idx(float phi_);
-	double MM_max(int W_bin_, int var_set_);
-	double MM2_max(int W_bin_, int var_set_);
 	int Friend_MM_idx(float MM_, int var_, int W_bin_);
 	int Friend_MM2_idx(float MM_, int var_, int W_bin_);
 	std::vector<int>  Friend_idx( float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_);
@@ -481,8 +504,8 @@ public:
 	void PCorr_Check_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End PCorr Check Plot----------------------------*
 	//*------------------------------Start Bin Centering Corrections------------------*
-	double Xij_Bin_Min(int bin_, int Xij_, double W_bin_, int var_set_);
-	double Xij_Bin_Max(int bin_, int Xij_, double W_bin_, int var_set_);
+	double Xij_Bin_Min(int bin_, int Xij_, int W_bin_, int var_set_);
+	double Xij_Bin_Max(int bin_, int Xij_, int W_bin_, int var_set_);
 	void Bin_Centering_Make(std::shared_ptr<Flags> flags_);
 	std::vector<int> Bin_Centering_idx(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, int variable_, std::shared_ptr<Flags> flags_);
 	void Bin_Centering_Fill(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, int variable_, double weight_, std::shared_ptr<Flags> flags_);
@@ -496,7 +519,27 @@ public:
 	long Bad_Angles(int var_, int top_, int angle_);
 	long Bad_MM(int var_, int top_, int par_);
 	long Ev_No_Pass(int var_, int top_);
-};
+	//*------------------------------Start Electron Angle Corrections------------------*
+	void Ele_Angle_Corr_Make(std::shared_ptr<Flags> flags_);
+	int Ele_Angle_Corr_Theta_idx(float theta_);
+	int Ele_Angle_Corr_Phi_idx(float phi_);
+	std::vector<int> Ele_Angle_Corr_idx(int sector_, float theta_, float phi_, std::shared_ptr<Flags> flags_);
+	void Ele_Angle_Corr_Fill(int sector_, float theta_, float phi_, float W_, float thetap_, std::shared_ptr<Flags> flags_);
+	void Ele_Angle_Corr_Write(std::shared_ptr<Flags> flags_);
+	//*------------------------------End Electron Angle Corrections------------------*
+	//*------------------------------Start Electron Momentum Magnitude Corrections------------------*
+	//Please note that the theta being put in should be corrected
+	void Ele_Mag_Corr_Make(std::shared_ptr<Flags> flags_);
+	int Ele_Mag_Corr_Theta_idx(float theta_);
+	int Ele_Mag_Corr_Phi_idx(float phi_);
+	std::vector<int> Ele_Mag_Corr_idx(int sector_, float theta_, float phi_, std::shared_ptr<Flags> flags_);
+	void Ele_Mag_Corr_Fill(float pe_, int sector_, float theta_, float phi_, float W_, std::shared_ptr<Flags> flags_);
+	void Ele_Mag_Corr_Write(std::shared_ptr<Flags> flags_);
+	//*------------------------------End Electron Momentum Magnitude Corrections------------------*
+	//*------------------------------Start Proton Energy Loss Corrections------------------*
+
+	//*------------------------------End Proton Energy Loss Corrections------------------*
+};	
 
 
  

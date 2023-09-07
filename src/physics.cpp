@@ -882,3 +882,31 @@ float physics::virtual_photon_flux(float W_, float Q2_, float Eprime_, std::shar
 	float epsilon = 1.0/(1+(2*(Q2_+w*w)/(4*beam*Eprime_-Q2_)));
 	return (fine_structure/(4*TMath::Pi()))*(W_*(W_*W_-mp*mp))/(beam*beam*mp*mp*(1-epsilon)*Q2_);
 }*/
+
+float physics::delta_theta_e(float theta_meas_, float theta_p_, int set_){
+	float event_energy;
+	switch(set_){
+		case 0:
+		event_energy = _energy_e16_; //Constants.hpp
+		break;
+		case 1:
+		event_energy = _energy_e1f_; //Constants.hpp
+		break;
+	}
+	float theta_calc = 2*TMath::ATan(_mp_/((event_energy + _mp_)*TMath::Tan(theta_p_*TMath::Pi()/180.0)))*180.0/TMath::Pi();
+	return theta_calc - theta_meas_;
+}	
+
+float physics::delta_p_e(float p_meas_, float theta_meas_, int set_){
+	float event_energy;
+	switch(set_){
+		case 0:
+		event_energy = _energy_e16_; //Constants.hpp
+		break;
+		case 1:
+		event_energy = _energy_e1f_; //Constants.hpp
+		break;
+	}
+	float p_calc = event_energy/(1+(2*event_energy*TMath::Sin(theta_meas_*TMath::Pi()/360.0)*TMath::Sin(theta_meas_*TMath::Pi()/360.0)/_mp_));
+	return p_calc/p_meas_;
+}

@@ -53,6 +53,7 @@ Analysis::Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> h
 			_hel = Analysis::Corr_Helicity(data_->Branches::evntclas2(),run_num_,flags_);//Need to pair with library of files where half-wave plate is in or out
 		}
 	}
+	//std::cout<<"size of thrown vector " <<_tEvent.size() <<"\n";
 	//Particle ID
 	if(thread_id_==0){
 		//std::cout<<"There are "<<_npart <<" good particles to ID\nBegin PID\n";
@@ -72,6 +73,8 @@ Analysis::Analysis(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> h
 		}
 		Analysis::Isolate_Event(hist_, flags_);//Isolate Definitive Event and Plot Accordingly
 		Analysis::Plot_Events(hist_,flags_);
+	}else if(flags_->Flags::Sim()){
+		Plot_Events(hist_,flags_);
 	}
 }
 
@@ -463,7 +466,7 @@ void Analysis::Plot_Events(std::shared_ptr<Histogram> hist_, std::shared_ptr<Fla
 		//std::cout<<"\nPlot Clean event\n";
 		plot::plot_clean_event(_rEvent[0],hist_,flags_);
 		plot::plot_event(_rEvent[0],hist_,flags_,false);
-	}else{
+	}else if(_rEvent.size()>1){
 		for(int i=0; i<_rEvent.size(); i++){
 			//std::cout<<"\nPlot dirty events\n";
 			plot::plot_event(_rEvent[i],hist_,flags_,false);
@@ -474,7 +477,9 @@ void Analysis::Plot_Events(std::shared_ptr<Histogram> hist_, std::shared_ptr<Fla
 			}
 		}
 	}
+	
 	if(flags_->Flags::Sim() && _tEvent[0].Event::W()>= _W_min_ && _tEvent[0].Event::W() < _W_max_ && _tEvent[0].Event::Q2()>= _Q2_min_ && _tEvent[0].Event::Q2() < _Q2_max_){
+		//std::cout<<"Thrown W:" <<_tEvent[0].Event::W() <<" Q2:" <<_tEvent[0].Event::Q2() <<"\n";
 		plot::plot_event(_tEvent[0],hist_,flags_,true);
 	}
 	if(_iEvent.size()>0){
