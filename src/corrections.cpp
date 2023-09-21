@@ -72,7 +72,9 @@ float corr::theta_e_corr(float theta_e_, float phi_e_, int run_, bool centered_,
 				//std::cout<<"\t\tPhi Constant added: " <<corr::power_10(_angle_e_part[run_][sector_][i][j],_angle_e_expon[run_][sector_][i][j])*corr::power(theta_e_,2-j) <<"\n";
 				//phi_const[i] += corr::power_10(_angle_e_part[run_][sector_][i][j],_angle_e_expon[run_][sector_][i][j])*pow(theta_e_,2-j);
 				//phi_const[i] += corr::power_10(_angle_e_part[run_][sector_][i][j],_angle_e_expon[run_][sector_][i][j])*corr::power(theta_e_,2-j);
-				phi_const[i] += _angle_e_part[run_][sector_][i][j]*corr::power(theta_e_,2-j);
+				
+				//phi_const[i] += _angle_e_part[run_][sector_][i][j]*corr::power(theta_e_,2-j);//Changed from this 9-8-2023
+				phi_const[i] += _angle_e_part[run_][sector_][i][j]*corr::power(theta_e_,j);//changed to this 9-8-2023
 				//std::cout<<"\t\t\tPhi Constant " <<i <<" :" <<phi_const[i] <<"\n";
 			}
 		}

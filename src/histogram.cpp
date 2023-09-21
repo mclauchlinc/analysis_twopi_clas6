@@ -21,6 +21,7 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	Histogram::Friend_Make(flags_);
 	Histogram::PCorr_Check_Make(flags_);
 	Histogram::SC_Eff_Make(flags_);
+	Histogram::Elastic_Peak_Make(flags_);
 	//Histogram::Cross_Make(flags_);
 	//Histogram::XY_Make(flags_);
 	//Histogram::Fid_Det_Make(flags_);
@@ -69,6 +70,7 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	Histogram::Bin_Centering_Write(flags_);
 	Histogram::Ele_Angle_Corr_Write(flags_);
 	Histogram::Ele_Mag_Corr_Write(flags_);
+	Histogram::Elastic_Peak_Write(flags_);
 	//Histogram::XY_Write(_envi);
 	//Histogram::Fid_Det_Write(_envi);
 	//Friend_Write(_envi);
@@ -5231,7 +5233,7 @@ void Histogram::Ele_Mag_Corr_Make(std::shared_ptr<Flags> flags_){
 	TH1F_ptr_2d tmp_2d;
 	while(cart.GetNextCombination()){
 		sprintf(hname,"Electron_Mag_Diff_Theta:%.1f-%.1f_Phi:%.1f-%.1f_Sec:%d",min_theta_pecorr+cart[1]*res_theta_pecorr,min_theta_pecorr+(cart[1]+1)*res_theta_pecorr,min_phi_pecorr+cart[0]*res_phi_pecorr,min_phi_pecorr+(cart[0]+1)*res_phi_pecorr,cart[2]+1);
-		tmp_1d.push_back(new TH1F(hname,hname,bins_delta_theta,min_delta_theta,max_delta_theta));
+		tmp_1d.push_back(new TH1F(hname,hname,bins_delta_p,min_delta_p,max_delta_p));
 		if(cart[0] == space_dims[0]-1){
 			if(tmp_1d.size()>0){
 				tmp_2d.push_back(tmp_1d);
@@ -5280,10 +5282,11 @@ std::vector<int> Histogram::Ele_Mag_Corr_idx(int sector_, float theta_, float ph
 }
 void Histogram::Ele_Mag_Corr_Fill(float pe_, int sector_, float theta_, float phi_, float W_, std::shared_ptr<Flags> flags_){
 	if(!flags_->Flags::Plot_Electron_Mag_Corr()){ return;}
+	//std::cout<<"\tEntered Mag Corr Filling with pe:" <<pe_ <<" sec:" <<sector_ <<" theta:" <<theta_ <<" W:" <<W_ <<"\n";
 	if(W_>= 0.7 && W_ < 1.05){
 		std::vector<int> idx = Histogram::Ele_Mag_Corr_idx(sector_,theta_,phi_,flags_);
 		if(Histogram::OK_Idx(idx)){
-			//std::cout<<"filling Ele_Mag_Corr W:" <<W_ <<" theta:" <<theta_ <<" phi:" <<phi_ <<" sector: " <<sector_ <<" to get index:" <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
+			//std::cout<<"filling Ele_Mag_Corr with delta p: " <<physics::delta_p_e(pe_,theta_, flags_->Flags::Run()) <<"W:" <<W_ <<" theta:" <<theta_ <<" phi:" <<phi_ <<" sector: " <<sector_ <<" to get index:" <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
 			_Pecorr_Mag_hist[idx[0]][idx[1]][idx[2]]->Fill(physics::delta_p_e(pe_,theta_, flags_->Flags::Run()));
 		}
 	}
@@ -5329,3 +5332,35 @@ void Histogram::Ele_Mag_Corr_Write(std::shared_ptr<Flags> flags_){
 //*------------------------------Start Proton Energy Loss Corrections------------------*
 
 //*------------------------------End Proton Energy Loss Corrections------------------*
+//*------------------------------Start Elastic Peak------------------*
+void Histogram::Elastic_Peak_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Electron_Mag_Corr() && !flags_->Flags::Plot_Electron_Mag_Corr()){ return;}
+	std::cout<<"Making Elastic Peak Histograms\n";
+	char hname[100];
+	char * corr_stuff[3] = {"no_corr","e_theta_corr","e_pcorr"};
+	for(int i=0; i<6; i++){
+		for(int j=0; j<3; j++){
+			sprintf(hname,"Elastic_Peak_Sec:%d_%s",i,corr_stuff[j]);
+			_Elastic_Peak_hist[i][j] = new TH1F(hname,hname,200,0.6,1.1);
+		}
+	}
+}
+
+void Histogram::Elastic_Peak_Fill(float W_, int corr_, int sector_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Electron_Mag_Corr() && !flags_->Flags::Plot_Electron_Mag_Corr()){ return;}
+	//std::cout<<"Filling Elastic Peak with W" <<W_ <<" corr:" <<corr_ <<" sector:" <<sector_ <<"\n";
+	_Elastic_Peak_hist[sector_-1][corr_]->Fill(W_);
+}
+
+void Histogram::Elastic_Peak_Write(std::shared_ptr<Flags> flags_){
+	//char dirname[100];
+	TDirectory* dir_elast = _RootOutputFile->mkdir("Elastic Peak");
+	for(int i=0; i<6; i++){
+		for(int j=0; j<3; j++){
+			_Elastic_Peak_hist[i][j]->SetXTitle("W (GeV)");
+			_Elastic_Peak_hist[i][j]->SetYTitle("Yield");
+			_Elastic_Peak_hist[i][j]->Write();
+		}
+	}
+}
+//*------------------------------End Elastic Peak------------------*

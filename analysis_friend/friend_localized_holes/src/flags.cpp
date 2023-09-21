@@ -80,6 +80,10 @@ Flags::Flags(){}
 				std::cout<<"\tIDed: Luminosity added " <<str.substr(3,str_len) <<"\n";
 				_luminosity=stof(str.substr(3,str_len));
 			}
+			if(str.substr(0,3) == _W_assign_bin_){
+				std::cout<<"\tIDed: W Bin Specified " <<str.substr(3,str_len) <<"\n";
+				_W_bin=stoi(str.substr(3,str_len));
+			}
 		}if(str_len >4){
 			if(str.substr(0,4) == _qratio_){
 				std::cout<<"\tIDed: Qratio: " <<str.substr(4,str_len) <<"\n";
@@ -96,6 +100,10 @@ Flags::Flags(){}
 			if(str.substr(0,4) == _lumen2_){
 				std::cout<<"\tIDed: Luminosity added " <<str.substr(4,str_len) <<"\n";
 				_luminosity2=stof(str.substr(4,str_len));
+			}
+			if(str.substr(0,4) == _Q2_assign_bin_){
+				std::cout<<"\tIDed: Q2 Bin Specified " <<str.substr(4,str_len) <<"\n";
+				_Q2_bin=stoi(str.substr(4,str_len));
 			}
 		}if(str_len > 5){
 			if(str.substr(0,5) == _exp_file_){
@@ -136,6 +144,10 @@ Flags::Flags(){}
 			if(str.substr(0,6) == _output_name_){
 				_output_name = str.substr(6,str_len);
 				std::cout<<"\tIDed: output file is " <<_output_name <<"\n"; 
+			}
+			if(str.substr(0,6) == _loc_hole_dist_){
+				_loc_holes_dist = stoi(str.substr(6,str_len));
+				std::cout<<"\tIDed: Local Hole Min Dist " <<_loc_holes_dist <<"\n"; 
 			}
 			/*if(str.substr(0,6) == _exp_pos_file2_){
 				_exp_pos_loc2 = str.substr(6,str_len);
@@ -485,4 +497,16 @@ Flags::Flags(){}
 
 	bool Flags::Has_Localized_Holes(){
 		return _has_localized_holes;
+	}
+
+	int Flags::W_Bin(){
+		return _W_bin;
+	}
+
+	int Flags::Q2_Bin(){
+		return _Q2_bin;
+	}
+
+	int Flags::Min_Local_Dist(){
+		return _loc_holes_dist;
 	}

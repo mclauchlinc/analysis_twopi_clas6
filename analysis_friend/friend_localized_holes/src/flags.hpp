@@ -40,6 +40,8 @@ static std::string _pol_alpha_ = "pol_alpha";
 static std::string _error_ = "error";
 static std::string _local_holes_ = "local_holes";
 static std::string _plot_local_holes_ = "plot_local_holes";
+static std::string _W_assign_bin_ = "-W=";
+static std::string _Q2_assign_bin_ = "-Q2=";
 
 
 static std::string _output_name_ = "-name=";
@@ -64,6 +66,7 @@ static std::string _no_loc_holes_ = "-nolocalholes";
 //static std::string _exp_pos_file2_ = "expp2=";
 //static std::string _exp_neg_file_ = "expn=";
 //static std::string _exp_neg_file2_ = "expn2=";
+static std::string _loc_hole_dist_ = "-dist=";
 
 //Other Info about the runf
 static std::string _info_ = "-i=";
@@ -167,6 +170,11 @@ private:
 	float _Qr = NAN; //Integrated Charge Ratio between filled and empty target 
 	float _Qr2 = NAN;
 
+	int _W_bin = -1;
+	int _Q2_bin = -1;
+
+	int _loc_holes_dist = 4;
+
 	
 public:
 	Flags();
@@ -223,6 +231,9 @@ public:
 	bool Localized_Holes();
 	bool Plot_Localized_Holes();
 	bool Has_Localized_Holes();
+	int W_Bin();
+	int Q2_Bin();
+	int Min_Local_Dist();
 };
 
 

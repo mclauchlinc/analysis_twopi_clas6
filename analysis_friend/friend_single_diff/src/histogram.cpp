@@ -71,6 +71,12 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 			_sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
             _exp_data_5d[i][j] = (THnSparseD *)exp_tree_->Get(hname);
             _empty_5d[i][j] = (THnSparseD *)empty_tree_->Get(hname);
+			//std::cout<<"Testing Integral methods for Experiment target filled\n";
+			//std::cout<<"\tnSparseIntegral(): " <<fun::nSparseIntegral(_exp_data_5d[i][j]) <<"\n";
+			//std::cout<<"\tSparse_Integral(): " <<fun::Sparse_Integral(_exp_data_5d[i][j]) <<"\n";
+			//TH1D* tmp_hist = _exp_data_5d[i][j]->Projection(1);
+			//std::cout<<"\tProj->Integral(): " <<tmp_hist->Integral() <<"\n";
+			//std::cout<<"\t->Integral(): " <<_exp_data_5d[i][j]->Integral() <<"\n";
 			//std::cout<<"Number of bins per axis\nSim\tExp\tEmp\tSim_no_rad\n";
 			//for(int k=0; k<5; k++){
 			//	std::cout<<_sim_data_5d[i][j]->GetAxis(k)->GetNbins() <<"\t" <<_exp_data_5d[i][j]->GetAxis(k)->GetNbins() <<"\t" <<_empty_5d[i][j]->GetAxis(k)->GetNbins() <<"\t" <<_thrown_no_rad_5d[i][j]->GetAxis(k)->GetNbins() <<"\n";

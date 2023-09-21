@@ -87,28 +87,39 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 				sector = physics::get_sector(phi_e);
 				theta_p = physics::get_theta(1,data);
 				phi_e_center = physics::phi_center(phi_e);
+				//hists_->Histogram::Elastic_Peak_Fill(physics::W(physics::Make_4Vector(true,pe,physics::get_theta(0,data),phi_e,_me_),flags_->Flags::Run()),0,sector,flags_);
 				if(flags_->Flags::E_Theta_Corr()){
 					theta_e = corr::theta_e_corr(physics::get_theta(0,data),phi_e_center,flags_->Flags::Run(),true,sector-1);
 					//std::cout<<"Correcting Electron Theta " <<physics::get_theta(0,data) <<" -> " <<theta_e <<"\n";
 					W = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e_center,_me_),flags_->Flags::Run());
+					hists_->Histogram::Elastic_Peak_Fill(W,1,sector,flags_);
 				}else{
 					theta_e = physics::get_theta(0,data);
 					W = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e,_me_),flags_->Flags::Run());
 				}
 				hists_->Histogram::Ele_Angle_Corr_Fill(sector,theta_e,phi_e_center,W,theta_p,flags_);
 			}
+			//std::cout<<"Checking plot P mag corr\n";
 			if(flags_->Flags::Plot_Electron_Mag_Corr() && !flags_->Flags::Sim() && data->Branches::gpart()>=2){
+				//std::cout<<"Passed plot p mag corr \tChecking e theta corr corr\n";
 				if(flags_->Flags::E_Theta_Corr()){
-					theta_e = corr::theta_e_corr(physics::get_theta(0,data),phi_e,flags_->Flags::Run(),false,sector-1);
+					//std::cout<<"passed e theta corr\n";
+					//theta_e = physics::get_theta(0,data);
+					
 					phi_e = physics::get_phi(0,data);
 					sector = physics::get_sector(phi_e);
 					phi_e_center = physics::phi_center(phi_e);
+					theta_e = corr::theta_e_corr(physics::get_theta(0,data),phi_e_center,flags_->Flags::Run(),true,sector-1);
 					if(flags_->Flags::E_PCorr()){
 						pe = corr::p_corr_e(data->Branches::p(0),theta_e,phi_e_center,flags_->Flags::Run(),true,sector-1);
 						W = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e_center,_me_),flags_->Flags::Run());
+						hists_->Histogram::Elastic_Peak_Fill(W,2,sector,flags_);
 					}else{
 						pe = data->Branches::p(0);
+						//std::cout<<"\npe:" <<pe <<" theta:" <<theta_e <<" phi:" <<phi_e ;
+						//physics::Print_4Vec(physics::Make_4Vector(true,pe,theta_e,phi_e,_me_));
 						W = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e,_me_),flags_->Flags::Run());
+						hists_->Histogram::Elastic_Peak_Fill(W,1,sector,flags_);
 					}
 					hists_->Histogram::Ele_Mag_Corr_Fill(pe,sector,theta_e, phi_e_center,W,flags_);
 				}

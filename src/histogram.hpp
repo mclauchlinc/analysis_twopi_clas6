@@ -294,6 +294,9 @@ protected:
 	float min_delta_theta = -0.2;
 	float max_delta_theta = 0.2;
 	int bins_delta_theta = 200;
+	float min_delta_p = 0.9;
+	float max_delta_p = 1.1;
+	int bins_delta_p = 200;
 
 
 	//binning
@@ -357,6 +360,9 @@ protected:
 	//Electron Momentum Correction
 	TH1F_ptr_3d _Pecorr_Angle_hist;
 	TH1F_ptr_3d _Pecorr_Mag_hist;
+
+	//Elastic Peak
+	TH1F* _Elastic_Peak_hist[6][3];//[sector][no corr, e_theta corr, all e corr]
 
 	//Proton Energy Loss Correction
 	TH1F_ptr_3d _Proton_ELoss_hist;
@@ -539,6 +545,11 @@ public:
 	//*------------------------------Start Proton Energy Loss Corrections------------------*
 
 	//*------------------------------End Proton Energy Loss Corrections------------------*
+	//*------------------------------Start Elastic Peak------------------*
+	void Elastic_Peak_Make(std::shared_ptr<Flags> flags_);
+	void Elastic_Peak_Fill(float W_, int corr_, int sector_, std::shared_ptr<Flags> flags_);
+	void Elastic_Peak_Write(std::shared_ptr<Flags> flags_);
+	//*------------------------------End Elastic Peak------------------*
 };	
 
 

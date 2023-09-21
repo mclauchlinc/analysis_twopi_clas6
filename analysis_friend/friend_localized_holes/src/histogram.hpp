@@ -209,6 +209,9 @@ protected:
 	TH1D * _sf_hist_neg[29][5];
 	TH1D * _acceptance_dist[29][5];
 	TH1D * _rel_acceptance_dist[29][5];
+	TH1D * _hole_err_hist[29][5];
+	TH1D * _hole_err_hist_pos[29][5];
+	TH1D * _hole_err_hist_neg[29][5];
 
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
