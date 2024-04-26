@@ -45,6 +45,12 @@ static int _fid_xbin_ = 400;//Degrees
 static float _fid_ymin_ = 0.0;//Degrees
 static float _fid_ymax_ = 180.0; //Degrees
 static int _fid_ybin_ = 300;//Degrees
+static float _geo_fid_xmin_[3] = {-600.0,0.0,-400.0};//mm
+static float _geo_fid_xmax_[3] = {600.0,400.0,400.0}; //mm
+static int _geo_fid_xbin_[3] = {600,600,600};//mm
+static float _geo_fid_ymin_[3] = {-600.0,-250.0,-400.0};//mm
+static float _geo_fid_ymax_[3] = {600.0,250.0,400.0}; //mm
+static int _geo_fid_ybin_[3] = {600,600,600};//mm
 //Delta T
 static float _delta_xmin_ = 0.0;//GeV
 static float _delta_xmax_ = 6.0; //GeV
@@ -69,12 +75,12 @@ static float _ec_xmin_ = 0.0;//GeV
 static float _ec_xmax_ = 6.0; //GeV
 static int _ec_xbin_ = 100;//GeV
 //MM
-static float _mm_min_[4] = {0.7,0.0,0.0,-0.2};
-static float _mm_max_[4] = {1.5,0.3,0.3,0.2};
+static float _mm_min_[4] = {0.836,-0.158,-0.158,-0.045};
+static float _mm_max_[4] = {1.2,0.273,0.273,0.045};
 static int _mm_bin_[4] = {200,200,200,200};
 //MM2
-static float _mm2_min_[4] = {0.7,0.0,0.0,-0.02};
-static float _mm2_max_[4] = {1.5,0.09,0.09,0.02};
+static float _mm2_min_[4] = {0.7,-0.025,-0.025,-0.002};
+static float _mm2_max_[4] = {1.5,0.075,0.075,0.002};
 static int _mm2_bin_[4] = {100,100,100,100};
 //EC
 static float _ec_min_ = 0.0;
@@ -83,9 +89,9 @@ static int _ec_bin_ = 200;
 
 //Detector Plots
 //Vertex
-static float _vertex_min_ = -12.0;
-static float _vertex_max_ = 5.0;
-static int _vertex_bin_ = 200;
+static float _vertex_min_[2] = {-12.0,-35.0};
+static float _vertex_max_[2] = {5.0,2.0};
+static int _vertex_bin_[2] = {200,400};
 //CC Eff
 	//Momentum vs. Theta
 static float _cc_eff1_xmin_ = 0.0;//GeV
@@ -258,6 +264,12 @@ protected:
 	 double FIDymin = 0.0;
 	 double FIDxmax = 30.0;
 	 double FIDymax = 180.0;
+	 int GEOFIDxres = 300;
+	 int GEOFIDyres = 300;
+	 double GEOFIDxmin = .0;
+	 double GEOFIDymin = 0.0;
+	 double GEOFIDxmax = 30.0;
+	 double GEOFIDymax = 180.0;
 	//Delta_t
 	 int DTxres = 1000;//300;
 	 int DTyres = 400;
@@ -329,6 +341,7 @@ protected:
 	//TH2F_ptr_5d _Made_WQ2_hist;//[11][6][2][2];//electron cuts, topologies (including pre), Recon vs. thrown, weight (for data this should always be "Recon")
 	TH2F_ptr_7d _Fid_hist;
 	Bool_6d _Fid_made;
+	TH2F_ptr_5d _Geo_Fid_hist;
 
 	//CC Histograms
 	Bool_6d _CC_made;
@@ -343,6 +356,7 @@ protected:
 
 	//MM Histograms
 	TH1F_ptr_5d _MM_hist;
+	TH1F_ptr_5d _MM_lin_hist;
 	Bool_4d _MM_made;
 
 	TH2F_ptr_5d _SF_hist;
@@ -550,6 +564,15 @@ public:
 	void Elastic_Peak_Fill(float W_, int corr_, int sector_, std::shared_ptr<Flags> flags_);
 	void Elastic_Peak_Write(std::shared_ptr<Flags> flags_);
 	//*------------------------------End Elastic Peak------------------*
+	//*------------------------------Start Detector Geometric Cut Histograms------------------*
+	void Geo_Fid_Make(std::shared_ptr<Flags> flags_);
+	//int Geo_Fid_Theta_idx(float theta_);
+	//int Geo_Fid_Phi_idx(float phi_);
+	std::vector<int> Geo_Fid_idx(const char* species_,const char* detector_, const char* sec_, const char* cut_, const char* pcut_, std::shared_ptr<Flags> flags_);
+	//void Geo_Fid_Fill(int sector_, float theta_, float phi_, float W_, float thetap_, std::shared_ptr<Flags> flags_);
+	void Geo_Fid_Fill(float x_, float y_, float weight_, const char* species_, const char* detector_, const char* sec_ ,const char* cut_, const char* pcut_, std::shared_ptr<Flags> flags_);
+	void Geo_Fid_Write(std::shared_ptr<Flags> flags_);
+	//*------------------------------End Detector Geometric Cut Histograms------------------*
 };	
 
 

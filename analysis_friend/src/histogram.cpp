@@ -336,6 +336,15 @@ void Histogram::Rad_Corr(){
 		_rad_corr_array.push_back(corr_tmp);
 		corr_tmp.clear();
 	}
+	for (int i = 0; i < _n_bins_7d[0]; i++)
+    {
+        std::cout << " [" ;
+        for (int j = 0; j < _n_bins_7d[0]; j++)
+        {
+            std::cout << _rad_corr->GetBinContent(i + 1, j + 1) << ", ";
+        }
+        std::cout<<"],"<<std::endl;
+    }
 }
 
 void Histogram::Make_N_7d(Flags flags_){

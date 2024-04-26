@@ -1,5 +1,6 @@
 #include "particle.hpp"
 
+
 //Initialize the particle by filling it with everything we want
 Particle::Particle(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_, bool thrown_){
 	_idx = idx_; 
@@ -74,6 +75,12 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 	//Particle ID
 	_pid = pid::pid(idx_,data_,flags_);
 	_ided = true;
+	_x[0] = detect::cc_x(data_,idx_);//cc, sc, ec
+	_x[1] = data_->Branches::dc_xsc(idx_);
+	_x[2] = data_->Branches::ech_x(idx_);
+	_y[0] = detect::cc_y(data_,idx_);//cc, sc, ec
+	_y[1] = data_->Branches::dc_ysc(idx_);
+	_y[2] = data_->Branches::ech_y(idx_);
 	if(idx_ == 0){//_Electron_
 		//Detector Quantities
 		_vz = data_->Branches::vz(idx_);
@@ -264,6 +271,14 @@ float Particle::Q2(){
 
 int Particle::Sector(){
 	return physics::get_sector(_phi);
+}
+
+float Particle::Get_x(int det_){
+	return _x[det_];
+}
+
+float Particle::Get_y(int det_){
+	return _y[det_];
 }
 
 TLorentzVector Particle::Get_4Vec(int i){

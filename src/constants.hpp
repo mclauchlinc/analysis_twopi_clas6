@@ -249,5 +249,6 @@ static const  char * throw_stat[] = {"recon","thrown"};//For reconst ructed vs. 
 static const  char * w_stat[] = {"nweight","weight"};
 static const  char * detectors[] = {"dc","cc","sc","ec"};
 static const  char * inter_had[] = {"#Delta^{++}","#rho","#Delta^{0}"};
+static const  char * run_groups[] = {"e16","e1f"};
 
 #endif

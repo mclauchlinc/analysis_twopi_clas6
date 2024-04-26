@@ -334,6 +334,8 @@ bool fun::ecut_perform(const char* ecut_, std::shared_ptr<Flags> flags_){
       pass = true;
     }else if(ecut_==_ec_cut_ && flags_->Flags::EC_Cut()){
       pass = true;
+    }else if(ecut_ == _sc_eff_cut_ && flags_->Flags::SC_Eff()){
+      pass = true;
     }else if(ecut_==_vertex_cut_ && flags_->Flags::Vertex_Cut()){
       pass = true;
     }else if(ecut_==_delta_cut_ && flags_->Flags::Delta_Cut(0)){
@@ -362,12 +364,14 @@ int fun::hcut_offset(const char * species_, const char * hcut_, std::shared_ptr<
 bool fun::hcut_perform(const char * species_,const char* hcut_, std::shared_ptr<Flags> flags_){
   bool pass = false;
   if(species_ != _ele_){
-    if(hcut_ == _none_ || hcut_==_sanity_ || hcut_==_pid_){
+    if(hcut_ == _none_ || hcut_==_sanity_ || hcut_==_pid_ ){
       pass = true;
     }else{
       if(hcut_==_fid_cut_ && flags_->Flags::Fid_Cut(fun::species_idx(species_))){
         pass = true;
       }else if(hcut_==_delta_cut_ && flags_->Flags::Delta_Cut(fun::species_idx(species_))){
+        pass = true;
+      }else if(hcut_ == _sc_eff_cut_ && flags_->Flags::SC_Eff()){
         pass = true;
       }else if(hcut_ == _id_cut_ && flags_->Flags::ID_Cut()){
         pass = true;
@@ -488,7 +492,8 @@ bool fun::is_empty(int run_num_, std::shared_ptr<Flags> flags_){
 }
 
 bool fun::is_full(int run_num_, std::shared_ptr<Flags> flags_){
-  switch(flags_->Run()){
+  std::cout<<"Checking run num: " <<run_num_ <<" for run: " <<run_groups[flags_->Run()] <<"\n";
+    switch(flags_->Run()){
     case 0:
       if(run_num_ >= _e16_run_bounds_[0] && run_num_ <= _e16_run_bounds_[1]){
         for(int i=0; i<std::distance(std::begin(_empty_e16_), std::end(_empty_e16_)); i++){
@@ -502,6 +507,7 @@ bool fun::is_full(int run_num_, std::shared_ptr<Flags> flags_){
       }
     break;
     case 1:
+      std::cout<<"is full e1f bounds: " <<_e1f_run_bounds_[0] <<"-" <<_e1f_run_bounds_[2] <<"\n";
       if(run_num_ >= _e1f_run_bounds_[0] && run_num_ <= _e1f_run_bounds_[1]){
         for(int i=0; i<std::distance(std::begin(_empty_e1f_), std::end(_empty_e1f_)); i++){
           if(run_num_ == _empty_e16_[i]){
@@ -521,9 +527,12 @@ bool fun::is_full(int run_num_, std::shared_ptr<Flags> flags_){
 }
 
 bool fun::correct_run_num(int run_num_, std::shared_ptr<Flags> flags_){
+  std::cout<<"*Checking run number*\n";
   if(flags_->Flags::Fill()){//Was the target filled?
+    std::cout<<"\tTarget Filled\n";
     return fun::is_full(run_num_,flags_);
   }else{
+    std::cout<<"\tTarget Empty\n";
     return fun::is_empty(run_num_,flags_);
   }
 }
@@ -592,7 +601,35 @@ bool fun::correct_run(int run_num_, std::shared_ptr<Flags> flags_){
     }else{//Empty Target
       return (beam && empty);
     }
+  }else if(flags_->Run()==_e1f_){//e1f
+    //std::cout<<"We are doing e1f!\n";
+    for(int i=0; i<(sizeof(_empty_e1f_)/sizeof(_empty_e1f_[0])); i++){
+      if(run_num_ == _empty_e1f_[i]){
+        empty=true;
+      }
+    }
+    //empty = fun::is_num_in_list(run_num_,_empty_e16_);
+    //std::cout<<"Checking Beam| size: " <<sizeof(_beam_e16_)/sizeof(_beam_e16_[0]) <<"\n";
+    for(int i=0; i<(sizeof(_beam_e1f_)/sizeof(_beam_e1f_[0])); i++){
+      if(run_num_ == _beam_e1f_[i]){
+        beam=true;
+      }
+    }
+    //beam = fun::is_num_in_list(run_num_,_beam_e16_);
+    for(int i=0; i<(sizeof(_other_e1f_)/sizeof(_other_e1f_[0])); i++){
+      if(run_num_ == _other_e1f_[i]){
+        other=true;
+      }
+    }
+    //std::cout<<"Checking Other| size: " <<sizeof(_other_e16_)/sizeof(_other_e16_[0]) <<"\n";
+    //other = fun::is_num_in_list(run_num_,_other_e16_);
+    if(flags_->Fill()){//Filled Target
+      return (beam && !empty && !other);
+    }else{//Empty Target
+      return (beam && empty);
+    }
   }
+
 
 
     //if(flags_->Fill()){//Filled Target

@@ -178,6 +178,25 @@ protected:
 	THnSparseD *_exp_data_5d_pos[29][5];
 	THnSparseD *_exp_data_5d_neg[29][5];
     THnSparseD *_sim_data_5d[29][5];
+
+	THnSparseD *_exp_data_5d_bop[29][5];
+	THnSparseD *_exp_data_5d_bop_pos[29][5];
+	THnSparseD *_exp_data_5d_bop_neg[29][5];
+    THnSparseD *_sim_data_5d_bop[29][5];
+	THnSparseD *_sim_data_5d_bop_pos[29][5];
+	THnSparseD *_sim_data_5d_bop_neg[29][5];
+
+	THnSparseD *_exp_data_5d_bop2[29][5];
+	THnSparseD *_exp_data_5d_bop2_pos[29][5];
+	THnSparseD *_exp_data_5d_bop2_neg[29][5];
+    THnSparseD *_sim_data_5d_bop2[29][5];
+	THnSparseD *_sim_data_5d_bop2_pos[29][5];
+	THnSparseD *_sim_data_5d_bop2_neg[29][5];
+
+	THnSparseD *_sim_exp_5d_sync[29][5];
+	THnSparseD *_sim_exp_5d_sync_pos[29][5];
+	THnSparseD *_sim_exp_5d_sync_neg[29][5];
+
     THnSparseD *_empty_5d[29][5];
 	THnSparseD *_empty_5d_pos[29][5];
 	THnSparseD *_empty_5d_neg[29][5];
@@ -185,6 +204,10 @@ protected:
     THnSparseD *_thrown_no_rad_5d[29][5];
     THnSparseD *_sim_holes_5d[29][5];
     THnSparseD *_sim_holes_tmp_5d[29][5];
+	THnSparseD *_sim_holes_5d_pos[29][5];
+    THnSparseD *_sim_holes_tmp_5d_pos[29][5];
+	THnSparseD *_sim_holes_5d_neg[29][5];
+    THnSparseD *_sim_holes_tmp_5d_neg[29][5];
     THnSparseD *_N_holes_5d[29][5];
 	THnSparseD *_N_holes_5d_pos[29][5];
 	THnSparseD *_N_holes_5d_neg[29][5];
@@ -192,6 +215,7 @@ protected:
 	THnSparseD *_N_holes_fifty_5d_pos[29][5];
 	THnSparseD *_N_holes_fifty_5d_neg[29][5];
     THnSparseD *_acceptance_5d[29][5];
+	THnSparseD *_acceptance_rel_err_5d[29][5];
 
 	THnSparseD *_scale_exp_5d[29][5];
 	THnSparseD *_scale_exp_5d_pos[29][5];
@@ -212,6 +236,10 @@ protected:
 	TH1D * _hole_err_hist[29][5];
 	TH1D * _hole_err_hist_pos[29][5];
 	TH1D * _hole_err_hist_neg[29][5];
+
+	TH1D * _hole_radius_hist[29][5];
+	TH1D * _hole_radius_hist_pos[29][5];
+	TH1D * _hole_radius_hist_neg[29][5];
 
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
@@ -248,7 +276,8 @@ public:
     float Q2_top(int i_);
     float W_mid(int i_);
     float Q2_mid(int i_);
-	
+	void Fill_Acceptance_Rel_Hist();
+	void Acceptance_Rel_Error_Cut();
 
 	
 };

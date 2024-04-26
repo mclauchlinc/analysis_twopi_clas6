@@ -46,6 +46,9 @@ int main(int argc, char **argv){
 	//Make relevant TTrees and Event Rootfile
 	//std::cout<<"Making TTree\n";
 	//auto forest = std::make_shared<Forest>(flags); 
+	for(int i=0; i<5; i++){
+		std::cout<<"power i:" <<i <<" = " <<corr::power(2.0, i) <<"\n";
+	}
 
 	std::future<bool> fut;
 

@@ -14,12 +14,18 @@ void plot::plot_pid(Particle particle_, std::shared_ptr<Histogram> hist_, std::s
 	}
 }
 void plot::plot_ele(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
+	//std::cout<<"Plotting Electron\n\tPlot no cut\n";
 	plot::plot_no_cut(particle_, hist_, flags_, 0);
+	//std::cout<<"\tPlot sanity\n";
 	plot::plot_sanity_cut(particle_, hist_, flags_, 0);
+	//std::cout<<"\tPlot sanity " <<flags_->Plot_Vertex() <<"\n";
 	plot::plot_vertex_cut(particle_, hist_, flags_, 0);
+	//std::cout<<"\tPlot sanity " <<flags_->Plot_Fid(0) <<"\n";
 	plot::plot_fid_cut(particle_, hist_, flags_, 0);
 	//plot::plot_delta_cut(particle_, hist_, flags_, 0);
+	//std::cout<<"\tPlot sanity " <<flags_->Plot_SF() <<"\n";
 	plot::plot_sf_cut(particle_, hist_, flags_, 0);
+	//std::cout<<"\tPlot sanity " <<flags_->Plot_CC() <<"\n";
 	plot::plot_cc_cut(particle_, hist_, flags_, 0);
 	plot::plot_ec_cut(particle_, hist_, flags_, 0);
 	plot::plot_sc_eff_cut(particle_, hist_, flags_, 0);
@@ -83,6 +89,10 @@ void plot::plot_no_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 	hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_none_,_sector_[particle_.Particle::Sector()-1],_no_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 	//std::cout<<"No Cut Delta\n";
 	hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _none_, _no_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+	//std::cout<<"No Cut Geometric\n";
+	//for(int k=0; k<3; k++){
+		//hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_no_cut_,_none_,flags_);
+	//}
 }
 void plot::plot_sanity_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
 	if(particle_.Pass_Sanity(par_)){
@@ -97,6 +107,9 @@ void plot::plot_sanity_cut(Particle particle_, std::shared_ptr<Histogram> hist_,
 		hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _sanity_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sanity_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _sanity_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_sanity_,flags_);
+		}
 	}else{
 		if(par_ == 0){
 			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _sanity_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
@@ -109,6 +122,9 @@ void plot::plot_sanity_cut(Particle particle_, std::shared_ptr<Histogram> hist_,
 		hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _sanity_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_sanity_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _sanity_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_sanity_,flags_);
+		}
 	}
 }
 void plot::plot_vertex_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
@@ -127,6 +143,9 @@ void plot::plot_vertex_cut(Particle particle_, std::shared_ptr<Histogram> hist_,
 		hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _vertex_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_vertex_cut_,_sector_[particle_.Particle::Sector()-1],_cut_[0],_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _vertex_cut_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_vertex_cut_,flags_);
+		}
 	}else{
 		if(par_ == 0){
 			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _vertex_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
@@ -139,6 +158,9 @@ void plot::plot_vertex_cut(Particle particle_, std::shared_ptr<Histogram> hist_,
 		hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _vertex_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_vertex_cut_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _vertex_cut_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_vertex_cut_,flags_);
+		}
 	}
 }
 void plot::plot_fid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
@@ -157,6 +179,9 @@ void plot::plot_fid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, st
 		hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _fid_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_fid_cut_,_sector_[particle_.Particle::Sector()-1],_cut_applied_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _fid_cut_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_fid_cut_,flags_);
+		}
 	}else{
 		if(par_ == 0){
 			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _fid_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
@@ -169,6 +194,9 @@ void plot::plot_fid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, st
 		hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _fid_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_fid_cut_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _fid_cut_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_fid_cut_,flags_);
+		}
 	}
 }
 void plot::plot_delta_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
@@ -187,6 +215,9 @@ void plot::plot_delta_cut(Particle particle_, std::shared_ptr<Histogram> hist_, 
 		hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _delta_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_delta_cut_,_sector_[particle_.Particle::Sector()-1],_cut_applied_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _delta_cut_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_delta_cut_,flags_);
+		}
 	}else{
 		if(par_ == 0){
 			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _delta_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
@@ -199,6 +230,9 @@ void plot::plot_delta_cut(Particle particle_, std::shared_ptr<Histogram> hist_, 
 		hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _delta_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_delta_cut_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _delta_cut_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_delta_cut_,flags_);
+		}
 	}
 }
 void plot::plot_sf_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
@@ -216,6 +250,9 @@ void plot::plot_sf_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sf_cut_,_cut_applied_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
 			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _sf_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
 			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _sf_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			for(int k=0; k<3; k++){
+				hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_sf_cut_,flags_);
+			}
 		}else{
 			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _sf_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
 			hist_->Histogram::CC_Fill(particle_.Particle::Get_nphe(), particle_.Particle::Get_cc_seg(), _sf_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], _cc_sides_[particle_.Particle::Get_cc_lrc()], flags_);
@@ -226,6 +263,9 @@ void plot::plot_sf_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_sf_cut_,_anti_cut_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
 			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _sf_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
 			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _sf_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], flags_);
+			for(int k=0; k<3; k++){
+				hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_sf_cut_,flags_);
+			}
 		}
 	}
 }
@@ -244,6 +284,9 @@ void plot::plot_cc_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_cc_cut_,_cut_applied_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
 			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
 			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			for(int k=0; k<3; k++){
+				hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_cc_cut_,flags_);
+			}
 		}else{
 			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _cc_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
 			hist_->Histogram::CC_Fill(particle_.Particle::Get_nphe(), particle_.Particle::Get_cc_seg(), _cc_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], _cc_sides_[particle_.Particle::Get_cc_lrc()], flags_);
@@ -254,6 +297,9 @@ void plot::plot_cc_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_cc_cut_,_anti_cut_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
 			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
 			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], flags_);
+			for(int k=0; k<3; k++){
+				hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_cc_cut_,flags_);
+			}
 		}
 	}
 }
@@ -401,6 +447,9 @@ void plot::plot_pid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, st
 		hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _pid_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_pid_,_sector_[particle_.Particle::Sector()-1],_cut_applied_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _pid_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_pid_,flags_);
+		}
 	}else{
 		if(par_ == 0){
 			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _pid_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
@@ -413,6 +462,10 @@ void plot::plot_pid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, st
 		hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _pid_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], flags_);
 		hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_pid_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
 		hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _pid_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+		for(int k=0; k<3; k++){
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_pid_,flags_);
+		}
+			
 	}
 }
 

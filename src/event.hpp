@@ -54,7 +54,10 @@ private:
 	float _vx = NAN;
 	float _vy = NAN;
 
-	TLorentzVector _k1_lab = physics::Make_4Vector(_energy_e16_,0.0,0.0,1.0,_me_);//{NAN,NAN,NAN,NAN};
+	TLorentzVector _k1_lab = {NAN,NAN,NAN,NAN};
+	//TLorentzVector _k1_lab_e16 = physics::Make_4Vector(_energy_e16_,0.0,0.0,1.0,_me_);//{NAN,NAN,NAN,NAN};
+	//TLorentzVector _k1_lab_e1f = physics::Make_4Vector(_energy_e1f_,0.0,0.0,1.0,_me_);//{NAN,NAN,NAN,NAN};
+	//TLorentzVector _k1_lab[] = {_k1_lab_e16,_k1_lab_e1f};
 	TLorentzVector _k1 = {NAN,NAN,NAN,NAN};//beam
 	TLorentzVector _p1 = {NAN,NAN,NAN,NAN};//target proton
 	TLorentzVector _vec_lab[4] = {{NAN,NAN,NAN,NAN},{NAN,NAN,NAN,NAN},{NAN,NAN,NAN,NAN},{NAN,NAN,NAN,NAN}};//4 vectors in lab frame
@@ -121,6 +124,7 @@ public:
 	int Sector(int particle_);
 	float Virtual_Photon_Flux();
 	int SC_pd(int i);
+	void Check_Event(bool thrown_, std::shared_ptr<Flags> flags_);
 };
 
 

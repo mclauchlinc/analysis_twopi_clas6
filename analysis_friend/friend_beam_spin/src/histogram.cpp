@@ -1,20 +1,17 @@
 #include "histogram.hpp"
 
 Histogram::Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_){
-	Histogram::Make_Acceptance_Rel_Hist(flags_);
-	Histogram::Extract_5d_Histograms(exp_tree_,sim_tree_,empty_tree_,nr_sim_tree_,holes_,flags_);
+    Histogram::Extract_5d_Histograms(exp_tree_,sim_tree_,empty_tree_,nr_sim_tree_,holes_,flags_);
     Histogram::Rad_Corr();
     //Histogram::Sparse_7to5(flags_);
-	Histogram::Fill_Acceptance_Rel_Hist();
-    Histogram::Single_Diff(flags_);
+    //Histogram::Single_Diff(flags_);
+	Histogram::Beam_Spin(flags_);
 }
 
 Histogram::Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_){
-    Histogram::Make_Acceptance_Rel_Hist(flags_);
-	Histogram::Extract_5d_Histograms(exp_tree_,sim_tree_,empty_tree_,nr_sim_tree_,flags_);
+    Histogram::Extract_5d_Histograms(exp_tree_,sim_tree_,empty_tree_,nr_sim_tree_,flags_);
     Histogram::Rad_Corr();
     //Histogram::Sparse_7to5(flags_);
-	Histogram::Fill_Acceptance_Rel_Hist();
     Histogram::Single_Diff(flags_);
 }
 
@@ -25,29 +22,70 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
     for(int i=0; i<_W_nbins_; i++){
         for(int j=0; j<_Q2_nbins_; j++){
             sprintf(hname,"Thrown_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-            _thrown_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
+            //std::cout<<"\tExtracting Thrown Histograms: " <<hname <<"\n";
+			_thrown_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
             _thrown_no_rad_5d[i][j] = (THnSparseD *)nr_sim_tree_->Get(hname);
             sprintf(hname,"%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-            _sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
+            //std::cout<<"\tExtracting Reconstructed Histograms: " <<hname <<"\n";
+			_sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
             _exp_data_5d[i][j] = (THnSparseD *)exp_tree_->Get(hname);
             _empty_5d[i][j] = (THnSparseD *)empty_tree_->Get(hname);
+			_empty_pos_5d[i][j] = (THnSparseD *)empty_tree_->Get(hname);
+			_empty_neg_5d[i][j] = (THnSparseD *)empty_tree_->Get(hname);
+			//sprintf(hname,"%s_%s_pos",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);
+			sprintf(hname,"%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f_pos",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			//std::cout<<"\tExtracting Reconstructed Pos Histograms: " <<hname <<"\n";
+			_exp_data_pos_5d[i][j] = (THnSparseD *)exp_tree_->Get(hname);
+			
+            //_empty_pos_5d[i][j] = (THnSparseD *)empty_tree_->Get(hname);
+			//sprintf(hname,"%s_%s_neg",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()]);
+			sprintf(hname,"%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f_neg",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			//std::cout<<"\tExtracting Reconstructed Neg Histograms: " <<hname <<"\n";
+			_exp_data_neg_5d[i][j] = (THnSparseD *)exp_tree_->Get(hname);
+            //_empty_neg_5d[i][j] = (THnSparseD *)empty_tree_->Get(hname);
             _acceptance_5d[i][j] = (THnSparseD*)_sim_data_5d[i][j]->Clone();
             _acceptance_5d[i][j]->Divide(_thrown_5d[i][j]);
             sprintf(hname,"Acceptance_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-            _acceptance_5d[i][j]->SetNameTitle(hname,hname);
+            //std::cout<<"\tMaking Acceptance Histogram: " <<hname <<"\n";
+			_acceptance_5d[i][j]->SetNameTitle(hname,hname);
             for(long k=0; k<_acceptance_5d[i][j]->GetNbins(); k++){
 				if(_acceptance_5d[i][j]->GetBinError(k)/_acceptance_5d[i][j]->GetBinContent(k) > 0.98){
 					_acceptance_5d[i][j]->SetBinContent(k,0.0);
 				}
 			}
 			sprintf(hname,"N_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-            _N_5d[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
-            _acceptance_5d[i][j]->SetNameTitle(hname,hname);
-            _N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
+            //std::cout<<"\tMaking Yield Histograms from clones: " <<hname <<"\n";
+			//std::cout<<"\t\tnon-Helicity\n";
+			_N_5d[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
+			//std::cout<<"\t\tPos Helicity\n";
+			_N_pos_5d[i][j] = (THnSparseD*)_exp_data_pos_5d[i][j]->Clone();
+			//std::cout<<"\t\tNeg Helicity\n";
+			_N_neg_5d[i][j] = (THnSparseD*)_exp_data_neg_5d[i][j]->Clone();
+            //std::cout<<"\t\tNon-Hel Empty Subtraction\n";
+			_N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
             _N_5d[i][j]->Divide(_acceptance_5d[i][j]);
-            sprintf(hname,"Localized_Holes_50_W:%.3f-%.3f_Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-            _N_holes_5d[i][j] = (THnSparseD *)holes_->Get(hname);
-	        _N_5d[i][j]->Add(_N_holes_5d[i][j]);
+			_N_5d[i][j]->SetNameTitle(hname,hname);
+			//_N_pos_5d[i][j]->Add(_empty_pos_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
+            _N_pos_5d[i][j]->Divide(_acceptance_5d[i][j]);
+			_acceptance_5d[i][j]->SetNameTitle(hname,hname);
+			//_N_neg_5d[i][j]->Add(_empty_neg_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
+            _N_neg_5d[i][j]->Divide(_acceptance_5d[i][j]);
+            //sprintf(hname,"Localized_Holes_50_W:%.3f-%.3f_Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+            //_N_holes_5d[i][j] = (THnSparseD *)holes_->Get(hname);
+	        //_N_5d[i][j]->Add(_N_holes_5d[i][j]);
+			//_N_holes_5d[i][j] = (THnSparseD *)holes_->Get(hname);
+			sprintf(hname,"Localized_Holes_50_W:%.3f-%.3f_Q2:%.2f-%.2f_pos",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			//std::cout<<"\tExtracting Localized Hole Histogram: " <<hname <<"\n";
+			_N_holes_pos_5d[i][j] = (THnSparseD *)holes_->Get(hname);
+			_N_pos_5d[i][j]->Add(_N_holes_pos_5d[i][j]);
+			sprintf(hname,"N_pos_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			_N_pos_5d[i][j]->SetNameTitle(hname,hname);
+			sprintf(hname,"Localized_Holes_50_W:%.3f-%.3f_Q2:%.2f-%.2f_neg",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			//std::cout<<"\tExtracting Localized Hole Histogram: " <<hname <<"\n";
+			_N_holes_neg_5d[i][j] = (THnSparseD *)holes_->Get(hname);
+			_N_neg_5d[i][j]->Add(_N_holes_neg_5d[i][j]);
+			sprintf(hname,"N_neg_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			_N_neg_5d[i][j]->SetNameTitle(hname,hname);
         }
     }
     std::cout<<"\nHistograms Extracted\nGetting Dimensions\n";
@@ -57,8 +95,6 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
         std::cout<<"Dimension " <<i <<" " <<_n_bins_5d[i] <<"\n";
 	}
     std::cout<<"Dimensions extracted\n";
-
-
 }
 
 void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_){
@@ -100,7 +136,7 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
             _N_5d[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
             _N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
 	        _N_5d[i][j]->Divide(_acceptance_5d[i][j]);
-			if(flags_.Flags::Nonlocal_Holes()){
+			/*if(flags_.Flags::Nonlocal_Holes()){
 				_sim_holes_tmp_5d[i][j] = (THnSparseD*)_sim_data_5d[i][j]->Clone();
 				_sim_holes_tmp_5d[i][j]->Divide(_acceptance_5d[i][j]);
 				_sim_holes_5d[i][j] = (THnSparseD*)_thrown_5d[i][j]->Clone();
@@ -111,7 +147,8 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 				_N_holes_5d[i][j] = (THnSparseD*)_sim_holes_5d[i][j]->Clone();
 				_N_holes_5d[i][j]->Scale(fun::nSparseIntegral(_exp_data_5d[i][j])/fun::nSparseIntegral(_sim_data_5d[i][j]));
 				_N_5d[i][j]->Add(_N_holes_5d[i][j],1.0);
-			}
+			}*/
+
         }
     }
     for(int i = 0; i<_thrown_5d[0][0]->GetNdimensions(); i++){
@@ -307,9 +344,6 @@ void Histogram::Single_Diff(Flags flags_){
 			}
 			//exp_ch_2d.push_back(exp_ch_1d);
 			exp_ch_1d.clear();
-			_acceptance_rel_err_hist[i][j]->GetXaxis()->SetTitle("Relative Error in Acceptance");
-			_acceptance_rel_err_hist[i][j]->GetYaxis()->SetTitle("Number of Bins");
-			_acceptance_rel_err_hist[i][j]->Write();
 		}
 	}
     /*std::cout<<"moving on\n";
@@ -332,6 +366,90 @@ void Histogram::Single_Diff(Flags flags_){
 	}*/
 	_RootOutputFile->Close();
 	std::cout<<"\nCompleted Single Differential Cross Sections\n";
+}
+
+void Histogram::Beam_Spin(Flags flags_){
+	//Will vary by W, Q2, and Phi 
+	std::cout<<"Beam Spin Asymmetry\n";
+	if(!flags_.Flags::Plot_Beam_Spin() || !flags_.Flags::Helicity()){
+		std::cout<<"\tNot Plotting Beam Spin Asymmetry\n";
+	 	return;
+	}
+	std::cout<<"Making Output File\n";
+	_RootOutputFile = new TFile(flags_.Flags::Output_File().c_str(),"RECREATE");
+	std::cout<<"Going into the rootfile: " <<_RootOutputFile->GetName() <<"\n";
+	_RootOutputFile->cd();
+	TCanvas* def = new TCanvas("def3");
+	char hname[100];
+	char dirname[100];
+	sprintf(dirname,"ducsk_|%.2f-%.2f",Histogram::Q2_low(0),Histogram::Q2_top(0));
+	std::cout<<"dirname: " <<dirname <<"\n";
+	char xlabel[100];
+	char ylabel[100];
+	sprintf(xlabel,"Phi (deg)");
+	sprintf(ylabel,"Asymmetry");
+	TH1D_1d_star beam_spin_1d;
+	TH1D_1d_star bot_spin_1d;
+	TH1D_1d_star top_neg_1d;
+	//TH3D * N_pos = _N_pos->THnSparse::Projection(0,1,6);
+	//TH3D * N_neg = _N_neg->THnSparse::Projection(0,1,6);
+	std::cout<<"\tMaking Directory\n";
+	TDirectory* dir_B = _RootOutputFile->mkdir("Beam Spin");
+	std::cout<<"\t\tMade main directory\n";
+	//TDirectory* dir_B = _RootOutputFile.mkdir("Beam Spin");
+	//dir_B->cd();
+	std::cout<<"initialize sub directories \n";
+	TDirectory* dir_B1[5];
+	std::cout<<"Making sub directories\n";
+	for(int j=0; j< 5; j++){//Q2
+		sprintf(dirname,"Beam_Spin_Q2|%.2f-%.2f",Histogram::Q2_low(j),Histogram::Q2_top(j));
+		std::cout<<"\t\tMaking Dir: " <<dirname <<"\n";
+		dir_B1[j] = dir_B->mkdir(dirname);
+	}
+	int idx[3];
+	std::cout<<"\tWriting Histograms\n";
+	//THnSparseD* Beam_Spin_Top[_N_5d_pos.size()][_N_5d_pos[0].size()];
+	//THnSparseD* Beam_Spin_Bot[_N_5d_pos.size()][_N_5d_pos[0].size()];
+	//THnSparseD* Beam_Spin_R[_N_5d_pos.size()][_N_5d_pos[0].size()];
+	//Convert the _exp_corr_5d and _exp_holes_5d to 4 dimensional sparse histograms for usage in plotting single differential cross sections
+	for(int i=0; i<29; i++){//W
+		for(int j=0; j< 5; j++){//Q2
+			//std::cout<<"\t\tW:" <<i <<" Q2:" <<j <<"\r";
+			sprintf(hname,"Beam_Spin_W|%.3f-%.3f_Q2|%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			//beam_spin_1d.push_back(new TH1D(hname,hname,_n_bins_5d[4],_bin_low_5d[4][0],_bin_up_5d[4][_n_bins_5d[4]-1]));
+			beam_spin_1d.push_back(_N_pos_5d[i][j]->Projection(4,"E"));
+			//beam_spin_1d.push_back(Beam_Spin_R[i][j]->Projection(4,"E"));
+			top_neg_1d.push_back(_N_neg_5d[i][j]->Projection(4,"E"));
+			beam_spin_1d[j]->SetNameTitle(hname,hname);
+			beam_spin_1d[j]->Add(top_neg_1d[j],-1.0);
+			sprintf(hname,"Top_neg_Beam_Spin_W|%.3f-%.3f_Q2|%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			top_neg_1d[j]->SetNameTitle(hname,hname);
+			//beam_spin_1d[j]->Scale((1.0/_beam_pol_[0]));
+			bot_spin_1d.push_back(_N_pos_5d[i][j]->Projection(4,"E"));
+			bot_spin_1d[j]->Add(top_neg_1d[j],1.0);
+			beam_spin_1d[j]->Divide(bot_spin_1d[j]);
+			beam_spin_1d[j]->Scale((1.0/_beam_pol_[0]));
+			//beam_spin_1d[j]->SetNameTitle(hname,hname);
+			sprintf(hname,"Bot_Beam_Spin_W|%.3f-%.3f_Q2|%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			bot_spin_1d[j]->SetNameTitle(hname,hname);
+			//std::cout<<"Checking Content for " <<hname <<"\n";
+			//for(int k=0; k<_n_bins_5d[4]; k++){//Phi
+			//	std::cout<<"\tPhi : " <<_bin_mid_7d[6][k] <<"| N_pos:" <<N_pos->GetBinContent(i,j,k) <<" | N_neg: " <<N_neg->GetBinContent(i,j,k) <<"\n";
+			//	beam_spin_1d[beam_spin_1d.size()-1]->SetBinContent(k,(1.0/_beam_pol_[0])*(N_pos->GetBinContent(i,j,k)-N_neg->GetBinContent(i,j,k))/(N_pos->GetBinContent(i,j,k)+N_neg->GetBinContent(i,j,k)));//Beam polarization needs to be specified and is not currently accurate
+			//}
+			dir_B1[j]->cd();
+			sprintf(hname,"Beam_Spin_W|%.3f-%.3f_Q2|%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			beam_spin_1d[j]->SetNameTitle(hname,hname);
+			beam_spin_1d[j]->GetXaxis()->SetTitle(xlabel);
+			beam_spin_1d[j]->GetYaxis()->SetTitle(ylabel);
+			beam_spin_1d[j]->Write();
+		}
+		//_beam_spin_hist.push_back(beam_spin_1d);
+		beam_spin_1d.clear();
+		bot_spin_1d.clear();
+		top_neg_1d.clear();
+	}
+	std::cout<<"\nFinished Beam Spin\n";
 }
 
 float Histogram::W_low(int i_){
@@ -385,26 +503,3 @@ double Histogram::CosTheta(int theta_bin_){
     return abs(TMath::Cos((_theta_min_+(theta_res*theta_bin_))*TMath::Pi()/180.0)-TMath::Cos((_theta_min_+(theta_res*theta_bin_+1))*TMath::Pi()/180.0));
 }
 
-void Histogram::Make_Acceptance_Rel_Hist(Flags flags_){
-	char hname[100];
-
-	for(int a=0; a<_W_nbins_; a++){
-		for(int b=0; b<_Q2_nbins_; b++){
-			sprintf(hname,"Acceptance_Relative_Error_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(a),Histogram::W_top(a),Histogram::Q2_low(b),Histogram::Q2_top(b));
-			_acceptance_rel_err_hist[a][b]= new TH1D(hname,hname,200,0.0,1.0);
-		}
-	}
-}
-
-void Histogram::Fill_Acceptance_Rel_Hist(){
-	for(int a=0; a<_W_nbins_; a++){
-		for(int b=0; b<_Q2_nbins_; b++){
-			//Int_t* coord = new Int_t[_acceptance_5d[i][j]->GetNbins()];
-			for(Long64_t i =0; i<_acceptance_5d[a][b]->GetNbins(); i++ ){
-				if(_acceptance_5d[a][b]->GetBinContent(i)>0.0){
-					_acceptance_rel_err_hist[a][b]->Fill(_acceptance_5d[a][b]->GetBinError(i)/_acceptance_5d[a][b]->GetBinContent(i));
-				}
-			}
-		}
-	}
-}

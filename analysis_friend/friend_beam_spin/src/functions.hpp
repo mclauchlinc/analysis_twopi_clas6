@@ -33,7 +33,6 @@ namespace fun {
     double Sparse_Integral(THnSparseD* nhist_);
     double Sparse_Integral_Error2(THnSparseD* nhist_);
     double Sparse_Integral_Error(THnSparseD* nhist_);
-    
 
 };
 #endif

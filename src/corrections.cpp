@@ -19,9 +19,9 @@ float corr::power_10(float num_, int power_of_ten_){
 }
 
 float corr::power(float num_, int power_){
-	float out = num_;
+	float out = 1.0;
 	if(power_==0){
-		return num_;
+		return out;
 	}else if(power_>0){
 		for(int i=0; i<power_; i++){
 			out = out*num_;
@@ -41,21 +41,21 @@ float corr::p_corr_e(float p_e_, float theta_e_, float phi_e_, int run_, bool ce
 			for(int j=0; j<3; j++){
 				//phi_const[i] += corr::power_10(_p_e_part[run_][sector_][i][j],_angle_e_expon[run_][sector_][i][j])*pow(theta_e_,2-j);
 				//phi_const[i] += corr::power_10(_p_e_part[run_][sector_][i][j],_angle_e_expon[run_][sector_][i][j])*corr::power(theta_e_,2-j);
-				phi_const[i] += _p_e_part[run_][sector_idx_][i][j]*corr::power(theta_e_,2-j);
+				phi_const[i] += _p_e_part[run_][sector_idx_][i][j]*corr::power(theta_e_,j);
 			}
 		}
-		return fun::poly_3(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3]);
+		return p_e_/fun::poly_3(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3]);
 	}
 	int sector = physics::get_sector(phi_e_);
 	for(int i=0; i<4; i++){
 		for(int j=0; j<3; j++){
 			//phi_const[i] += corr::power_10(_p_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*pow(theta_e_,2-j);
 			//phi_const[i] += corr::power_10(_p_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*corr::power(theta_e_,2-j);
-			phi_const[i] += _p_e_part[run_][sector-1][i][j]*corr::power(theta_e_,2-j);
+			phi_const[i] += _p_e_part[run_][sector-1][i][j]*corr::power(theta_e_,j);
 		}
 	}
 	float phi = physics::phi_center(phi_e_);
-	return p_e_*fun::poly_3(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3]);
+	return p_e_/fun::poly_3(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3]);
 }
 
 float corr::theta_e_corr(float theta_e_, float phi_e_, int run_, bool centered_, int sector_){
@@ -81,21 +81,24 @@ float corr::theta_e_corr(float theta_e_, float phi_e_, int run_, bool centered_,
 		//std::cout<<"\tPoly: " <<fun::poly_4(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<" c0:" <<phi_const[0] <<" c1:" <<phi_const[1] <<" c2:" <<phi_const[2] <<" c3:" <<phi_const[3] <<" c4:" <<phi_const[4] <<"\n"; 
 		//std::cout<<"\tCorrected Theta: " <<theta_e_-fun::poly_4(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<"\n";
 		return theta_e_-fun::poly_4(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]);
-	}
-	int sector = physics::get_sector(phi_e_);
-	for(int i=0; i<5; i++){
-		for(int j=0; j<3; j++){
-			//std::cout<<"\t\tTheta Parameters: " <<_angle_e_part[run_][sector][i][j] <<" x10^" <<_angle_e_expon[run_][sector][i][j] <<" = " <<corr::power_10(_angle_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j]) <<"\n";
-			//std::cout<<"\t\tTheta to power: " <<corr::power(theta_e_,2-j) <<"\n";
-			//std::cout<<"\t\tPhi Constant added: " <<corr::power_10(_angle_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*corr::power(theta_e_,2-j) <<"\n";
-			//phi_const[i] += corr::power_10(_angle_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*pow(theta_e_,2-j);
-			//phi_const[i] += corr::power_10(_angle_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*corr::power(theta_e_,2-j);
-			phi_const[i] += _angle_e_part[run_][sector][i][j]*corr::power(theta_e_,2-j);
-			//std::cout<<"\t\t\tPhi Constant " <<i <<" :" <<phi_const[i] <<"\n";
+		//return theta_e_-fun::poly_4(phi_e_,phi_const[4],phi_const[3],phi_const[2],phi_const[1],phi_const[0]);
+	}else{
+		int sector = physics::get_sector(phi_e_);
+		for(int i=0; i<5; i++){
+			for(int j=0; j<3; j++){
+				//std::cout<<"\t\tTheta Parameters: " <<_angle_e_part[run_][sector][i][j] <<" x10^" <<_angle_e_expon[run_][sector][i][j] <<" = " <<corr::power_10(_angle_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j]) <<"\n";
+				//std::cout<<"\t\tTheta to power: " <<corr::power(theta_e_,2-j) <<"\n";
+				//std::cout<<"\t\tPhi Constant added: " <<corr::power_10(_angle_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*corr::power(theta_e_,2-j) <<"\n";
+				//phi_const[i] += corr::power_10(_angle_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*pow(theta_e_,2-j);
+				//phi_const[i] += corr::power_10(_angle_e_part[run_][sector][i][j],_angle_e_expon[run_][sector][i][j])*corr::power(theta_e_,2-j);
+				phi_const[i] += _angle_e_part[run_][sector][i][j]*corr::power(theta_e_,j);
+				//std::cout<<"\t\t\tPhi Constant " <<i <<" :" <<phi_const[i] <<"\n";
+			}
 		}
+		float phi = physics::phi_center(phi_e_);
+		//std::cout<<"\tPoly: " <<fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<" c0:" <<phi_const[0] <<" c1:" <<phi_const[1] <<" c2:" <<phi_const[2] <<" c3:" <<phi_const[3] <<" c4:" <<phi_const[4] <<"\n"; 
+		//std::cout<<"\tCorrected Theta: " <<theta_e_-fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<"\n";
+		return theta_e_-fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]);
+		//return theta_e_-fun::poly_4(phi_e_,phi_const[4],phi_const[3],phi_const[2],phi_const[1],phi_const[0]);
 	}
-	float phi = physics::phi_center(phi_e_);
-	//std::cout<<"\tPoly: " <<fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<" c0:" <<phi_const[0] <<" c1:" <<phi_const[1] <<" c2:" <<phi_const[2] <<" c3:" <<phi_const[3] <<" c4:" <<phi_const[4] <<"\n"; 
-	//std::cout<<"\tCorrected Theta: " <<theta_e_-fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<"\n";
-	return theta_e_-fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]);
 }

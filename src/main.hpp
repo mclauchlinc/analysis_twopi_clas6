@@ -61,10 +61,12 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	for(size_t curr_event = 0; curr_event < num_events; curr_event++){
 		//Get singular event
 		chain_->GetEntry(curr_event);
-		run_num = fun::extract_run_number(chain_->GetFile()->GetName(),flags_);
-		//std::cout<<"Run Number is: " <<run_num <<" and it: ";
+		if(!flags_->Sim()){
+			run_num = fun::extract_run_number(chain_->GetFile()->GetName(),flags_);
+			std::cout<<"Run group: " <<flags_->Run() <<" Run Number is: " <<run_num <<" and it: ";
+		}
 		if(fun::correct_run(run_num,flags_)){
-			//std::cout<<"passed\n";
+			//std::cout<<" event is valid for what we are doing\n";
 			//std::cout<<"Run Number is: " <<run_num <<" and it: passed";
 			//Update on Progress through Analysis
 			//if((thread_id_ == 0 || flags_->Flags::Make_Friend()) && curr_event%(num_events/100) == 0){
@@ -80,6 +82,7 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 				q_prev = data->Branches::q_l();
 			}
 			//Particle ID, Event Selection, and Histogram Filling
+			//std::cout<<"Going into a given event\n";
 			auto analysis = std::make_shared<Analysis>(data,hists_, thread_id_, run_num, flags_);
 			if(flags_->Flags::Plot_Electron_Angle_Corr() && !flags_->Flags::Sim() && data->Branches::gpart()>=2){
 				phi_e = physics::get_phi(0,data);
@@ -91,7 +94,7 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 				if(flags_->Flags::E_Theta_Corr()){
 					theta_e = corr::theta_e_corr(physics::get_theta(0,data),phi_e_center,flags_->Flags::Run(),true,sector-1);
 					//std::cout<<"Correcting Electron Theta " <<physics::get_theta(0,data) <<" -> " <<theta_e <<"\n";
-					W = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e_center,_me_),flags_->Flags::Run());
+					W = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e,_me_),flags_->Flags::Run());
 					hists_->Histogram::Elastic_Peak_Fill(W,1,sector,flags_);
 				}else{
 					theta_e = physics::get_theta(0,data);
@@ -105,21 +108,21 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 				if(flags_->Flags::E_Theta_Corr()){
 					//std::cout<<"passed e theta corr\n";
 					//theta_e = physics::get_theta(0,data);
-					
 					phi_e = physics::get_phi(0,data);
 					sector = physics::get_sector(phi_e);
 					phi_e_center = physics::phi_center(phi_e);
+					hists_->Histogram::Elastic_Peak_Fill(physics::W(physics::Make_4Vector(true,pe,physics::get_theta(0,data),phi_e,_me_),flags_->Flags::Run()),0,sector,flags_);
 					theta_e = corr::theta_e_corr(physics::get_theta(0,data),phi_e_center,flags_->Flags::Run(),true,sector-1);
 					if(flags_->Flags::E_PCorr()){
 						pe = corr::p_corr_e(data->Branches::p(0),theta_e,phi_e_center,flags_->Flags::Run(),true,sector-1);
-						W = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e_center,_me_),flags_->Flags::Run());
+						W = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e,_me_),flags_->Flags::Run());
 						hists_->Histogram::Elastic_Peak_Fill(W,2,sector,flags_);
 					}else{
 						pe = data->Branches::p(0);
 						//std::cout<<"\npe:" <<pe <<" theta:" <<theta_e <<" phi:" <<phi_e ;
 						//physics::Print_4Vec(physics::Make_4Vector(true,pe,theta_e,phi_e,_me_));
 						W = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e,_me_),flags_->Flags::Run());
-						hists_->Histogram::Elastic_Peak_Fill(W,1,sector,flags_);
+						//hists_->Histogram::Elastic_Peak_Fill(W,1,sector,flags_);
 					}
 					hists_->Histogram::Ele_Mag_Corr_Fill(pe,sector,theta_e, phi_e_center,W,flags_);
 				}

@@ -184,6 +184,15 @@ protected:
     THnSparseD *_N_holes_5d[29][5];
     THnSparseD *_acceptance_5d[29][5];
     THnSparseD *_N_5d[29][5];
+	
+	THnSparseD *_exp_data_pos_5d[29][5];
+	THnSparseD *_exp_data_neg_5d[29][5];
+	THnSparseD *_empty_pos_5d[29][5];
+	THnSparseD *_empty_neg_5d[29][5];
+	THnSparseD *_N_holes_pos_5d[29][5];
+	THnSparseD *_N_holes_neg_5d[29][5];
+	THnSparseD *_N_pos_5d[29][5];
+	THnSparseD *_N_neg_5d[29][5];
 
 
 
@@ -205,7 +214,10 @@ protected:
 	TH1D_3d_star _single_diff_hist;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
 	TH1D_3d_star _single_difference_hist;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
 
-	TH1D *_acceptance_rel_err_hist[29][5];//W,Q2
+	//Beam Spin Histograms
+	TH1D_2d_star _beam_spin_hist;
+	TH1D_4d_star _beam_spin_Xij_hist;
+
 	
 public:
 	Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
@@ -217,6 +229,7 @@ public:
     void Rad_Corr();
 	void Polarization(Flags flags_);
 	void Single_Diff(Flags flags_);
+	void Beam_Spin(Flags flags_);
     float W_low(int i_);
     float W_top(int i_);
     float Q2_low(int i_);
@@ -226,8 +239,6 @@ public:
     //double MM_max(int W_bin_, int var_set_);
 	//double MM2_max(int W_bin_, int var_set_);
     double CosTheta(int theta_bin_);
-	void Make_Acceptance_Rel_Hist(Flags flags_);
-	void Fill_Acceptance_Rel_Hist();
 	
 
 	

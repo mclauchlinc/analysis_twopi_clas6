@@ -29,9 +29,6 @@ static const double _qe_ = 1.602*pow(10.,-19.); //Coulombs charge of electron
 static const double _MH_ = 1.007; //g/mol molar mass of hydrogen
 static const double _Q_tot_ = 21.32*pow(10.,-3.); //Coulombs from Arjun's Thesis. need to calculate myself 
 
-//Cut Values
-static const double _Acceptance_Rel_Error_Max_ = 0.75;
-
 static const char * _sparse_names_[] = {"2#pi_off_proton_#Delta^{++}","2#pi_off_proton_#rho","2#pi_off_proton_#Delta^{0}"};
 static const  char * _mpro_ = "mpro";
 static const  char * _mpip_ = "mpip";
@@ -43,6 +40,7 @@ static const char * _topo_[] = {"Pmiss","PIPmiss","PIMmiss","Zeromiss","ALLmiss"
 static const char * _var_set_[] = {"PIM","Pro","PIP"};
 static const bool _cluster_loc_[] = {false,true};
 static const char * _five_dim_[] = {"MM1","MM2","Theta","Alpha","Phi"};
+static const char * _cross_five_dim_[] = {"MM1","MM2","Theta)","Alpha","Phi"};
 static const char * _dim_units_[] = {"GeV","GeV","Angle (deg)","Angle (deg)","Angle (deg)"};
 static const char * _dim_units_y_[] = {"GeV","GeV","rad","rad","rad"};
 

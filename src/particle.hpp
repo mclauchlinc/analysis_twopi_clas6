@@ -11,7 +11,7 @@
 #include "pid.hpp"
 #include "flags.hpp"
 #include "corrections.hpp"
-
+#include "detectors.hpp"
 /*
 	This class is for individual particles in an event
 	It's filled with all the relevant kinematic, detector, and cut info
@@ -122,6 +122,8 @@ public:
 	float Get_vx();
 	float Get_vy();
 	float Get_delta(int par_);
+	float Get_x(int det_);
+	float Get_y(int det_);
 
 	TLorentzVector Get_4Vec(int i);//Which assumed mass (needed due to dual id of proton and pip)
 

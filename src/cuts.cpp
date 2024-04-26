@@ -1,8 +1,9 @@
 #include "cuts.hpp"
 
-float cuts::fid_e_theta_cut(int run_, int sector_, float p_){ 
-	return _c1e_[run_][sector_-1] + _c2e_[run_][sector_-1] / ((float)p_+_p_shift_e_[run_][sector_-1]);
+float cuts::fid_e_theta_cut(int run_, int sector_, float p_, int sim_idx_){ 
+	return _c1e_[run_][sim_idx_][sector_-1] + _c2e_[run_][sim_idx_][sector_-1] / ((float)p_+_p_shift_e_[run_][sim_idx_][sector_-1]);
 }
+/*
 float cuts::fid_e_expon_pos(int run_, int sector_, float p_){ 
 	return _c3e_[run_][sector_-1][0] * TMath::Power((float)p_,_factor_e_[run_][sector_-1][0]);
 }
@@ -14,6 +15,18 @@ float cuts::fid_e_del_phi_pos(int run_, int sector_, float p_, float theta_){
 }
 float cuts::fid_e_del_phi_neg(int run_, int sector_, float p_, float theta_){ 
 	return -_c4e_[run_][sector_-1][1] * TMath::Power((TMath::Sin((theta_-cuts::fid_e_theta_cut(run_,sector_,p_))/_degree_)),cuts::fid_e_expon_neg(run_,sector_,p_));
+}*/
+
+float cuts::fid_e_del(int run_, int sector_, float p_, float theta_, bool sim_, int side_){
+	float c4 = 0.0;
+	float c3 = 0.0;
+	int sim_idx = 0;
+	if(sim_){sim_idx = 1;}
+	for(int i=0; i<3; i++){
+		c4 += _c4e_[run_][sim_idx][sector_-1][side_][i]*pow(p_,i);
+		c3 += _c3e_[run_][sim_idx][sector_-1][side_][i]*pow(p_,i);
+	}
+	return c4*TMath::Power((TMath::Sin((theta_-cuts::fid_e_theta_cut(run_,sector_,p_,sim_))/_degree_)),c3);
 }
 
 bool cuts::fid_e (float p_, float theta_, float phi_, std::shared_ptr<Flags> flags_){
@@ -22,22 +35,26 @@ bool cuts::fid_e (float p_, float theta_, float phi_, std::shared_ptr<Flags> fla
 		//Calculate angles and sector
 		float phi_c = physics::phi_center(phi_);
 		int sector = physics::get_sector(phi_);
-
+		int sim_idx = 0;
+		if(flags_->Flags::Sim()){sim_idx = 1;}
 		//Application of Cut
 		pass = true; 
-		pass &= (phi_c<=cuts::fid_e_del_phi_pos(flags_->Flags::Run(), sector, p_, theta_));
-		pass &= (phi_c >=cuts::fid_e_del_phi_neg(flags_->Flags::Run(), sector, p_, theta_));
-		pass &= theta_>=fid_e_theta_cut(flags_->Flags::Run(),sector,p_);
+		//pass &= (phi_c<=cuts::fid_e_del_phi_pos(flags_->Flags::Run(), sector, p_, theta_));
+		//pass &= (phi_c >=cuts::fid_e_del_phi_neg(flags_->Flags::Run(), sector, p_, theta_));
+		pass &= (phi_c <= cuts::fid_e_del(flags_->Flags::Run(), sector, p_, theta_, flags_->Flags::Sim(), 0));
+		pass &= (phi_c >= cuts::fid_e_del(flags_->Flags::Run(), sector, p_, theta_, flags_->Flags::Sim(), 1));
+		pass &= theta_>=fid_e_theta_cut(flags_->Flags::Run(),sector,p_,sim_idx);
 	}
 	return pass;
 }
 
-float cuts::phi_min(int hadron_, float theta_, int run_, int sector_){
-	return -(_a0mh_[run_][hadron_][sector_-1]*(1.0-TMath::Exp(-_a1mh_[run_][hadron_][sector_-1]*(theta_-_a2mh_[run_][hadron_][sector_-1])))-_a3mh_[run_][hadron_][sector_-1]);
+float cuts::phi_min(int hadron_, float theta_, int run_, int sector_, int sim_){
+	//return -(_a0mh_[run_][hadron_][sector_-1]*(1.0-TMath::Exp(-_a1mh_[run_][hadron_][sector_-1]*(theta_-_a2mh_[run_][hadron_][sector_-1])))-_a3mh_[run_][hadron_][sector_-1]);
+	return (_a0mh_[run_][sim_][hadron_][sector_-1]*(1.0-TMath::Exp(-_a1mh_[run_][sim_][hadron_][sector_-1]*(theta_-_a2mh_[run_][sim_][hadron_][sector_-1])))+_a3mh_[run_][sim_][hadron_][sector_-1]);
 }
 
-float cuts::phi_max(int hadron_, float theta_, int run_, int sector_){
-	return (_a0xh_[run_][hadron_][sector_-1]*(1.0-TMath::Exp(-_a1xh_[run_][hadron_][sector_-1]*(theta_-_a2xh_[run_][hadron_][sector_-1])))+_a3xh_[run_][hadron_][sector_-1]);
+float cuts::phi_max(int hadron_, float theta_, int run_, int sector_, int sim_){
+	return (_a0xh_[run_][sim_][hadron_][sector_-1]*(1.0-TMath::Exp(-_a1xh_[run_][sim_][hadron_][sector_-1]*(theta_-_a2xh_[run_][sim_][hadron_][sector_-1])))+_a3xh_[run_][sim_][hadron_][sector_-1]);
 }
 
 bool cuts::fid_h (int hadron_, float theta_, float phi_, std::shared_ptr<Flags> flags_){ //{0,1}->{pro,pip}
@@ -46,11 +63,17 @@ bool cuts::fid_h (int hadron_, float theta_, float phi_, std::shared_ptr<Flags> 
 	//Phi is centered for the sector
 	float phi_c = physics::phi_center(phi_);
 	int sector = physics::get_sector(phi_);
+	int sim_stat = -1;
+	if(flags_->Flags::Sim()){
+		sim_stat = 1;
+	}else{
+		sim_stat = 0;
+	}
 
 	//Actual application of the cut
-	if(phi_c>=cuts::phi_min(hadron_, theta_, flags_->Flags::Run(), sector-1) && phi_c<=cuts::phi_max(hadron_, theta_, flags_->Flags::Run(), sector-1) && !isnan(phi_) && !isnan(theta_))
+	if(phi_c>=cuts::phi_min(hadron_, theta_, flags_->Flags::Run(), sector, sim_stat) && phi_c<=cuts::phi_max(hadron_, theta_, flags_->Flags::Run(), sector, sim_stat) && !isnan(phi_) && !isnan(theta_))
 	{
-		pass = true;
+		pass = (theta_ >= _hadron_min_theta_[flags_->Flags::Run()][sim_stat][hadron_][sector-1]);
 	}
 	return pass;
 }
@@ -281,7 +304,7 @@ bool cuts::sf_cut(float p_, float sf_, float phi_, std::shared_ptr<Flags> flags_
 	return pass;
 }
 //Not utilized yet, but will be in time 
-float cuts::mm_top(int run_, int sim_, int top_, int sector_, float W_){
+float cuts::mm_top(int run_, int sim_, int top_, int sector_, float W_, int cut_width_){
 	float output = 0.0;
 	/*
 	run {0,1} -> e16,e1f
@@ -293,10 +316,12 @@ float cuts::mm_top(int run_, int sim_, int top_, int sector_, float W_){
 	//std::cout<<"\t\t\tslope: " <<_mm2_par_[sim_][run_][top_][sector_-1][1][0] <<"\tintercept: " <<_mm2_par_[sim_][run_][top_][sector_-1][1][1] <<"\n";
 	//std::cout<<"\t\tupper: " <<_mm2_par_[sim_][run_][top_][sector_-1][1][0]*W_ + 						_mm2_par_[sim_][run_][top_][sector_-1][1][1] <<"\n";
 	//std::cout<<"\t\t\tCheck: " <<_mm2_par_[sim_][run_][top_][sector_-1][1][0]*W_ <<" + " <<	_mm2_par_[sim_][run_][top_][sector_-1][1][1] <<"\n";
-	return ((_mm2_par_[sim_][run_][top_][sector_-1][1][0]*W_) + _mm2_par_[sim_][run_][top_][sector_-1][1][1]);
+	
+	return ((_mm2_var_[run_][sim_][top_][sector_-1][1][cut_width_][0]*W_) + _mm2_var_[run_][sim_][top_][sector_-1][1][cut_width_][1]);
+	//return ((_mm2_par_[sim_][run_][top_][sector_-1][1][0]*W_) + _mm2_par_[sim_][run_][top_][sector_-1][1][1]);
 }
 //Not utilized yet, but will be in time 
-float cuts::mm_bot(int run_, int sim_, int top_, int sector_, float W_){
+float cuts::mm_bot(int run_, int sim_, int top_, int sector_, float W_, int cut_width_){
 	/*
 	run {0,1} -> e16,e1f
 	sim {0,1} -> sim,exp
@@ -307,7 +332,9 @@ float cuts::mm_bot(int run_, int sim_, int top_, int sector_, float W_){
 	//std::cout<<"\t\t\tslope" <<_mm2_par_[sim_][run_][top_][sector_-1][0][0] <<"\tintercept" <<_mm2_par_[sim_][run_][top_][sector_-1][0][1] <<"\n";
 	//std::cout<<"\t\tlower: " <<_mm2_par_[sim_][run_][top_][sector_-1][0][0]*W_ + _mm2_par_[sim_][run_][top_][sector_-1][0][1] <<"\n";
 	//std::cout<<"\t\t\tCheck: " <<_mm2_par_[sim_][run_][top_][sector_-1][0][0]*W_ <<" + " <<_mm2_par_[sim_][run_][top_][sector_-1][0][1] <<"\n";
-	return ((_mm2_par_[sim_][run_][top_][sector_-1][0][0]*W_) + _mm2_par_[sim_][run_][top_][sector_-1][0][1]);
+	
+	return ((_mm2_var_[run_][sim_][top_][sector_-1][0][cut_width_][0]*W_) + _mm2_var_[run_][sim_][top_][sector_-1][0][cut_width_][1]);
+	//return ((_mm2_par_[sim_][run_][top_][sector_-1][0][0]*W_) + _mm2_par_[sim_][run_][top_][sector_-1][0][1]);
 }
 //Will need some modification to have W dependence, but this will work for now
 bool cuts::MM_cut(int top_, float mm_, int sector_, float W_, std::shared_ptr<Flags> flags_){

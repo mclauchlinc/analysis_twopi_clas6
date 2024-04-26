@@ -12,13 +12,14 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, std::shared_ptr
 			_weight = weight_;
 			_top[top_] = true;
 			if(cuts::MM_cut(top_,_MM2,p0_.Particle::Sector(),_W,flags_)){
-				//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
+				//std::cout<<"\tPassed " <<_top_[top_] <<" MM2:" <<_MM2 <<"\n";
 				_pass[top_] = true;
 				_pass_top = top_;
 				_hel = hel_; 
 				Event::COM();
 				Event::Vars();
 				Event::Calc_Error();
+				//Event::Check_Event(false,flags_);
 			}
 		}else{
 			std::cout<<"Didn't include enough particles for thrown\n";
@@ -35,6 +36,11 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, s
 		}
 		if(thrown_ && top_ == fun::top_idx(_mzero_)){
 			//std::cout<<"Thrown Event doin stuff\n";
+			Event::Extract_Particles(top_,p0_,p1_,p2_,p3_,flags_);
+			_top[top_] = true;
+			_pass_top = top_;
+			_hel = hel_; 
+			/*
 			_top[top_] = true;
 			_pass_top = top_;
 			_hel = hel_; 
@@ -54,21 +60,27 @@ Event::Event(int top_, Particle p0_, Particle p1_, Particle p2_, Particle p3_, s
 			_p_lab[3] = p3_.Particle::Get_p();
 			_phi_lab[3] = p3_.Particle::Get_phi();
 			_theta_lab[3] = p3_.Particle::Get_theta();
+			_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[2],_vec_lab[3]);
+			_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[2],_vec_lab[3]);
+			*/
 			Event::COM();
 			Event::Vars();
 			_weight = weight_;
+			//Event::Check_Event(true,flags_);
 		}else{
 			Event::Extract_Particles(top_,p0_,p1_,p2_,p3_,flags_);
 			_weight = weight_;
 			_top[top_] = true;
 			if(cuts::MM_cut(top_,_MM2,p0_.Particle::Sector(),_W,flags_) && _MM != 0.0){
-				//std::cout<<"\tPassed " <<_top_[top_] <<"\n";
+				//std::cout<<"\tPassed " <<_top_[top_] <<" MM2:" <<_MM2 <<" " <<"\n";
+				
 				_pass[top_] = true;
 				_pass_top = top_;
 				_hel = hel_; 
 				Event::COM();
 				Event::Vars();
 				Event::Calc_Error();
+				//Event::Check_Event(false,flags_);
 			}
 		}
 	}
@@ -107,16 +119,37 @@ bool Event::Check_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, 
 			case 0:
 				if(p1_.Particle::Is_Pip() && p2_.Particle::Is_Pim()){
 					pass = true;
+				}else{
+					if(!p1_.Particle::Is_Pip()){
+						std::cout<<"\tBAD PIP\n";
+					}
+					if(!p2_.Particle::Is_Pim()){
+						std::cout<<"\tBAD PIM\n";
+					}
 				}
 			break;
 			case 1:
 				if(p1_.Particle::Is_Pro() && p2_.Particle::Is_Pim()){
 					pass = true;
+				}else{
+					if(!p1_.Particle::Is_Pro()){
+						std::cout<<"\tBAD PROTON\n";
+					}
+					if(!p2_.Particle::Is_Pim()){
+						std::cout<<"\tBAD PIM\n";
+					}
 				}
 			break;
 			case 2:
 				if(p1_.Particle::Is_Pro() && p2_.Particle::Is_Pip()){
 					pass = true;
+				}else{
+					if(!p1_.Particle::Is_Pro()){
+						std::cout<<"\tBAD PROTON\n";
+					}
+					if(!p2_.Particle::Is_Pip()){
+						std::cout<<"\tBAD PIP\n";
+					}
 				}
 			break;
 			default:
@@ -125,7 +158,7 @@ bool Event::Check_Particles(int top_, Particle p0_, Particle p1_, Particle p2_, 
 		}
 		//std::cout<<pass <<"\n";
 	}else{
-		//std::cout<<"\tBAD ELECTRON\n";
+		std::cout<<"\tBAD ELECTRON\n";
 	}
 	//std::cout<<"Checking Particles. Pass is: " <<pass <<"\n";
 	//std::cout<<"\tWQ2 Cut flag is: " <<flags_->Flags::WQ2_Cut() <<" and W:" <<_W <<" Q2:" <<_Q2 <<" and cut result:" <<cuts::in_range(_W,_Q2) <<"\n";
@@ -421,6 +454,9 @@ void Event::Missing_Hadron(){
 		default:
 		break;
 	}
+	if(_thrown){
+		//std::cout<<"_full_event = " <<_full_event <<"  _pass_top:" <<_pass_top <<"\n";
+	}
 }
 
 
@@ -444,7 +480,12 @@ void Event::COM(){
 }
 
 void Event::Vars(){
-	//std::cout<<"Doing Vars\n";
+	//std::cout<<"Doing ";
+	/*if(_thrown){
+		std::cout<<"*Vars thrown*\n";
+	}else{
+		std::cout<<"*Vars recon*\n";
+	}*/
 	for(int i = 0; i<3; i++){
 		if(_COM){
 			_alphab[i] = physics::alpha(i, _k1, _vec[0], _vec[1], _vec[2], _vec[3], true);
@@ -586,3 +627,53 @@ int Event::SC_pd(int i){
 //void Event::Calculate_All(){
 
 //}
+void Event::Check_Event(bool thrown_, std::shared_ptr<Flags> flags_){
+	if(flags_->Sim()){
+		if(thrown_){
+			std::cout<<" *checking thrown event*\n";
+			std::cout<<"\tp_lab: " <<_p_lab[0] <<" " <<_p_lab[1] <<" " <<_p_lab[2] <<" " <<_p_lab[3] <<"\n";
+			std::cout<<"\ttheta_lab: " <<_theta_lab[0] <<" " <<_theta_lab[1] <<" " <<_theta_lab[2] <<" " <<_theta_lab[3] <<"\n"; 
+			std::cout<<"\ttheta: " <<_theta[0] <<" " <<_theta[1] <<" " <<_theta[2] <<" " <<_theta[3] <<"\n"; 
+			std::cout<<"\tp: " <<_p[0] <<" " <<_p[1] <<" " <<_p[2] <<" " <<_p[3] <<"\n";
+			std::cout<<"\tdt: " <<_dt[0] <<" " <<_dt[1] <<" " <<_dt[2] <<" " <<_dt[3] <<"\n";
+			std::cout<<"\tsc_pd: " <<_sc_pd[0] <<" " <<_sc_pd[1] <<" " <<_sc_pd[2] <<" " <<_sc_pd[3] <<"\n";
+			std::cout<<"\tMMb: " <<_MMb[0] <<" " <<_MMb[1] <<" " <<_MMb[2] <<" " <<_MMb[3] <<"\n";
+			std::cout<<"\tMM2b: " <<_MM2b[0] <<" " <<_MM2b[1] <<" " <<_MM2b[2] <<" " <<_MM2b[3] <<"\n";
+			std::cout<<"\tthetab: " <<_thetab[0] <<" " <<_thetab[1] <<" " <<_thetab[2] <<" " <<_thetab[3] <<"\n";
+			std::cout<<"\tthetab: " <<_alphab[0] <<" " <<_alphab[1] <<" " <<_alphab[2] <<" " <<_alphab[3] <<"\n";
+			std::cout<<"\tMM2b: " <<_phib[0] <<" " <<_phib[1] <<" " <<_phib[2] <<" " <<_phib[3] <<"\n";
+			std::cout<<"\tv: " <<_vx <<" " <<_vy <<" " <<_vz <<"\n";
+			std::cout<<"\tMM: " <<_MM <<" MM2: " <<_MM2 <<"\n";
+		}else{
+			std::cout<<" *checking recon event*\n";
+			std::cout<<"\tp_lab: " <<_p_lab[0] <<" " <<_p_lab[1] <<" " <<_p_lab[2] <<" " <<_p_lab[3] <<"\n";
+			std::cout<<"\ttheta_lab: " <<_theta_lab[0] <<" " <<_theta_lab[1] <<" " <<_theta_lab[2] <<" " <<_theta_lab[3] <<"\n"; 
+			std::cout<<"\ttheta: " <<_theta[0] <<" " <<_theta[1] <<" " <<_theta[2] <<" " <<_theta[3] <<"\n"; 
+			std::cout<<"\tp: " <<_p[0] <<" " <<_p[1] <<" " <<_p[2] <<" " <<_p[3] <<"\n";
+			std::cout<<"\tdt: " <<_dt[0] <<" " <<_dt[1] <<" " <<_dt[2] <<" " <<_dt[3] <<"\n";
+			std::cout<<"\tsc_pd: " <<_sc_pd[0] <<" " <<_sc_pd[1] <<" " <<_sc_pd[2] <<" " <<_sc_pd[3] <<"\n";
+			std::cout<<"\tMMb: " <<_MMb[0] <<" " <<_MMb[1] <<" " <<_MMb[2] <<" " <<_MMb[3] <<"\n";
+			std::cout<<"\tMM2b: " <<_MM2b[0] <<" " <<_MM2b[1] <<" " <<_MM2b[2] <<" " <<_MM2b[3] <<"\n";
+			std::cout<<"\tthetab: " <<_thetab[0] <<" " <<_thetab[1] <<" " <<_thetab[2] <<" " <<_thetab[3] <<"\n";
+			std::cout<<"\tthetab: " <<_alphab[0] <<" " <<_alphab[1] <<" " <<_alphab[2] <<" " <<_alphab[3] <<"\n";
+			std::cout<<"\tMM2b: " <<_phib[0] <<" " <<_phib[1] <<" " <<_phib[2] <<" " <<_phib[3] <<"\n";
+			std::cout<<"\tv: " <<_vx <<" " <<_vy <<" " <<_vz <<"\n";
+			std::cout<<"\tMM: " <<_MM <<" MM2: " <<_MM2 <<"\n";
+		}
+	}else{
+		std::cout<<" *checking exp recon event*\n";
+		std::cout<<"\tp_lab: " <<_p_lab[0] <<" " <<_p_lab[1] <<" " <<_p_lab[2] <<" " <<_p_lab[3] <<"\n";
+		std::cout<<"\ttheta_lab: " <<_theta_lab[0] <<" " <<_theta_lab[1] <<" " <<_theta_lab[2] <<" " <<_theta_lab[3] <<"\n"; 
+		std::cout<<"\ttheta: " <<_theta[0] <<" " <<_theta[1] <<" " <<_theta[2] <<" " <<_theta[3] <<"\n"; 
+		std::cout<<"\tp: " <<_p[0] <<" " <<_p[1] <<" " <<_p[2] <<" " <<_p[3] <<"\n";
+		std::cout<<"\tdt: " <<_dt[0] <<" " <<_dt[1] <<" " <<_dt[2] <<" " <<_dt[3] <<"\n";
+		std::cout<<"\tsc_pd: " <<_sc_pd[0] <<" " <<_sc_pd[1] <<" " <<_sc_pd[2] <<" " <<_sc_pd[3] <<"\n";
+		std::cout<<"\tMMb: " <<_MMb[0] <<" " <<_MMb[1] <<" " <<_MMb[2] <<" " <<_MMb[3] <<"\n";
+		std::cout<<"\tMM2b: " <<_MM2b[0] <<" " <<_MM2b[1] <<" " <<_MM2b[2] <<" " <<_MM2b[3] <<"\n";
+		std::cout<<"\tthetab: " <<_thetab[0] <<" " <<_thetab[1] <<" " <<_thetab[2] <<" " <<_thetab[3] <<"\n";
+		std::cout<<"\tthetab: " <<_alphab[0] <<" " <<_alphab[1] <<" " <<_alphab[2] <<" " <<_alphab[3] <<"\n";
+		std::cout<<"\tMM2b: " <<_phib[0] <<" " <<_phib[1] <<" " <<_phib[2] <<" " <<_phib[3] <<"\n";
+		std::cout<<"\tv: " <<_vx <<" " <<_vy <<" " <<_vz <<"\n";
+		std::cout<<"\tMM: " <<_MM <<" MM2: " <<_MM2 <<"\n";
+	}
+}
