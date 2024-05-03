@@ -5557,15 +5557,94 @@ void Histogram::Elastic_Peak_Write(std::shared_ptr<Flags> flags_){
 //*------------------------------End Elastic Peak------------------*
 
 //*------------------------------Start Detector Geometric Cut Peak------------------*
+int Histogram::Geo_Fid_Paddle_Idx(int det_, int seg_idx_){
+	int seg_idx = -1;
+	if(detectors[det_+1]=="cc"){
+		if(seg_idx_ < _geo_fid_cc_segments_*3){
+			for(int i=0; i<_geo_fid_cc_sides_; i++){
+				if(seg_idx_ >= _geo_fid_cc_segments_*i){
+					seg_idx = seg_idx_ - _geo_fid_cc_segments_*i;
+				}
+			}
+		}else{
+			seg_idx = _geo_fid_cc_segments_;
+		}
+	}else if(detectors[det_+1]=="sc"){
+		if(seg_idx_ <= _num_sc_paddles_){
+			seg_idx = seg_idx_;
+		}
+	}else if(detectors[det_+1]=="ec"){
+		if(seg_idx_ == 0){
+			seg_idx = seg_idx_;
+		}
+	}
+	return seg_idx; 
+}
+int Histogram::Geo_Fid_Side_Idx(int det_, int seg_idx_){
+	int side_idx = -1;
+	if(detectors[det_+1]=="cc"){
+		if(seg_idx_ < _geo_fid_cc_segments_*3){
+			for(int i=0; i<_geo_fid_cc_sides_; i++){
+				if(seg_idx_ >= _geo_fid_cc_segments_*i){
+					side_idx = i;
+				}
+			}
+		}else{
+			side_idx = seg_idx_ - _geo_fid_cc_segments_*3;
+		}
+	}else if(detectors[det_+1]=="sc"){
+		if(seg_idx_ <= _num_sc_paddles_){
+			side_idx = 0;
+		}
+	}else if(detectors[det_+1]=="ec"){
+		if(seg_idx_ == 0){
+			side_idx = 0;
+		}
+	}
+	return side_idx; 
+}
+
+int Histogram::Geo_Fid_Seg_Idx(int det_, int pad_idx_, int side_idx_){
+	int seg_idx = -1;
+	if(detectors[det_+1]=="cc"){
+		if(side_idx_ == _geo_fid_cc_sides_){
+			if(pad_idx_ == _geo_fid_cc_segments_){
+				seg_idx = (_geo_fid_cc_segments_+1)*_geo_fid_cc_sides_;
+			}
+		}else{
+			if(pad_idx_ == _geo_fid_cc_segments_){
+				seg_idx = (_geo_fid_cc_segments_)*_geo_fid_cc_sides_+side_idx_;
+			}else{
+				seg_idx = _geo_fid_cc_segments_*side_idx_+pad_idx_;
+			}
+		}
+	}else if(detectors[det_+1]=="sc"){
+		if(side_idx_ == 0){
+			if(pad_idx_ >= 0){
+				seg_idx = pad_idx_;
+			}
+		}
+	}else if(detectors[det_+1]=="ec"){
+		if(side_idx_ == 0){
+			if(pad_idx_ >= 0){
+				seg_idx = pad_idx_;
+			}
+		}
+	}
+	return seg_idx;
+}
+
+
 void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 	if(!flags_->Flags::Plot_CC_Geo() && !flags_->Flags::Plot_SC_Geo() && !flags_->Flags::Plot_EC_Geo()){ return;}
 	std::cout<<"Making Geometric Fiducial Plots\n";
-	std::vector<long> space_dims(5);
-	space_dims[4] = std::distance(std::begin(_species_), std::end(_species_)); //Particle Species
-	space_dims[3] = 3; //CC, SC, EC
-	space_dims[2] = std::distance(std::begin(_sector_), std::end(_sector_)); //Sector
-	space_dims[1] = std::distance(std::begin(_cut_), std::end(_cut_));//Cut and anti cut //Cut Status
-	space_dims[0] = std::distance(std::begin(_ecuts_), std::end(_ecuts_));//ID Cut
+	std::vector<long> space_dims(6);
+	space_dims[5] = std::distance(std::begin(_species_), std::end(_species_)); //Particle Species
+	space_dims[4] = 3; //CC, SC, EC
+	space_dims[3] = std::distance(std::begin(_sector_), std::end(_sector_)); //Sector
+	space_dims[2] = std::distance(std::begin(_cut_), std::end(_cut_));//Cut and anti cut //Cut Status
+	space_dims[1] = std::distance(std::begin(_ecuts_), std::end(_ecuts_));//ID Cut
+	space_dims[0] = 54+4;//total number of CC segment/side combinations. + 4  SC paddles go up to 18
 	char hname[100];
 
 	CartesianGenerator cart(space_dims);
@@ -5573,31 +5652,109 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 	TH2F_ptr_2d tmp_2d;
 	TH2F_ptr_3d tmp_3d;
 	TH2F_ptr_4d tmp_4d;
+	TH2F_ptr_5d tmp_5d;
 	int species_idx = -1;
 	int det_idx = -1;
 	int sec_idx = -1;
 	int cut_idx = -1;
 	int pcut_idx = -1;
+	int seg_idx = -1;
 	char* pcut_name;
 	bool pass = false;
+	int cc_seg_idx = -1;
+	int cc_side_idx = -1;
 	while(cart.GetNextCombination()){
 		pass = false;
-		species_idx = cart[4];
-		det_idx = cart[3];
-		sec_idx = cart[2];
-		cut_idx = cart[1];
-		pcut_idx = cart[0];
+		species_idx = cart[5];
+		det_idx = cart[4];
+		sec_idx = cart[3];
+		cut_idx = cart[2];
+		pcut_idx = cart[1];
+		seg_idx = cart[0];
 		if((pcut_idx == 0 && cut_idx == 2) || (pcut_idx >0 && cut_idx < 2)){
 			if(_species_[species_idx]==_ele_){
 				if(fun::pcut_perform(_species_[species_idx],_ecuts_[pcut_idx],flags_) && _ecuts_[pcut_idx]!=_event_){
-					sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
-					pass = true;
+					cc_seg_idx = Histogram::Geo_Fid_Paddle_Idx(det_idx,seg_idx);
+					cc_side_idx = Histogram::Geo_Fid_Side_Idx(det_idx,seg_idx);
+					if(detectors[det_idx+1]=="cc"){
+						if(cc_seg_idx == _geo_fid_cc_segments_){
+							if(cc_side_idx == _geo_fid_cc_sides_){
+								sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:All_Side:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
+								pass = true;
+							}else{
+								sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:All_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx],_cc_sides_[cc_side_idx]);
+								pass = true;
+							}
+						}else{
+							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:%d_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx],cc_seg_idx,_cc_sides_[cc_side_idx]);
+							pass = true;
+						}
+					}else if(detectors[det_idx+1]=="sc"){
+						if(cc_side_idx == 0){
+							if(cc_seg_idx == _geo_fid_sc_paddles_){
+								sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Paddle:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
+							pass = true;	
+							}else if(cc_seg_idx < _geo_fid_sc_paddles_){
+								sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Paddle:%d",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx],seg_idx);
+								pass = true;
+							}else{
+								pass = false;
+							}
+						}else{
+							pass = false;
+						}
+					}else if(detectors[det_idx+1]=="ec"){
+						if(seg_idx == 0){
+							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
+							pass = true;
+						}else{
+							pass == false;
+						}
+					}
+					//sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
+					//pass = true;
 					//std::cout<<_Geo_Fid_hist.size() <<" " <<tmp_4d.size() <<" " <<tmp_3d.size() <<" "<<tmp_2d.size() <<" "<<tmp_1d.size() <<" " <<hname <<"\n";
 				}
 			}else if(pcut_idx < std::distance(std::begin(_hcuts_), std::end(_hcuts_))){
 				if(fun::pcut_perform(_species_[species_idx],_hcuts_[pcut_idx],flags_) && _hcuts_[pcut_idx]!=_event_){
-					sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
-					pass = true;
+					if(detectors[det_idx+1]=="cc"){
+						if(seg_idx < _geo_fid_cc_segments_*_geo_fid_cc_sides_){
+							for(int i=0; i<3; i++){
+								if(seg_idx >= _geo_fid_cc_segments_*i){
+									cc_side_idx = i;
+									cc_seg_idx = seg_idx-(_geo_fid_cc_segments_*i);
+								}
+							}
+							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:%d_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx],cc_seg_idx,_cc_sides_[cc_side_idx]);
+							pass = true;
+						}else if(seg_idx < _geo_fid_cc_segments_*_geo_fid_cc_sides_+3){
+							cc_side_idx = seg_idx - (_geo_fid_cc_segments_*_geo_fid_cc_sides_);
+							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:All_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx],_cc_sides_[cc_side_idx]);
+							pass = true;
+						}else{
+							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:All_Side:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
+							pass = true;
+						}
+					}else if(detectors[det_idx+1]=="sc"){
+						if(seg_idx < _geo_fid_sc_paddles_){
+							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Paddle:%d",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx],seg_idx);
+							pass = true;
+						}else if(seg_idx == _geo_fid_sc_paddles_){
+							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Paddle:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
+							pass = true;
+						}else{
+							pass = false;
+						}
+					}else if(detectors[det_idx+1]=="ec"){
+						if(seg_idx == 0){
+							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
+							pass = true;
+						}else{
+							pass == false;
+						}
+					}
+					//sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
+					//pass = true;
 					//std::cout<<_Geo_Fid_hist.size() <<" " <<tmp_4d.size() <<" " <<tmp_3d.size() <<" "<<tmp_2d.size() <<" "<<tmp_1d.size() <<" " <<hname <<"\n";
 				}
 			}
@@ -5631,8 +5788,14 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 					}
 					if(cart[3] == space_dims[3]-1){
 						if(tmp_4d.size()>0){
-							_Geo_Fid_hist.push_back(tmp_4d);
+							tmp_5d.push_back(tmp_4d);
 							tmp_4d.clear();
+						}
+						if(cart[4] == space_dims[4]-1){
+							if(tmp_5d.size()>0){
+								_Geo_Fid_hist.push_back(tmp_5d);
+								tmp_5d.clear();
+							}
 						}
 					}
 				}
@@ -5641,8 +5804,8 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 	}
 	std::cout<<"\tFinished Making Geometric Fiducial Histograms\n";
 }
-std::vector<int> Histogram::Geo_Fid_idx(const char* species_,const char* detector_, const char* sec_, const char* cut_, const char* pcut_, std::shared_ptr<Flags> flags_){
-	std::vector<int> idx; 
+std::vector<int> Histogram::Geo_Fid_idx(const char* species_,const char* detector_, const char* sec_, const char* cut_, const char* pcut_, int det_seg_, int det_side_, std::shared_ptr<Flags> flags_){
+	std::vector<int> idx;
 	int species_idx = fun::species_idx(species_)+fun::species_offset(species_,pcut_,flags_);
 	idx.push_back(species_idx);
 	if(detector_=="cc"){
@@ -5687,17 +5850,60 @@ std::vector<int> Histogram::Geo_Fid_idx(const char* species_,const char* detecto
 			}
 		}
 	}
+	if(detector_=="cc"){
+		idx.push_back(Histogram::Geo_Fid_Seg_Idx(0, det_seg_, det_side_));
+	}else if(detector_=="sc"){
+		idx.push_back(Histogram::Geo_Fid_Seg_Idx(1, det_seg_, det_side_));
+	}else if(detector_=="ec"){
+		idx.push_back(Histogram::Geo_Fid_Seg_Idx(2, det_seg_, det_side_));
+	}else{
+		idx.push_back(-1);
+	}
 	return idx;
 }
 
-void Histogram::Geo_Fid_Fill(float x_, float y_, float weight_, const char* species_, const char* detector_, const char* sec_, const char* cut_, const char* pcut_, std::shared_ptr<Flags> flags_){
-	if(!flags_->CC_Geo() && !flags_->SC_Geo() && !flags_->EC_Geo()){ return;}
-	std::vector<int> idx = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,flags_);
-	//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+void Histogram::Geo_Fid_Fill(float x_, float y_, float weight_, const char* species_, const char* detector_, const char* sec_, const char* cut_, const char* pcut_, int det_seg_, int det_side_, std::shared_ptr<Flags> flags_){
+	//std::cout<<"Attempting to fill Geo Fid\n";
+	//if(!flags_->CC_Geo() && !flags_->SC_Geo() && !flags_->EC_Geo()){ return;}
+	if(!flags_->Flags::Plot_CC_Geo() && !flags_->Flags::Plot_SC_Geo() && !flags_->Flags::Plot_EC_Geo()){ return;}
+	std::vector<int> idx = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,det_seg_,det_side_,flags_);
+	
+	float x_cent = detect::x_det_center(x_,y_,fun::sector_idx(sec_)+1);
+	float y_cent = detect::y_det_center(x_,y_,fun::sector_idx(sec_)+1);
+
+	//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" paddle:" <<det_seg_ <<" side:" <<det_side_ <<" x:" <<x_ <<" y:" <<y_ <<" x_c:" <<x_cent <<" y_c:" <<y_cent <<"\n";
 	//fun::print_vector_idx(idx);
+	
 	if(Histogram::OK_Idx(idx)){
-		_Geo_Fid_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(x_,y_,weight_);//Sector
-		_Geo_Fid_hist[idx[0]][idx[1]][6][idx[3]][idx[4]]->Fill(x_,y_,weight_);//All Sectors
+		_Geo_Fid_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Fill(x_cent,y_cent,weight_);//Sector
+		_Geo_Fid_hist[idx[0]][idx[1]][6][idx[3]][idx[4]][idx[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+	}
+	if(detector_ == "cc"){
+		//Sum over All Segments, split by side
+		std::vector<int> idx2 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_cc_segments_,det_side_,flags_);
+		//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+		//fun::print_vector_idx(idx);
+		if(Histogram::OK_Idx(idx2)){
+			_Geo_Fid_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]][idx2[5]]->Fill(x_cent,y_cent,weight_);//Sector
+			_Geo_Fid_hist[idx2[0]][idx2[1]][6][idx2[3]][idx2[4]][idx2[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+		}
+		//Sum over all segments, add sides together
+		std::vector<int> idx3 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_cc_segments_,3,flags_);
+		//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+		//fun::print_vector_idx(idx);
+		if(Histogram::OK_Idx(idx3)){
+			_Geo_Fid_hist[idx3[0]][idx3[1]][idx3[2]][idx3[3]][idx3[4]][idx3[5]]->Fill(x_cent,y_cent,weight_);//Sector
+			_Geo_Fid_hist[idx3[0]][idx3[1]][6][idx3[3]][idx3[4]][idx3[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+		}
+	}else if(detector_ == "sc"){
+		//Sum over all Paddles
+		std::vector<int> idx4 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_sc_paddles_,det_side_,flags_);
+		//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+		//fun::print_vector_idx(idx);
+		if(Histogram::OK_Idx(idx4)){
+			_Geo_Fid_hist[idx4[0]][idx4[1]][idx4[2]][idx4[3]][idx4[4]][idx4[5]]->Fill(x_cent,y_cent,weight_);//Sector
+			_Geo_Fid_hist[idx4[0]][idx4[1]][6][idx4[3]][idx4[4]][idx4[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+		}
 	}
 }
 
@@ -5705,12 +5911,13 @@ void Histogram::Geo_Fid_Write(std::shared_ptr<Flags> flags_){
 	std::cout<<"Trying to Write Geometric Fiducial Plots\n";
 	if(!flags_->Flags::Plot_CC_Geo() && !flags_->Flags::Plot_SC_Geo() && !flags_->Flags::Plot_EC_Geo()){ return;}
 	std::cout<<"Writing Geometric Fiducial Plots\n";
-	std::vector<long> space_dims(5);
-	space_dims[4] = std::distance(std::begin(_species_), std::end(_species_)); //Particle Species
-	space_dims[3] = 3; //CC, SC, EC
-	space_dims[2] = std::distance(std::begin(_sector_), std::end(_sector_)); //Sector
-	space_dims[1] = std::distance(std::begin(_cut_), std::end(_cut_));//Cut and anti cut //Cut Status
-	space_dims[0] = std::distance(std::begin(_ecuts_), std::end(_ecuts_));//ID Cut
+	std::vector<long> space_dims(6);
+	space_dims[5] = std::distance(std::begin(_species_), std::end(_species_)); //Particle Species
+	space_dims[4] = 3; //CC, SC, EC
+	space_dims[3] = std::distance(std::begin(_sector_), std::end(_sector_)); //Sector
+	space_dims[2] = std::distance(std::begin(_cut_), std::end(_cut_));//Cut and anti cut //Cut Status
+	space_dims[1] = std::distance(std::begin(_ecuts_), std::end(_ecuts_));//ID Cut
+	space_dims[0] = 54+4;//total number of CC segment/side combinations. + 4  SC paddles go up to 18
 
 	char dirname[100];
 	std::cout<<"\tMaking TDirectories\n";
@@ -5761,25 +5968,31 @@ void Histogram::Geo_Fid_Write(std::shared_ptr<Flags> flags_){
 	int sec_idx = -1;
 	int cut_idx = -1;
 	int pcut_idx = -1;
+	int seg_idx = -1;
+	int pad_idx = -1;
+	int side_idx = -1;
 	char* pcut_name;
 	bool pass = false;
 	std::vector<int> hist_idx;
 	while(cart.GetNextCombination()){
 		pass = false;
-		species_idx = cart[4];
-		det_idx = cart[3];
-		sec_idx = cart[2];
-		cut_idx = cart[1];
-		pcut_idx = cart[0];
+		species_idx = cart[5];
+		det_idx = cart[4];
+		sec_idx = cart[3];
+		cut_idx = cart[2];
+		pcut_idx = cart[1];
+		seg_idx = cart[0];
 		//std::cout<<"********** " <<species_idx <<" " <<det_idx <<" " <<sec_idx <<" " <<cut_idx <<" " <<pcut_idx <<"\n";
+		pad_idx = Histogram::Geo_Fid_Paddle_Idx(det_idx,seg_idx);
+		side_idx = Histogram::Geo_Fid_Side_Idx(det_idx,seg_idx);
 		if(species[species_idx]==_ele_){
-			hist_idx = Histogram::Geo_Fid_idx(species[species_idx],detectors[det_idx+1],_sector_[sec_idx],_cut_[cut_idx],_ecuts_[pcut_idx],flags_);
+			hist_idx = Histogram::Geo_Fid_idx(species[species_idx],detectors[det_idx+1],_sector_[sec_idx],_cut_[cut_idx],_ecuts_[pcut_idx],pad_idx,side_idx,flags_);
 			//std::cout<<"\t" <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_cut_[cut_idx] <<" " <<_ecuts_[pcut_idx] <<"\n";
 		}else if(pcut_idx < std::distance(std::begin(_hcuts_), std::end(_hcuts_))){
-			hist_idx = Histogram::Geo_Fid_idx(species[species_idx],detectors[det_idx+1],_sector_[sec_idx],_cut_[cut_idx],_hcuts_[pcut_idx],flags_);
+			hist_idx = Histogram::Geo_Fid_idx(species[species_idx],detectors[det_idx+1],_sector_[sec_idx],_cut_[cut_idx],_hcuts_[pcut_idx],pad_idx,side_idx,flags_);
 			//std::cout<<"\t" <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_cut_[cut_idx] <<" " <<_hcuts_[pcut_idx] <<"\n";
 		}else{
-			hist_idx = Histogram::Geo_Fid_idx("no","no","no","no","no",flags_);
+			hist_idx = Histogram::Geo_Fid_idx("no","no","no","no","no",pad_idx,side_idx,flags_);
 		}
 		if(Histogram::OK_Idx(hist_idx)){
 			//std::cout<<"\tcd()-> " <<species_idx <<" " <<det_idx+1 <<" " <<sec_idx+1 <<" " <<pcut_idx+1 <<"\n";
@@ -5791,7 +6004,7 @@ void Histogram::Geo_Fid_Write(std::shared_ptr<Flags> flags_){
 			//fun::print_vector_idx(hist_idx);
 			dir_geo_fid_sub[species_idx][det_idx+1][sec_idx+1][pcut_idx+1]->cd();
 			//std::cout<<"\t" <<_Geo_Fid_hist[hist_idx[0]][hist_idx[1]][hist_idx[2]][hist_idx[3]][hist_idx[4]]->GetName() <<"\n";
-			_Geo_Fid_hist[hist_idx[0]][hist_idx[1]][hist_idx[2]][hist_idx[3]][hist_idx[4]]->Write();
+			_Geo_Fid_hist[hist_idx[0]][hist_idx[1]][hist_idx[2]][hist_idx[3]][hist_idx[4]][hist_idx[5]]->Write();
 		}
 	}
 

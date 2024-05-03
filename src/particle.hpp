@@ -71,7 +71,7 @@ private:
 	float _dtheta[3] = {NAN,NAN,NAN};
 	float _dphi[3] = {NAN,NAN,NAN};
 
-	int _sc_pd = -1;
+	int _sc_pd = -1;//sc_paddle
 
 
 public:

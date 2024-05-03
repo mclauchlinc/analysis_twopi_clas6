@@ -63,7 +63,7 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 		chain_->GetEntry(curr_event);
 		if(!flags_->Sim()){
 			run_num = fun::extract_run_number(chain_->GetFile()->GetName(),flags_);
-			std::cout<<"Run group: " <<flags_->Run() <<" Run Number is: " <<run_num <<" and it: ";
+			//std::cout<<"Run group: " <<flags_->Run() <<" Run Number is: " <<run_num <<" and it: ";
 		}
 		if(fun::correct_run(run_num,flags_)){
 			//std::cout<<" event is valid for what we are doing\n";

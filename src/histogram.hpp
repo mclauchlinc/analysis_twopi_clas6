@@ -45,12 +45,15 @@ static int _fid_xbin_ = 400;//Degrees
 static float _fid_ymin_ = 0.0;//Degrees
 static float _fid_ymax_ = 180.0; //Degrees
 static int _fid_ybin_ = 300;//Degrees
-static float _geo_fid_xmin_[3] = {-600.0,0.0,-400.0};//mm
-static float _geo_fid_xmax_[3] = {600.0,400.0,400.0}; //mm
-static int _geo_fid_xbin_[3] = {600,600,600};//mm
-static float _geo_fid_ymin_[3] = {-600.0,-250.0,-400.0};//mm
-static float _geo_fid_ymax_[3] = {600.0,250.0,400.0}; //mm
-static int _geo_fid_ybin_[3] = {600,600,600};//mm
+static float _geo_fid_xmin_[3] = {-300.0,-200.0,-200.0};//Made for detector centering {-600.0,0.0,-400.0};//mm
+static float _geo_fid_xmax_[3] = {300.0,200.0,200.0};//Made for detector centering {600.0,400.0,400.0}; //mm
+static int _geo_fid_xbin_[3] = {300,300,300};//mm
+static float _geo_fid_ymin_[3] = {0.0,0.0,0.0};//Made for detector centering{-600.0,-250.0,-400.0};//mm
+static float _geo_fid_ymax_[3] = {600.0,500.0,500.0};//Made for detector centering{600.0,250.0,400.0}; //mm
+static int _geo_fid_ybin_[3] = {300,300,300};//mm
+static int _geo_fid_cc_segments_ = 18;
+static int _geo_fid_cc_sides_ = 3;
+static int _geo_fid_sc_paddles_ = 48;
 //Delta T
 static float _delta_xmin_ = 0.0;//GeV
 static float _delta_xmax_ = 6.0; //GeV
@@ -341,7 +344,7 @@ protected:
 	//TH2F_ptr_5d _Made_WQ2_hist;//[11][6][2][2];//electron cuts, topologies (including pre), Recon vs. thrown, weight (for data this should always be "Recon")
 	TH2F_ptr_7d _Fid_hist;
 	Bool_6d _Fid_made;
-	TH2F_ptr_5d _Geo_Fid_hist;
+	TH2F_ptr_6d _Geo_Fid_hist;
 
 	//CC Histograms
 	Bool_6d _CC_made;
@@ -565,12 +568,15 @@ public:
 	void Elastic_Peak_Write(std::shared_ptr<Flags> flags_);
 	//*------------------------------End Elastic Peak------------------*
 	//*------------------------------Start Detector Geometric Cut Histograms------------------*
+	int Geo_Fid_Paddle_Idx(int det_, int seg_idx_);
+	int Geo_Fid_Side_Idx(int det_, int seg_idx_);
+	int Geo_Fid_Seg_Idx(int det_, int pad_idx_, int side_idx_);
 	void Geo_Fid_Make(std::shared_ptr<Flags> flags_);
 	//int Geo_Fid_Theta_idx(float theta_);
 	//int Geo_Fid_Phi_idx(float phi_);
-	std::vector<int> Geo_Fid_idx(const char* species_,const char* detector_, const char* sec_, const char* cut_, const char* pcut_, std::shared_ptr<Flags> flags_);
+	std::vector<int> Geo_Fid_idx(const char* species_,const char* detector_, const char* sec_, const char* cut_, const char* pcut_, int det_seg_, int det_side_, std::shared_ptr<Flags> flags_);
 	//void Geo_Fid_Fill(int sector_, float theta_, float phi_, float W_, float thetap_, std::shared_ptr<Flags> flags_);
-	void Geo_Fid_Fill(float x_, float y_, float weight_, const char* species_, const char* detector_, const char* sec_ ,const char* cut_, const char* pcut_, std::shared_ptr<Flags> flags_);
+	void Geo_Fid_Fill(float x_, float y_, float weight_, const char* species_, const char* detector_, const char* sec_ ,const char* cut_, const char* pcut_, int det_seg_, int det_side_, std::shared_ptr<Flags> flags_);
 	void Geo_Fid_Write(std::shared_ptr<Flags> flags_);
 	//*------------------------------End Detector Geometric Cut Histograms------------------*
 };	

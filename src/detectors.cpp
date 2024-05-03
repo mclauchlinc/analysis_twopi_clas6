@@ -1,5 +1,19 @@
 #include "detectors.hpp"
 
+float detect::x_det_center(float x_,float y_,int sector_){
+	float rot_angle = _detector_center_angles_[sector_-1]*TMath::Pi()/180.0;
+	return TMath::Cos(rot_angle)*x_-TMath::Sin(rot_angle)*y_;
+}
+float detect::y_det_center(float x_, float y_,int sector_){
+	float rot_angle = _detector_center_angles_[sector_-1]*TMath::Pi()/180.0;
+	return TMath::Sin(rot_angle)*x_+TMath::Cos(rot_angle)*y_;
+}
+float detect::phi_det_center(float phi_,int sector_){
+
+}
+float detect::theta_det_center(float theta_,int sector_){
+
+}
 
 int detect::cc_segment(int cc_segm){
 	int seg = -1;

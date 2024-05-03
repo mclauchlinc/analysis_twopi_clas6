@@ -5,12 +5,20 @@
 #include "branches.hpp"
 #include "TVector.h"
 #include "constants.hpp"
+#include "TMath.h"
 
 
 const static int _num_cc_segments_ = 18;
-
+const static float _detector_center_angles_[] = {90.0,30.0,-30.0,-90.0,-150.0,150.0};//The number of degrees it needs to be rotated to be centered on the sector
+const static int _num_sc_paddles_ = 48;
 
 namespace detect{
+	//Detector X-Y centering
+	float x_det_center(float x_, float y_, int sector_);
+	float y_det_center(float x_, float y_, int sector_);
+	float phi_det_center(float phi_, int sector_);
+	float theta_det_center(float theta_, int sector_);
+
 	//float Acc = -0.000785;
 	//float Bcc = 0.0;
 	//float Ccc = -0.00168;

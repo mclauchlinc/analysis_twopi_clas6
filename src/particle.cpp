@@ -64,7 +64,7 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 	}else{
 		_theta = physics::get_theta(data_->Branches::cz(idx_));
 	}
-	if(flags_->Flags::Plot_SC_Eff() && data_->Branches::sc(idx_)>0){
+	if(data_->Branches::sc(idx_)>0){
 		_sc_pd = data_->Branches::sc_pd(idx_);
 	}
 	_phi = physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_));
@@ -116,6 +116,8 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 			}
 		}
 	}else{//Hadron
+		_cc_seg = detect::cc_segment(data_->Branches::cc_segm(idx_));
+		_cc_lrc = detect::cc_lrc(data_->Branches::cc_segm(idx_));
 		if(_q > 0){
 			if(_pid[1]){//Proton
 				_sanity_pass[1] = true;
