@@ -201,18 +201,27 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 				_p_lab[0] = p0_.Particle::Get_p();
 				_phi_lab[0] = p0_.Particle::Get_phi();
 				_theta_lab[0] = p0_.Particle::Get_theta();
+				_x_cc[0] = p0_.Particle::Get_x(0);
+				_x_sc[0] = p0_.Particle::Get_x(1);
+				_x_ec[0] = p0_.Particle::Get_x(2);
 				_vec_lab[2] = p1_.Particle::Get_4Vec(2);
 				_p_lab[2] = p1_.Particle::Get_p();
 				_phi_lab[2] = p1_.Particle::Get_phi();
 				_theta_lab[2] = p1_.Particle::Get_theta();
 				_dt[2] = p1_.Particle::Get_delta(2);
 				_sc_pd[2] = p1_.Particle::Get_sc_pd();
+				_x_cc[2] = p1_.Particle::Get_x(0);
+				_x_sc[2] = p1_.Particle::Get_x(1);
+				_x_ec[2] = p1_.Particle::Get_x(2);
 				_vec_lab[3] = p2_.Particle::Get_4Vec(3);
 				_p_lab[3] = p2_.Particle::Get_p();
 				_phi_lab[3] = p2_.Particle::Get_phi();
 				_theta_lab[3] = p2_.Particle::Get_theta();
 				_dt[3] = p2_.Particle::Get_delta(3);
 				_sc_pd[3] = p2_.Particle::Get_sc_pd();
+				_x_cc[3] = p2_.Particle::Get_x(0);
+				_x_sc[3] = p2_.Particle::Get_x(1);
+				_x_ec[3] = p2_.Particle::Get_x(2);
 				_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[2],_vec_lab[3]);
 				_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[2],_vec_lab[3]);
 			break;
@@ -221,18 +230,27 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 				_p_lab[0] = p0_.Particle::Get_p();
 				_phi_lab[0] = p0_.Particle::Get_phi();
 				_theta_lab[0] = p0_.Particle::Get_theta();
+				_x_cc[0] = p0_.Particle::Get_x(0);
+				_x_sc[0] = p0_.Particle::Get_x(1);
+				_x_ec[0] = p0_.Particle::Get_x(2);
 				_vec_lab[1] = p1_.Particle::Get_4Vec(1);
 				_p_lab[1] = p1_.Particle::Get_p();
 				_phi_lab[1] = p1_.Particle::Get_phi();
 				_theta_lab[1] = p1_.Particle::Get_theta();
 				_dt[1] = p1_.Particle::Get_delta(1);
 				_sc_pd[1] = p1_.Particle::Get_sc_pd();
+				_x_cc[1] = p1_.Particle::Get_x(0);
+				_x_sc[1] = p1_.Particle::Get_x(1);
+				_x_ec[1] = p1_.Particle::Get_x(2);
 				_vec_lab[3] = p2_.Particle::Get_4Vec(3);
 				_p_lab[3] = p2_.Particle::Get_p();
 				_phi_lab[3] = p2_.Particle::Get_phi();
 				_theta_lab[3] = p2_.Particle::Get_theta();
 				_dt[3] = p2_.Particle::Get_delta(3);
 				_sc_pd[3] = p2_.Particle::Get_sc_pd();
+				_x_cc[3] = p2_.Particle::Get_x(0);
+				_x_sc[3] = p2_.Particle::Get_x(1);
+				_x_ec[3] = p2_.Particle::Get_x(2);
 				_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[3]);
 				_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[1],_vec_lab[3]);
 			break;
@@ -241,18 +259,27 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 				_p_lab[0] = p0_.Particle::Get_p();
 				_phi_lab[0] = p0_.Particle::Get_phi();
 				_theta_lab[0] = p0_.Particle::Get_theta();
+				_x_cc[0] = p0_.Particle::Get_x(0);
+				_x_sc[0] = p0_.Particle::Get_x(1);
+				_x_ec[0] = p0_.Particle::Get_x(2);
 				_vec_lab[1] = p1_.Particle::Get_4Vec(1);
 				_p_lab[1] = p1_.Particle::Get_p();
 				_phi_lab[1] = p1_.Particle::Get_phi();
 				_theta_lab[1] = p1_.Particle::Get_theta();
 				_dt[1] = p1_.Particle::Get_delta(1);
 				_sc_pd[1] = p1_.Particle::Get_sc_pd();
+				_x_cc[1] = p1_.Particle::Get_x(0);
+				_x_sc[1] = p1_.Particle::Get_x(1);
+				_x_ec[1] = p1_.Particle::Get_x(2);
 				_vec_lab[2] = p2_.Particle::Get_4Vec(2);
 				_p_lab[2] = p2_.Particle::Get_p();
 				_phi_lab[2] = p2_.Particle::Get_phi();
 				_theta_lab[2] = p2_.Particle::Get_theta();
 				_dt[2] = p2_.Particle::Get_delta(2);
 				_sc_pd[2] = p2_.Particle::Get_sc_pd();
+				_x_cc[2] = p2_.Particle::Get_x(0);
+				_x_sc[2] = p2_.Particle::Get_x(1);
+				_x_ec[2] = p2_.Particle::Get_x(2);
 				_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[2]);
 				_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[1],_vec_lab[2]);
 			break;
@@ -283,24 +310,36 @@ void Event::Extract_Particles(int top_, Particle p0_, Particle p1_, Particle p2_
 		_p_lab[0] = p0_.Particle::Get_p();
 		_phi_lab[0] = p0_.Particle::Get_phi();
 		_theta_lab[0] = p0_.Particle::Get_theta();
+		_x_cc[0] = p0_.Particle::Get_x(0);
+		_x_sc[0] = p0_.Particle::Get_x(1);
+		_x_ec[0] = p0_.Particle::Get_x(2);
 		_vec_lab[1] = p1_.Particle::Get_4Vec(1);
 		_p_lab[1] = p1_.Particle::Get_p();
 		_phi_lab[1] = p1_.Particle::Get_phi();
 		_theta_lab[1] = p1_.Particle::Get_theta();
 		_dt[1] = p1_.Particle::Get_delta(1);
 		_sc_pd[1] = p1_.Particle::Get_sc_pd();
+		_x_cc[1] = p1_.Particle::Get_x(0);
+		_x_sc[1] = p1_.Particle::Get_x(1);
+		_x_ec[1] = p1_.Particle::Get_x(2);
 		_vec_lab[2] = p2_.Particle::Get_4Vec(2);
 		_p_lab[2] = p2_.Particle::Get_p();
 		_phi_lab[2] = p2_.Particle::Get_phi();
 		_theta_lab[2] = p2_.Particle::Get_theta();
 		_dt[2] = p2_.Particle::Get_delta(2);
 		_sc_pd[2] = p2_.Particle::Get_sc_pd();
+		_x_cc[2] = p2_.Particle::Get_x(0);
+		_x_sc[2] = p2_.Particle::Get_x(1);
+		_x_ec[2] = p2_.Particle::Get_x(2);
 		_vec_lab[3] = p3_.Particle::Get_4Vec(3);
 		_p_lab[3] = p3_.Particle::Get_p();
 		_phi_lab[3] = p3_.Particle::Get_phi();
 		_theta_lab[3] = p3_.Particle::Get_theta();
 		_dt[3] = p3_.Particle::Get_delta(3);
 		_sc_pd[3] = p3_.Particle::Get_sc_pd();
+		_x_cc[3] = p3_.Particle::Get_x(0);
+		_x_sc[3] = p3_.Particle::Get_x(1);
+		_x_ec[3] = p3_.Particle::Get_x(2);
 		_MM = physics::MM_event(flags_->Flags::Run(),0,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 		_MM2 = physics::MM_event(flags_->Flags::Run(),1,_vec_lab[0],_vec_lab[1],_vec_lab[2],_vec_lab[3]);
 	}
@@ -675,5 +714,28 @@ void Event::Check_Event(bool thrown_, std::shared_ptr<Flags> flags_){
 		std::cout<<"\tMM2b: " <<_phib[0] <<" " <<_phib[1] <<" " <<_phib[2] <<" " <<_phib[3] <<"\n";
 		std::cout<<"\tv: " <<_vx <<" " <<_vy <<" " <<_vz <<"\n";
 		std::cout<<"\tMM: " <<_MM <<" MM2: " <<_MM2 <<"\n";
+	}
+}
+
+float Event::X_Det(int species_, int det_,std::shared_ptr<Flags> flags_){
+	if(det_ ==0){
+		return _x_cc[species_];
+	}else if(det_ ==1){
+		return _x_sc[species_];
+	}else if(det_ ==2){
+		return _x_ec[species_];
+	}else{
+		return NAN;
+	}
+}
+float Event::Y_Det(int species_, int det_,std::shared_ptr<Flags> flags_){
+	if(det_ ==0){
+		return _y_cc[species_];
+	}else if(det_ ==1){
+		return _y_sc[species_];
+	}else if(det_ ==2){
+		return _y_ec[species_];
+	}else{
+		return NAN;
 	}
 }

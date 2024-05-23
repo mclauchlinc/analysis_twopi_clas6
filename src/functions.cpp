@@ -288,6 +288,20 @@ int fun::species_offset(const char* species_, const char* pcut_, std::shared_ptr
       }
     }
   }
+  if(pcut_==_geo_sc_cut_){
+    for(int i=0; i<fun::species_idx(species_); i++){
+      if(!flags_->Flags::Plot_Fid_Geo(i,1)){
+        offset-=1;
+      }
+    }
+  }
+  if(pcut_==_geo_ec_cut_){
+    for(int i=0; i<fun::species_idx(species_); i++){
+      if(!flags_->Flags::Plot_Fid_Geo(i,2)){
+        offset-=1;
+      }
+    }
+  }
   /*if(pcut_==_beta_cut_){
     for(int i=0; i<fun::species_idx(species_);i++){
       if(!flags_->Flags::Plot_Beta(i)){
@@ -338,9 +352,15 @@ bool fun::ecut_perform(const char* ecut_, std::shared_ptr<Flags> flags_){
       pass = true;
     }else if(ecut_==_vertex_cut_ && flags_->Flags::Vertex_Cut()){
       pass = true;
-    }else if(ecut_==_delta_cut_ && flags_->Flags::Delta_Cut(0)){
-      pass = true;
     }else if(ecut_ == _id_cut_ && flags_->Flags::ID_Cut()){
+      pass = true;
+    }else if(ecut_ == _geo_cc_cut_ && flags_->Flags::Geo_Cut(0,0)){
+      pass = true;
+    }else if(ecut_ == _geo_sc_cut_ && flags_->Flags::Geo_Cut(0,1)){
+      pass = true;
+    }else if(ecut_ == _geo_ec_cut_ && flags_->Flags::Geo_Cut(0,2)){
+      pass = true;
+    }else if(ecut_ == _kin_eff_cut_ && flags_->Flags::Kin_Eff_Cut(0)){
       pass = true;
     }else if(ecut_==_event_){
       pass = true;
@@ -374,6 +394,12 @@ bool fun::hcut_perform(const char * species_,const char* hcut_, std::shared_ptr<
       }else if(hcut_ == _sc_eff_cut_ && flags_->Flags::SC_Eff()){
         pass = true;
       }else if(hcut_ == _id_cut_ && flags_->Flags::ID_Cut()){
+        pass = true;
+      }else if(hcut_ == _geo_sc_cut_ && flags_->Flags::Geo_Cut(fun::species_idx(species_),1)){
+        pass = true;
+      }else if(hcut_ == _geo_ec_cut_ && flags_->Flags::Geo_Cut(fun::species_idx(species_),2)){
+        pass = true;
+      }else if(hcut_ == _kin_eff_cut_ && flags_->Flags::Kin_Eff_Cut(fun::species_idx(species_))){
         pass = true;
       }else if(hcut_==_event_ ){
         pass = true;
@@ -658,6 +684,10 @@ bool fun::correct_run(int run_num_, std::shared_ptr<Flags> flags_){
     return a_*pow(x_,2) + b_*x_,2 + c_;
   }
 
+  bool fun::check_sec(const char * sec_, float x_, float y_){
+    return sec_ == _sector_[physics::get_sector(physics::get_phi(x_,y_))-1];
+  }
+
 /*
 int fun::array_size(char * array_[]){
   return std::distance(std::begin(array_), std::end(array_));
@@ -665,3 +695,103 @@ int fun::array_size(char * array_[]){
 int fun::array_size(const char * array_[]){
   return std::distance(std::begin(array_), std::end(array_));
 }*/
+
+int fun::ele_cut_width(const char* cut_, std::shared_ptr<Flags> flags_){
+  if(cut_ == _fid_cut_){
+    return flags_->Flags::Fid_Cut_Width(0);
+  }else if(cut_ == _delta_cut_){
+    return flags_->Flags::Delta_Cut_Width(0);
+  }else if(cut_ == _geo_cc_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(0,0);
+  }else if(cut_ == _geo_sc_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(0,1);
+  }else if(cut_ == _geo_ec_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(0,2);
+  }else if(cut_ == _vertex_cut_){
+    return flags_->Flags::Vertex_Cut_Width();
+  }else if(cut_ == _kin_eff_cut_){
+    return flags_->Flags::Kin_Eff_Cut_Width(0);
+  }else if(cut_ == _cc_cut_){
+    return flags_->Flags::Min_CC_Cut_Width();
+  }else if(cut_ == _sf_cut_){
+    return flags_->Flags::SF_Cut_Width();
+  }else{
+    return 1;
+  }
+}
+int fun::pro_cut_width(const char* cut_, std::shared_ptr<Flags> flags_){
+  if(cut_ == _fid_cut_){
+    return flags_->Flags::Fid_Cut_Width(1);
+  }else if(cut_ == _delta_cut_){
+    return flags_->Flags::Delta_Cut_Width(1);
+  }else if(cut_ == _geo_cc_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(1,0);
+  }else if(cut_ == _geo_sc_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(1,1);
+  }else if(cut_ == _geo_ec_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(1,2);
+  }else if(cut_ == _kin_eff_cut_){
+    return flags_->Flags::Kin_Eff_Cut_Width(1);
+  }else{
+    return 1;
+  }
+}
+int fun::pip_cut_width(const char* cut_, std::shared_ptr<Flags> flags_){
+  if(cut_ == _fid_cut_){
+    return flags_->Flags::Fid_Cut_Width(2);
+  }else if(cut_ == _delta_cut_){
+    return flags_->Flags::Delta_Cut_Width(2);
+  }else if(cut_ == _geo_cc_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(2,0);
+  }else if(cut_ == _geo_sc_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(2,1);
+  }else if(cut_ == _geo_ec_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(2,2);
+  }else if(cut_ == _kin_eff_cut_){
+    return flags_->Flags::Kin_Eff_Cut_Width(2);
+  }else{
+    return 1;
+  }
+}
+int fun::pim_cut_width(const char* cut_, std::shared_ptr<Flags> flags_){
+  if(cut_ == _fid_cut_){
+    return flags_->Flags::Fid_Cut_Width(3);
+  }else if(cut_ == _delta_cut_){
+    return flags_->Flags::Delta_Cut_Width(3);
+  }else if(cut_ == _geo_cc_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(3,0);
+  }else if(cut_ == _geo_sc_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(3,1);
+  }else if(cut_ == _geo_ec_cut_){
+    return flags_->Flags::Fid_Geo_Cut_Width(3,2);
+  }else if(cut_ == _kin_eff_cut_){
+    return flags_->Flags::Kin_Eff_Cut_Width(3);
+  }else{
+    return 1;
+  }
+}
+int fun::cut_width(const char* species_, const char* cut_, std::shared_ptr<Flags> flags_){
+  if(species_ == _ele_){
+    return fun::ele_cut_width(cut_,flags_);
+  }else if(species_ == _pro_){
+    return fun::pro_cut_width(cut_,flags_);
+  }else if(species_ == _pip_){
+    return fun::pip_cut_width(cut_,flags_);
+  }else if(species_ == _pim_){
+    return fun::pim_cut_width(cut_,flags_);
+  }else{
+    return 1;
+  }
+}
+
+int fun::geo_det_idx(const char* detector_){
+  if(detector_ == _cc_){
+    return 0;
+  }else if(detector_ == _sc_){
+    return 1;
+  }else if(detector_ == _ec_){
+    return 2;
+  }else{
+    return -1;
+  }
+}

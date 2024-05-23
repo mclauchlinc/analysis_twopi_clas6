@@ -437,12 +437,22 @@ void Histogram::WQ2_Make(std::shared_ptr<Flags> flags_){
 		space_dims[0] = std::distance(std::begin(_recon_), std::end(_recon_));//Reconstructed vs. Thrown
 		CartesianGenerator cart(space_dims);
 		CartesianGenerator cart2(space_dims);
-		/*
-		for(int i=0; i<5; i++){
-			std::cout<<space_dims[i] <<" ";
-		}
-		std::cout<<"\n";*/
 		char hname[100];//For naming histograms
+		Double_t Q2_bin[6] = {_Q2_bins_[0],_Q2_bins_[1],_Q2_bins_[2],_Q2_bins_[3],_Q2_bins_[4],_Q2_bins_[5]};
+
+		for(int i=0; i<5; i++){
+			std::cout<<_top_[i] <<" perform?: " <<fun::top_perform(_top_[i], flags_) <<"\n";
+			if(fun::top_perform(_top_[i], flags_)){
+				sprintf(hname,"W Q2 Yield Top:%s",_top_[i]);
+				_WQ2_yield_hist.push_back(new TH2F(hname,hname,Histogram::W_bins(),_W_min_,_W_max_,5,Q2_bin));
+			}
+		}
+		if(flags_->Flags::Sim()){
+			sprintf(hname,"W Q2 Yield Thrown");
+			_WQ2_yield_hist.push_back(new TH2F(hname,hname,Histogram::W_bins(),_W_min_,_W_max_,5,Q2_bin));
+		}
+		std::cout<<"\nYield W-Q^2 hists made";
+		
 		//std::cout<<"Making WQ2 made histogram\n";
 		while(cart2.GetNextCombination()){
 			/*std::cout<<"\t\tIndex: ";
@@ -496,13 +506,13 @@ void Histogram::WQ2_Make(std::shared_ptr<Flags> flags_){
 					}
 				}else{//Reconstructed Stuff
 					if(_ecuts_[cart[4]]== _event_ && _top_[cart[2]]!=_mnone_ && _cut_[cart[3]]!=_no_cut_){//Event Selection
-						//std::cout<<"\t\tMaking Event Selection WQ2\n";
-						//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
+						std::cout<<"\t\tMaking Event Selection WQ2\n";
+						std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
 						sprintf(hname,"W_Q2_%s_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]]);
 						plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
 						_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 						//fun::print_vector_idx(cart);
-						//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
+						fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 					}else if(_ecuts_[cart[4]] != _event_ && _top_[cart[2]]==_mnone_){//Electron ID
 						//std::cout<<"\t\tMaking PID WQ2\n";
 						if(_ecuts_[cart[4]]== _none_ && _cut_[cart[3]]==_no_cut_){//&& _cut_[cart[3]]==_no_cut_
@@ -560,6 +570,30 @@ void Histogram::WQ2_Make(std::shared_ptr<Flags> flags_){
 							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
 							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
 						}
+						if(_ecuts_[cart[4]]== _geo_cc_cut_ && flags_->Flags::Geo_Cut(0,0) && _cut_[cart[3]]!=_no_cut_){
+							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: " <<_WQ2_hist.size() <<" " <<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
+							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
+							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
+							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
+							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
+						}
+						if(_ecuts_[cart[4]]== _geo_sc_cut_ && flags_->Flags::Geo_Cut(0,1) && _cut_[cart[3]]!=_no_cut_){
+							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: " <<_WQ2_hist.size() <<" " <<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
+							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
+							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
+							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
+							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
+						}
+						if(_ecuts_[cart[4]]== _geo_ec_cut_ && flags_->Flags::Geo_Cut(0,2) && _cut_[cart[3]]!=_no_cut_){
+							//std::cout<<"\t Index: ";
+							//std::cout<<"Filled WQ2 idx: " <<_WQ2_hist.size() <<" " <<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
+							sprintf(hname,"W_Q2_%s_%s_%s",_ecuts_[cart[4]],_cut_[cart[3]],_weight_[cart[1]]);
+							plot_1d.push_back(new TH2F(hname,hname,_wq2_xbin_,_wq2_xmin_,_wq2_xmax_,_wq2_ybin_,_wq2_ymin_,_wq2_ymax_));
+							_WQ2_made[cart[4]][cart[3]][cart[2]][cart[1]][cart[0]]=true;
+							//fun::print_vector_idx(WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_));
+						}
 						if(_ecuts_[cart[4]]== _pid_ && _cut_[cart[3]]!=_no_cut_){
 							//std::cout<<"\t Index: ";
 							//std::cout<<"Filled WQ2 idx: "  <<_WQ2_hist.size() <<" "<<plot_4d.size() << " " <<plot_3d.size() << " " <<plot_2d.size() << " " <<plot_1d.size() <<"\n";
@@ -571,32 +605,31 @@ void Histogram::WQ2_Make(std::shared_ptr<Flags> flags_){
 					}
 				}
 			}
-			if(cart[0] == space_dims[0]-1 && plot_1d.size()>0){
+			if(cart[0] == space_dims[0]-1){
 				//std::cout<<"\t\tPush back 1d\n";
-				plot_2d.push_back(plot_1d);
-				//std::cout<<"Size of 1d: " <<plot_1d.size() <<" | Size of 2d: " <<plot_2d.size()<<"\n";
-				plot_1d.clear();
-			}
-			if(cart[1] == space_dims[1]-1 && plot_2d.size()>0 && cart[0] == space_dims[0]-1){
-				//std::cout<<"\t\tPush back 2d\n";
-				plot_3d.push_back(plot_2d);
-				//std::cout<<"Size of 2d: " <<plot_2d.size() <<" | Size of 3d: " <<plot_3d.size()<<"\n";
-				plot_2d.clear();
-			}
-			if(cart[2] == space_dims[2]-1 && plot_3d.size()>0 && cart[1] == space_dims[1]-1 && cart[0] == space_dims[0]-1){
-				//std::cout<<"\t\tPush back 3d\n";
-				plot_4d.push_back(plot_3d);
-				//std::cout<<"Size of 3d: " <<plot_3d.size() <<" | Size of 4d: " <<plot_4d.size()<<"\n";
-				plot_3d.clear();
-			}
-			if(cart[3] == space_dims[3]-1 && plot_4d.size()>0 && cart[1] == space_dims[1]-1 && cart[0] == space_dims[0]-1 && cart[2]==space_dims[2]-1){
-				//std::cout<<"\t\tPush back 4d\n";
-				_WQ2_hist.push_back(plot_4d);
-				//std::cout<<"Size of 4d: " <<plot_4d.size() <<" | Size of 5d: " <<_WQ2_hist.size()<<"\n";
-				plot_4d.clear();
-			}
-			if(cart[4] == space_dims[4]-1 && cart[3] == space_dims[3]-1 && cart[1] == space_dims[1]-1 && cart[0] == space_dims[0]-1 && cart[2]==space_dims[2]-1){
-				//std::cout<<"Size of 5d: " <<_WQ2_hist.size() <<"\n";
+				if(plot_1d.size()>0){
+					plot_2d.push_back(plot_1d);
+					//std::cout<<"Size of 1d: " <<plot_1d.size() <<" | Size of 2d: " <<plot_2d.size()<<"\n";
+					plot_1d.clear();
+				}
+				if(cart[1] == space_dims[1]-1){
+					if(plot_2d.size()>0){
+						plot_3d.push_back(plot_2d);
+						plot_2d.clear();
+					}
+					if(cart[2] == space_dims[2]-1){
+						if(plot_3d.size()>0){
+							plot_4d.push_back(plot_3d);
+							plot_3d.clear();
+						}
+						if(cart[3] == space_dims[3]-1){
+							if(plot_4d.size()>0){
+								_WQ2_hist.push_back(plot_4d);
+								plot_4d.clear();
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -606,7 +639,7 @@ std::vector<int> Histogram::WQ2_cut_idx(const char* ecut_, const char * cut_, co
 	std::vector<int> idx;
 	int ecut_idx = -1; 
 	int cut_idx = -1; 
-	//std::cout<<"input to WQ2 Cut idx: " <<ecut_ <<"\n\t" <<cut_ <<"\n\t" <<top_ <<"\n\t" <<weight_ <<"\n\t" <<recon_  <<"\n";
+	//std::cout<<"input to WQ2 Cut idx: " <<ecut_ <<"\t" <<cut_ <<"\t" <<top_ <<"\t" <<weight_ <<"\t" <<recon_  <<"\n";
 	//if(cut_!=_no_cut_){
 		if(recon_==_thrown_ && flags_->Flags::Sim()){
 			if(ecut_ == _event_ && cut_ == _cut_applied_ && top_==_mzero_){//Thrown 
@@ -695,32 +728,51 @@ bool Histogram::Made_WQ2_idx(const char* ecut_, const char * cut_, const char* t
 }
 
 void Histogram::WQ2_Fill(float W_, float Q2_, const char* ecut_, const char *cut_, const char * top_, const char * thrown_, std::shared_ptr<Flags> flags_, float weight_){
-	if(flags_->Plot_WQ2()){
-		//std::cout<<"Trying to fill WQ2: " <<ecut_ <<" " <<cut_ <<" " <<top_ <<" " <<thrown_ <<"\n";
-		std::vector<int> idx;
-		if(flags_->Flags::Sim()){//Weighted
-			idx = Histogram::WQ2_cut_idx(ecut_,cut_,top_,_weighted_,thrown_,flags_);
-			if(Histogram::OK_Idx(idx)){
-				if(Made_WQ2_idx(ecut_,cut_,top_,_nweighted_,thrown_)){	
-				//if(Histogram::Good_WQ2_idx(ecut_,cut_,top_,_nweighted_,_recon_[fun::truth_idx(thrown_)],flags_)){
-					_WQ2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(W_,Q2_,weight_);
+	if(!flags_->Plot_WQ2()){return;}
+	if(isnan(W_)){return;}
+	if(isnan(Q2_)){return;}
+	//std::cout<<"Trying to fill WQ2: " <<ecut_ <<" " <<cut_ <<" " <<top_ <<" " <<thrown_ <<"\n";
+	std::vector<int> idx;
+	if(flags_->Flags::Sim()){//Weighted
+		idx = Histogram::WQ2_cut_idx(ecut_,cut_,top_,_weighted_,thrown_,flags_);
+		if(Histogram::OK_Idx(idx)){
+			if(ecut_==_event_){
+				if(thrown_ == _thrown_){
+					//std::cout<<"Filling WQ2 Yield thrown " <<_WQ2_yield_hist.size()-1 <<"\n";
+					_WQ2_yield_hist[_WQ2_yield_hist.size()-1]->Fill(W_,Q2_,1.0);
+				}else{
+					//std::cout<<"Filling WQ2 Yield " <<fun::top_idx(top_)+fun::top_offset(top_,flags_) <<"\n";
+					_WQ2_yield_hist[fun::top_idx(top_)+fun::top_offset(top_,flags_)]->Fill(W_,Q2_,1.0);
+					//_WQ2_yield_hist[fun::top_idx(top_)+fun::top_offset(_mall_,flags_)]->Fill(W_,Q2_,1.0);
 				}
 			}
-			idx.clear();
+			//if(Made_WQ2_idx(ecut_,cut_,top_,_nweighted_,thrown_)){	
+			//if(Histogram::Good_WQ2_idx(ecut_,cut_,top_,_nweighted_,_recon_[fun::truth_idx(thrown_)],flags_)){
+				_WQ2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(W_,Q2_,weight_);
+			//}
 		}
-		//if(Histogram::OK_Idx(idx)){
-		if(Made_WQ2_idx(ecut_,cut_,top_,_nweighted_,thrown_)){
-			idx = Histogram::WQ2_cut_idx(ecut_,cut_,top_,_nweighted_,thrown_,flags_);
-			if(Histogram::OK_Idx(idx)){
-				_WQ2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(W_,Q2_,1.0);
-			}
-			idx.clear();
+		idx.clear();
+	}
+	//if(Histogram::OK_Idx(idx)){
+	//if(Made_WQ2_idx(ecut_,cut_,top_,_nweighted_,thrown_)){
+	idx = Histogram::WQ2_cut_idx(ecut_,cut_,top_,_nweighted_,thrown_,flags_);
+	if(Histogram::OK_Idx(idx)){
+		if(!flags_->Flags::Sim() && ecut_==_event_){
+			//std::cout<<"Filling WQ2 Yield " <<fun::top_idx(top_)+fun::top_offset(top_,flags_) <<"\n";
+			_WQ2_yield_hist[fun::top_idx(top_)+fun::top_offset(top_,flags_)]->Fill(W_,Q2_,1.0);
+			//_WQ2_yield_hist[fun::top_idx(top_)+fun::top_offset(_mall_,flags_)]->Fill(W_,Q2_,1.0);
 		}
+		//std::cout<<"Trying to fill WQ2_hist at \n";
+		//fun::print_vector_idx(idx);
+		_WQ2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]]->Fill(W_,Q2_,1.0);
+	}
+	idx.clear();
+	//}
 		
 		//std::cout<<"input to WQ2 Filling: " <<ecut_ <<"\n\t" <<cut_ <<"\n\t" <<top_ <<"\n\t" <<weight_ <<"\n\t" <<_recon_[fun::truth_idx(thrown_)]  <<"\n";
 		//std::cout<<"Trying to fill WQ2:" <<ecut_ <<" " <<cut_ <<" " <<top_ <<" " <<_recon_[fun::truth_idx(thrown_)] <<"\n";
 		
-	}
+	
 }
 
 void Histogram::WQ2_Write(std::shared_ptr<Flags> flags_){
@@ -746,6 +798,13 @@ void Histogram::WQ2_Write(std::shared_ptr<Flags> flags_){
 		space_dims[1] = std::distance(std::begin(_weight_), std::end(_weight_));//Not Weight vs. Weighted
 		space_dims[0] = std::distance(std::begin(_recon_), std::end(_recon_));//Reconstructed vs. Thrown
 		CartesianGenerator cart(space_dims);
+
+		dir_WQ2->cd();
+		for(int i=0; i<_WQ2_yield_hist.size(); i++){
+			_WQ2_yield_hist[i]->SetXTitle("W (GeV)");
+			_WQ2_yield_hist[i]->SetYTitle("Q2 (GeV^2)");
+			_WQ2_yield_hist[i]->Write();
+		}
 		while(cart.GetNextCombination()){
 			if(_cut_[cart[3]]!=_no_cut_){	
 				idx = Histogram::WQ2_cut_idx(_ecuts_[cart[4]],_cut_[cart[3]],_top_[cart[2]],_weight_[cart[1]],_recon_[cart[0]],flags_);
@@ -859,68 +918,21 @@ void Histogram::Fid_Make(std::shared_ptr<Flags> flags_){
 		char hname[100];//For naming histograms
 		int idx = 0; 
 
-		/*while(cart2.GetNextCombination()){
-			//if(_cut_[cart[2]] != _no_cut_){
-				made_1d.push_back(false);
-			//}
-			if(cart2[0]==space_dims[0]-1 && made_1d.size()>0){
-				made_2d.push_back(made_1d);
-				//std::cout<<"\t\t\t\t\tLength of made_1d: " <<made_1d.size() <<"\n";
-				made_1d.clear();
-			}
-			if(cart2[1]==space_dims[1]-1 && cart2[0]==space_dims[0]-1 && made_2d.size()>0){
-				made_3d.push_back(made_2d);
-				//std::cout<<"\t\t\t\tLength of made_2d: " <<made_2d.size() <<"\n";
-				made_2d.clear();
-			}
-			if(cart2[2]==space_dims[2]-1 && cart2[1]==space_dims[1]-1 && cart2[0]==space_dims[0]-1 && made_3d.size()>0){
-				made_4d.push_back(made_3d);
-				//std::cout<<"\t\t\tLength of made_3d: " <<made_3d.size() <<"\n";
-				made_3d.clear();
-			}
-			if(cart2[3]==space_dims[3]-1 && cart2[2]==space_dims[2]-1 && cart2[1]==space_dims[1]-1 && cart2[0]==space_dims[0]-1 && made_4d.size()>0){
-				made_5d.push_back(made_4d);
-				//std::cout<<"\t\tLength of made_4d: " <<made_4d.size() <<"\n";
-				made_4d.clear();
-			}
-			if(cart2[4]==space_dims[4]-1 && cart2[3]==space_dims[3]-1 && cart2[2]==space_dims[2]-1 && cart2[1]==space_dims[1]-1 && cart2[0]==space_dims[0]-1 && made_5d.size()>0){
-				_Fid_made.push_back(made_5d);
-				//std::cout<<"\t\t\tLength of made_3d: " <<made_3d.size() <<"\n";
-				made_5d.clear();
-			}
-			if(cart2[5]==space_dims[5]-1 && cart2[4]==space_dims[4]-1 && cart2[3]==space_dims[3]-1 && cart2[2]==space_dims[2]-1 && cart2[1]==space_dims[1]-1 && cart2[0]==space_dims[0]-1){
-				//std::cout<<"\tLength of made: " <<_Fid_made.size() <<"\n";
-			}
-		}*/
 
 		while(cart.GetNextCombination()){
-			/*std::cout<<"\t\tIndex: ";
-			for(int i=0; i<5; i++){
-				std::cout<<cart[i];
-			}
-			std::cout<<"\n";*/
 			if(flags_->Plot_Fid(cart[5]) && (flags_->Flags::Sim() || _weight_[cart[6]]==_nweighted_)){
 				if(_species_[cart[5]] == _ele_){
-					//std::cout<<"\tFid for Electrons\n";
 					if(_ecuts_[cart[4]] == _event_ && _top_[cart[1]]!=_mnone_ && _cut_[cart[2]]!=_no_cut_){
-						//std::cout<<"P index: " <<cart[0] <<" and p_lim: " <<_p_bin_bins_ <<"\n";
-					//	std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n"; 
 						if(cart[0]==_p_bin_bins_){
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[6]],_top_[cart[1]]);
-							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n"; 						
-							//std::cout<<"hname:" <<hname <<"\n";
+
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 						}else{
 							sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s_p:%.3f-%.3f",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[6]],_top_[cart[1]],Histogram::P_Min(cart[0]),Histogram::P_Max(cart[0]));
 							plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 						}
-						//sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]],_top_[cart[1]]);
-						//plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
-						//_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][ cart[6]] = true;
 					}else if(_ecuts_[cart[4]] != _event_ && _top_[cart[1]]==_mnone_){//No Event Selection
 						if(_ecuts_[cart[4]]== _none_ && _cut_[cart[2]]==_no_cut_){// && _cut_[cart[2]]==_no_cut_){
-							//std::cout<<"\t\tFid None "<<_species_[cart[5]] <<" " <<_hcuts_[cart[4]] <<" " <<_sector_[cart[3]] <<" " <<_cut_[cart[2]] <<" " <<_weight_[ cart[6]] <<" pbin:" <<cart[0] <<"\n";
-							//std::cout<<"\t\t\tFid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							if(cart[0]==_p_bin_bins_){
 								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[cart[6]]);
 								//std::cout<<"hname:" <<hname <<"\n";
@@ -929,9 +941,6 @@ void Histogram::Fid_Make(std::shared_ptr<Flags> flags_){
 								sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s_p:%.3f-%.3f",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]],_top_[cart[1]],Histogram::P_Min(cart[0]),Histogram::P_Max(cart[0]));
 								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
 							}
-							//sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
-							//plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
-							//_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][ cart[6]] = true;
 						}
 						if(_ecuts_[cart[4]]== _sanity_ && _cut_[cart[2]]!=_no_cut_){
 							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
@@ -999,6 +1008,45 @@ void Histogram::Fid_Make(std::shared_ptr<Flags> flags_){
 							//_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][ cart[6]] = true;
 						}
 						if(_ecuts_[cart[4]]== _vertex_cut_ && flags_->Flags::Vertex_Cut()&& _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+							if(cart[0]==_p_bin_bins_){
+								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							}else{
+								sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s_p:%.3f-%.3f",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]],_top_[cart[1]],Histogram::P_Min(cart[0]),Histogram::P_Max(cart[0]));
+								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							}
+							//sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+							//plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							//_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][ cart[6]] = true;
+						}
+						if(_ecuts_[cart[4]]== _geo_cc_cut_ && flags_->Flags::Geo_Cut(cart[5],0)&& _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+							if(cart[0]==_p_bin_bins_){
+								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							}else{
+								sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s_p:%.3f-%.3f",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]],_top_[cart[1]],Histogram::P_Min(cart[0]),Histogram::P_Max(cart[0]));
+								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							}
+							//sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+							//plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							//_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][ cart[6]] = true;
+						}
+						if(_ecuts_[cart[4]]== _geo_sc_cut_ && flags_->Flags::Geo_Cut(cart[5],1)&& _cut_[cart[2]]!=_no_cut_){
+							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+							if(cart[0]==_p_bin_bins_){
+								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							}else{
+								sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s_p:%.3f-%.3f",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]],_top_[cart[1]],Histogram::P_Min(cart[0]),Histogram::P_Max(cart[0]));
+								plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							}
+							//sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+							//plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+							//_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][ cart[6]] = true;
+						}
+						if(_ecuts_[cart[4]]== _geo_ec_cut_ && flags_->Flags::Geo_Cut(cart[5],2)&& _cut_[cart[2]]!=_no_cut_){
 							//std::cout<<"Fid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
 							if(cart[0]==_p_bin_bins_){
 								sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_ecuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
@@ -1102,6 +1150,36 @@ void Histogram::Fid_Make(std::shared_ptr<Flags> flags_){
 								//_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][ cart[6]] = true;
 							}
 							if(_hcuts_[cart[4]]== _delta_cut_ && flags_->Flags::Delta_Cut(cart[5]) && _cut_[cart[2]]!=_no_cut_){
+								//std::cout<<"\t\tFid delta Hadrons " <<_species_[cart[5]] <<" " <<_hcuts_[cart[4]] <<" " <<_sector_[cart[3]] <<" " <<_cut_[cart[2]] <<" " <<_weight_[ cart[6]] <<" pbin:" <<cart[0] <<"\n";
+								//std::cout<<"\t\tFid Fid Hadrons " <<_weight_[ cart[6]] <<" "<<_species_[cart[5]] <<" " <<_hcuts_[cart[4]] <<" " <<_sector_[cart[3]] <<" " <<_cut_[cart[2]] <<" " <<_top_[cart[1]] <<" pbin:" <<cart[0] <<"\n";
+								//std::cout<<"\t\t\tFid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+								if(cart[0]==_p_bin_bins_ && _species_[cart[5]]==_pim_){
+									sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+									plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+								}else{
+									sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s_p:%.3f-%.3f",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]],_top_[cart[1]],Histogram::P_Min(cart[0]),Histogram::P_Max(cart[0]));
+									plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+								}
+								//sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+								//plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+								//_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][ cart[6]] = true;
+							}
+							if(_hcuts_[cart[4]]== _geo_sc_cut_ && flags_->Flags::Geo_Cut(cart[5],1) && _cut_[cart[2]]!=_no_cut_){
+								//std::cout<<"\t\tFid delta Hadrons " <<_species_[cart[5]] <<" " <<_hcuts_[cart[4]] <<" " <<_sector_[cart[3]] <<" " <<_cut_[cart[2]] <<" " <<_weight_[ cart[6]] <<" pbin:" <<cart[0] <<"\n";
+								//std::cout<<"\t\tFid Fid Hadrons " <<_weight_[ cart[6]] <<" "<<_species_[cart[5]] <<" " <<_hcuts_[cart[4]] <<" " <<_sector_[cart[3]] <<" " <<_cut_[cart[2]] <<" " <<_top_[cart[1]] <<" pbin:" <<cart[0] <<"\n";
+								//std::cout<<"\t\t\tFid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
+								if(cart[0]==_p_bin_bins_ && _species_[cart[5]]==_pim_){
+									sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+									plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+								}else{
+									sprintf(hname,"Fid_%s_%s_%s_%s_%s_%s_p:%.3f-%.3f",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]],_top_[cart[1]],Histogram::P_Min(cart[0]),Histogram::P_Max(cart[0]));
+									plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+								}
+								//sprintf(hname,"Fid_%s_%s_%s_%s_%s",_species_[cart[5]],_hcuts_[cart[4]],_sector_[cart[3]],_cut_[cart[2]],_weight_[ cart[6]]);
+								//plot_1d.push_back(new TH2F(hname,hname,_fid_xbin_,_fid_xmin_,_fid_xmax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+								//_Fid_made[cart[5]][cart[4]][cart[3]][cart[2]][cart[1]][ cart[6]] = true;
+							}
+							if(_hcuts_[cart[4]]== _geo_ec_cut_ && flags_->Flags::Geo_Cut(cart[5],2) && _cut_[cart[2]]!=_no_cut_){
 								//std::cout<<"\t\tFid delta Hadrons " <<_species_[cart[5]] <<" " <<_hcuts_[cart[4]] <<" " <<_sector_[cart[3]] <<" " <<_cut_[cart[2]] <<" " <<_weight_[ cart[6]] <<" pbin:" <<cart[0] <<"\n";
 								//std::cout<<"\t\tFid Fid Hadrons " <<_weight_[ cart[6]] <<" "<<_species_[cart[5]] <<" " <<_hcuts_[cart[4]] <<" " <<_sector_[cart[3]] <<" " <<_cut_[cart[2]] <<" " <<_top_[cart[1]] <<" pbin:" <<cart[0] <<"\n";
 								//std::cout<<"\t\t\tFid Hist idx: " <<_Fid_hist.size() <<" " <<plot_6d.size() <<" " <<plot_5d.size() <<" " <<plot_4d.size() <<" " <<plot_3d.size() <<" " <<plot_2d.size() <<" " <<plot_1d.size() <<"\n";
@@ -4661,6 +4739,10 @@ void Histogram::Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, flo
 void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float plus_weight_, int top_passed_, std::shared_ptr<Flags> flags_){
 	if(flags_->Flags::Make_Friend() && ((fun::top_perform(top_,flags_)) || (top_==_mzero_ && thrown_))){
 		bool check_vals = true;
+		bool alpha_loop = false;
+		bool phi_loop = false;
+		float phi = 0.0;
+		float alpha = 0.0;
 		check_vals &= (W_ >= _W_min_);
 		check_vals &= (W_ < _W_max_);
 		if(!check_vals){
@@ -4693,17 +4775,35 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 		check_vals = true;
 		check_vals &= (alpha_ >= _alpha_min_);
 		check_vals &= (alpha_ < _alpha_max_);
+		if(alpha_ == _alpha_max_){
+			alpha_loop = true;
+			check_vals = true;
+		}
 		if(!check_vals){
 			std::cout<<"top:" <<top_ <<" var:" <<var_ <<" alpha:" <<alpha_ <<" alpha bounds:" <<_alpha_min_ <<"-" <<_alpha_max_ <<" thrown:" <<thrown_ <<"\n";
 		}
 		check_vals = true;
 		check_vals &= (phi_ >= _phi_min_);
 		check_vals &= (phi_ < _phi_max_);
+		if(phi_ == _phi_max_){
+			check_vals = true;
+			phi_loop = true;
+		}
 		if(!check_vals){
 			std::cout<<"top:" <<top_ <<" var:" <<var_  <<" phi:" <<phi_ <<" phi bounds:" <<_phi_min_ <<"-" <<_phi_max_ <<" weight:" <<weight_ <<" helicity:" <<helicity_ <<" thrown:" <<thrown_ <<"\n";
 		}
 		if(!std::isnan(W_) && !std::isnan(Q2_) && !std::isnan(MM_) && !std::isnan(MM2_) && !std::isnan(theta_) && !std::isnan(alpha_) && !std::isnan(phi_) && !std::isnan(weight_)){
-			if(Histogram::Good_Friend_Idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_)){
+			if(phi_loop){
+				phi = 0.0;
+			}else{
+				phi = phi_;
+			}
+			if(alpha_loop){
+				alpha = 0.0;
+			}else{
+				alpha = alpha_;
+			}
+			if(Histogram::Good_Friend_Idx(W_,Q2_,MM_,MM2_,theta_,alpha,phi,var_)){
 			//if(Histogram::OK_Idx(Histogram::Friend_idx(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_))){
 			//int *y = Friend_binning(W_,Q2_,MM_,MM2_,theta_,alpha_,phi_,var_);
 			//std::cout<<std::endl <<"Y binning: " <<y;
@@ -4714,8 +4814,8 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 				x[0] = (double)MM_;
 				x[1] = (double)MM2_;
 				x[2] = (double)theta_;
-				x[3] = (double)alpha_;
-				x[4] = (double)phi_;
+				x[3] = (double)alpha;
+				x[4] = (double)phi;
 				if(thrown_){
 					//std::lock_guard<std::mutex> lk(std::mutex);//Muting the multithreading for THnSparse filling
 					TThread::Lock();
@@ -4723,8 +4823,8 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 					_MM1_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM_,weight_*plus_weight_);
 					_MM2_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM2_,weight_*plus_weight_);
 					_Theta_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(theta_,weight_*plus_weight_);
-					_Alpha_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha_,weight_*plus_weight_);
-					_Phi_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi_,weight_*plus_weight_);
+					_Alpha_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha,weight_*plus_weight_);
+					_Phi_Dist_thr[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi,weight_*plus_weight_);
 					TThread::UnLock();
 					//std::cout<<"\tThrown " <<var_  <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}else{
@@ -4755,8 +4855,8 @@ void Histogram::Friend_Fill(const char* top_, float W_, float Q2_, float MM_, fl
 					_MM1_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM_,weight_*plus_weight_);
 					_MM2_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(MM2_,weight_*plus_weight_);
 					_Theta_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(theta_,weight_*plus_weight_);
-					_Alpha_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha_,weight_*plus_weight_);
-					_Phi_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi_,weight_*plus_weight_);
+					_Alpha_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(alpha,weight_*plus_weight_);
+					_Phi_Dist[var_][Histogram::W_bin(W_)][Histogram::Q2_bin(Q2_)]->Fill(phi,weight_*plus_weight_);
 					TThread::UnLock();
 					//std::cout<<"\tNormal " <<var_ <<" " <<fun::top_idx(top_) <<" " <<Histogram::W_bin(W_) <<" " <<Histogram::Q2_bin(Q2_) <<"\n"; 
 				}
@@ -5269,6 +5369,34 @@ void Histogram::Bin_Centering_Write(std::shared_ptr<Flags> flags_){
 	std::cout<<"\tFinished Writing Bin Centering Plots\n";
 }
 
+void Histogram::Clean_Top_Increment(int i_){
+	_ctop[i_]+=1;
+}
+
+void Histogram::Isolated_Top_Increment(int i_){
+	_itop[i_]+=1;
+}
+
+long Histogram::Clean_Top(int i_){
+	return _ctop[i_];
+}
+
+long Histogram::Isolated_Top(int i_){
+	return _itop[i_];
+}
+void Histogram::Clean_Not_Isolated_Top_Increment(int i_){
+	_cnitop[i_]+=1;
+}
+long Histogram::Clean_Not_Isolated_Top(int i_){
+	return _cnitop[i_];
+}
+void Histogram::Clean_and_Isolated_Top_Increment(int i_){
+	_caitop[i_]+=1;
+}
+long Histogram::Clean_and_Isolated_Top(int i_){
+	return _caitop[i_];
+}
+
 void Histogram::Top_Increment(int i_){
 	_ntop[i_]+=1;
 }
@@ -5308,6 +5436,18 @@ void Histogram::Ele_Angle_Corr_Make(std::shared_ptr<Flags> flags_){
 	CartesianGenerator cart(space_dims);
 	TH1F_ptr_1d tmp_1d;
 	TH1F_ptr_2d tmp_2d;
+
+	TH2F_ptr_1d tmp2_1d;
+	for(int sec=0; sec<7; sec++){
+		sprintf(hname,"Electron-Proton Elastic Angles %s",_sector_[sec]);
+		_Pecorr_Angle_Dist_hist.push_back(new TH2F(hname,hname,_fid_ybin_,_fid_ymin_,_fid_ymax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+		for(int top=0; top<5; top++){
+			sprintf(hname,"Electron-Proton Elastic Angles %s top:%s",_sector_[sec],_top_[top]);
+			tmp2_1d.push_back(new TH2F(hname,hname,_fid_ybin_,_fid_ymin_,_fid_ymax_,_fid_ybin_,_fid_ymin_,_fid_ymax_));
+		}
+		_Pecorr_Angle_Dist2_hist.push_back(tmp2_1d);
+		tmp2_1d.clear();
+	}
 	while(cart.GetNextCombination()){
 		sprintf(hname,"Electron_Angle_Diff_Theta:%.1f-%.1f_Phi:%.1f-%.1f_Sec:%d",min_theta_pecorr+cart[1]*res_theta_pecorr,min_theta_pecorr+(cart[1]+1)*res_theta_pecorr,min_phi_pecorr+cart[0]*res_phi_pecorr,min_phi_pecorr+(cart[0]+1)*res_phi_pecorr,cart[2]+1);
 		tmp_1d.push_back(new TH1F(hname,hname,bins_delta_theta,min_delta_theta,max_delta_theta));
@@ -5359,8 +5499,11 @@ std::vector<int> Histogram::Ele_Angle_Corr_idx(int sector_, float theta_, float 
 }
 void Histogram::Ele_Angle_Corr_Fill(int sector_, float theta_, float phi_, float W_, float thetap_, std::shared_ptr<Flags> flags_){
 	if(!flags_->Flags::Plot_Electron_Angle_Corr()){ return;}
+	float min_proton_theta = 15.0;//5/17/24
 	if(W_>= 0.7 && W_ < 1.05){
-		if(thetap_ >= 35.0){
+		_Pecorr_Angle_Dist_hist[sector_-1]->Fill(theta_,thetap_);
+		_Pecorr_Angle_Dist_hist[6]->Fill(theta_,thetap_);
+		if(thetap_ >= min_proton_theta){
 			std::vector<int> idx = Histogram::Ele_Angle_Corr_idx(sector_,theta_,phi_,flags_);
 			if(Histogram::OK_Idx(idx)){
 				//std::cout<<"filling Ele_Mag_Corr W:" <<W_ <<" theta:" <<theta_ <<" phi:" <<phi_ <<" sector: " <<sector_ <<" to get index:" <<idx[0] <<" " <<idx[1] <<" " <<idx[2] <<"\n";
@@ -5368,6 +5511,13 @@ void Histogram::Ele_Angle_Corr_Fill(int sector_, float theta_, float phi_, float
 			}
 		}
 	}
+}
+
+void Histogram::Ele_Pro_Angle_Dist_Fill(const char* sector_, float theta_, float thetap_, const char* top_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Plot_Electron_Angle_Corr()){ return;}
+	int sec_idx = fun::sector_idx(sector_);
+	_Pecorr_Angle_Dist2_hist[sec_idx][fun::top_idx(top_)]->Fill(theta_,thetap_);
+	_Pecorr_Angle_Dist2_hist[6][fun::top_idx(top_)]->Fill(theta_,thetap_);
 }
 
 void Histogram::Ele_Angle_Corr_Write(std::shared_ptr<Flags> flags_){
@@ -5398,6 +5548,18 @@ void Histogram::Ele_Angle_Corr_Write(std::shared_ptr<Flags> flags_){
 	CartesianGenerator cart(space_dims);
 	TH1F_ptr_1d tmp_1d;
 	TH1F_ptr_2d tmp_2d;
+	dir_pecorr_angle->cd();
+	for(int sec=0; sec<7; sec++){
+		_Pecorr_Angle_Dist_hist[sec]->SetXTitle("Electron Theta (deg)");
+		_Pecorr_Angle_Dist_hist[sec]->SetYTitle("Proton Theta (deg)");
+		_Pecorr_Angle_Dist_hist[sec]->Write();
+		for(int top = 0; top<5; top++){
+			_Pecorr_Angle_Dist2_hist[sec][top]->SetXTitle("Electron Theta (deg)");
+			_Pecorr_Angle_Dist2_hist[sec][top]->SetYTitle("Proton Theta (deg)");
+			_Pecorr_Angle_Dist2_hist[sec][top]->Write();
+		}
+	}
+
 	while(cart.GetNextCombination()){
 		dir_pecorr_angle_sub[cart[2]][cart[1]+1]->cd();
 		_Pecorr_Angle_hist[cart[2]][cart[1]][cart[0]]->SetXTitle("Delta Theta (deg)");
@@ -5522,20 +5684,20 @@ void Histogram::Ele_Mag_Corr_Write(std::shared_ptr<Flags> flags_){
 //*------------------------------End Proton Energy Loss Corrections------------------*
 //*------------------------------Start Elastic Peak------------------*
 void Histogram::Elastic_Peak_Make(std::shared_ptr<Flags> flags_){
-	if(!flags_->Flags::Plot_Electron_Mag_Corr() && !flags_->Flags::Plot_Electron_Mag_Corr()){ return;}
+	if(!flags_->Flags::Plot_Elastic()){ return;}
 	std::cout<<"Making Elastic Peak Histograms\n";
 	char hname[100];
 	char * corr_stuff[3] = {"no_corr","e_theta_corr","e_pcorr"};
 	for(int i=0; i<6; i++){
 		for(int j=0; j<3; j++){
 			sprintf(hname,"Elastic_Peak_Sec:%d_%s",i,corr_stuff[j]);
-			_Elastic_Peak_hist[i][j] = new TH1F(hname,hname,200,0.6,1.1);
+			_Elastic_Peak_hist[i][j] = new TH1F(hname,hname,300,0.6,1.2);
 		}
 	}
 }
 
 void Histogram::Elastic_Peak_Fill(float W_, int corr_, int sector_, std::shared_ptr<Flags> flags_){
-	if(!flags_->Flags::Plot_Electron_Mag_Corr() && !flags_->Flags::Plot_Electron_Mag_Corr()){ return;}
+	if(!flags_->Flags::Plot_Elastic()){ return;}
 	//std::cout<<"Filling Elastic Peak with W" <<W_ <<" corr:" <<corr_ <<" sector:" <<sector_ <<"\n";
 	_Elastic_Peak_hist[sector_-1][corr_]->Fill(W_);
 }
@@ -5606,7 +5768,7 @@ int Histogram::Geo_Fid_Side_Idx(int det_, int seg_idx_){
 
 int Histogram::Geo_Fid_Seg_Idx(int det_, int pad_idx_, int side_idx_){
 	int seg_idx = -1;
-	if(detectors[det_+1]=="cc"){
+	if(detectors[det_+1]==_cc_){
 		if(side_idx_ == _geo_fid_cc_sides_){
 			if(pad_idx_ == _geo_fid_cc_segments_){
 				seg_idx = (_geo_fid_cc_segments_+1)*_geo_fid_cc_sides_;
@@ -5618,13 +5780,13 @@ int Histogram::Geo_Fid_Seg_Idx(int det_, int pad_idx_, int side_idx_){
 				seg_idx = _geo_fid_cc_segments_*side_idx_+pad_idx_;
 			}
 		}
-	}else if(detectors[det_+1]=="sc"){
+	}else if(detectors[det_+1]==_sc_){
 		if(side_idx_ == 0){
 			if(pad_idx_ >= 0){
 				seg_idx = pad_idx_;
 			}
 		}
-	}else if(detectors[det_+1]=="ec"){
+	}else if(detectors[det_+1]==_ec_){
 		if(side_idx_ == 0){
 			if(pad_idx_ >= 0){
 				seg_idx = pad_idx_;
@@ -5636,7 +5798,29 @@ int Histogram::Geo_Fid_Seg_Idx(int det_, int pad_idx_, int side_idx_){
 
 
 void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
-	if(!flags_->Flags::Plot_CC_Geo() && !flags_->Flags::Plot_SC_Geo() && !flags_->Flags::Plot_EC_Geo()){ return;}
+	bool plot_geo = false;
+	for(int i=0; i<4; i++){
+		for(int j=0; j<3; j++){
+			if(flags_->Flags::Plot_Fid_Geo(i,j)){
+				plot_geo=true;
+			}
+		}
+	}
+	bool plot_cc = false;
+	bool plot_sc = false;
+	bool plot_ec = false;
+	for(int i=0; i<4; i++){
+		if(flags_->Flags::Plot_Fid_Geo(i,0)){
+			plot_cc=true;
+		}
+		if(flags_->Flags::Plot_Fid_Geo(i,1)){
+			plot_sc=true;
+		}
+		if(flags_->Flags::Plot_Fid_Geo(i,2)){
+			plot_ec=true;
+		}
+	}
+	if(!plot_geo){ return;}
 	std::cout<<"Making Geometric Fiducial Plots\n";
 	std::vector<long> space_dims(6);
 	space_dims[5] = std::distance(std::begin(_species_), std::end(_species_)); //Particle Species
@@ -5646,6 +5830,7 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 	space_dims[1] = std::distance(std::begin(_ecuts_), std::end(_ecuts_));//ID Cut
 	space_dims[0] = 54+4;//total number of CC segment/side combinations. + 4  SC paddles go up to 18
 	char hname[100];
+	char hname2[100];
 
 	CartesianGenerator cart(space_dims);
 	TH2F_ptr_1d tmp_1d;
@@ -5653,6 +5838,11 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 	TH2F_ptr_3d tmp_3d;
 	TH2F_ptr_4d tmp_4d;
 	TH2F_ptr_5d tmp_5d;
+	TH2F_ptr_1d tmp2_1d;
+	TH2F_ptr_2d tmp2_2d;
+	TH2F_ptr_3d tmp2_3d;
+	TH2F_ptr_4d tmp2_4d;
+	TH2F_ptr_5d tmp2_5d;
 	int species_idx = -1;
 	int det_idx = -1;
 	int sec_idx = -1;
@@ -5673,29 +5863,34 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 		seg_idx = cart[0];
 		if((pcut_idx == 0 && cut_idx == 2) || (pcut_idx >0 && cut_idx < 2)){
 			if(_species_[species_idx]==_ele_){
-				if(fun::pcut_perform(_species_[species_idx],_ecuts_[pcut_idx],flags_) && _ecuts_[pcut_idx]!=_event_){
+				if(fun::pcut_perform(_species_[species_idx],_ecuts_[pcut_idx],flags_)){
 					cc_seg_idx = Histogram::Geo_Fid_Paddle_Idx(det_idx,seg_idx);
 					cc_side_idx = Histogram::Geo_Fid_Side_Idx(det_idx,seg_idx);
 					if(detectors[det_idx+1]=="cc"){
 						if(cc_seg_idx == _geo_fid_cc_segments_){
 							if(cc_side_idx == _geo_fid_cc_sides_){
 								sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:All_Side:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
+								sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Seg:All_Side:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
 								pass = true;
 							}else{
 								sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:All_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx],_cc_sides_[cc_side_idx]);
+								sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Seg:All_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx],_cc_sides_[cc_side_idx]);
 								pass = true;
 							}
 						}else{
 							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:%d_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx],cc_seg_idx,_cc_sides_[cc_side_idx]);
+							sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Seg:%d_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx],cc_seg_idx,_cc_sides_[cc_side_idx]);
 							pass = true;
 						}
 					}else if(detectors[det_idx+1]=="sc"){
 						if(cc_side_idx == 0){
 							if(cc_seg_idx == _geo_fid_sc_paddles_){
 								sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Paddle:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
+								sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Paddle:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
 							pass = true;	
 							}else if(cc_seg_idx < _geo_fid_sc_paddles_){
 								sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Paddle:%d",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx],seg_idx);
+								sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Paddle:%d",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx],seg_idx);
 								pass = true;
 							}else{
 								pass = false;
@@ -5706,6 +5901,7 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 					}else if(detectors[det_idx+1]=="ec"){
 						if(seg_idx == 0){
 							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
+							sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
 							pass = true;
 						}else{
 							pass == false;
@@ -5713,10 +5909,10 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 					}
 					//sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_ecuts_[pcut_idx],_cut_[cut_idx]);
 					//pass = true;
-					//std::cout<<_Geo_Fid_hist.size() <<" " <<tmp_4d.size() <<" " <<tmp_3d.size() <<" "<<tmp_2d.size() <<" "<<tmp_1d.size() <<" " <<hname <<"\n";
+					//std::cout<<_Geo_Fid_hist.size() <<" " <<tmp_5d.size() <<" " <<tmp_4d.size() <<" " <<tmp_3d.size() <<" "<<tmp_2d.size() <<" "<<tmp_1d.size() <<" " <<hname <<"\n";
 				}
 			}else if(pcut_idx < std::distance(std::begin(_hcuts_), std::end(_hcuts_))){
-				if(fun::pcut_perform(_species_[species_idx],_hcuts_[pcut_idx],flags_) && _hcuts_[pcut_idx]!=_event_){
+				if(fun::pcut_perform(_species_[species_idx],_hcuts_[pcut_idx],flags_)){
 					if(detectors[det_idx+1]=="cc"){
 						if(seg_idx < _geo_fid_cc_segments_*_geo_fid_cc_sides_){
 							for(int i=0; i<3; i++){
@@ -5726,21 +5922,26 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 								}
 							}
 							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:%d_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx],cc_seg_idx,_cc_sides_[cc_side_idx]);
+							sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Seg:%d_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx],cc_seg_idx,_cc_sides_[cc_side_idx]);
 							pass = true;
 						}else if(seg_idx < _geo_fid_cc_segments_*_geo_fid_cc_sides_+3){
 							cc_side_idx = seg_idx - (_geo_fid_cc_segments_*_geo_fid_cc_sides_);
 							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:All_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx],_cc_sides_[cc_side_idx]);
+							sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Seg:All_Side:%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx],_cc_sides_[cc_side_idx]);
 							pass = true;
 						}else{
 							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Seg:All_Side:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
+							sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Seg:All_Side:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
 							pass = true;
 						}
 					}else if(detectors[det_idx+1]=="sc"){
 						if(seg_idx < _geo_fid_sc_paddles_){
 							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Paddle:%d",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx],seg_idx);
+							sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Paddle:%d",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx],seg_idx);
 							pass = true;
 						}else if(seg_idx == _geo_fid_sc_paddles_){
 							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s_Paddle:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
+							sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s_Paddle:All",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
 							pass = true;
 						}else{
 							pass = false;
@@ -5748,6 +5949,7 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 					}else if(detectors[det_idx+1]=="ec"){
 						if(seg_idx == 0){
 							sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
+							sprintf(hname2,"%s_%s_Geometric_Fid2_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
 							pass = true;
 						}else{
 							pass == false;
@@ -5755,46 +5957,69 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 					}
 					//sprintf(hname,"%s_%s_Geometric_Fid_Sec:%s_Cut:%s_%s",_species_[species_idx],detectors[det_idx+1],_sector_[sec_idx],_hcuts_[pcut_idx],_cut_[cut_idx]);
 					//pass = true;
+					
 					//std::cout<<_Geo_Fid_hist.size() <<" " <<tmp_4d.size() <<" " <<tmp_3d.size() <<" "<<tmp_2d.size() <<" "<<tmp_1d.size() <<" " <<hname <<"\n";
 				}
 			}
 		}
-		if(!flags_->Flags::Plot_CC_Geo() && detectors[det_idx+1]=="cc"){
+		if(!plot_cc && detectors[det_idx+1]=="cc"){
 			pass = false;
 		}
-		if(!flags_->Flags::Plot_SC_Geo() && detectors[det_idx+1]=="sc"){
+		if(!plot_sc && detectors[det_idx+1]=="sc"){
 			pass = false;
 		}
-		if(!flags_->Flags::Plot_EC_Geo() && detectors[det_idx+1]=="ec"){
+		if(!plot_ec && detectors[det_idx+1]=="ec"){
 			pass = false;
 		}
 		if(pass){
+			//std::cout<<_Geo_Fid_hist.size() <<" " <<tmp_5d.size() <<" " <<tmp_4d.size() <<" " <<tmp_3d.size() <<" "<<tmp_2d.size() <<" "<<tmp_1d.size() <<" " <<hname <<"\n";
 			tmp_1d.push_back(new TH2F(hname,hname,_geo_fid_xbin_[det_idx],_geo_fid_xmin_[det_idx],_geo_fid_xmax_[det_idx],_geo_fid_ybin_[det_idx],_geo_fid_ymin_[det_idx],_geo_fid_ymax_[det_idx]));
+			tmp2_1d.push_back(new TH2F(hname2,hname2,_geo_fid2_xbin_[det_idx],_geo_fid2_xmin_[det_idx],_geo_fid2_xmax_[det_idx],_geo_fid2_ybin_[det_idx],_geo_fid2_ymin_[det_idx],_geo_fid2_ymax_[det_idx]));
 		}
 		if(cart[0] == space_dims[0]-1){
 			if(tmp_1d.size()>0){
 				tmp_2d.push_back(tmp_1d);
 				tmp_1d.clear();
 			}
+			if(tmp2_1d.size()>0){
+				tmp2_2d.push_back(tmp2_1d);
+				tmp2_1d.clear();
+			}
 			if(cart[1] == space_dims[1]-1){
 				if(tmp_2d.size()>0){
 					tmp_3d.push_back(tmp_2d);
 					tmp_2d.clear();
+				}
+				if(tmp2_2d.size()>0){
+					tmp2_3d.push_back(tmp2_2d);
+					tmp2_2d.clear();
 				}
 				if(cart[2] == space_dims[2]-1){
 					if(tmp_3d.size()>0){
 						tmp_4d.push_back(tmp_3d);
 						tmp_3d.clear();
 					}
+					if(tmp2_3d.size()>0){
+						tmp2_4d.push_back(tmp2_3d);
+						tmp2_3d.clear();
+					}
 					if(cart[3] == space_dims[3]-1){
 						if(tmp_4d.size()>0){
 							tmp_5d.push_back(tmp_4d);
 							tmp_4d.clear();
 						}
+						if(tmp2_4d.size()>0){
+							tmp2_5d.push_back(tmp2_4d);
+							tmp2_4d.clear();
+						}
 						if(cart[4] == space_dims[4]-1){
 							if(tmp_5d.size()>0){
 								_Geo_Fid_hist.push_back(tmp_5d);
 								tmp_5d.clear();
+							}
+							if(tmp2_5d.size()>0){
+								_Geo_Fid2_hist.push_back(tmp2_5d);
+								tmp2_5d.clear();
 							}
 						}
 					}
@@ -5806,48 +6031,89 @@ void Histogram::Geo_Fid_Make(std::shared_ptr<Flags> flags_){
 }
 std::vector<int> Histogram::Geo_Fid_idx(const char* species_,const char* detector_, const char* sec_, const char* cut_, const char* pcut_, int det_seg_, int det_side_, std::shared_ptr<Flags> flags_){
 	std::vector<int> idx;
-	int species_idx = fun::species_idx(species_)+fun::species_offset(species_,pcut_,flags_);
+	int species_idx = fun::species_idx(species_);//+fun::species_offset(species_,pcut_,flags_);
 	idx.push_back(species_idx);
-	if(detector_=="cc"){
-		idx.push_back(0);
-	}else if(detector_=="sc"){
-		idx.push_back(1);
-	}else if(detector_=="ec"){
-		idx.push_back(2);
+	if(detector_==_cc_){
+		if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),0)){
+			idx.push_back(0);
+		}else{
+			idx.push_back(-1);
+		}
+	}else if(detector_==_sc_){
+		if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),0)){
+			if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),1)){
+				idx.push_back(1);
+			}else{
+				idx.push_back(-1);
+			}
+		}else{
+			if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),1)){
+				idx.push_back(0);
+			}else{
+				idx.push_back(-1);
+			}
+		}
+	}else if(detector_==_ec_){
+		if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),0)){
+			if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),1)){
+				if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),2)){
+					idx.push_back(2);
+				}else{
+					idx.push_back(-1);
+				}
+			}else{
+				if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),2)){
+					idx.push_back(1);
+				}else{
+					idx.push_back(-1);
+				}
+			}
+		}else{
+			if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),1)){
+				if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),2)){
+					idx.push_back(1);
+				}else{
+					idx.push_back(-1);
+				}
+			}else{
+				if(flags_->Flags::Plot_Fid_Geo(fun::species_idx(species_),2)){
+					idx.push_back(0);
+				}else{
+					idx.push_back(-1);
+				}
+			}
+		}
 	}else{
 		idx.push_back(-1);
 	}
 	idx.push_back(fun::sector_idx(sec_));
 	idx.push_back(fun::cut_idx(cut_));
-	if(pcut_==_event_){
-		idx.push_back(-1);
-	}else{
-		if(species_==_ele_){
-			if(fun::ecut_perform(pcut_,flags_)){
-				if(pcut_==_none_ && cut_==_no_cut_){
-					idx.push_back(fun::ecut_idx(pcut_)+fun::ecut_offset(pcut_,flags_));
-				}else if(cut_!=_no_cut_){
-					idx.push_back(fun::ecut_idx(pcut_)+fun::ecut_offset(pcut_,flags_)-1);
-				}else{
-					idx.push_back(-1);
-				}
-				//idx.push_back(fun::ecut_idx(pcut_)+fun::ecut_offset(pcut_,flags_));
+	
+	if(species_==_ele_){
+		if(fun::ecut_perform(pcut_,flags_)){
+			if(pcut_==_none_ && cut_==_no_cut_){
+				idx.push_back(fun::ecut_idx(pcut_)+fun::ecut_offset(pcut_,flags_));
+			}else if(cut_!=_no_cut_){
+				idx.push_back(fun::ecut_idx(pcut_)+fun::ecut_offset(pcut_,flags_)-1);
 			}else{
 				idx.push_back(-1);
 			}
+			//idx.push_back(fun::ecut_idx(pcut_)+fun::ecut_offset(pcut_,flags_));
 		}else{
-			if(fun::hcut_perform(species_, pcut_,flags_)){
-				if(pcut_==_none_ && cut_==_no_cut_){
-					idx.push_back(fun::hcut_idx(pcut_)+fun::hcut_offset(species_,pcut_,flags_));
-				}else if(cut_!=_no_cut_){
-					idx.push_back(fun::hcut_idx(pcut_)+fun::hcut_offset(species_,pcut_,flags_)-1);
-				}else{
-					idx.push_back(-1);
-				}
-				//idx.push_back(fun::hcut_idx(pcut_)+fun::hcut_offset(species_,pcut_,flags_));
+			idx.push_back(-1);
+		}
+	}else{
+		if(fun::hcut_perform(species_, pcut_,flags_)){
+			if(pcut_==_none_ && cut_==_no_cut_){
+				idx.push_back(fun::hcut_idx(pcut_)+fun::hcut_offset(species_,pcut_,flags_));
+			}else if(cut_!=_no_cut_){
+				idx.push_back(fun::hcut_idx(pcut_)+fun::hcut_offset(species_,pcut_,flags_)-1);
 			}else{
 				idx.push_back(-1);
 			}
+			//idx.push_back(fun::hcut_idx(pcut_)+fun::hcut_offset(species_,pcut_,flags_));
+		}else{
+			idx.push_back(-1);
 		}
 	}
 	if(detector_=="cc"){
@@ -5865,51 +6131,151 @@ std::vector<int> Histogram::Geo_Fid_idx(const char* species_,const char* detecto
 void Histogram::Geo_Fid_Fill(float x_, float y_, float weight_, const char* species_, const char* detector_, const char* sec_, const char* cut_, const char* pcut_, int det_seg_, int det_side_, std::shared_ptr<Flags> flags_){
 	//std::cout<<"Attempting to fill Geo Fid\n";
 	//if(!flags_->CC_Geo() && !flags_->SC_Geo() && !flags_->EC_Geo()){ return;}
-	if(!flags_->Flags::Plot_CC_Geo() && !flags_->Flags::Plot_SC_Geo() && !flags_->Flags::Plot_EC_Geo()){ return;}
+	int sp_idx = fun::species_idx(species_);
+	int det_idx = fun::geo_det_idx(detector_);
+
+	if(!flags_->Flags::Plot_Fid_Geo(sp_idx,det_idx)){ return;}
 	std::vector<int> idx = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,det_seg_,det_side_,flags_);
 	
-	float x_cent = detect::x_det_center(x_,y_,fun::sector_idx(sec_)+1);
-	float y_cent = detect::y_det_center(x_,y_,fun::sector_idx(sec_)+1);
-
-	//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" paddle:" <<det_seg_ <<" side:" <<det_side_ <<" x:" <<x_ <<" y:" <<y_ <<" x_c:" <<x_cent <<" y_c:" <<y_cent <<"\n";
-	//fun::print_vector_idx(idx);
 	
-	if(Histogram::OK_Idx(idx)){
-		_Geo_Fid_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Fill(x_cent,y_cent,weight_);//Sector
-		_Geo_Fid_hist[idx[0]][idx[1]][6][idx[3]][idx[4]][idx[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
-	}
-	if(detector_ == "cc"){
-		//Sum over All Segments, split by side
-		std::vector<int> idx2 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_cc_segments_,det_side_,flags_);
-		//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
-		//fun::print_vector_idx(idx);
-		if(Histogram::OK_Idx(idx2)){
-			_Geo_Fid_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]][idx2[5]]->Fill(x_cent,y_cent,weight_);//Sector
-			_Geo_Fid_hist[idx2[0]][idx2[1]][6][idx2[3]][idx2[4]][idx2[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+	//std::cout<<"Filling Fid Geo " <<species_ <<" " <<detector_ <<" with: ";
+	//std::cout<<"\tx:" <<x_ <<" y:" <<y_ <<" weight:" <<weight_ <<" sec:" <<sec_ <<" cut:" <<cut_ <<" pcut_:" <<pcut_ <<" det_seg:" <<det_seg_ <<" det_side:" <<det_side_ <<"\n";
+	//fun::print_vector_idx(idx);
+	//if(fun::check_sec(sec_,x_,y_) || (detector_ == _sc_ && fun::check_sec(_sec1_,x_,y_))){ 
+	//std::cout<<"x:" <<x_ <<" " <<isnan(x_) <<" y:" <<y_ <<" " <<isnan(y_) <<"\n";
+	if(!isnan(x_) && !isnan(y_)){
+
+		float x_cent = detect::x_det_center(x_,y_,fun::sector_idx(sec_)+1);
+		float y_cent = detect::y_det_center(x_,y_,fun::sector_idx(sec_)+1);
+		if(detector_ == _sc_){//All the x-y coordinates for SC are sector centered, but not in the way I want. 
+			x_cent = detect::x_det_center(x_,y_,fun::sector_idx(_sec1_)+1);
+			y_cent = detect::y_det_center(x_,y_,fun::sector_idx(_sec1_)+1);
 		}
-		//Sum over all segments, add sides together
-		std::vector<int> idx3 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_cc_segments_,3,flags_);
-		//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+		//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" paddle:" <<det_seg_ <<" side:" <<det_side_ <<" x:" <<x_ <<" y:" <<y_ <<" x_c:" <<x_cent <<" y_c:" <<y_cent <<"\n";
 		//fun::print_vector_idx(idx);
-		if(Histogram::OK_Idx(idx3)){
-			_Geo_Fid_hist[idx3[0]][idx3[1]][idx3[2]][idx3[3]][idx3[4]][idx3[5]]->Fill(x_cent,y_cent,weight_);//Sector
-			_Geo_Fid_hist[idx3[0]][idx3[1]][6][idx3[3]][idx3[4]][idx3[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+		
+		if(Histogram::OK_Idx(idx)){
+			//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" paddle:" <<det_seg_ <<" side:" <<det_side_ <<" x:" <<x_ <<" y:" <<y_ <<" x_c:" <<x_cent <<" y_c:" <<y_cent <<"\n";
+			//fun::print_vector_idx(idx);
+			_Geo_Fid_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Fill(x_cent,y_cent,weight_);//Sector
+			_Geo_Fid2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Fill(x_,y_,weight_);//Sector
+			idx = Histogram::Geo_Fid_idx(species_,detector_,_sec_all_,cut_,pcut_,det_seg_,det_side_,flags_);
+			//fun::print_vector_idx(idx);
+			_Geo_Fid_hist[idx[0]][idx[1]][6][idx[3]][idx[4]][idx[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+			_Geo_Fid2_hist[idx[0]][idx[1]][6][idx[3]][idx[4]][idx[5]]->Fill(x_,y_,weight_);//All Sectors
 		}
-	}else if(detector_ == "sc"){
-		//Sum over all Paddles
-		std::vector<int> idx4 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_sc_paddles_,det_side_,flags_);
-		//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
-		//fun::print_vector_idx(idx);
-		if(Histogram::OK_Idx(idx4)){
-			_Geo_Fid_hist[idx4[0]][idx4[1]][idx4[2]][idx4[3]][idx4[4]][idx4[5]]->Fill(x_cent,y_cent,weight_);//Sector
-			_Geo_Fid_hist[idx4[0]][idx4[1]][6][idx4[3]][idx4[4]][idx4[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+		if(detector_ == _cc_){
+			//Sum over All Segments, split by side
+			std::vector<int> idx2 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_cc_segments_,det_side_,flags_);
+			//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+			//fun::print_vector_idx(idx);
+			if(Histogram::OK_Idx(idx2)){
+				_Geo_Fid_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]][idx2[5]]->Fill(x_cent,y_cent,weight_);//Sector
+				_Geo_Fid_hist[idx2[0]][idx2[1]][6][idx2[3]][idx2[4]][idx2[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+				_Geo_Fid2_hist[idx2[0]][idx2[1]][idx2[2]][idx2[3]][idx2[4]][idx2[5]]->Fill(x_,y_,weight_);//Sector
+				_Geo_Fid2_hist[idx2[0]][idx2[1]][6][idx2[3]][idx2[4]][idx2[5]]->Fill(x_,y_,weight_);//All Sectors
+			}
+			//Sum over all segments, add sides together
+			std::vector<int> idx3 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_cc_segments_,3,flags_);
+			//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+			//fun::print_vector_idx(idx);
+			if(Histogram::OK_Idx(idx3)){
+				_Geo_Fid_hist[idx3[0]][idx3[1]][idx3[2]][idx3[3]][idx3[4]][idx3[5]]->Fill(x_cent,y_cent,weight_);//Sector
+				_Geo_Fid_hist[idx3[0]][idx3[1]][6][idx3[3]][idx3[4]][idx3[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+				_Geo_Fid2_hist[idx3[0]][idx3[1]][idx3[2]][idx3[3]][idx3[4]][idx3[5]]->Fill(x_,y_,weight_);//Sector
+				_Geo_Fid2_hist[idx3[0]][idx3[1]][6][idx3[3]][idx3[4]][idx3[5]]->Fill(x_,y_,weight_);//All Sectors
+			}
+		}else if(detector_ == _sc_){
+			//Sum over all Paddles
+			std::vector<int> idx4 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_sc_paddles_,det_side_,flags_);
+			//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+			//fun::print_vector_idx(idx);
+			if(Histogram::OK_Idx(idx4)){
+				_Geo_Fid_hist[idx4[0]][idx4[1]][idx4[2]][idx4[3]][idx4[4]][idx4[5]]->Fill(x_cent,y_cent,weight_);//Sector
+				_Geo_Fid_hist[idx4[0]][idx4[1]][6][idx4[3]][idx4[4]][idx4[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+				_Geo_Fid2_hist[idx4[0]][idx4[1]][idx4[2]][idx4[3]][idx4[4]][idx4[5]]->Fill(x_,y_,weight_);//Sector
+				_Geo_Fid2_hist[idx4[0]][idx4[1]][6][idx4[3]][idx4[4]][idx4[5]]->Fill(x_,y_,weight_);//All Sectors
+			}
+		}/*else if(detector_ == _ec_){
+			std::vector<int> idx5 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,0,0,flags_);
+			//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+			//fun::print_vector_idx(idx);
+			if(Histogram::OK_Idx(idx5)){
+				_Geo_Fid_hist[idx5[0]][idx5[1]][idx5[2]][idx5[3]][idx5[4]][idx5[5]]->Fill(x_cent,y_cent,weight_);//Sector
+				_Geo_Fid_hist[idx5[0]][idx5[1]][6][idx5[3]][idx5[4]][idx5[5]]->Fill(x_cent,y_cent,weight_);//All Sectors
+			}
+		}*/
+		/*if(Histogram::OK_Idx(idx)){
+			_Geo_Fid2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]]->Fill(x_,y_,weight_);//Sector
+			_Geo_Fid2_hist[idx[0]][idx[1]][6][idx[3]][idx[4]][idx[5]]->Fill(x_,y_,weight_);//All Sectors
 		}
+		//Full range histograms
+		if(detector_ == _cc_){
+			//Sum over All Segments, split by side
+			std::vector<int> idx22 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_cc_segments_,det_side_,flags_);
+			//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+			//fun::print_vector_idx(idx);
+			if(Histogram::OK_Idx(idx22)){
+				_Geo_Fid2_hist[idx22[0]][idx22[1]][idx22[2]][idx22[3]][idx22[4]][idx22[5]]->Fill(x_,y_,weight_);//Sector
+				_Geo_Fid2_hist[idx22[0]][idx22[1]][6][idx22[3]][idx22[4]][idx22[5]]->Fill(x_,y_,weight_);//All Sectors
+			}
+			//Sum over all segments, add sides together
+			std::vector<int> idx23 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_cc_segments_,3,flags_);
+			//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+			//fun::print_vector_idx(idx);
+			if(Histogram::OK_Idx(idx23)){
+				_Geo_Fid2_hist[idx23[0]][idx23[1]][idx23[2]][idx23[3]][idx23[4]][idx23[5]]->Fill(x_,y_,weight_);//Sector
+				_Geo_Fid2_hist[idx23[0]][idx23[1]][6][idx23[3]][idx23[4]][idx23[5]]->Fill(x_,y_,weight_);//All Sectors
+			}
+		}else if(detector_ == _sc_){
+			//Sum over all Paddles
+			std::vector<int> idx24 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_sc_paddles_,det_side_,flags_);
+			//std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+			//fun::print_vector_idx(idx);
+			if(Histogram::OK_Idx(idx24)){
+				_Geo_Fid2_hist[idx24[0]][idx24[1]][idx24[2]][idx24[3]][idx24[4]][idx24[5]]->Fill(x_,y_,weight_);//Sector
+				_Geo_Fid2_hist[idx24[0]][idx24[1]][6][idx24[3]][idx24[4]][idx24[5]]->Fill(x_,y_,weight_);//All Sectors
+			}
+		}else if(detector_ == _ec_){
+			//Sum over all Paddles
+			std::vector<int> idx25 = Histogram::Geo_Fid_idx(species_,detector_,sec_,cut_,pcut_,_num_sc_paddles_,det_side_,flags_);
+			std::cout<<"Filling " <<species_ <<" " <<detector_ <<" " <<sec_ <<" " <<cut_ <<" " <<pcut_ <<" x:" <<x_ <<" y:" <<y_ <<"\n";
+			fun::print_vector_idx(idx25);
+			if(Histogram::OK_Idx(idx25)){
+				_Geo_Fid2_hist[idx25[0]][idx25[1]][idx25[2]][idx25[3]][idx25[4]][idx25[5]]->Fill(x_,y_,weight_);//Sector
+				idx25 = Histogram::Geo_Fid_idx(species_,detector_,_sec_all_,cut_,pcut_,_num_sc_paddles_,det_side_,flags_);
+				fun::print_vector_idx(idx25);
+				_Geo_Fid2_hist[idx25[0]][idx25[1]][6][idx25[3]][idx25[4]][idx25[5]]->Fill(x_,y_,weight_);//All Sectors
+			}
+		}*/
 	}
 }
 
 void Histogram::Geo_Fid_Write(std::shared_ptr<Flags> flags_){
 	std::cout<<"Trying to Write Geometric Fiducial Plots\n";
-	if(!flags_->Flags::Plot_CC_Geo() && !flags_->Flags::Plot_SC_Geo() && !flags_->Flags::Plot_EC_Geo()){ return;}
+	bool plot_geo = false;
+	bool plot_cc[4] = {false,false,false,false};
+	bool plot_sc[4] = {false,false,false,false};
+	bool plot_ec[4] = {false,false,false,false};
+	bool plot_par[4] = {false,false,false,false};
+	for(int i=0; i<4; i++){
+		if(flags_->Flags::Plot_Fid_Geo(i,0)){
+			plot_cc[i] = true;
+		}
+		if(flags_->Flags::Plot_Fid_Geo(i,1)){
+			plot_sc[i] = true;
+		}
+		if(flags_->Flags::Plot_Fid_Geo(i,2)){
+			plot_ec[i] = true;
+		}
+		for(int j=0; j<3; j++){
+			if(flags_->Flags::Plot_Fid_Geo(i,j)){
+				plot_geo=true;
+				plot_par[i] = true;
+			}
+		}
+	}
+	if(!plot_geo){ return;}
 	std::cout<<"Writing Geometric Fiducial Plots\n";
 	std::vector<long> space_dims(6);
 	space_dims[5] = std::distance(std::begin(_species_), std::end(_species_)); //Particle Species
@@ -5928,31 +6294,35 @@ void Histogram::Geo_Fid_Write(std::shared_ptr<Flags> flags_){
 	TDirectory* dir_geo_fid_sub[4][3+1][7+1][std::distance(std::begin(_ecuts_), std::end(_ecuts_))+1];//{sector,proton_thesh}
 	//Histogram::W_bot(Wbin),Histogram::W_top(Wbin),Histogram::Q2_bot(Q2bin),Histogram::Q2_top(Q2bin),Histogram::Xij_Bin_Min(j,Xij,Wbin,var),Histogram::Xij_Bin_Max(j,Xij,Wbin,var)
 	for(int i=0; i<4; i++){
-		sprintf(dirname,"Geo Fid %s",species[i]);
-		dir_geo_fid_sub[i][0][0][0] = dir_geo_fid->mkdir(dirname);
-		//std::cout<<"\tMade " <<i <<" " <<0 <<" " <<0 <<" " <<0 <<"\n";
-		for(int j=0; j<3; j++){
-			sprintf(dirname,"Geo Fid %s %s",species[i],detectors[j+1]);
-			//std::cout<<"\tMade " <<i <<" " <<j+1 <<" " <<0 <<" " <<0 <<"\n";
-			dir_geo_fid_sub[i][j+1][0][0] = dir_geo_fid_sub[i][0][0][0]->mkdir(dirname);
-			for(int k=0; k<7; k++){
-				sprintf(dirname,"Geo Fid %s %s %s",species[i],detectors[j+1],_sector_[k]);
-				dir_geo_fid_sub[i][j+1][k+1][0] = dir_geo_fid_sub[i][j+1][0][0]->mkdir(dirname);
-				//std::cout<<"\tMade " <<i <<" " <<j+1 <<" " <<k+1 <<" " <<0 <<"\n";
-				if(species[i]==_ele_){
-					for(int l=0; l<std::distance(std::begin(_ecuts_), std::end(_ecuts_)); l++){
-						if(fun::ecut_perform(_ecuts_[l],flags_) && _ecuts_[l]!=_event_){
-							sprintf(dirname,"Geo Fid %s %s %s %s",species[i],detectors[j+1],_sector_[k],_ecuts_[l]);
-							//std::cout<<"\tMade " <<i <<" " <<j+1 <<" " <<k+1 <<" " <<l+1 <<"\t" <<species[i] <<" " <<detectors[j+1] <<" " <<_sector_[k] <<" " <<_ecuts_[l] <<"\n";
-							dir_geo_fid_sub[i][j+1][k+1][l+1] = dir_geo_fid_sub[i][j+1][k+1][0]->mkdir(dirname);
-						}
-					}
-				}else{
-					for(int l=0; l<std::distance(std::begin(_hcuts_), std::end(_hcuts_)); l++){
-						if(fun::hcut_perform(species[i],_hcuts_[l],flags_) && _hcuts_[l]!=_event_){
-							sprintf(dirname,"Geo Fid %s %s %s %s",species[i],detectors[j+1],_sector_[k],_hcuts_[l]);
-							//std::cout<<"\tMade " <<i <<" " <<j+1 <<" " <<k+1 <<" " <<l+1 <<"\t" <<species[i] <<" " <<detectors[j+1] <<" " <<_sector_[k] <<" " <<_hcuts_[l] <<"\n";
-							dir_geo_fid_sub[i][j+1][k+1][l+1] = dir_geo_fid_sub[i][j+1][k+1][0]->mkdir(dirname);
+		if(plot_par[i]){
+			sprintf(dirname,"Geo Fid %s",species[i]);
+			dir_geo_fid_sub[i][0][0][0] = dir_geo_fid->mkdir(dirname);
+			//std::cout<<"\tMade " <<i <<" " <<0 <<" " <<0 <<" " <<0 <<"\n";
+			for(int j=0; j<3; j++){
+				if(flags_->Plot_Fid_Geo(i,j)){
+					sprintf(dirname,"Geo Fid %s %s",species[i],detectors[j+1]);
+					//std::cout<<"\tMade " <<i <<" " <<j+1 <<" " <<0 <<" " <<0 <<"\n";
+					dir_geo_fid_sub[i][j+1][0][0] = dir_geo_fid_sub[i][0][0][0]->mkdir(dirname);
+					for(int k=0; k<7; k++){
+						sprintf(dirname,"Geo Fid %s %s %s",species[i],detectors[j+1],_sector_[k]);
+						dir_geo_fid_sub[i][j+1][k+1][0] = dir_geo_fid_sub[i][j+1][0][0]->mkdir(dirname);
+						//std::cout<<"\tMade " <<i <<" " <<j+1 <<" " <<k+1 <<" " <<0 <<"\n";
+						if(species[i]==_ele_){
+							for(int l=0; l<std::distance(std::begin(_ecuts_), std::end(_ecuts_)); l++){
+								if(fun::ecut_perform(_ecuts_[l],flags_)){
+									sprintf(dirname,"Geo Fid %s %s %s %s",species[i],detectors[j+1],_sector_[k],_ecuts_[l]);
+									//std::cout<<"\tMade " <<i <<" " <<j+1 <<" " <<k+1 <<" " <<l+1 <<"\t" <<species[i] <<" " <<detectors[j+1] <<" " <<_sector_[k] <<" " <<_ecuts_[l] <<"\n";
+									dir_geo_fid_sub[i][j+1][k+1][l+1] = dir_geo_fid_sub[i][j+1][k+1][0]->mkdir(dirname);
+								}
+							}
+						}else{
+							for(int l=0; l<std::distance(std::begin(_hcuts_), std::end(_hcuts_)); l++){
+								if(fun::hcut_perform(species[i],_hcuts_[l],flags_)){
+									sprintf(dirname,"Geo Fid %s %s %s %s",species[i],detectors[j+1],_sector_[k],_hcuts_[l]);
+									//std::cout<<"\tMade " <<i <<" " <<j+1 <<" " <<k+1 <<" " <<l+1 <<"\t" <<species[i] <<" " <<detectors[j+1] <<" " <<_sector_[k] <<" " <<_hcuts_[l] <<"\n";
+									dir_geo_fid_sub[i][j+1][k+1][l+1] = dir_geo_fid_sub[i][j+1][k+1][0]->mkdir(dirname);
+								}
+							}
 						}
 					}
 				}
@@ -5985,29 +6355,310 @@ void Histogram::Geo_Fid_Write(std::shared_ptr<Flags> flags_){
 		//std::cout<<"********** " <<species_idx <<" " <<det_idx <<" " <<sec_idx <<" " <<cut_idx <<" " <<pcut_idx <<"\n";
 		pad_idx = Histogram::Geo_Fid_Paddle_Idx(det_idx,seg_idx);
 		side_idx = Histogram::Geo_Fid_Side_Idx(det_idx,seg_idx);
-		if(species[species_idx]==_ele_){
-			hist_idx = Histogram::Geo_Fid_idx(species[species_idx],detectors[det_idx+1],_sector_[sec_idx],_cut_[cut_idx],_ecuts_[pcut_idx],pad_idx,side_idx,flags_);
-			//std::cout<<"\t" <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_cut_[cut_idx] <<" " <<_ecuts_[pcut_idx] <<"\n";
-		}else if(pcut_idx < std::distance(std::begin(_hcuts_), std::end(_hcuts_))){
-			hist_idx = Histogram::Geo_Fid_idx(species[species_idx],detectors[det_idx+1],_sector_[sec_idx],_cut_[cut_idx],_hcuts_[pcut_idx],pad_idx,side_idx,flags_);
-			//std::cout<<"\t" <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_cut_[cut_idx] <<" " <<_hcuts_[pcut_idx] <<"\n";
-		}else{
-			hist_idx = Histogram::Geo_Fid_idx("no","no","no","no","no",pad_idx,side_idx,flags_);
-		}
-		if(Histogram::OK_Idx(hist_idx)){
-			//std::cout<<"\tcd()-> " <<species_idx <<" " <<det_idx+1 <<" " <<sec_idx+1 <<" " <<pcut_idx+1 <<"\n";
-			if(species_idx == 0){
-				//std::cout<<"\tcd()-> " <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_ecuts_[pcut_idx] <<"\n";
+		if(flags_->Flags::Plot_Fid_Geo(species_idx,det_idx)){
+			if(species[species_idx]==_ele_){
+				hist_idx = Histogram::Geo_Fid_idx(species[species_idx],detectors[det_idx+1],_sector_[sec_idx],_cut_[cut_idx],_ecuts_[pcut_idx],pad_idx,side_idx,flags_);
+				//std::cout<<"\t" <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_cut_[cut_idx] <<" " <<_ecuts_[pcut_idx] <<"\n";
+			}else if(pcut_idx < std::distance(std::begin(_hcuts_), std::end(_hcuts_))){
+				hist_idx = Histogram::Geo_Fid_idx(species[species_idx],detectors[det_idx+1],_sector_[sec_idx],_cut_[cut_idx],_hcuts_[pcut_idx],pad_idx,side_idx,flags_);
+				//std::cout<<"\t" <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_cut_[cut_idx] <<" " <<_hcuts_[pcut_idx] <<"\n";
 			}else{
-				//std::cout<<"\tcd()-> " <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_ecuts_[pcut_idx] <<"\n";
+				hist_idx = Histogram::Geo_Fid_idx("no","no","no","no","no",pad_idx,side_idx,flags_);
 			}
-			//fun::print_vector_idx(hist_idx);
-			dir_geo_fid_sub[species_idx][det_idx+1][sec_idx+1][pcut_idx+1]->cd();
-			//std::cout<<"\t" <<_Geo_Fid_hist[hist_idx[0]][hist_idx[1]][hist_idx[2]][hist_idx[3]][hist_idx[4]]->GetName() <<"\n";
-			_Geo_Fid_hist[hist_idx[0]][hist_idx[1]][hist_idx[2]][hist_idx[3]][hist_idx[4]][hist_idx[5]]->Write();
+			if(Histogram::OK_Idx(hist_idx)){
+				//std::cout<<"\tcd()-> " <<species_idx <<" " <<det_idx+1 <<" " <<sec_idx+1 <<" " <<pcut_idx+1 <<"\n";
+				if(species_idx == 0){
+					//std::cout<<"\tcd()-> " <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_ecuts_[pcut_idx] <<"\n";
+				}else{
+					//std::cout<<"\tcd()-> " <<species[species_idx] <<" " <<detectors[det_idx+1] <<" " <<_sector_[sec_idx] <<" " <<_ecuts_[pcut_idx] <<"\n";
+				}
+				//fun::print_vector_idx(hist_idx);
+				dir_geo_fid_sub[species_idx][det_idx+1][sec_idx+1][pcut_idx+1]->cd();
+				//std::cout<<"\t" <<_Geo_Fid_hist[hist_idx[0]][hist_idx[1]][hist_idx[2]][hist_idx[3]][hist_idx[4]]->GetName() <<"\n";
+				_Geo_Fid_hist[hist_idx[0]][hist_idx[1]][hist_idx[2]][hist_idx[3]][hist_idx[4]][hist_idx[5]]->Write();
+				_Geo_Fid2_hist[hist_idx[0]][hist_idx[1]][hist_idx[2]][hist_idx[3]][hist_idx[4]][hist_idx[5]]->Write();
+			}
 		}
 	}
 
 }
 
 //*------------------------------End Detector Geometric Cut Peak------------------*
+
+//*------------------------------Start Bin Centering Corrections for Polarization------------------*
+	//double Xij_Bin_Min(int bin_, int Xij_, int W_bin_, int var_set_);
+	//double Xij_Bin_Max(int bin_, int Xij_, int W_bin_, int var_set_);
+	void Histogram::Bin_Centering2_Make(std::shared_ptr<Flags> flags_){
+	//[W][Q2][Var Set][Xij][Bin Xij][W,Q2,Xij projection]
+		if(!flags_->Plot_Bin_Centering2()){
+			return;
+		}
+		std::cout<<"Making Bin Centering Correction Histograms\n";
+		std::vector<long> space_dims(4);
+		space_dims[3] = 29; //W Bins
+		space_dims[2] = 5; //Q2 Bins
+		space_dims[1] = 3; //Var Set
+		space_dims[0] = 4; //Xij
+		CartesianGenerator cart(space_dims);
+		char hname[100];
+		TH1D_ptr_1d hist_1d;
+		TH1D_ptr_2d hist_2d;
+		TH1D_ptr_3d hist_3d;
+		TH1D_ptr_4d hist_4d;
+		TH1D_ptr_5d hist_5d;
+		TH1D_ptr_6d hist_6d;
+		double bot;
+		double top;
+		int num_bins_xij[5] = {_MM_bins_+2*_MM_wider_,_MM_bins_+2*_MM_wider_,_theta_bins_,_alpha_bins_,_phi_bins_};
+		int num_bins_fin = 0;
+		int Wbin = 0;
+		int Q2bin = 0;
+		int Xij=0;
+		int var=0;
+		char proj_name[100];
+		char* xij_names[] = {"MM1","MM2","theta","alpha","phi"};
+		while(cart.GetNextCombination()){
+			Wbin = cart[3];
+			Q2bin=cart[2];
+			Xij=cart[0];
+			var=cart[1];
+			for(int k=0; k<_phi_bins_; k++){
+				for(int j=0; j<num_bins_xij[Xij]; j++){
+					for(int i=0; i<4; i++){
+						switch(i){
+							case 0: 
+								num_bins_fin = 29;//W
+								sprintf(proj_name,"W");
+								bot = Histogram::W_bot(Wbin);
+								top = Histogram::W_top(Wbin);
+							break;
+							case 1: 
+								num_bins_fin = 5;//Q2
+								sprintf(proj_name,"Q2");
+								bot = Histogram::Q2_bot(Q2bin);
+								top = Histogram::Q2_top(Q2bin);
+							break;
+							case 2: 
+								num_bins_fin = num_bins_xij[Xij];//Xij
+								sprintf(proj_name,"%s_%s",_var_names_[var],xij_names[Xij]);
+								bot = Histogram::Xij_Bin_Min(j,Xij,Wbin,var);
+								top = Histogram::Xij_Bin_Max(j,Xij,Wbin,var);
+							break;
+							case 3: 
+								num_bins_fin = num_bins_xij[4];//phi
+								sprintf(proj_name,"%s_%s",_var_names_[var],xij_names[4]);
+								bot = Histogram::Xij_Bin_Min(k,4,Wbin,var);
+								top = Histogram::Xij_Bin_Max(k,4,Wbin,var);
+							break;
+							default:
+								std::cout<<"Improper variable choice for bin centering\n";
+							break;
+						}
+						sprintf(hname,"%s_Bin_Center_W:%.3f-%.3f_Q2:%.2f-%.2f_%s_%s:%.4f-%.4f_Phi:%.4f-%.4f",proj_name,Histogram::W_bot(Wbin),Histogram::W_top(Wbin),Histogram::Q2_bot(Q2bin),Histogram::Q2_top(Q2bin),_var_names_[var],xij_names[Xij],Histogram::Xij_Bin_Min(j,Xij,Wbin,var),Histogram::Xij_Bin_Max(j,Xij,Wbin,var),Histogram::Xij_Bin_Min(k,4,Wbin,var),Histogram::Xij_Bin_Max(k,4,Wbin,var));
+						hist_1d.push_back(new TH1D(hname,hname,11,bot,top));
+					}
+					hist_2d.push_back(hist_1d);
+					hist_1d.clear();
+				}
+				hist_3d.push_back(hist_2d);
+				hist_2d.clear();
+			}
+			if(hist_3d.size()>0){
+				hist_4d.push_back(hist_3d);
+				hist_3d.clear();
+			}
+			if(cart[0] == space_dims[0]-1){
+				if(hist_4d.size()>0){
+					hist_5d.push_back(hist_4d);
+					hist_4d.clear();
+				}
+				if(cart[1] == space_dims[1]-1){
+					if(hist_5d.size()>0){
+						hist_6d.push_back(hist_5d);
+						hist_5d.clear();
+					}
+					if(cart[2] == space_dims[2]-1){
+						if(hist_6d.size()>0){
+							_Bin_Center2_hist.push_back(hist_6d);
+							hist_6d.clear();
+						}
+					}
+				}
+			}
+		}
+		std::cout<<"\tFinished Making Bin Centering Histograms\n";
+	}
+	std::vector<int> Histogram::Bin_Centering2_idx(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, double phi_val_, int variable_, std::shared_ptr<Flags> flags_){
+		std::vector<int> idx;
+		idx.push_back(Histogram::W_bin(W_));
+		idx.push_back(Histogram::Q2_bin(Q2_));
+		idx.push_back(var_set_);
+		idx.push_back(Xij_);
+		idx.push_back(Histogram::Friend_phi_idx(phi_val_));
+		switch(Xij_){
+			case 0:
+				idx.push_back(Histogram::Friend_MM_idx(Xij_val_,var_set_,Histogram::W_bin(W_)));
+			break;
+			case 1:
+				idx.push_back(Histogram::Friend_MM2_idx(Xij_val_,var_set_,Histogram::W_bin(W_)));
+			break;
+			case 2:
+				idx.push_back(Histogram::Friend_theta_idx(Xij_val_));
+			break;
+			case 3:
+				idx.push_back(Histogram::Friend_alpha_idx(Xij_val_));
+			break;
+			case 4:
+				idx.push_back(Histogram::Friend_phi_idx(Xij_val_));
+			break;
+			default:
+				idx.push_back(-1);
+			break;
+		}
+		idx.push_back(variable_);
+		return idx;
+	}
+	void Histogram::Bin_Centering2_Fill(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, double phi_val_, int variable_, double weight_, std::shared_ptr<Flags> flags_){
+		if(!flags_->Plot_Bin_Centering2()){
+			return;
+		}
+		std::vector<int> idx = Histogram::Bin_Centering2_idx(W_,Q2_,var_set_,Xij_,Xij_val_,phi_val_,variable_,flags_);
+		//std::cout<<"Filling Bin Centering Corrections with W:" <<W_ <<" Q2:" <<Q2_ <<" var_set:" <<var_set_ <<" Xij:" <<Xij_ <<" Xij_val:" <<Xij_val_ <<" variable:" <<variable_ <<" weight:" <<weight_ <<"\n";
+		if(Histogram::OK_Idx(idx)){
+			switch(variable_){
+				case 0:
+					_Bin_Center2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]][idx[6]]->Fill(W_,weight_);
+				break;
+				case 1:
+					_Bin_Center2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]][idx[6]]->Fill(Q2_,weight_);
+				break;
+				case 2:
+					_Bin_Center2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]][idx[6]]->Fill(Xij_val_,weight_);
+				break;
+				case 3:
+					_Bin_Center2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]][idx[6]]->Fill(phi_val_,weight_);
+				break;
+				default:
+					std::cout<<"Improper Variable designation for Bin Centering Corrections\n";
+				break;
+			}
+		}
+	}
+	void Histogram::Bin_Centering2_Write(std::shared_ptr<Flags> flags_){
+		if(!flags_->Plot_Bin_Centering2()){ return; }
+		std::cout<<"Writing Bin Centering Plots for Polarization\n";
+		char dir_name[100];
+		//std::cout<<"Making Large Directory:";
+		TDirectory* dir_bc2 = _RootOutputFile->mkdir("Bin Centering2 Plots");
+		//std::cout<<" Done\n";
+		dir_bc2->cd();
+		//std::cout<<"Making Sub Directories: ";
+		TDirectory* dir_bc2_sub[29][5+1][3+1][4+1][4+1];//[W][Q2][var set][xij][W,Q2,Xij,phi]
+		//Histogram::W_bot(Wbin),Histogram::W_top(Wbin),Histogram::Q2_bot(Q2bin),Histogram::Q2_top(Q2bin),Histogram::Xij_Bin_Min(j,Xij,Wbin,var),Histogram::Xij_Bin_Max(j,Xij,Wbin,var)
+		char* xij_names[] = {"MM1","MM2","theta","alpha","phi"};
+		char proj_name[100];
+		for(int i=0; i<29; i++){//W
+			sprintf(dir_name,"Bin Centering2 W:%.3f-%.3f",Histogram::W_bot(i),Histogram::W_top(i));
+			dir_bc2_sub[i][0][0][0][0] = dir_bc2->mkdir(dir_name);
+			dir_bc2_sub[i][0][0][0][0]->cd();
+			for(int j=0; j<5; j++){//Q2
+				sprintf(dir_name,"Bin Centering2 W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_bot(i),Histogram::W_top(i),Histogram::Q2_bot(j),Histogram::Q2_top(j));
+				dir_bc2_sub[i][j+1][0][0][0] = dir_bc2_sub[i][0][0][0][0]->mkdir(dir_name);
+				dir_bc2_sub[i][j+1][0][0][0]->cd();
+				for(int k=0; k<3; k++){//var set
+					sprintf(dir_name,"Bin Centering2 W:%.3f-%.3f Q2:%.2f-%.2f var:%s",Histogram::W_bot(i),Histogram::W_top(i),Histogram::Q2_bot(j),Histogram::Q2_top(j),_var_names_[k]);
+					dir_bc2_sub[i][j+1][k+1][0][0] = dir_bc2_sub[i][j+1][0][0][0]->mkdir(dir_name);
+					dir_bc2_sub[i][j+1][k+1][0][0]->cd();
+					for(int l=0; l<4; l++){//Xij
+						sprintf(dir_name,"Bin Centering2 W:%.3f-%.3f Q2:%.2f-%.2f var:%s Xij:%s",Histogram::W_bot(i),Histogram::W_top(i),Histogram::Q2_bot(j),Histogram::Q2_top(j),_var_names_[k],xij_names[l]);
+						dir_bc2_sub[i][j+1][k+1][l+1][0] = dir_bc2_sub[i][j+1][k+1][0][0]->mkdir(dir_name);
+						dir_bc2_sub[i][j+1][k+1][l+1][0]->cd();
+						for(int m=0; m<4; m++){//{W,Q2,Xij,phi}
+							switch(m){
+								case 0:
+									sprintf(proj_name,"W");
+								break;
+								case 1:
+									sprintf(proj_name,"Q2");
+								break;
+								case 2:
+									sprintf(proj_name,"%s",xij_names[l]);
+								break;
+								case 3:
+									sprintf(proj_name,"%s",xij_names[4]);
+								break;
+								default:
+									sprintf(proj_name,"wrong");
+								break;
+							}
+							sprintf(dir_name,"Bin Centering W:%.3f-%.3f Q2:%.2f-%.2f var:%s Xij:%s proj:%s",Histogram::W_bot(i),Histogram::W_top(i),Histogram::Q2_bot(j),Histogram::Q2_top(j),_var_names_[k],xij_names[l],proj_name);
+							dir_bc2_sub[i][j+1][k+1][l+1][m+1] = dir_bc2_sub[i][j+1][k+1][l+1][0]->mkdir(dir_name);
+						}
+					}
+				}
+			}
+		}
+		std::vector<long> space_dims(4);
+		space_dims[3] = 29; //W Bins
+		space_dims[2] = 5; //Q2 Bins
+		space_dims[1] = 3; //Var Set
+		space_dims[0] = 5; //Xij
+		CartesianGenerator cart(space_dims);
+		char hname[100];
+		std::vector<int> idx;
+		int Wbin, Q2bin, Xij, var;
+		double val, Xij_val, phi_val;
+		int num_bins_xij[5] = {_MM_bins_+2*_MM_wider_,_MM_bins_+2*_MM_wider_,_theta_bins_,_alpha_bins_,_phi_bins_};
+		char * xij_units[5] = {"GeV","GeV","Degrees","Degrees","Degrees"};
+		double top,bot;
+		char xlabel[100];
+		while(cart.GetNextCombination()){
+			Wbin = cart[3];
+			Q2bin=cart[2];
+			Xij=cart[0];
+			var=cart[1];
+			//std::cout<<"W bin:" <<Wbin <<" Q2 bin:" <<Q2bin <<" var:" <<var <<" Xij:" <<Xij <<" going into loop\n";
+			for(int k=0; k<num_bins_xij[4]; k++){
+				phi_val = (Xij_Bin_Min(k,4,Wbin,var)+Xij_Bin_Max(k,4,Wbin,var))/2.0;
+				for(int j=0; j<num_bins_xij[Xij]; j++){
+					Xij_val = (Xij_Bin_Min(j,Xij,Wbin,var)+Xij_Bin_Max(j,Xij,Wbin,var))/2.0;
+					for(int i=0; i<4; i++){//Variable projection
+						switch(i){
+							case 0: 
+								bot = Histogram::W_bot(Wbin);
+								top = Histogram::W_top(Wbin);
+								sprintf(xlabel,"W (GeV)");
+							break;
+							case 1: 
+								bot = Histogram::Q2_bot(Q2bin);
+								top = Histogram::Q2_top(Q2bin);
+								sprintf(xlabel,"Q2 (GeV^2)");
+							break;
+							case 2: 
+								bot = Histogram::Xij_Bin_Min(j,Xij,Wbin,var);
+								top = Histogram::Xij_Bin_Max(j,Xij,Wbin,var);
+								sprintf(xlabel,"%s %s",xij_names[Xij],xij_units[Xij]);
+							break;
+							case 3: 
+								bot = Histogram::Xij_Bin_Min(k,4,Wbin,var);
+								top = Histogram::Xij_Bin_Max(k,4,Wbin,var);
+								sprintf(xlabel,"%s %s",xij_names[4],xij_units[4]);
+							break;
+						}
+						val = (top+bot)/2.0;
+						//std::cout<<"W: " <<W_center(Wbin) <<" Q2:" <<(Q2_bot(Q2bin)+Q2_top(Q2bin))/2.0 <<" var:" <<var <<" Xij:" <<Xij <<" Xij_val:" <<Xij_val <<" variable:" <<i <<"\n";
+						idx = Histogram::Bin_Centering2_idx(W_center(Wbin),(Q2_bot(Q2bin)+Q2_top(Q2bin))/2.0,var,Xij,Xij_val,phi_val,i,flags_);
+						//fun::print_vector_idx(idx);
+						if(Histogram::OK_Idx(idx)){
+							dir_bc2_sub[Wbin][Q2bin+1][var+1][Xij+1][i+1]->cd();
+							_Bin_Center2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]][idx[6]]->SetXTitle(xlabel);
+							_Bin_Center2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]][idx[6]]->SetYTitle("Yield");
+							_Bin_Center2_hist[idx[0]][idx[1]][idx[2]][idx[3]][idx[4]][idx[5]][idx[6]]->Write();
+						}
+					}
+				}
+			}
+		}
+		std::cout<<"\tFinished Writing Bin Centering Plots for Polarization\n";
+	}
+	//*------------------------------End Bin Centering Corrections for Polarization------------------*

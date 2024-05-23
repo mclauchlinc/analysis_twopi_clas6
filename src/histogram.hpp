@@ -45,15 +45,21 @@ static int _fid_xbin_ = 400;//Degrees
 static float _fid_ymin_ = 0.0;//Degrees
 static float _fid_ymax_ = 180.0; //Degrees
 static int _fid_ybin_ = 300;//Degrees
-static float _geo_fid_xmin_[3] = {-300.0,-200.0,-200.0};//Made for detector centering {-600.0,0.0,-400.0};//mm
-static float _geo_fid_xmax_[3] = {300.0,200.0,200.0};//Made for detector centering {600.0,400.0,400.0}; //mm
-static int _geo_fid_xbin_[3] = {300,300,300};//mm
-static float _geo_fid_ymin_[3] = {0.0,0.0,0.0};//Made for detector centering{-600.0,-250.0,-400.0};//mm
-static float _geo_fid_ymax_[3] = {600.0,500.0,500.0};//Made for detector centering{600.0,250.0,400.0}; //mm
-static int _geo_fid_ybin_[3] = {300,300,300};//mm
+static float _geo_fid_xmin_[3] = {-200.0,-175.0,-200.0};//Made for detector centering {-600.0,0.0,-400.0};//mm
+static float _geo_fid_xmax_[3] = {200.0,175.0,200.0};//Made for detector centering {600.0,400.0,400.0}; //mm
+static int _geo_fid_xbin_[3] = {200,200,200};//cm
+static float _geo_fid_ymin_[3] = {50.0,50.0,50.0};//Made for detector centering{-600.0,-250.0,-400.0};//mm
+static float _geo_fid_ymax_[3] = {400.0,400.0,400.0};//Made for detector centering{600.0,250.0,400.0}; //mm
+static int _geo_fid_ybin_[3] = {200,200,200};//cm
 static int _geo_fid_cc_segments_ = 18;
 static int _geo_fid_cc_sides_ = 3;
 static int _geo_fid_sc_paddles_ = 48;
+static float _geo_fid2_xmin_[3] = {-600.0,-500.0,-500.0};
+static float _geo_fid2_xmax_[3] = {600.0,500.0,500.0};
+static int _geo_fid2_xbin_[3] = {600,600,600};
+static float _geo_fid2_ymin_[3] = {-600.0,-500.0,-500.0};
+static float _geo_fid2_ymax_[3] = {600.0,500.0,500.0};
+static int _geo_fid2_ybin_[3] = {600,600,600};
 //Delta T
 static float _delta_xmin_ = 0.0;//GeV
 static float _delta_xmax_ = 6.0; //GeV
@@ -122,6 +128,7 @@ static int _p_bin_bins_= 25;//Steps
 static int _n_cc_seg_ = 18;
 static int _n_cc_lrc_ = 3; 
 static int _n_sec_ = 6; 
+
 
 //THnSparse Binning
 static int _n_var_ = 3; //Number of variable sets
@@ -202,6 +209,7 @@ using TH1D_ptr_3d = std::vector<std::vector<std::vector<TH1D*>>>;
 using TH1D_ptr_4d = std::vector<std::vector<std::vector<std::vector<TH1D*>>>>;
 using TH1D_ptr_5d = std::vector<std::vector<std::vector<std::vector<std::vector<TH1D*>>>>>;
 using TH1D_ptr_6d = std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<TH1D*>>>>>>;
+using TH1D_ptr_7d = std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<TH1D*>>>>>>>;
 
 using TDir_ptr_1d = std::vector<TDirectory*>;
 using TDir_ptr_2d = std::vector<std::vector<TDirectory*>>;
@@ -267,9 +275,9 @@ protected:
 	 double FIDymin = 0.0;
 	 double FIDxmax = 30.0;
 	 double FIDymax = 180.0;
-	 int GEOFIDxres = 300;
-	 int GEOFIDyres = 300;
-	 double GEOFIDxmin = .0;
+	 int GEOFIDxres = 200;
+	 int GEOFIDyres = 200;
+	 double GEOFIDxmin = -30.0;
 	 double GEOFIDymin = 0.0;
 	 double GEOFIDxmax = 30.0;
 	 double GEOFIDymax = 180.0;
@@ -337,14 +345,22 @@ protected:
 
 	long _event_npass[3][4] = {{0,0,0,0},{0,0,0,0},{0,0,0,0}};
 
+	long _ctop[4] = {0,0,0,0};//clean topologies
+	long _itop[4] = {0,0,0,0};//isolated topologies
+	long _cnitop[4] = {0,0,0,0};//clean but not isolated topologies
+	long _caitop[4] = {0,0,0,0};//clean and isolated topologies
+
+
 	 //Making the Histograms
 
 	TH2F_ptr_5d _WQ2_hist;
+	TH2F_ptr_1d _WQ2_yield_hist;
 	Bool_5d _WQ2_made;
 	//TH2F_ptr_5d _Made_WQ2_hist;//[11][6][2][2];//electron cuts, topologies (including pre), Recon vs. thrown, weight (for data this should always be "Recon")
 	TH2F_ptr_7d _Fid_hist;
 	Bool_6d _Fid_made;
 	TH2F_ptr_6d _Geo_Fid_hist;
+	TH2F_ptr_6d _Geo_Fid2_hist;
 
 	//CC Histograms
 	Bool_6d _CC_made;
@@ -377,6 +393,8 @@ protected:
 	//Electron Momentum Correction
 	TH1F_ptr_3d _Pecorr_Angle_hist;
 	TH1F_ptr_3d _Pecorr_Mag_hist;
+	TH2F_ptr_1d _Pecorr_Angle_Dist_hist;
+	TH2F_ptr_2d _Pecorr_Angle_Dist2_hist;
 
 	//Elastic Peak
 	TH1F* _Elastic_Peak_hist[6][3];//[sector][no corr, e_theta corr, all e corr]
@@ -410,6 +428,7 @@ protected:
 	TH1F_ptr_3d _PCorr_Check_hist;
 
 	TH1D_ptr_6d _Bin_Center_hist;//[W][Q2][Var Set][Xij][Bin Xij][W,Q2,Xij projection]
+	TH1D_ptr_7d _Bin_Center2_hist;//[W][Q2][Var Set][Xij][Bin Xij][Phi Bin][W,Q2,Xij,Phi projection]
 
 
 public:
@@ -534,6 +553,14 @@ public:
 	void Bin_Centering_Fill(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, int variable_, double weight_, std::shared_ptr<Flags> flags_);
 	void Bin_Centering_Write(std::shared_ptr<Flags> flags_);
 	//*------------------------------End Bin Centering Corrections------------------*
+	void Clean_Top_Increment(int i_);
+	void Isolated_Top_Increment(int i_);
+	long Clean_Top(int i_);
+	long Isolated_Top(int i_);
+	void Clean_Not_Isolated_Top_Increment(int i_);
+	long Clean_Not_Isolated_Top(int i_);
+	void Clean_and_Isolated_Top_Increment(int i_);
+	long Clean_and_Isolated_Top(int i_);
 	void Top_Increment(int i_);	
 	void Top_Pot_Increment(int i_);	
 	long NTop(int i_);
@@ -557,6 +584,7 @@ public:
 	int Ele_Mag_Corr_Phi_idx(float phi_);
 	std::vector<int> Ele_Mag_Corr_idx(int sector_, float theta_, float phi_, std::shared_ptr<Flags> flags_);
 	void Ele_Mag_Corr_Fill(float pe_, int sector_, float theta_, float phi_, float W_, std::shared_ptr<Flags> flags_);
+	void Ele_Pro_Angle_Dist_Fill(const char* sector_, float theta_,  float thetap_, const char* top_, std::shared_ptr<Flags> flags_);
 	void Ele_Mag_Corr_Write(std::shared_ptr<Flags> flags_);
 	//*------------------------------End Electron Momentum Magnitude Corrections------------------*
 	//*------------------------------Start Proton Energy Loss Corrections------------------*
@@ -579,6 +607,14 @@ public:
 	void Geo_Fid_Fill(float x_, float y_, float weight_, const char* species_, const char* detector_, const char* sec_ ,const char* cut_, const char* pcut_, int det_seg_, int det_side_, std::shared_ptr<Flags> flags_);
 	void Geo_Fid_Write(std::shared_ptr<Flags> flags_);
 	//*------------------------------End Detector Geometric Cut Histograms------------------*
+	//*------------------------------Start Bin Centering Corrections for Polarization------------------*
+	//double Xij_Bin_Min(int bin_, int Xij_, int W_bin_, int var_set_);
+	//double Xij_Bin_Max(int bin_, int Xij_, int W_bin_, int var_set_);
+	void Bin_Centering2_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> Bin_Centering2_idx(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, double phi_val_, int variable_, std::shared_ptr<Flags> flags_);
+	void Bin_Centering2_Fill(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, double phi_val_, int variable_, double weight_, std::shared_ptr<Flags> flags_);
+	void Bin_Centering2_Write(std::shared_ptr<Flags> flags_);
+	//*------------------------------End Bin Centering Corrections for Polarization------------------*
 };	
 
 

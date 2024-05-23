@@ -43,6 +43,10 @@
 			pass &= pid::min_cc(idx_,data_,flags_);
 			pass &= pid::vertex_e(idx_,data_,flags_);
 			pass &= pid::id_bank(idx_,data_,flags_,_ele_);
+			pass &= pid::geo_cc_cut(0,idx_,data_,flags_);
+			pass &= pid::geo_sc_cut(0,idx_,data_,flags_);
+			pass &= pid::geo_ec_cut(0,idx_,data_,flags_);
+			pass &= pid::kin_eff_cut(0,idx_,data_,flags_);
 		}
 		return pass; 
 	}
@@ -55,6 +59,10 @@
 			pass &= pid::sc_eff(1, idx_, data_, flags_);
 			pass &= pid::fid_pro(idx_,data_,flags_);
 			pass &= pid::id_bank(idx_,data_,flags_,_pro_);
+			pass &= pid::geo_cc_cut(1,idx_,data_,flags_);
+			pass &= pid::geo_sc_cut(1,idx_,data_,flags_);
+			pass &= pid::geo_ec_cut(1,idx_,data_,flags_);
+			pass &= pid::kin_eff_cut(1,idx_,data_,flags_);
 		}
 		return pass;
 	}
@@ -67,6 +75,10 @@
 			pass &= pid::sc_eff(2, idx_, data_, flags_);
 			pass &= pid::fid_pip(idx_,data_,flags_);
 			pass &= pid::id_bank(idx_,data_,flags_,_pip_);
+			pass &= pid::geo_cc_cut(2,idx_,data_,flags_);
+			pass &= pid::geo_sc_cut(2,idx_,data_,flags_);
+			pass &= pid::geo_ec_cut(2,idx_,data_,flags_);
+			pass &= pid::kin_eff_cut(2,idx_,data_,flags_);
 		}
 		return pass;
 	}
@@ -78,6 +90,10 @@
 			pass &= pid::sc_eff(3, idx_, data_, flags_);
 			pass &= pid::fid_pim(idx_,data_,flags_);
 			pass &= pid::id_bank(idx_,data_,flags_,_pim_);
+			pass &= pid::geo_cc_cut(3,idx_,data_,flags_);
+			pass &= pid::geo_sc_cut(3,idx_,data_,flags_);
+			pass &= pid::geo_ec_cut(3,idx_,data_,flags_);
+			pass &= pid::kin_eff_cut(3,idx_,data_,flags_);
 		}
 		return pass;
 	}
@@ -347,16 +363,53 @@
 	}
 
 	bool pid::vertex_e(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
-		if(!flags_->Flags::Vertex_Cut()){
-			return true;
-		}
-		return cuts::vertex_cut(data_->Branches::vz(idx_),flags_->Flags::Run());
+		if(!flags_->Flags::Vertex_Cut()){return true;}
+		int sector = physics::get_sector(physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)));
+		return cuts::vertex_cut(data_->Branches::vz(idx_),flags_->Flags::Run(),sector,flags_);
 	}
 
 	//Efficiency Cuts
 	bool pid::sc_eff(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
-		if(!flags_->Flags::SC_Eff()){
-			return true;
+		if(!flags_->Flags::SC_Eff()){return true;}
+		return cuts::sc_eff_cut(data_->Branches::p(idx_), physics::get_theta(data_->Branches::cz(idx_)), flags_->Flags::Run(), par_, flags_);
+	}
+
+	bool pid::geo_cc_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
+		if(!flags_->Flags::Geo_Cut(par_,0)){return true;}
+		bool pass = true;
+		int sector = physics::get_sector(physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)));
+		pass&=cuts::cc_geo_cut(par_, detect::cc_x(data_,idx_),  detect::cc_y(data_,idx_),  sector,  detect::cc_lrc(data_->Branches::cc_segm(idx_)),  detect::cc_segment(data_->Branches::cc_segm(idx_)), flags_);
+		
+		return pass;
+	}
+	bool pid::geo_sc_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
+		if(!flags_->Flags::Geo_Cut(par_,1)){return true;}
+		bool pass = true;
+		int sector = physics::get_sector(physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)));
+		pass &= cuts::sc_geo_cut(par_, data_->Branches::dc_xsc(idx_), data_->Branches::dc_ysc(idx_), sector,data_->Branches::sc_pd(idx_),flags_);
+		return pass;
+	}
+	bool pid::geo_ec_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
+		if(!flags_->Flags::Geo_Cut(par_,2)){return true;}
+		bool pass = true;
+		int sector = physics::get_sector(physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)));
+		pass &= cuts::ec_geo_cut(par_,data_->Branches::ech_x(idx_),data_->Branches::ech_y(idx_),sector,flags_);
+		return pass;
+	}
+	bool pid::kin_eff_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
+		if(!flags_->Flags::Kin_Eff_Cut(par_)){return true;}
+		bool pass = true;
+		float p = data_->Branches::p(idx_);
+		float theta = physics::get_theta(data_->Branches::cz(idx_));
+		if(par_ == 0){
+			if(flags_->E_Theta_Corr()){
+				theta = corr::theta_e_corr(physics::get_theta(data_->Branches::cz(idx_)),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run());
+				if(flags_->E_PCorr()){
+					p = corr::p_corr_e(data_->Branches::p(idx_),corr::theta_e_corr(physics::get_theta(data_->Branches::cz(idx_)),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run()),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run());
+				}
+			}
 		}
-		return cuts::sc_eff_cut(data_->Branches::p(idx_), physics::get_theta(data_->Branches::cz(idx_)), flags_->Flags::Run(), par_);
+		int sector = physics::get_sector(physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)));
+		pass &= cuts::kin_eff_cut(par_,sector,p,theta,flags_);
+		return pass;
 	}

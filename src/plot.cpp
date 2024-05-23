@@ -30,6 +30,9 @@ void plot::plot_ele(Particle particle_, std::shared_ptr<Histogram> hist_, std::s
 	plot::plot_ec_cut(particle_, hist_, flags_, 0);
 	plot::plot_sc_eff_cut(particle_, hist_, flags_, 0);
 	plot::plot_id_cut(particle_, hist_, flags_, 0);
+	plot::plot_cc_geo_cut(particle_, hist_, flags_, 0);
+	plot::plot_sc_geo_cut(particle_, hist_, flags_, 0);
+	plot::plot_ec_geo_cut(particle_, hist_, flags_, 0);
 	plot::plot_pid_cut(particle_, hist_, flags_, 0);
 }
 void plot::plot_pro(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
@@ -39,6 +42,9 @@ void plot::plot_pro(Particle particle_, std::shared_ptr<Histogram> hist_, std::s
 	plot::plot_delta_cut(particle_, hist_, flags_, 1);
 	plot::plot_sc_eff_cut(particle_, hist_, flags_, 1);
 	plot::plot_id_cut(particle_, hist_, flags_, 1);
+	//plot::plot_cc_geo_cut(particle_, hist_, flags_, 1);
+	plot::plot_sc_geo_cut(particle_, hist_, flags_, 1);
+	plot::plot_ec_geo_cut(particle_, hist_, flags_, 1);
 	plot::plot_pid_cut(particle_, hist_, flags_, 1);
 }
 void plot::plot_pip(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
@@ -48,6 +54,8 @@ void plot::plot_pip(Particle particle_, std::shared_ptr<Histogram> hist_, std::s
 	plot::plot_delta_cut(particle_, hist_, flags_, 2);
 	plot::plot_sc_eff_cut(particle_, hist_, flags_, 2);
 	plot::plot_id_cut(particle_, hist_, flags_, 2);
+	plot::plot_sc_geo_cut(particle_, hist_, flags_, 2);
+	plot::plot_ec_geo_cut(particle_, hist_, flags_, 2);
 	plot::plot_pid_cut(particle_, hist_, flags_, 2);
 }
 void plot::plot_pim(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
@@ -57,6 +65,8 @@ void plot::plot_pim(Particle particle_, std::shared_ptr<Histogram> hist_, std::s
 	plot::plot_delta_cut(particle_, hist_, flags_, 3);
 	plot::plot_sc_eff_cut(particle_, hist_, flags_, 3);
 	plot::plot_id_cut(particle_, hist_, flags_, 3);
+	plot::plot_sc_geo_cut(particle_, hist_, flags_, 3);
+	plot::plot_ec_geo_cut(particle_, hist_, flags_, 3);
 	plot::plot_pid_cut(particle_, hist_, flags_, 3);
 }
 
@@ -93,6 +103,9 @@ void plot::plot_no_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std
 	//for(int k=0; k<3; k++){
 		//hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(k),particle_.Particle::Get_y(k),particle_.Particle::Get_Weight(),_species_[par_],detectors[k+1],_sector_[particle_.Particle::Sector()-1],_no_cut_,_none_,flags_);
 	//}
+	hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_no_cut_,_none_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+	hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_no_cut_,_none_,particle_.Particle::Get_sc_pd(),0,flags_);
+	hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_no_cut_,_none_,0,0,flags_);
 }
 void plot::plot_sanity_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
 	if(particle_.Pass_Sanity(par_)){
@@ -499,6 +512,156 @@ void plot::plot_sc_eff_cut(Particle particle_, std::shared_ptr<Histogram> hist_,
 		}
 	}
 }
+void plot::plot_cc_geo_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
+	if(!flags_->Flags::Geo_Cut(par_,0)){return;}
+	if(par_==0){
+		if(particle_.Pass_Geo_CC(par_)){
+			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _geo_cc_cut_, _cut_applied_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
+			hist_->Histogram::CC_Fill(particle_.Particle::Get_nphe(), particle_.Particle::Get_cc_seg(), _geo_cc_cut_, _cut_applied_, _mnone_, _sector_[particle_.Particle::Sector()-1], _cc_sides_[particle_.Particle::Get_cc_lrc()], flags_);
+			//hist_->Fill_EC();
+			hist_->Histogram::Vertex_Fill(particle_.Particle::Get_vz(), particle_.Particle::Get_Weight(), _geo_cc_cut_, _cut_applied_,_mnone_,_sector_[particle_.Particle::Sector()-1],flags_);
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_applied_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_geo_cc_cut_,_cut_applied_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,0,0,flags_);
+		}else{
+			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _geo_cc_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
+			hist_->Histogram::CC_Fill(particle_.Particle::Get_nphe(), particle_.Particle::Get_cc_seg(), _geo_cc_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], _cc_sides_[particle_.Particle::Get_cc_lrc()], flags_);
+			//hist_->Fill_EC();
+			hist_->Histogram::Vertex_Fill(particle_.Particle::Get_vz(), particle_.Particle::Get_Weight(), _geo_cc_cut_, _anti_cut_,_mnone_,_sector_[particle_.Particle::Sector()-1],flags_);
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_geo_cc_cut_,_anti_cut_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,0,0,flags_);
+		}
+	}else{
+		if(particle_.Pass_Geo_CC(par_)){
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_applied_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,0,0,flags_);
+		}else{
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,0,0,flags_);
+		}
+	}
+}
+void plot::plot_sc_geo_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
+	if(!flags_->Flags::Geo_Cut(par_,1)){return;}
+	if(par_==0){
+		if(particle_.Pass_Geo_SC(par_)){
+			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _geo_cc_cut_, _cut_applied_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
+			hist_->Histogram::CC_Fill(particle_.Particle::Get_nphe(), particle_.Particle::Get_cc_seg(), _geo_cc_cut_, _cut_applied_, _mnone_, _sector_[particle_.Particle::Sector()-1], _cc_sides_[particle_.Particle::Get_cc_lrc()], flags_);
+			//hist_->Fill_EC();
+			hist_->Histogram::Vertex_Fill(particle_.Particle::Get_vz(), particle_.Particle::Get_Weight(), _geo_cc_cut_, _cut_applied_,_mnone_,_sector_[particle_.Particle::Sector()-1],flags_);
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_applied_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_geo_cc_cut_,_cut_applied_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,0,0,flags_);
+		}else{
+			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _geo_cc_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
+			hist_->Histogram::CC_Fill(particle_.Particle::Get_nphe(), particle_.Particle::Get_cc_seg(), _geo_cc_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], _cc_sides_[particle_.Particle::Get_cc_lrc()], flags_);
+			//hist_->Fill_EC();
+			hist_->Histogram::Vertex_Fill(particle_.Particle::Get_vz(), particle_.Particle::Get_Weight(), _geo_cc_cut_, _anti_cut_,_mnone_,_sector_[particle_.Particle::Sector()-1],flags_);
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_geo_cc_cut_,_anti_cut_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,0,0,flags_);
+		}
+	}else{
+		if(particle_.Pass_Geo_SC(par_)){
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_applied_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,0,0,flags_);
+		}else{
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,0,0,flags_);
+		}
+	}
+}
+void plot::plot_ec_geo_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
+	if(!flags_->Flags::Geo_Cut(par_,2)){return;}
+	if(par_==0){
+		if(particle_.Pass_Geo_EC(par_)){
+			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _geo_cc_cut_, _cut_applied_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
+			hist_->Histogram::CC_Fill(particle_.Particle::Get_nphe(), particle_.Particle::Get_cc_seg(), _geo_cc_cut_, _cut_applied_, _mnone_, _sector_[particle_.Particle::Sector()-1], _cc_sides_[particle_.Particle::Get_cc_lrc()], flags_);
+			//hist_->Fill_EC();
+			hist_->Histogram::Vertex_Fill(particle_.Particle::Get_vz(), particle_.Particle::Get_Weight(), _geo_cc_cut_, _cut_applied_,_mnone_,_sector_[particle_.Particle::Sector()-1],flags_);
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_applied_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_geo_cc_cut_,_cut_applied_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,0,0,flags_);
+		}else{
+			hist_->Histogram::SF_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_sf(), particle_.Particle::W(), _geo_cc_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], particle_.Particle::Get_Weight(), flags_);
+			hist_->Histogram::CC_Fill(particle_.Particle::Get_nphe(), particle_.Particle::Get_cc_seg(), _geo_cc_cut_, _anti_cut_, _mnone_, _sector_[particle_.Particle::Sector()-1], _cc_sides_[particle_.Particle::Get_cc_lrc()], flags_);
+			//hist_->Fill_EC();
+			hist_->Histogram::Vertex_Fill(particle_.Particle::Get_vz(), particle_.Particle::Get_Weight(), _geo_cc_cut_, _anti_cut_,_mnone_,_sector_[particle_.Particle::Sector()-1],flags_);
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::WQ2_Fill(particle_.Particle::W(),particle_.Particle::Q2(),_geo_cc_cut_,_anti_cut_,_mnone_,_nthrown_,flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,0,0,flags_);
+		}
+	}else{
+		if(particle_.Pass_Geo_EC(par_)){
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_cut_applied_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _cut_applied_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _cut_applied_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_cut_applied_,_geo_cc_cut_,0,0,flags_);
+		}else{
+			hist_->Histogram::Fid_Fill(_species_[par_],particle_.Particle::Get_theta(),physics::phi_center(particle_.Particle::Get_phi()),_geo_cc_cut_,_sector_[particle_.Particle::Sector()-1],_anti_cut_,_mnone_,particle_.Particle::Get_p(),flags_,particle_.Particle::Get_Weight());
+			hist_->Histogram::Delta_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_delta(par_), particle_.Particle::Get_Weight(), particle_.Particle::W(),_species_[par_], _geo_cc_cut_, _anti_cut_, _mnone_,_sector_[particle_.Particle::Sector()-1], flags_ );
+			hist_->Histogram::Kinematic_Eff_Fill(particle_.Particle::Get_p(), particle_.Particle::Get_theta(), particle_.Particle::Get_Weight(),_species_[par_], _geo_cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], _mnone_, flags_);
+			hist_->Histogram::SC_Eff_Fill(particle_.Particle::Get_sc_pd(), particle_.Particle::Get_Weight(), _species_[par_], _geo_cc_cut_, _anti_cut_, _sector_[particle_.Particle::Sector()-1], flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(0),particle_.Particle::Get_y(0),particle_.Particle::Get_Weight(),_species_[par_],detectors[0+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_cc_seg(),particle_.Particle::Get_cc_lrc(),flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(1),particle_.Particle::Get_y(1),particle_.Particle::Get_Weight(),_species_[par_],detectors[1+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,particle_.Particle::Get_sc_pd(),0,flags_);
+			hist_->Histogram::Geo_Fid_Fill(particle_.Particle::Get_x(2),particle_.Particle::Get_y(2),particle_.Particle::Get_Weight(),_species_[par_],detectors[2+1],_sector_[particle_.Particle::Sector()-1],_anti_cut_,_geo_cc_cut_,0,0,flags_);
+		}
+	}
+}
 void plot::plot_pid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_){
 	if(particle_.Pass_pid(par_)){
 		if(par_ == 0){
@@ -573,16 +736,22 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 		if(event_.Event::Q2() < _Q2_min_ || event_.Event::Q2() >= _Q2_max_){
 			std::cout<<"Q2:" <<event_.Event::Q2() <<"\n";
 		}
-		for(int j=0; j<3; j++){
+		for(int j=0; j<3; j++){//Variable Set
 			if(flags_->Sim()){
 				//memory effort to minimize this 6-28-23
 				hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), 1.0, -1,flags_);
-				for(int k=0; k<3; k++){
+				for(int k=0; k<3; k++){//Projection
 					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 0, event_.Event::MMb(j), k, event_.Event::Weight(), flags_);
 					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 1, event_.Event::MM2b(j), k, event_.Event::Weight(), flags_);
 					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 2, event_.Event::Thetab(j), k, event_.Event::Weight(), flags_);
 					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 3, event_.Event::Alphab(j), k, event_.Event::Weight(), flags_);
 					hist_->Histogram::Bin_Centering_Fill(event_.Event::W(), event_.Event::Q2(), j, 4, event_.Event::Phib(j), k, event_.Event::Weight(), flags_);
+				}
+				for(int k=0; k<4; k++){//Projection 2
+					hist_->Histogram::Bin_Centering2_Fill(event_.Event::W(), event_.Event::Q2(), j, 0, event_.Event::MMb(j),event_.Event::Phib(j), k, event_.Event::Weight(), flags_);
+					hist_->Histogram::Bin_Centering2_Fill(event_.Event::W(), event_.Event::Q2(), j, 1, event_.Event::MM2b(j),event_.Event::Phib(j), k, event_.Event::Weight(), flags_);
+					hist_->Histogram::Bin_Centering2_Fill(event_.Event::W(), event_.Event::Q2(), j, 2, event_.Event::Thetab(j),event_.Event::Phib(j), k, event_.Event::Weight(), flags_);
+					hist_->Histogram::Bin_Centering2_Fill(event_.Event::W(), event_.Event::Q2(), j, 3, event_.Event::Alphab(j),event_.Event::Phib(j), k, event_.Event::Weight(), flags_);
 				}
 			}//else{
 				//hist_->Histogram::Friend_Fill(_mzero_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, thrown_, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff()*event_.Event::Virtual_Photon_Flux(), flags_);
@@ -612,7 +781,7 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 				}
 				hist_->Histogram::MM_Fill(_top_[l],_cut_applied_,_dirty_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
 				//hist_->Fill_MM(i);
-				hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_top_[l],_nthrown_,flags_,event_.Event::Weight());
+				//hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_top_[l],_nthrown_,flags_,event_.Event::Weight());
 			}else{
 				//std::cout<<"\tFailed\n";
 				//PID Plots with Event Selection
@@ -628,7 +797,7 @@ void plot::plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::share
 				}
 				hist_->Histogram::MM_Fill(_top_[l],_anti_cut_,_dirty_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
 				//hist_->Fill_MM(i);
-				hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_anti_cut_,_top_[l],_nthrown_,flags_,event_.Event::Weight());
+				//hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_anti_cut_,_top_[l],_nthrown_,flags_,event_.Event::Weight());
 			}
 			hist_->Histogram::MM_Fill(_top_[l],_no_cut_,_dirty_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
 		}
@@ -641,15 +810,18 @@ void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std:
 	//std::cout<<"Plotting Clean Event: " <<_top_[event_.Event::Top()] <<"\n";
 	if(event_.Event::Pass()){
 		//std::cout<<"Event Passed \n";
-		for(int k=0; k<3; k++){
+		//for(int k=0; k<3; k++){
 			//std::cout<<"Friend Fill \n";
 			/*if(flags_->Flags::Sim()){
 				hist_->Histogram::Friend_Fill(_top_[event_.Event::Top()], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff(), flags_);
 			}else{
 				hist_->Histogram::Friend_Fill(_top_[event_.Event::Top()], event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(k), event_.Event::MM2b(k), event_.Event::Thetab(k), event_.Event::Alphab(k), event_.Event::Phib(k) , k, false, event_.Event::Weight(), event_.Event::Helicity(), event_.Event::CC_eff()*event_.Event::Virtual_Photon_Flux(), flags_);
 			}*/
-		}
+		//}
 		//std::cout<<"particle Filling\n";
+		if(!flags_->Flags::Sim()){
+			hist_->Histogram::Ele_Pro_Angle_Dist_Fill(_sector_[event_.Event::Sector(0)-1], event_.Event::Theta(0), event_.Event::Theta(1), _top_[top], flags_);
+		}
 		for(int j=0; j<4; j++){//Particle
 			//std::cout<<"Filling particle " <<_species_[j] <<"\n";
 			if(j == 0){//Electron
@@ -666,6 +838,7 @@ void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std:
 			
 		}
 		hist_->Histogram::MM_Fill(_top_[top],_cut_applied_,_clean_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
+		hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_cut_applied_,_top_[top],_nthrown_,flags_,event_.Event::Weight());
 	}else{
 		//std::cout<<"Event Failed \n";
 		for(int j=0; j<4; j++){//Particle
@@ -679,7 +852,6 @@ void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std:
 				//std::cout<<"Filling Vertex failure\n";
 				hist_->Histogram::Vertex_Fill(event_.Event::Vz(), event_.Event::Weight(), _event_, _anti_cut_, _top_[event_.Event::Top()], _sector_[event_.Event::Sector(j)-1],flags_);
 				//std::cout<<"Filling CC_Eff failure\n";
-				
 			}
 			hist_->Histogram::Kinematic_Eff_Fill(event_.Event::P(j), event_.Event::Theta(j), event_.Event::Weight(),_species_[j], _event_, _anti_cut_, _sector_[event_.Event::Sector(j)-1], _top_[event_.Event::Top()], flags_);
 			//Do need to modify the plots here
@@ -690,6 +862,7 @@ void plot::plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std:
 		}
 		//std::cout<<"Filling MM for failure\n";
 		hist_->Histogram::MM_Fill(_top_[top],_anti_cut_,_clean_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
+		hist_->Histogram::WQ2_Fill(event_.Event::W(),event_.Event::Q2(),_event_,_anti_cut_,_top_[top],_nthrown_,flags_,event_.Event::Weight());
 	}
 	//std::cout<<"Filling MM for no cut\n";
 	hist_->Histogram::MM_Fill(_top_[top],_no_cut_,_clean_,_sector_[event_.Event::Sector(0)-1],event_.Event::MM2(),event_.Event::W(),event_.Event::Weight(),flags_);
@@ -721,6 +894,9 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 		if(event_.Event::Phib(0)<0.0 || event_.Event::Phib(0)>=360.0 || event_.Event::Phib(1)<0.0 || event_.Event::Phib(1)>=360.0 || event_.Event::Phib(2)<0.0 || event_.Event::Phib(2)>=360.0){
 			std::cout<<"Pim Phi: " <<event_.Event::Phib(0) <<" Pro Phi: " <<event_.Event::Phib(1) <<"  Pip Phi: " <<event_.Event::Phib(2) <<"\n";
 		}
+		if(!flags_->Flags::Sim()){
+			hist_->Histogram::Ele_Pro_Angle_Dist_Fill(_sector_[event_.Event::Sector(0)-1], event_.Event::Theta(0), event_.Event::Theta(1), _mall_, flags_);
+		}
 		for(int j=0; j<3; j++){//Variable Set
 			if(flags_->Flags::Sim()){
 				hist_->Histogram::Friend_Fill(_mall_, event_.Event::W(), event_.Event::Q2(), event_.Event::MMb(j), event_.Event::MM2b(j), event_.Event::Thetab(j), event_.Event::Alphab(j), event_.Event::Phib(j) , j, false, event_.Event::Weight(), event_.Event::Helicity(), 1.0, top_passed_, flags_);
@@ -737,6 +913,9 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 				hist_->Histogram::Kinematic_Eff_Fill(event_.Event::P(i), event_.Event::Theta(i), event_.Event::Weight(),_species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], _mall_, flags_);
 				//std::cout<<"Filling SC_Eff " <<_species_[i] <<" event with " <<event_.Event::SC_pd(i) <<"\n";
 				hist_->Histogram::SC_Eff_Fill(event_.Event::SC_pd(i), event_.Event::Weight(), _species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], flags_);
+				hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,0,flags_), event_.Event::Y_Det(i,0,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, event_.Event::CC_seg(), event_.Event::CC_side(), flags_);
+				hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,1,flags_), event_.Event::Y_Det(i,1,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, event_.Event::SC_pd(i), 0, flags_);
+				hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,2,flags_), event_.Event::Y_Det(i,2,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, 0, 0, flags_);
 			}else{
 				switch(event_.Event::Top()){
 					case 0:
@@ -746,6 +925,8 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 							//std::cout<<"Filling SC_Eff " <<_species_[i] <<" event with " <<event_.Event::SC_pd(i) <<"\n";
 							hist_->Histogram::SC_Eff_Fill(event_.Event::SC_pd(i), event_.Event::Weight(), _species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], flags_);
 							hist_->Histogram::Kinematic_Eff_Fill(event_.Event::P(i), event_.Event::Theta(i), event_.Event::Weight(),_species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], _mall_, flags_);
+							hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,1,flags_), event_.Event::Y_Det(i,1,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, event_.Event::SC_pd(i), 0, flags_);
+							hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,2,flags_), event_.Event::Y_Det(i,2,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, 0, 0, flags_);
 						}
 					break;
 					case 1:
@@ -755,6 +936,8 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 							//std::cout<<"Filling SC_Eff " <<_species_[i] <<" event with " <<event_.Event::SC_pd(i) <<"\n";
 							hist_->Histogram::SC_Eff_Fill(event_.Event::SC_pd(i), event_.Event::Weight(), _species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], flags_);
 							hist_->Histogram::Kinematic_Eff_Fill(event_.Event::P(i), event_.Event::Theta(i), event_.Event::Weight(),_species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], _mall_, flags_);
+							hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,1,flags_), event_.Event::Y_Det(i,1,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, event_.Event::SC_pd(i), 0, flags_);
+							hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,2,flags_), event_.Event::Y_Det(i,2,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, 0, 0, flags_);
 						}
 					break;
 					case 2:
@@ -764,6 +947,8 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 							//std::cout<<"Filling SC_Eff " <<_species_[i] <<" event with " <<event_.Event::SC_pd(i) <<"\n";
 							hist_->Histogram::SC_Eff_Fill(event_.Event::SC_pd(i), event_.Event::Weight(), _species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], flags_);
 							hist_->Histogram::Kinematic_Eff_Fill(event_.Event::P(i), event_.Event::Theta(i), event_.Event::Weight(),_species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], _mall_, flags_);
+							hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,1,flags_), event_.Event::Y_Det(i,1,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, event_.Event::SC_pd(i), 0, flags_);
+							hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,2,flags_), event_.Event::Y_Det(i,2,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, 0, 0, flags_);
 						}
 					break;
 					case 3:
@@ -772,6 +957,11 @@ void plot::plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, s
 						//std::cout<<"Filling SC_Eff " <<_species_[i] <<" event with " <<event_.Event::SC_pd(i) <<"\n";
 						hist_->Histogram::SC_Eff_Fill(event_.Event::SC_pd(i), event_.Event::Weight(), _species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], flags_);
 						hist_->Histogram::Kinematic_Eff_Fill(event_.Event::P(i), event_.Event::Theta(i), event_.Event::Weight(),_species_[i], _event_, _cut_applied_, _sector_[event_.Event::Sector(i)-1], _mall_, flags_);
+						if(_species_[i]==_ele_){
+								hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,0,flags_), event_.Event::Y_Det(i,0,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, event_.Event::CC_seg(), event_.Event::CC_side(), flags_);
+							}
+							hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,1,flags_), event_.Event::Y_Det(i,1,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, event_.Event::SC_pd(i), 0, flags_);
+							hist_->Histogram::Geo_Fid_Fill(event_.Event::X_Det(i,2,flags_), event_.Event::Y_Det(i,2,flags_), event_.Event::Weight(),_species_[i], _sc_, _sector_[event_.Event::Sector(i)-1],_cut_applied_, _event_, 0, 0, flags_);
 					break;
 					default:
 						std::cout<<"Plotting Isolated Event without valid Topology\t" <<event_.Event::Top() <<"\n";

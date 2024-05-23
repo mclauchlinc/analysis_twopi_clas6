@@ -1,6 +1,6 @@
 #include "cuts.hpp"
 
-float cuts::fid_e_theta_cut(int run_, int sector_, float p_, int sim_idx_){ 
+float cuts::fid_e_theta_cut(int run_, int sector_, float p_, int sim_idx_, int cut_width_){ 
 	return _c1e_[run_][sim_idx_][sector_-1] + _c2e_[run_][sim_idx_][sector_-1] / ((float)p_+_p_shift_e_[run_][sim_idx_][sector_-1]);
 }
 /*
@@ -17,7 +17,7 @@ float cuts::fid_e_del_phi_neg(int run_, int sector_, float p_, float theta_){
 	return -_c4e_[run_][sector_-1][1] * TMath::Power((TMath::Sin((theta_-cuts::fid_e_theta_cut(run_,sector_,p_))/_degree_)),cuts::fid_e_expon_neg(run_,sector_,p_));
 }*/
 
-float cuts::fid_e_del(int run_, int sector_, float p_, float theta_, bool sim_, int side_){
+float cuts::fid_e_del(int run_, int sector_, float p_, float theta_, bool sim_, int side_, int cut_width_){
 	float c4 = 0.0;
 	float c3 = 0.0;
 	int sim_idx = 0;
@@ -48,12 +48,12 @@ bool cuts::fid_e (float p_, float theta_, float phi_, std::shared_ptr<Flags> fla
 	return pass;
 }
 
-float cuts::phi_min(int hadron_, float theta_, int run_, int sector_, int sim_){
+float cuts::phi_min(int hadron_, float theta_, int run_, int sector_, int sim_, int cut_width_){
 	//return -(_a0mh_[run_][hadron_][sector_-1]*(1.0-TMath::Exp(-_a1mh_[run_][hadron_][sector_-1]*(theta_-_a2mh_[run_][hadron_][sector_-1])))-_a3mh_[run_][hadron_][sector_-1]);
 	return (_a0mh_[run_][sim_][hadron_][sector_-1]*(1.0-TMath::Exp(-_a1mh_[run_][sim_][hadron_][sector_-1]*(theta_-_a2mh_[run_][sim_][hadron_][sector_-1])))+_a3mh_[run_][sim_][hadron_][sector_-1]);
 }
 
-float cuts::phi_max(int hadron_, float theta_, int run_, int sector_, int sim_){
+float cuts::phi_max(int hadron_, float theta_, int run_, int sector_, int sim_, int cut_width_){
 	return (_a0xh_[run_][sim_][hadron_][sector_-1]*(1.0-TMath::Exp(-_a1xh_[run_][sim_][hadron_][sector_-1]*(theta_-_a2xh_[run_][sim_][hadron_][sector_-1])))+_a3xh_[run_][sim_][hadron_][sector_-1]);
 }
 
@@ -77,19 +77,19 @@ bool cuts::fid_h (int hadron_, float theta_, float phi_, std::shared_ptr<Flags> 
 	}
 	return pass;
 }
-float cuts::fid_h_theta_cut(int run_, int sector_, float p_){ 
+float cuts::fid_h_theta_cut(int run_, int sector_, float p_, int cut_width_){ 
 	return _c1h_[run_][sector_-1] + _c2h_[run_][sector_-1] / ((float)p_+_p_shift_h_[run_][sector_-1]);
 }
-float cuts::fid_h_expon_pos(int run_, int sector_, float p_){ 
+float cuts::fid_h_expon_pos(int run_, int sector_, float p_, int cut_width_){ 
 	return _c3h_[run_][sector_-1][0] * TMath::Power((float)p_,_factor_h_[run_][sector_-1][0]);
 }
-float cuts::fid_h_expon_neg(int run_, int sector_, float p_){ 
+float cuts::fid_h_expon_neg(int run_, int sector_, float p_, int cut_width_){ 
 	return _c3h_[run_][sector_-1][1] * TMath::Power((float)p_,_factor_h_[run_][sector_-1][1]);
 }
-float cuts::fid_h_del_phi_pos(int run_, int sector_, float p_, float theta_){ 
+float cuts::fid_h_del_phi_pos(int run_, int sector_, float p_, float theta_, int cut_width_){ 
 	return _c4h_[run_][sector_-1][0] * TMath::Power((TMath::Sin((theta_-cuts::fid_h_theta_cut(run_,sector_,p_))/_degree_)),cuts::fid_h_expon_pos(run_,sector_,p_));
 }
-float cuts::fid_h_del_phi_neg(int run_, int sector_, float p_, float theta_){ 
+float cuts::fid_h_del_phi_neg(int run_, int sector_, float p_, float theta_, int cut_width_){ 
 	return -_c4h_[run_][sector_-1][1] * TMath::Power((TMath::Sin((theta_-cuts::fid_h_theta_cut(run_,sector_,p_))/_degree_)),cuts::fid_h_expon_neg(run_,sector_,p_));
 }
 
@@ -137,7 +137,7 @@ bool cuts::fid_cut(int part_, float p_, float theta_, float phi_, std::shared_pt
 }
 
 //Proton Formulae from Arjun
-float cuts::delta_low(int part_, int run_, bool sim_, float p_){
+float cuts::delta_low(int part_, int run_, bool sim_, float p_, int cut_width_){
 	float d0 = NAN;
 	float d1 = NAN;
 	float d2 = NAN;
@@ -178,7 +178,7 @@ float cuts::delta_low(int part_, int run_, bool sim_, float p_){
 	return d0+d1*p_+d2*p_*p_+d3*p_*p_*p_;
 }
 
-float cuts::delta_high(int part_, int run_, bool sim_, float p_){
+float cuts::delta_high(int part_, int run_, bool sim_, float p_, int cut_width_){
 	float d0 = NAN;
 	float d1 = NAN;
 	float d2 = NAN;
@@ -280,14 +280,16 @@ bool cuts::min_ec(Float_t etot_, int sector_, std::shared_ptr<Flags> flags_){
 	return pass;
 }
 
-float cuts::sf_low(int run_, int sim_, Float_t p_, int sector_){
-	//std::cout<<"sf_low: "<<_sf_low_e16_[run_][sim_][sector_-1][0] + _sf_low_e16_[run_][sim_][sector_-1][1]*p_ + _sf_low_e16_[run_][sim_][sector_-1][2]*p_*p_ + _sf_low_e16_[run_][sim_][sector_-1][3]*p_*p_*p_ <<"\n";
-	return _sf_low_e16_[run_][sim_][sector_-1][0] + _sf_low_e16_[run_][sim_][sector_-1][1]*p_ + _sf_low_e16_[run_][sim_][sector_-1][2]*p_*p_ + _sf_low_e16_[run_][sim_][sector_-1][3]*p_*p_*p_;
+float cuts::sf_low(int run_, int sim_, Float_t p_, int sector_, int cut_width_){
+	//std::cout<<"sf_low: "<<_sf_low_[run_][sim_][sector_-1][0] + _sf_low_e16_[run_][sim_][sector_-1][1]*p_ + _sf_low_e16_[run_][sim_][sector_-1][2]*p_*p_ + _sf_low_e16_[run_][sim_][sector_-1][3]*p_*p_*p_ <<"\n";
+	//return _sf_low_e16_[run_][sim_][sector_-1][0] + _sf_low_e16_[run_][sim_][sector_-1][1]*p_ + _sf_low_e16_[run_][sim_][sector_-1][2]*p_*p_ + _sf_low_e16_[run_][sim_][sector_-1][3]*p_*p_*p_;
+	return _sf_low_[run_][sim_][sector_-1][cut_width_][0] + _sf_low_[run_][sim_][sector_-1][cut_width_][1]*p_ + _sf_low_[run_][sim_][sector_-1][cut_width_][2]*p_*p_ + _sf_low_[run_][sim_][sector_-1][cut_width_][3]*p_*p_*p_;
 }
 
-float cuts::sf_top(int run_, int sim_, Float_t p_, int sector_){
+float cuts::sf_top(int run_, int sim_, Float_t p_, int sector_, int cut_width_){
 	//std::cout<<"sf_top: "<<_sf_top_e16_[run_][sim_][sector_-1][0] + _sf_top_e16_[run_][sim_][sector_-1][1]*p_ + _sf_top_e16_[run_][sim_][sector_-1][2]*p_*p_ + _sf_top_e16_[run_][sim_][sector_-1][3]*p_*p_*p_ <<"\n";
-	return _sf_top_e16_[run_][sim_][sector_-1][0] + _sf_top_e16_[run_][sim_][sector_-1][1]*p_ + _sf_top_e16_[run_][sim_][sector_-1][2]*p_*p_ + _sf_top_e16_[run_][sim_][sector_-1][3]*p_*p_*p_;
+	//return _sf_top_e16_[run_][sim_][sector_-1][0] + _sf_top_e16_[run_][sim_][sector_-1][1]*p_ + _sf_top_e16_[run_][sim_][sector_-1][2]*p_*p_ + _sf_top_e16_[run_][sim_][sector_-1][3]*p_*p_*p_;
+	return _sf_top_[run_][sim_][sector_-1][cut_width_][0] + _sf_top_[run_][sim_][sector_-1][cut_width_][1]*p_ + _sf_top_[run_][sim_][sector_-1][cut_width_][2]*p_*p_ + _sf_top_[run_][sim_][sector_-1][cut_width_][3]*p_*p_*p_;
 }
 //Electron Sampling Fraction cut using the EC
 bool cuts::sf_cut(float p_, float sf_, float phi_, std::shared_ptr<Flags> flags_){
@@ -296,9 +298,11 @@ bool cuts::sf_cut(float p_, float sf_, float phi_, std::shared_ptr<Flags> flags_
 	if(flags_->Flags::Sim()){
 		sim_idx = 1; 
 	}
+	int cut_width = fun::cut_width(_ele_,_sf_cut_,flags_);
+	//std::cout<<"cut_width:" <<cut_width <<"\n";
 	int sector = physics::get_sector(phi_);
 	//std::cout<<"sf: " <<sf_ <<"\n";
-	if(sf_ >= cuts::sf_low(flags_->Flags::Run(),sim_idx,p_,sector) && sf_ <= cuts::sf_top(flags_->Flags::Run(),sim_idx,p_,sector)){
+	if(sf_ >= cuts::sf_low(flags_->Flags::Run(),sim_idx,p_,sector,cut_width) && sf_ <= cuts::sf_top(flags_->Flags::Run(),sim_idx,p_,sector,cut_width)){
 		pass = true;
 	}
 	return pass;
@@ -306,6 +310,7 @@ bool cuts::sf_cut(float p_, float sf_, float phi_, std::shared_ptr<Flags> flags_
 //Not utilized yet, but will be in time 
 float cuts::mm_top(int run_, int sim_, int top_, int sector_, float W_, int cut_width_){
 	float output = 0.0;
+	
 	/*
 	run {0,1} -> e16,e1f
 	sim {0,1} -> sim,exp
@@ -346,6 +351,7 @@ bool cuts::MM_cut(int top_, float mm_, int sector_, float W_, std::shared_ptr<Fl
 	if(flags_->Flags::Sim()){
 		sim_idx = 1; 
 	}
+	int cut_width = flags_->Flags::MM_Cut_Width(top_);
 	//std::cout<<"Trying to cut MM for: " <<_top_[top_] <<" with W: " <<W_ <<"\n";
 	//std::cout<<"\tMissing Mass: " <<mm_ <<" with top: " <<cuts::mm_top(flags_->Flags::Run(),sim_idx,top_,sector_,W_) <<" and bot: " <<cuts::mm_bot(flags_->Flags::Run(),sim_idx,top_,sector_,W_) <<"\n";
 
@@ -435,50 +441,282 @@ bool cuts::h_sanity(char* species_, int q_, int dc_, int sc_, int stat_){
   return pass; 
 }
 
-bool cuts::vertex_cut(float vz_, int run_){
+bool cuts::vertex_cut(float vz_, int run_, int sector_, std::shared_ptr<Flags> flags_){
 	bool pass = false;
-	if(vz_ > _vz_bot_[run_] && vz_ < _vz_top_[run_]){
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){
+		sim_idx = 1;
+	}
+	int cut_width = fun::cut_width(_ele_,_vertex_cut_,flags_);
+	if(vz_ > _vz_bot_[run_][sim_idx][sector_-1] && vz_ < _vz_top_[run_][sim_idx][sector_-1]){
 		pass = true;
 	}
 	return pass;
 }
 //These all need to be built up 1/18/23
-bool cuts::sc_eff_ele_cut(float p_, float theta_, int run_){
+bool cuts::sc_eff_ele_cut(float p_, float theta_, int run_, std::shared_ptr<Flags> flags_){
 	bool pass = false;
 	return pass;
 }
-bool cuts::sc_eff_pro_cut(float p_, float theta_, int run_){
+bool cuts::sc_eff_pro_cut(float p_, float theta_, int run_, std::shared_ptr<Flags> flags_){
 	bool pass = false;
 	return pass;
 }
-bool cuts::sc_eff_pip_cut(float p_, float theta_, int run_){
+bool cuts::sc_eff_pip_cut(float p_, float theta_, int run_, std::shared_ptr<Flags> flags_){
 	bool pass = false;
 	return pass;
 }
-bool cuts::sc_eff_pim_cut(float p_, float theta_, int run_){
+bool cuts::sc_eff_pim_cut(float p_, float theta_, int run_, std::shared_ptr<Flags> flags_){
 	bool pass = false;
 	return pass;
 
 }
-bool cuts::sc_eff_cut(float p_, float theta_, int run_, int par_){
+bool cuts::sc_eff_cut(float p_, float theta_, int run_, int par_, std::shared_ptr<Flags> flags_){
 	bool pass = false;
 	switch(par_){
 		case 0:
-			pass = sc_eff_ele_cut(p_,theta_,run_);
+			pass = sc_eff_ele_cut(p_,theta_,run_,flags_);
 		break;
 		case 1:
-			pass = sc_eff_pro_cut(p_,theta_,run_);
+			pass = sc_eff_pro_cut(p_,theta_,run_,flags_);
 		break;
 		case 2:
-			pass = sc_eff_pim_cut(p_,theta_,run_);
+			pass = sc_eff_pim_cut(p_,theta_,run_,flags_);
 		break;
 		case 3:
-			pass = sc_eff_pim_cut(p_,theta_,run_);
+			pass = sc_eff_pim_cut(p_,theta_,run_,flags_);
 		break;
 		default:
-			pass = sc_eff_ele_cut(p_,theta_,run_);
+			pass = sc_eff_ele_cut(p_,theta_,run_,flags_);
 		break;
 	}
 	return pass;
 }
 
+
+//Geometric CC Cuts
+//edge Cuts for Right and Left {e16,e1f}{exp,sim}{sec}{tight,mid,loose}{right,left}{intercept,slope}
+//static float _geo_cc_side_edge_pars_[2][2][6][3][2][2]
+//Center Cuts for Right and Left {e16,e1f}{exp,sim}{sec}{tight,mid,loose}{right,left}
+//static float _geo_cc_side_center_pars_[2][2][6][3][2]
+//static float _geo_cc_mid_x_pars_[2][2][6][_num_cc_segments_][3][2]
+//{run group}{exp/sim}{seg}{sec}{side}{tight,mid,loose}{bot,top}
+//static float _geo_seg_bounds_[2][2][_num_cc_segments_][6][3][3][2]
+bool cuts::cc_geo_left_cut(int par_, float x_, float y_,int sec_,int side_, int seg_, std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	float x_cen = detect::x_det_center(x_,y_,sec_);
+	float y_cen = detect::y_det_center(x_,y_,sec_);
+	int side_idx = side_;
+	int cut_width = flags_->Flags::Fid_Geo_Cut_Width(par_,0);
+	int run = flags_->Flags::Run();
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){
+		sim_idx = 1;
+	}
+	if(side_ == -1){return false;}
+	if(seg_ == -1){return false;}
+	//std::cout<<"CC_Geo_Left_Cut\n";
+	//std::cout<<"par:" <<par_ <<" x_cen:" <<x_cen <<" y_cen:" <<y_cen <<" sec:" <<sec_ <<" side:" <<side_ <<" seg:" <<seg_ <<"\n";
+	if( side_ == 0){
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (_geo_cc_side_center_pars_[run][sim_idx][sec_][cut_width][side_idx] !=0.0 );
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (x_cen > _geo_cc_side_center_pars_[run][sim_idx][sec_][cut_width][side_idx]);
+	//	std::cout<<"x_cen:" <<x_cen <<" > " <<_geo_cc_side_center_pars_[run][sim_idx][sec_][cut_width][1] <<"\n";
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+	}else if(side_ == 1){
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (_geo_cc_mid_x_pars_[run][sim_idx][sec_][seg_][cut_width][1] != 0.0);
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (x_cen > _geo_cc_mid_x_pars_[run][sim_idx][sec_][seg_][cut_width][0]);
+	//	std::cout<<"x_cen:" <<x_cen <<" > " <<_geo_cc_side_center_pars_[run][sim_idx][sec_][cut_width][1] <<"\n";
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+	}else if(side_ == 2){
+		side_idx = 1; 
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][0] != 0.0);
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][1] != 0.0);
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (y_cen > (_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][0]+_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][1]*x_cen));
+	//	std::cout<<"y_cen:" <<y_cen <<" > " <<(_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][0]+_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][1][0]*x_cen) <<"\n";
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+	}
+	return pass;
+}
+bool cuts::cc_geo_right_cut(int par_, float x_, float y_,int sec_,int side_, int seg_, std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	float x_cen = detect::x_det_center(x_,y_,sec_);
+	float y_cen = detect::y_det_center(x_,y_,sec_);
+	int side_idx = side_;
+	int cut_width = flags_->Flags::Fid_Geo_Cut_Width(par_,0);
+	int run = flags_->Flags::Run();
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){
+		sim_idx = 1;
+	}
+	if(side_ == -1){return false;}
+	if(seg_ == -1){return false;}
+	//std::cout<<"CC_Geo_Right_Cut\n";
+	//std::cout<<"par:" <<par_ <<" x_cen:" <<x_cen <<" y_cen:" <<y_cen <<" sec:" <<sec_ <<" side:" <<side_ <<" seg:" <<seg_ <<"\n";
+	if( side_ == 2){
+		side_idx = 1; 
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (_geo_cc_side_center_pars_[run][sim_idx][sec_][cut_width][0] != 0.0);
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (x_cen < _geo_cc_side_center_pars_[run][sim_idx][sec_][cut_width][side_idx]);
+	//	std::cout<<"x_cen:" <<x_cen <<" < " <<_geo_cc_side_center_pars_[run][sim_idx][sec_][cut_width][0] <<"\n";
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+	}else if(side_ == 1){
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (_geo_cc_mid_x_pars_[run][sim_idx][sec_][seg_][cut_width][0] != 0.0);
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (x_cen < _geo_cc_mid_x_pars_[run][sim_idx][sec_][seg_][cut_width][1]);
+	//	std::cout<<"x_cen:" <<x_cen <<" < " <<_geo_cc_mid_x_pars_[run][sim_idx][sec_][seg_][cut_width][0] <<"\n";
+	//	std::cout<<"\t\tpass:" <<pass <<"\n";
+	}else if(side_ == 0){
+		side_idx = 0;
+		//std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][0] != 0);
+		//std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][1] !=0);
+		//std::cout<<"\t\tpass:" <<pass <<"\n";
+		pass &= (y_cen > (_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][0]+_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][1]*x_cen));
+		//std::cout<<"ycen:" <<y_cen <<" > " <<(_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][0]+_geo_cc_side_edge_pars_[run][sim_idx][sec_][cut_width][side_idx][0]*x_cen) <<"\n";
+		//std::cout<<"\t\tpass:" <<pass <<"\n";
+	}
+	return pass;
+}
+bool cuts::cc_geo_seg_cut(int par_, float x_, float y_,int sec_,int side_, int seg_, std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	if(seg_ == -1){return pass;}
+	float x_cen = detect::x_det_center(x_,y_,sec_);
+	float y_cen = detect::y_det_center(x_,y_,sec_);
+	int side_idx = side_;
+	int cut_width = flags_->Flags::Fid_Geo_Cut_Width(par_,0);
+	int run = flags_->Flags::Run();
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){
+		sim_idx = 1;
+	}
+	if(side_ == -1){return false;}
+	if(seg_ == -1){return false;}
+	//std::cout<<"CC_Geo_Seg_Cut\n";
+	//std::cout<<"par:" <<par_ <<" x_cen:" <<x_cen <<" y_cen:" <<y_cen <<" sec:" <<sec_ <<" side:" <<side_ <<" seg:" <<seg_ <<"\n";
+	//std::cout<<"\t\tpass:" <<pass <<"\n";
+	pass &= (_geo_seg_bounds_[run][sim_idx][seg_][sec_][side_][cut_width][0] != 0.0);
+	//std::cout<<"\t\tpass:" <<pass <<"\n";
+	pass &= (_geo_seg_bounds_[run][sim_idx][seg_][sec_][side_][cut_width][1] != 0.0);
+	//std::cout<<"\t\tpass:" <<pass <<"\n";
+	pass &= (y_cen >  _geo_seg_bounds_[run][sim_idx][seg_][sec_][side_][cut_width][0]);
+	//std::cout<<"y_cen:" <<y_cen <<" > " <<_geo_seg_bounds_[run][sim_idx][seg_][sec_][side_][cut_width][0] <<"\n";
+	//std::cout<<"\t\tpass:" <<pass <<"\n";
+	pass &= (y_cen <  _geo_seg_bounds_[run][sim_idx][seg_][sec_][side_][cut_width][1]);
+	//std::cout<<"y_cen:" <<y_cen <<" < " <<_geo_seg_bounds_[run][sim_idx][seg_][sec_][side_][cut_width][1] <<"\n";
+	//std::cout<<"\t\tpass:" <<pass <<"\n";
+	return pass;
+}
+bool cuts::cc_geo_cut(int par_, float x_, float y_, int sec_,int side_, int seg_, std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){ sim_idx=1;}
+	if(side_ == -1){return false;}
+	if(seg_ == -1){return false;}
+	pass &= cuts::cc_geo_left_cut(par_,x_,y_,sec_,side_,seg_,flags_);
+	pass &= cuts::cc_geo_right_cut(par_,x_,y_,sec_,side_,seg_,flags_);
+	pass &=  cuts::cc_geo_seg_cut(par_,x_,y_,sec_,side_,seg_,flags_);
+	return pass; 
+}
+bool cuts::sc_geo_left_cut(int par_, float x_, float y_, int sec_,int pad_, std::shared_ptr<Flags> flags_){
+	return true;
+}
+bool cuts::sc_geo_right_cut(int par_, float x_, float y_, int sec_,int pad_, std::shared_ptr<Flags> flags_){
+	return true;
+}
+bool cuts::sc_geo_pad_cut(int par_, float x_, float y_, int sec_,int pad_, std::shared_ptr<Flags> flags_){
+	return true;
+}
+bool cuts::sc_geo_cut(int par_, float x_, float y_, int sec_,int pad_, std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){ sim_idx=1;}
+	pass &= cuts::sc_geo_left_cut(par_,x_,y_,sec_,pad_,flags_);
+	pass &= cuts::sc_geo_right_cut(par_,x_,y_,sec_,pad_,flags_);
+	pass &=  cuts::sc_geo_pad_cut(par_,x_,y_,sec_,pad_,flags_);
+	return pass; 
+}
+bool cuts::ec_geo_left_cut(int par_, float x_, float y_, int sec_,std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	float x_cen = detect::x_det_center(x_,y_,sec_);
+	float y_cen = detect::y_det_center(x_,y_,sec_);
+	int cut_width = flags_->Flags::Fid_Geo_Cut_Width(par_,2);
+	int run = flags_->Flags::Run();
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){
+		sim_idx = 1;
+	}
+	pass &= (y_cen > (_geo_ec_side_pars_[run][sim_idx][par_][sec_][cut_width][1][0] + _geo_ec_side_pars_[run][sim_idx][par_][sec_][cut_width][1][1]*x_cen));
+	return pass;
+}
+bool cuts::ec_geo_right_cut(int par_, float x_, float y_, int sec_,std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	float x_cen = detect::x_det_center(x_,y_,sec_);
+	float y_cen = detect::y_det_center(x_,y_,sec_);
+	int cut_width = flags_->Flags::Fid_Geo_Cut_Width(par_,2);
+	int run = flags_->Flags::Run();
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){
+		sim_idx = 1;
+	}
+	pass &= (y_cen > (_geo_ec_side_pars_[run][sim_idx][par_][sec_][cut_width][0][0] + _geo_ec_side_pars_[run][sim_idx][par_][sec_][cut_width][0][1]*x_cen));
+	return pass;
+}
+bool cuts::ec_geo_top_cut(int par_, float x_, float y_, int sec_,std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	float x_cen = detect::x_det_center(x_,y_,sec_);
+	float y_cen = detect::y_det_center(x_,y_,sec_);
+	int cut_width = flags_->Flags::Fid_Geo_Cut_Width(par_,2);
+	int run = flags_->Flags::Run();
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){
+		sim_idx = 1;
+	}
+	pass &= (y_cen < _geo_ec_top_cut_[run][sim_idx][sec_][cut_width]);
+	return pass;
+}
+bool cuts::ec_geo_eff_cut(int par_, float x_, float y_, int sec_,std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	float x_cen = detect::x_det_center(x_,y_,sec_);
+	float y_cen = detect::y_det_center(x_,y_,sec_);
+	int cut_width = flags_->Flags::Fid_Geo_Cut_Width(par_,2);
+	int run = flags_->Flags::Run();
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){
+		sim_idx = 1;
+	}
+	if(!sec_ == 4){return pass;}
+	//The diagonal EXP cut
+	bool low1 = (y_cen < (_e16_sec5_eff_cut1_[sim_idx][par_][cut_width][0][0] + _e16_sec5_eff_cut1_[sim_idx][par_][cut_width][0][1]*x_cen));
+	bool high1 = (y_cen > (_e16_sec5_eff_cut1_[sim_idx][par_][cut_width][1][0] + _e16_sec5_eff_cut1_[sim_idx][par_][cut_width][1][1]*x_cen));
+	//Horizontal SIM cut
+	bool low2 = (y_cen < _e16_sec5_eff_cut2_[sim_idx][par_][cut_width][0]);
+	bool high2 = (y_cen > _e16_sec5_eff_cut2_[sim_idx][par_][cut_width][1]);
+	
+	pass &= (low1 || high1 );
+	pass &= (low2 || high2 );
+	return pass;
+}
+bool cuts::ec_geo_cut(int par_, float x_, float y_, int sec_,std::shared_ptr<Flags> flags_){
+	bool pass = true;
+	int sim_idx = 0;
+	if(flags_->Flags::Sim()){ sim_idx=1;}
+	pass &= cuts::ec_geo_left_cut(par_,x_,y_,sec_,flags_);
+	pass &= cuts::ec_geo_right_cut(par_,x_,y_,sec_,flags_);
+	pass &=  cuts::ec_geo_top_cut(par_,x_,y_,sec_,flags_);
+	pass &=  cuts::ec_geo_eff_cut(par_,x_,y_,sec_,flags_);
+	return pass; 
+}
+
+bool cuts::kin_eff_cut(int par_, int sec_, float p_, float theta_, std::shared_ptr<Flags> flags_){
+	return true;
+}

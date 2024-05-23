@@ -18,6 +18,7 @@
 #include "flags.hpp"
 #include <iterator>
 #include "TLatex.h"
+#include "physics.hpp"
 
 //namespace fs = std::experimental::filesystem;
 
@@ -78,8 +79,16 @@ bool correct_run(int run_num_, std::shared_ptr<Flags> flags_);
 float poly_4(float x_, float a_, float b_, float c_, float d_, float e_);
 float poly_3(float x_, float a_, float b_, float c_, float d_);
 float poly_2(float x_, float a_, float b_, float c_);
+bool check_sec(const char * sec_, float x_, float y_);
 //int array_size(char* array_[]);
 //int array_size(const char* array_[]);
+int ele_cut_width(const char* cut_, std::shared_ptr<Flags> flags_);
+int pro_cut_width(const char* cut_, std::shared_ptr<Flags> flags_);
+int pip_cut_width(const char* cut_, std::shared_ptr<Flags> flags_);
+int pim_cut_width(const char* cut_, std::shared_ptr<Flags> flags_);
+int cut_width(const char* species_, const char* cut_, std::shared_ptr<Flags> flags_);
+int geo_det_idx(const char* detector_);
+
 }
 
 #endif

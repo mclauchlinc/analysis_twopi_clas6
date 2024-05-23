@@ -4,6 +4,7 @@
 #include "constants.hpp"
 #include "branches.hpp"
 #include "cuts.hpp"
+#include "corrections.hpp"
 
 
 namespace pid {
@@ -43,6 +44,10 @@ namespace pid {
 	bool vertex_e(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 	//Efficiency Cuts
 	bool sc_eff(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
+	bool geo_cc_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
+	bool geo_sc_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
+	bool geo_ec_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
+	bool kin_eff_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 }
 
 #endif

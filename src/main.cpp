@@ -21,7 +21,10 @@ int main(int argc, char **argv){
 
 	std::cout<<"Reading Flags\n";
 	auto flags = std::make_shared<Flags>();//argc,argv);
+	//std::cout<<"Output Flags before filling\n";
+	//flags->Flags::Print_Flags();
 	flags->Flags::Read_Flags(argc,argv);
+	std::cout<<"Output Flags after filling\n";
 	flags->Flags::Print_Flags();
 	//std::vector<std::vector<std::string>> infilenames(flags->Flags::Num_Cores());
 
@@ -39,6 +42,10 @@ int main(int argc, char **argv){
 
 	std::shared_ptr<double> q_tot;
 
+	for(int i=0; i<std::distance(std::begin(_ecuts_), std::end(_ecuts_)); i++){
+		std::cout<<"ecut:" <<_ecuts_[i] <<" cut:" <<fun::ecut_perform(_ecuts_[i],flags) <<" mod_idx:" <<fun::ecut_idx(_ecuts_[i])+fun::ecut_offset(_ecuts_[i],flags) <<"\n";
+	}
+
 	//Make histograms objects as a shared pointer that all threads will have
 	std::cout<<"Making Histogram\n";
 	auto hists = std::make_shared<Histogram>(flags);//Check on this
@@ -53,7 +60,7 @@ int main(int argc, char **argv){
 	std::future<bool> fut;
 
 
-	std::cout<<"Am i makign bin centering plots? " <<flags->Flags::Plot_Bin_Centering() <<"\n";
+	std::cout<<"Am i making bin centering plots? " <<flags->Flags::Plot_Bin_Centering() <<"\n";
 	//For each thread
 	std::cout<<"Running Multithreaded\n";
 	for(int i = 0; i<flags->Flags::Num_Cores(); i++){
@@ -82,8 +89,24 @@ int main(int argc, char **argv){
 	for(int i = 0; i<flags->Flags::Num_Cores(); i++){//_NUM_THREADS_
 		events += threads[i].get();
 	}
+	std::cout<<"\tClean Event Dist:\n";
+	for(int i=0; i<4; i++){
+		std::cout<<"\t" <<_top_[i] <<":" <<hists->Histogram::Clean_Top(i);
+	}
+	std::cout<<"\n\tIsolated Event Dist:\n";
+	for(int i=0; i<4; i++){
+		std::cout<<"\t" <<_top_[i] <<":" <<hists->Histogram::Isolated_Top(i);
+	}
+	std::cout<<"\n\tClean not Isolated Event Dist:\n";
+	for(int i=0; i<4; i++){
+		std::cout<<"\t" <<_top_[i] <<":" <<hists->Histogram::Clean_Not_Isolated_Top(i);
+	}
+	std::cout<<"\n\tClean and Isolated Event Dist:\n";
+	for(int i=0; i<4; i++){
+		std::cout<<"\t" <<_top_[i] <<":" <<hists->Histogram::Clean_and_Isolated_Top(i);
+	}
 	//std::cout<<std::endl <<"Total Number of Files: " <<envi->Environment::was_num_file() <<std::endl; 
-	std::cout<<"***Integrated Charge was " <<q_tot <<"**\n";
+	std::cout<<"\n***Integrated Charge was " <<q_tot <<"**\n";
 
 	long total_passed_events[3][4] = {{0,0,0,0},{0,0,0,0},{0,0,0,0}};
 	long total_bad_angles[3][4] = {{0,0,0,0},{0,0,0,0},{0,0,0,0}};
@@ -106,6 +129,8 @@ int main(int argc, char **argv){
 	std::cout<<"\nWriting Histograms\n";
 	hists->Histogram::Write(flags);
 	//hists->Histogram::Print(output_name,envi);
+
+	std::cout<<"\n\nOutput File:\n\t" <<flags->Flags::Output_Name() <<"\n\n";
 
 	std::cout<<std::endl;
 	//Timer and Efficiency Counters

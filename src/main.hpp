@@ -51,6 +51,7 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	auto data = std::make_shared<Branches>(chain_,flags_->Flags::Sim());
 	float pe = 0.0;
 	float W = 0.0;
+	float W0 = 0.0;
 	float theta_e = 0.0;
 	float theta_p = 0.0;
 	float phi_e = 0.0;
@@ -84,12 +85,16 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			//Particle ID, Event Selection, and Histogram Filling
 			//std::cout<<"Going into a given event\n";
 			auto analysis = std::make_shared<Analysis>(data,hists_, thread_id_, run_num, flags_);
-			if(flags_->Flags::Plot_Electron_Angle_Corr() && !flags_->Flags::Sim() && data->Branches::gpart()>=2){
+
+			if((flags_->Flags::Plot_Electron_Angle_Corr() || flags_->Flags::Plot_Elastic()) && !flags_->Flags::Sim() && data->Branches::gpart()>=2){
 				phi_e = physics::get_phi(0,data);
 				pe = data->Branches::p(0);
 				sector = physics::get_sector(phi_e);
 				theta_p = physics::get_theta(1,data);
 				phi_e_center = physics::phi_center(phi_e);
+				theta_e = physics::get_theta(0,data);
+				W0 = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e,_me_),flags_->Flags::Run());
+				hists_->Histogram::Elastic_Peak_Fill(W0,0,sector,flags_);
 				//hists_->Histogram::Elastic_Peak_Fill(physics::W(physics::Make_4Vector(true,pe,physics::get_theta(0,data),phi_e,_me_),flags_->Flags::Run()),0,sector,flags_);
 				if(flags_->Flags::E_Theta_Corr()){
 					theta_e = corr::theta_e_corr(physics::get_theta(0,data),phi_e_center,flags_->Flags::Run(),true,sector-1);

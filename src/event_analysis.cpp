@@ -247,6 +247,9 @@ void Analysis::Event_ID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogr
 			_gtop[_rEvent[idx].Event::Top()]+=1;
 		}
 	} 
+	if(_gEvent.size() != _gevts){
+		std::cout<<"\nGood Event Size:" <<_gEvent.size() <<" _gevts:" <<_gevts <<"\n";
+	}
 	/*
 	for(int j=0; j<4; j++){//Topology
 		if(_ntop[j]>0){//Number of possible in that topology
@@ -274,7 +277,8 @@ void Analysis::Isolate_Event(std::shared_ptr<Histogram> hist_, std::shared_ptr<F
 		}else{
 			//std::cout<<"\tonly one good event\n";
 		}
-		if(_gtop[3]>0){
+		//if(_gtop[3]>0){
+		if(_gtop[3]>0 && _gtop[0]>0 && _gtop[1]>0 && _gtop[2]>0){	
 			_top_passed = 3;
 			hist_->Histogram::Top_Increment(3);
 			for(int i=0; i<3; i++){
@@ -287,7 +291,7 @@ void Analysis::Isolate_Event(std::shared_ptr<Histogram> hist_, std::shared_ptr<F
 			}else{
 				_iEvent.push_back(_gEvent[Analysis::gEvent_idx(3,0)]);
 				if(_gEvent[Analysis::gEvent_idx(3,0)].Event::Pass()){
-					
+					//hist_->Histogram::Isolated_Top_Increment(3);
 					//std::cout<<"isolated to Zero Missing\n";
 				}else{
 					std::cout<<"We have a weird problem with the event passage\n";
@@ -306,6 +310,7 @@ void Analysis::Isolate_Event(std::shared_ptr<Histogram> hist_, std::shared_ptr<F
 					Analysis::Isolate_Top(2,hist_,flags_);
 				}else{
 					_iEvent.push_back(_gEvent[Analysis::gEvent_idx(2,0)]);
+					//hist_->Histogram::Isolated_Top_Increment(2);
 					//std::cout<<"isolated to PIM Missing\n";
 				}
 			}else{
@@ -319,6 +324,7 @@ void Analysis::Isolate_Event(std::shared_ptr<Histogram> hist_, std::shared_ptr<F
 						Analysis::Isolate_Top(1,hist_,flags_);
 					}else{
 						_iEvent.push_back(_gEvent[Analysis::gEvent_idx(1,0)]);
+						//hist_->Histogram::Isolated_Top_Increment(1);
 						//std::cout<<"isolated to PIP Missing\n";
 					}
 				}else{
@@ -329,6 +335,7 @@ void Analysis::Isolate_Event(std::shared_ptr<Histogram> hist_, std::shared_ptr<F
 							Analysis::Isolate_Top(0,hist_,flags_);
 						}else{
 							_iEvent.push_back(_gEvent[Analysis::gEvent_idx(0,0)]);
+							//hist_->Histogram::Isolated_Top_Increment(0);
 							//std::cout<<"isolated to Proton Missing\n";
 							
 						}
@@ -344,8 +351,8 @@ void Analysis::Isolate_Top(int top_, std::shared_ptr<Histogram> hist_, std::shar
 	int idx = -1;
 	if(_gtop[top_]>0){
 		for(int i=1; i<_gtop[top_]; i++){
-			//std::cout<<"\t"<<i-1<<" event index: " <<Analysis::gEvent_idx(top_,i-1) <<" error: "<<_gEvent[Analysis::gEvent_idx(top_,i-1)].Event::Error() <<"\n";
-			//std::cout<<"\t"<<i<<" event index: " <<Analysis::gEvent_idx(top_,i) <<" error: "<<_gEvent[Analysis::gEvent_idx(top_,i)].Event::Error() <<"\n";
+			std::cout<<"\t"<<i-1<<" event index: " <<Analysis::gEvent_idx(top_,i-1) <<" error: "<<_gEvent[Analysis::gEvent_idx(top_,i-1)].Event::Error() <<"\n";
+			std::cout<<"\t"<<i<<" event index: " <<Analysis::gEvent_idx(top_,i) <<" error: "<<_gEvent[Analysis::gEvent_idx(top_,i)].Event::Error() <<"\n";
 			if(_gEvent[Analysis::gEvent_idx(top_,i-1)].Event::Error() < _gEvent[Analysis::gEvent_idx(top_,i)].Event::Error()){
 				idx = Analysis::gEvent_idx(top_,i-1);
 				//std::cout<<"\t\tIndex: " <<idx <<"\n";
@@ -356,7 +363,8 @@ void Analysis::Isolate_Top(int top_, std::shared_ptr<Histogram> hist_, std::shar
 		}
 		if(idx>=0){
 			_iEvent.push_back(_gEvent[idx]);
-			//std::cout<<"isolated to " <<topologies[top_+1] <<" Index " <<idx <<"\n";
+			std::cout<<"isolated to " <<_top_[top_] <<" Index " <<idx <<"\n";
+			//hist_->Histogram::Isolated_Top_Increment(top_);
 		}else{
 			std::cout<<"Bad Index for Good Event\n";
 		}
@@ -463,20 +471,80 @@ void Analysis::Plot_Particles(std::shared_ptr<Histogram> hist_, std::shared_ptr<
 void Analysis::Plot_Events(std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_){
 	//std::cout<<"\t\tPlotting Events\n";
 	if(_rEvent.size() == 1){
+	//if(_gEvent.size() == 1){
 		//std::cout<<"\nPlot Clean event\n";
+		//if((_rEvent[0].Event::W() >= _W_min_ && _rEvent[0].Event::W() < _W_max_) && (_rEvent[0].Event::Q2() >= _Q2_bins_[0] && _rEvent[0].Event::Q2() < _Q2_bins_[5])){
+		//if((_gEvent[0].Event::W() >= _W_min_ && _gEvent[0].Event::W() < _W_max_) && (_gEvent[0].Event::Q2() >= _Q2_bins_[0] && _gEvent[0].Event::Q2() < _Q2_bins_[5])){
+			//if(!_iEvent.size()>0){
+			//	//hist_->Histogram::Clean_Not_Isolated_Top_Increment(_rEvent[0].Event::Top());
+			//	hist_->Histogram::Clean_Not_Isolated_Top_Increment(_gEvent[0].Event::Top());
+			//}else{
+			//	//hist_->Histogram::Clean_and_Isolated_Top_Increment(_rEvent[0].Event::Top());
+			//	hist_->Histogram::Clean_and_Isolated_Top_Increment(_gEvent[0].Event::Top());
+			//}
+		//}
 		plot::plot_clean_event(_rEvent[0],hist_,flags_);
+		//plot::plot_clean_event(_gEvent[0],hist_,flags_);
+		//hist_->Histogram::Clean_Top_Increment(_rEvent[0].Event::Top());
+		//hist_->Histogram::Clean_Top_Increment(_gEvent[0].Event::Top());
 		plot::plot_event(_rEvent[0],hist_,flags_,false);
+		//plot::plot_event(_gEvent[0],hist_,flags_,false);
 	}else if(_rEvent.size()>1){
+	//}else if(_gEvent.size()>1){
 		for(int i=0; i<_rEvent.size(); i++){
+		//for(int i=0; i<_gEvent.size(); i++){
 			//std::cout<<"\nPlot dirty events\n";
 			plot::plot_event(_rEvent[i],hist_,flags_,false);
-			if(_top_[_rEvent[i].Event::Top()]==_mzero_){
-				if(_ntop[3]==1){
+			//plot::plot_event(_gEvent[i],hist_,flags_,false);
+			if(_top_[_rEvent[i].Event::Top()]==_mzero_ && _ntop[3]==1){// && _ntop[0]>0 && _ntop[1]>0 && _ntop[2]>0){
+			//if(_top_[_gEvent[i].Event::Top()]==_mzero_){
+				//if(_ntop[3]==1 && _ntop[0] && _ntop[1] && _ntop[2]){
+					//if(!_iEvent.size()>0){
+						//hist_->Histogram::Clean_Not_Isolated_Top_Increment(_rEvent[0].Event::Top());
+					//	hist_->Histogram::Clean_Not_Isolated_Top_Increment(_gEvent[0].Event::Top());
+					//}else{
+						//hist_->Histogram::Clean_and_Isolated_Top_Increment(_rEvent[0].Event::Top());
+					//	hist_->Histogram::Clean_and_Isolated_Top_Increment(_gEvent[0].Event::Top());
+					//}
+				plot::plot_clean_event(_rEvent[i],hist_,flags_);
+					//plot::plot_clean_event(_gEvent[i],hist_,flags_);
+					//hist_->Histogram::Clean_Top_Increment(3);
+				//}
+			}else if(_top_[_rEvent[i].Event::Top()]==_mpim_ && _ntop[2]==1){
 					plot::plot_clean_event(_rEvent[i],hist_,flags_);
+			}else if(_top_[_rEvent[i].Event::Top()]==_mpip_ &&_ntop[1] == 1){
+				plot::plot_clean_event(_rEvent[i],hist_,flags_);
+			}else if(_top_[_rEvent[i].Event::Top()]==_mpro_ & _ntop[0] == 1){
+				plot::plot_clean_event(_rEvent[i],hist_,flags_);
+			}
+		}
+	}
+	if(_gEvent.size() == 1){
+		hist_->Histogram::Clean_Top_Increment(_gEvent[0].Event::Top());
+		if(!_iEvent.size()>0){
+			//hist_->Histogram::Clean_Not_Isolated_Top_Increment(_rEvent[0].Event::Top());
+			hist_->Histogram::Clean_Not_Isolated_Top_Increment(_gEvent[0].Event::Top());
+		}else{
+			//hist_->Histogram::Clean_and_Isolated_Top_Increment(_rEvent[0].Event::Top());
+			hist_->Histogram::Clean_and_Isolated_Top_Increment(_gEvent[0].Event::Top());
+		}
+	}else{
+		if(_gtop[3]==1){
+			for(int i=0; i<_gEvent.size(); i++){
+				if(_gEvent[i].Event::Top()==3 && _gtop[0]>0 && _gtop[1]>0 && _gtop[2]>0){
+					hist_->Histogram::Clean_Top_Increment(_gEvent[i].Event::Top());
+					if(!_iEvent.size()>0){
+						//hist_->Histogram::Clean_Not_Isolated_Top_Increment(_rEvent[0].Event::Top());
+						hist_->Histogram::Clean_Not_Isolated_Top_Increment(_gEvent[i].Event::Top());
+					}else{
+						//hist_->Histogram::Clean_and_Isolated_Top_Increment(_rEvent[0].Event::Top());
+						hist_->Histogram::Clean_and_Isolated_Top_Increment(_gEvent[i].Event::Top());
+					}
 				}
 			}
 		}
 	}
+
 	
 	if(flags_->Flags::Sim() && _tEvent[0].Event::W()>= _W_min_ && _tEvent[0].Event::W() < _W_max_ && _tEvent[0].Event::Q2()>= _Q2_min_ && _tEvent[0].Event::Q2() < _Q2_max_){
 		//std::cout<<"Thrown W:" <<_tEvent[0].Event::W() <<" Q2:" <<_tEvent[0].Event::Q2() <<"\n";
@@ -484,6 +552,7 @@ void Analysis::Plot_Events(std::shared_ptr<Histogram> hist_, std::shared_ptr<Fla
 	}
 	if(_iEvent.size()>0){
 		if(_iEvent.size()==1){
+			hist_->Histogram::Isolated_Top_Increment(_top_passed);
 			plot::plot_isolated_event(_iEvent[0],hist_,flags_, _top_passed);
 		}else{
 			std::cout<<"size: " <<_iEvent.size() <<"  Didn't isolate event: there's more than one here!\n";

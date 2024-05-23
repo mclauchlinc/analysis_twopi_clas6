@@ -40,6 +40,11 @@ static std::string _ec_cut_f_ = "ec";
 static std::string _id_cut_f_ = "id";
 static std::string _beta_cut_f_[4] = {"beta_ele","beta_pro","beta_pip","beta_pim"};; //{ele,pro,pip,pim}
 static std::string _wq2_cut_f_ = "wq2";
+static std::string _fid_geo_cut_f_[4][3] = {	{"fid_geo_cc_ele","fid_geo_sc_ele","fid_geo_ec_ele"},
+												{"fid_geo_cc_pro","fid_geo_sc_pro","fid_geo_ec_pro"},
+												{"fid_geo_cc_pip","fid_geo_sc_pip","fid_geo_ec_pip"},
+												{"fid_geo_cc_pim","fid_geo_sc_pim","fid_geo_ec_pim"}};
+static std::string _kin_eff_cut_f_[4] = {"kin_ele","kin_pro","kin_pip","kin_pim"};
 //Other Cuts
 static std::string _vertex_cut_f_ = "vertex";
 //Event Selection
@@ -53,6 +58,7 @@ static std::string _eff_cc_ = "cc";
 static std::string _eff_dc_ = "dc";
 static std::string _eff_ec_ = "ec";
 static std::string _eff_sc_ = "sc";
+static std::string _eff_kin_ = "kin";
 //Corrections
 static std::string _corr_ = "-corr=";
 static std::string _ncorr_ = "-ncorr=";
@@ -73,18 +79,23 @@ static std::string _plot_cc_eff_ = "cc_eff";
 static std::string _plot_sc_eff_ = "sc_eff";
 static std::string _plot_ec_eff_ = "ec_eff";
 static std::string _plot_dc_eff_ = "dc_eff";
-static std::string _plot_cc_geo_ = "cc_geo";
-static std::string _plot_sc_geo_ = "sc_geo";
-static std::string _plot_ec_geo_ = "ec_geo";
+static std::string _plot_fid_geo_[4][3] = {	{"fid_geo_cc_ele","fid_geo_sc_ele","fid_geo_ec_ele"},
+											{"fid_geo_cc_pro","fid_geo_sc_pro","fid_geo_ec_pro"},
+											{"fid_geo_cc_pip","fid_geo_sc_pip","fid_geo_ec_pip"},
+											{"fid_geo_cc_pim","fid_geo_sc_pim","fid_geo_ec_pim"}};
 static std::string _plot_mm_[4] = {"mm_pro","mm_pip","mm_pim","mm_zero"}; //{pro,pip,pim,zero}
 static std::string _plot_beta_[4] = {"beta_ele","beta_pro","beta_pip","beta_pim"}; //{ele,pro,pip,pim}
 static std::string _plot_vertex_ = "vertex";
+static std::string _plot_kin_eff_[4] = {"kin_eff_ele","kin_eff_pro","kin_eff_pip","kin_eff_pim"};
 static std::string _plot_e_pcorr_ = "e_pcorr";
 static std::string _plot_elastic_ = "elastic";
 static std::string _plot_check_ = "check";
-static std::string _plot_bin_centering_ = "bin_centering";
+static std::string _plot_bin_centering_ = "bin_centering";//Single Differential and Beam Spin
+static std::string _plot_bin_centering2_ = "bin_centering2";//Polarization Obs. 
 static std::string _plot_ecorr_angle_ = "e_pcorr_theta";
 static std::string _plot_ecorr_mag_ = "e_pcorr_mag";
+static std::string _loose_cut_ = "-loose=";
+static std::string _tight_cut_ = "-tight=";
 //Histogram Separation
 //Will have space for this
 //THnSparse
@@ -119,6 +130,11 @@ private:
 	bool _ec_cut = false;
 	bool _id_cut = false;
 	bool _beta_cut[4] = {false,false,false,false}; //{ele,pro,pip,pim}
+	bool _fid_geo_cut[4][3] = {	{false,false,false},
+								{false,false,false},
+								{false,false,false},
+								{false,false,false}};
+	bool _kin_eff_cut[4] = {false,false,false,false};
 	//Other Cuts
 	bool _vertex_cut = false;
 	//Event Selection
@@ -148,11 +164,13 @@ private:
 	bool _plot_sf = false;
 	bool _plot_cc = false;
 	bool _plot_dt[4] = {false,false,false,false}; //{ele,pro,pip,pim}
-	bool _plot_cc_geo = false;
-	bool _plot_sc_geo = false;
-	bool _plot_ec_geo = false;
+	bool _plot_fid_geo[4][3] = {	{false,false,false},//{species}{detector}
+									{false,false,false},
+									{false,false,false},
+									{false,false,false}};
 	bool _plot_mm[4] = {false,false,false,false}; //{pro,pip,pim,zero}
 	bool _plot_beta[4] = {false,false,false,false}; //{ele,pro,pip,pim}
+	bool _plot_kin_eff[4] = {false,false,false,false}; //{ele,pro,pip,pim}
 	bool _plot_cc_eff = false;
 	bool _plot_sc_eff = false;
 	bool _plot_ec_eff = false;
@@ -162,8 +180,12 @@ private:
 	bool _plot_elastic = false;
 	bool _plot_check = false;
 	bool _plot_bin_centering = false;
+	bool _plot_bin_centering2 = false;
 	bool _plot_ecorr_angle = false;
 	bool _plot_ecorr_mag = false;
+
+	std::string _loose_cut = "";
+	std::string _tight_cut = "";
 
 	//Histogram Separation
 		//Will have space for this
@@ -204,6 +226,8 @@ public:
 	bool EC_Cut();
 	bool ID_Cut();
 	bool Beta_Cut(int particle);
+	bool Geo_Cut(int particle_, int detector_);
+	bool Kin_Eff_Cut(int particle_);
 	//Other Cuts
 	bool Vertex_Cut();
 	bool WQ2_Cut();
@@ -221,7 +245,7 @@ public:
 	bool P_Corr();
 	bool E_Theta_Corr();
 	bool E_PCorr();
-	bool Delta_Corr();
+	//bool Delta_Corr();
 	bool E_Corr();
 	bool Vertex_Corr();
 	//Histograms
@@ -232,20 +256,21 @@ public:
 	bool Plot_CC_Eff();
 	bool Plot_SC_Eff();
 	bool Plot_Delta(int particle);
-	bool Plot_CC_Geo();
-	bool Plot_EC_Geo();
-	bool Plot_SC_Geo();
+	bool Plot_Fid_Geo(int particle_, int detector_);
 	bool Plot_MM(int topology);
 	bool Plot_Beta(int particle);
 	bool Plot_Vertex();
 	bool Plot_E_PCorr();
 	bool Plot_Elastic();
 	bool Plot_Check();
+	bool Plot_Kin_Eff(int particle_);
 	bool Plot_Bin_Centering();
+	bool Plot_Bin_Centering2();
 	bool Plot_Electron_Angle_Corr();
 	bool Plot_Electron_Mag_Corr();
+	
 	//Portions of Histograms
-	bool Ele_Cut(const char * ecut_);
+	//bool Ele_Cut(const char * ecut_);
 
 	//Histogram Separation
 
@@ -261,7 +286,15 @@ public:
 	int Num_Cores();
 	void Print_Flags();
 
-	bool Flux_Weight();
+	//bool Flux_Weight();
+	int Fid_Cut_Width(int i_);
+	int Delta_Cut_Width(int i_);
+	int Fid_Geo_Cut_Width(int i_, int detector_);
+	int SF_Cut_Width();
+	int Min_CC_Cut_Width();
+	int MM_Cut_Width(int top_);
+	int Vertex_Cut_Width();
+	int Kin_Eff_Cut_Width(int species_);
 };
 
 

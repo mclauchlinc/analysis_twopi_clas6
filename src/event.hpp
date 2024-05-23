@@ -46,6 +46,12 @@ private:
 	float _cc_eff = NAN;//CC Efficiency
 	float _dt[4] = {NAN,NAN,NAN,NAN};
 	int _sc_pd[4] = {-1,-1,-1,-1};
+	float _x_cc[4] = {NAN,NAN,NAN,NAN};
+	float _y_cc[4] = {NAN,NAN,NAN,NAN};
+	float _x_sc[4] = {NAN,NAN,NAN,NAN};
+	float _y_sc[4] = {NAN,NAN,NAN,NAN};
+	float _x_ec[4] = {NAN,NAN,NAN,NAN};
+	float _y_ec[4] = {NAN,NAN,NAN,NAN};
 	
 	//Virtual Photon Flux
 	float _virtual_photon_flux = NAN;
@@ -125,6 +131,8 @@ public:
 	float Virtual_Photon_Flux();
 	int SC_pd(int i);
 	void Check_Event(bool thrown_, std::shared_ptr<Flags> flags_);
+	float X_Det(int species_, int det_,std::shared_ptr<Flags> flags_);
+	float Y_Det(int species_, int det_,std::shared_ptr<Flags> flags_);
 };
 
 

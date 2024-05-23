@@ -37,13 +37,13 @@ int detect::cc_segment(int cc_segm){
 int detect::cc_lrc(int cc_segm){
 	int po = -1;
 	if(cc_segm > 0 && cc_segm <200){
-		po = 0;//left
+		po = 0;//right
 	}
 	if(cc_segm > 1000 && cc_segm <1200){
 		po = 1;//coincident
 	}
 	if(cc_segm > 2000 && cc_segm <2200){
-		po = 2;//right
+		po = 2;//left
 	}
 	
 	return po;

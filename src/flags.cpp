@@ -132,6 +132,10 @@ void Flags::ID_Flag(std::string argi){
 			_image_name = str.substr(7,str_len);
 		}else if(str.substr(0,7) == _num_cores_){
 			_num_cores = stoi(str.substr(7,str_len));
+		}else if(str.substr(0,7) == _loose_cut_){
+			_loose_cut = stoi(str.substr(7,str_len));
+		}else if(str.substr(0,7) == _tight_cut_){
+			_tight_cut = stoi(str.substr(7,str_len));
 		}
 	}if(str_len > 8){
 		if(str.substr(0,8) == _make_friend_){
@@ -149,6 +153,10 @@ void Flags::Cut_Flag(std::string str, bool include){
 			_delta_cut[j] = true;
 			_beta_cut[j] = true;
 			_mm_cut[j] = true;
+			for(int i=0; i<3; i++){
+				_fid_geo_cut[j][i] = true;
+			}
+			_kin_eff_cut[j] = true;
 		}
 		_sf_cut = true;
 		_cc_cut = true;
@@ -156,6 +164,7 @@ void Flags::Cut_Flag(std::string str, bool include){
 		_vertex_cut=true;
 		_wq2_cut=true;
 		_cut_all = true;
+
 	}
 	if(include && !_cut_all){
 		for(int i=0; i<4; i++){
@@ -174,6 +183,16 @@ void Flags::Cut_Flag(std::string str, bool include){
 			if(str==_mm_cut_f_[i]){
 				std::cout<<"Will do MM Cut: " <<i <<std::endl;
 				_mm_cut[i]=true;
+			}
+			if(str==_kin_eff_cut_f_[i]){
+				std::cout<<"Will do Kin Eff Cut: " <<i <<std::endl;
+				_kin_eff_cut[i]=true;
+			}
+			for(int j=0; j<3; j++){
+				if(str == _fid_geo_cut_f_[i][j]){
+					std::cout<<"Will cut fid geo " <<i <<" " <<j <<"\n";
+					_fid_geo_cut[i][j] = true;
+				}
 			}
 		}
 		if(str==_sf_cut_f_){
@@ -200,6 +219,7 @@ void Flags::Cut_Flag(std::string str, bool include){
 			std::cout<<"Will do W Q^2 Cut\n";
 			_wq2_cut=true;
 		}
+		
 	}
 	if(!include && _cut_all){
 		for(int i=0; i<4; i++){
@@ -218,6 +238,16 @@ void Flags::Cut_Flag(std::string str, bool include){
 			if(str==_mm_cut_f_[i]){
 				std::cout<<"Will NOT do MM Cut: " <<i <<"\n";
 				_mm_cut[i]=false;
+			}
+			if(str==_kin_eff_cut_f_[i]){
+				std::cout<<"Will NOT do Kin Eff Cut: " <<i <<std::endl;
+				_kin_eff_cut[i]=false;
+			}
+			for(int j=0; j<3; j++){
+				if(str == _fid_geo_cut_f_[i][j]){
+					std::cout<<"Will NOT Cut fid geo " <<i <<" " <<j <<"\n";
+					_fid_geo_cut[i][j] = false;
+				}
 			}
 		}
 		if(str==_sf_cut_f_){
@@ -272,6 +302,10 @@ void Flags::Plot_Flag(std::string str, bool include){
 			_plot_dt[i] = true;
 			_plot_mm[i] = true;
 			_plot_beta[i] = true;
+			for(int j=0; j<3; j++){
+					_plot_fid_geo[i][j] = true;
+			}
+			_plot_kin_eff[i] = true;
 		}
 		_plot_sf = true;
 		_plot_cc = true;
@@ -279,9 +313,6 @@ void Flags::Plot_Flag(std::string str, bool include){
 		_plot_sc_eff = true;
 		_plot_ec_eff = true;
 		_plot_dc_eff = true;
-		_plot_sc_geo = true;
-		_plot_cc_geo = true;
-		_plot_ec_geo = true;
 		_plot_vertex = true;
 		_plot_e_pcorr = true;
 		_plot_elastic = true;
@@ -310,62 +341,64 @@ void Flags::Plot_Flag(std::string str, bool include){
 				std::cout<<"Will Plot Beta:" <<i <<"\n";
 				_plot_beta[i] = true;
 			}
+			if(str == _plot_kin_eff_[i]){
+				std::cout<<"Will Plot Kinematic Efficiency:" <<i <<"\n";
+				_plot_kin_eff[i] = true;
+			}
+			for(int j=0; j<3; j++){
+				if(str == _plot_fid_geo_[i][j]){
+					std::cout<<"Will Plot fid geo " <<i <<" " <<j <<"\n";
+					_plot_fid_geo[i][j] = true;
+				}
+			}
 		}
 		if(str == _plot_sf_){
 			std::cout<<"Will Plot SF\n";
 			_plot_sf = true;
 		}
 		if(str == _plot_cc_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot cc\n";
 			_plot_cc = true;
 		}
 		if(str == _plot_cc_eff_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot cc eff\n";
 			_plot_cc_eff = true;
 		}
 		if(str == _plot_sc_eff_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot sc eff\n";
 			_plot_sc_eff = true;
 		}
 		if(str == _plot_ec_eff_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot ec eff\n";
 			_plot_ec_eff = true;
 		}
 		if(str == _plot_dc_eff_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot dc eff\n";
 			_plot_dc_eff = true;
 		}
-		if(str == _plot_sc_geo_){
-			std::cout<<"Will Plot SF\n";
-			_plot_sc_geo = true;
-		}
-		if(str == _plot_cc_geo_){
-			std::cout<<"Will Plot SF\n";
-			_plot_cc_geo = true;
-		}
-		if(str == _plot_ec_geo_){
-			std::cout<<"Will Plot SF\n";
-			_plot_ec_geo = true;
-		}
 		if(str == _plot_vertex_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot vertex\n";
 			_plot_vertex = true;
 		}
 		if(str == _plot_e_pcorr_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot e pcorr\n";
 			_plot_e_pcorr = true;
 		}
 		if(str == _plot_elastic_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot Elastic\n";
 			_plot_elastic = true;
 		}
 		if(str == _plot_check_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot plot check\n";
 			_plot_check = true;
 		}
 		if(str == _plot_bin_centering_){
-			std::cout<<"Will Plot SF\n";
+			std::cout<<"Will Plot Bin Centering\n";
 			_plot_bin_centering = true;
+		}
+		if(str == _plot_bin_centering2_){
+			std::cout<<"Will Plot Bin Centering2\n";
+			_plot_bin_centering2 = true;
 		}
 		if(str == _plot_ecorr_angle_){
 			std::cout<<"Will Plot Electron Angle Corrections\n";
@@ -397,6 +430,16 @@ void Flags::Plot_Flag(std::string str, bool include){
 				std::cout<<"Will NOT Plot Beta " <<i <<"\n";
 				_plot_beta[i] = false;
 			}
+			if(str == _plot_kin_eff_[i]){
+				std::cout<<"Will NOT Plot kin_eff " <<i <<"\n";
+				_plot_kin_eff[i] = false;
+			}
+			for(int j=0; j<3; j++){
+				if(str == _plot_fid_geo_[i][j]){
+					std::cout<<"Will Not Plot fid geo " <<i <<" " <<j <<"\n";
+					_plot_fid_geo[i][j] = false;
+				}
+			}
 		}
 		if(str == _plot_sf_){
 			_plot_sf = false;
@@ -416,15 +459,6 @@ void Flags::Plot_Flag(std::string str, bool include){
 		if(str == _plot_dc_eff_){
 			_plot_dc_eff = false;
 		}
-		if(str == _plot_sc_geo_){
-			_plot_sc_geo = false;
-		}
-		if(str == _plot_cc_geo_){
-			_plot_cc_geo = false;
-		}
-		if(str == _plot_ec_geo_){
-			_plot_ec_geo = false;
-		}
 		if(str == _plot_vertex_){
 			_plot_vertex = false;
 		}
@@ -439,6 +473,9 @@ void Flags::Plot_Flag(std::string str, bool include){
 		}
 		if(str == _plot_bin_centering_){
 			_plot_bin_centering = false;
+		}
+		if(str == _plot_bin_centering2_){
+			_plot_bin_centering2 = false;
 		}
 		if(str == _plot_ecorr_angle_){
 			_plot_ecorr_angle = false;
@@ -605,6 +642,13 @@ bool Flags::ID_Cut(){
 bool Flags::Beta_Cut(int particle){
 	return _beta_cut[particle];
 }
+bool Flags::Geo_Cut(int particle_, int detector_){
+	return _fid_geo_cut[particle_][detector_];
+}
+bool Flags::Kin_Eff_Cut(int particle_){
+	return _kin_eff_cut[particle_];
+}
+
 //Other Cuts
 bool Flags::Vertex_Cut(){
 	return _vertex_cut;
@@ -676,14 +720,8 @@ bool Flags::Plot_SC_Eff(){
 bool Flags::Plot_Delta(int particle){
 	return _plot_dt[particle];
 }
-bool Flags::Plot_CC_Geo(){
-	return _plot_cc_geo;
-}
-bool Flags::Plot_EC_Geo(){
-	return _plot_ec_geo;
-}
-bool Flags::Plot_SC_Geo(){
-	return _plot_sc_geo;
+bool Flags::Plot_Fid_Geo(int particle_, int detector_){
+	return _plot_fid_geo[particle_][detector_];
 }
 bool Flags::Plot_MM(int topology){
 	return _plot_mm[topology];
@@ -703,8 +741,14 @@ bool Flags::Plot_Elastic(){
 bool Flags::Plot_Check(){
 	return _plot_check;
 }
+bool Flags::Plot_Kin_Eff(int particle_){
+	return _plot_kin_eff[particle_];
+}
 bool Flags::Plot_Bin_Centering(){
 	return _plot_bin_centering;
+}
+bool Flags::Plot_Bin_Centering2(){
+	return _plot_bin_centering2;
 }
 bool Flags::Plot_Electron_Angle_Corr(){
 	return _plot_ecorr_angle;
@@ -712,6 +756,7 @@ bool Flags::Plot_Electron_Angle_Corr(){
 bool Flags::Plot_Electron_Mag_Corr(){
 	return _plot_ecorr_mag;
 }
+
 //Histogram Separation
 
 //THnSparse
@@ -767,6 +812,16 @@ void Flags::Print_Flags(){
 	for(int i=0; i<4; i++){
 		std::cout<<"\t" <<i <<Beta_Cut(i)<<"\n";
 	} 
+	std::cout<<"Geo Cut:\n";
+	for(int i=0; i<4; i++){
+		for(int j=0; j<3; j++){
+			std::cout<<"\t" <<i <<" " <<j <<Geo_Cut(i,j) <<"\n";
+		}
+	}
+	std::cout<<"Kinematic Efficiency Cut:\n";
+	for(int i=0; i<4; i++){
+		std::cout<<"\t" <<i <<Kin_Eff_Cut(i)<<"\n";
+	} 
 	//Other Cuts
 	std::cout<<"Vertex Cut: " <<Vertex_Cut()<<"\n";
 	std::cout<<"WQ2 Cut: " <<WQ2_Cut()<<"\n";
@@ -805,9 +860,16 @@ void Flags::Print_Flags(){
 	for(int i= 0; i<4; i++){
 		std::cout<<"\t" <<i <<Plot_Delta(i) <<"\n";
 	}
-	std::cout<<"Plot CC Geo: " <<Plot_CC_Geo()<<"\n";
-	std::cout<<"Plot EC Geo: " <<Plot_EC_Geo()<<"\n";
-	std::cout<<"Plot SC Geo: " <<Plot_SC_Geo()<<"\n";
+	std::cout<<"Plot Geo:\n";
+	for(int i=0; i<4; i++){
+		for(int j=0; j<3; j++){
+			std::cout<<"\t" <<i <<" " <<j <<" perf:"<<Plot_Fid_Geo(i,j) <<"\n";
+		}
+	}
+	std::cout<<"Plot Kinematic Efficiency:\n";
+	for(int i=0; i<4; i++){
+		std::cout<<"\t" <<i <<Plot_Kin_Eff(i)<<"\n";
+	}
 	std::cout<<"Plot MM:\n";
 	for(int i=0; i<4; i++){
 		std::cout<<"\t" <<i <<Plot_MM(i) <<"\n";
@@ -835,4 +897,104 @@ void Flags::Print_Flags(){
 	std::cout<<"Image Name: " <<Image_Name()<<"\n";
 
 	std::cout<<"Num Cores: " <<Num_Cores()<<"\n";
+}
+
+int Flags::Fid_Cut_Width(int i_){
+	if(i_<4){
+		if(Flags::Plot_Fid(i_)){
+			if(_loose_cut==_fid_cut_f_[i_]){
+				return 2;
+			}else if(_tight_cut==_fid_cut_f_[i_]){
+				return 0;
+			}else{
+				return 1;
+			}
+		}else{
+			return 1;
+		}
+	}else{
+		return 1;
+	}
+}
+
+int Flags::Delta_Cut_Width(int i_){
+	if(i_<4){
+		if(Flags::Plot_Delta(i_)){
+			if(_loose_cut==_delta_cut_f_[i_]){
+				return 2;
+			}else if(_tight_cut==_delta_cut_f_[i_]){
+				return 0;
+			}else{
+				return 1;
+			}
+		}else{
+			return 1;
+		}
+	}else{
+		return 1;
+	}
+}
+int Flags::Fid_Geo_Cut_Width(int i_, int detector_){
+	if(i_<4 && detector_ < 3){
+		if(_loose_cut==_fid_geo_cut_f_[i_][detector_]){
+			return 2;
+		}else if(_tight_cut==_fid_geo_cut_f_[i_][detector_]){
+			return 0;
+		}else{
+			return 1;
+		}
+	}else{
+		return 1;
+	}
+}
+int Flags::SF_Cut_Width(){
+	std::string cut = _sf_cut_f_;
+	if(_loose_cut==cut){
+		return 2;
+	}else if(_tight_cut==cut){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+int Flags::Min_CC_Cut_Width(){
+	std::string cut = _cc_cut_f_;
+	if(_loose_cut==cut){
+		return 2;
+	}else if(_tight_cut==cut){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+int Flags::MM_Cut_Width(int top_){
+	std::string cut = "";
+	cut = _mm_cut_f_[top_];
+	if(_loose_cut==cut || _loose_cut == "mall"){
+		return 2;
+	}else if(_tight_cut==cut || _tight_cut == "mall"){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+int Flags::Vertex_Cut_Width(){
+	std::string cut = _vertex_cut_f_;
+	if(_loose_cut==cut){
+		return 2;
+	}else if(_tight_cut==cut){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+int Flags::Kin_Eff_Cut_Width(int species_){
+	std::string cut = _kin_eff_cut_f_[species_];
+	if(_loose_cut==cut){
+		return 2;
+	}else if(_tight_cut==cut){
+		return 0;
+	}else{
+		return 1;
+	}
 }

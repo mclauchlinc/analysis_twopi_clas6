@@ -101,6 +101,10 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 			_vertex_pass = true;
 			//_beta_pass[0] = true;
 			_id_pass[0] = true;
+			_geo_cc_pass[0] = true;
+			_geo_sc_pass[0] = true;
+			_geo_ec_pass[0] = true;
+			_kin_eff_pass[0] = true;
 		}else{
 			_sanity_pass[0] = pid::sanity_ele(idx_,data_,flags_);
 			if(_sanity_pass[0]){
@@ -111,13 +115,19 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				//_dt_pass[0] = pid::delta_t_ele(idx_,data_,flags_);//Maybe implement later
 				_fid_pass[0] = pid::fid_ele(idx_,data_,flags_);
 				//_beta_pass[0] = pid::
+				_geo_cc_pass[0] = pid::geo_cc_cut(0,idx_,data_,flags_);
+				_geo_sc_pass[0] = pid::geo_sc_cut(0,idx_,data_,flags_);
+				_geo_ec_pass[0] = pid::geo_ec_cut(0,idx_,data_,flags_);
+				_kin_eff_pass[0] = pid::kin_eff_cut(0,idx_,data_,flags_);
 				_sc_eff_pass[0] = pid::sc_eff(0, idx_, data_, flags_);
 				_id_pass[0] = pid::id_bank(idx_,data_,flags_,_ele_);
 			}
 		}
 	}else{//Hadron
-		_cc_seg = detect::cc_segment(data_->Branches::cc_segm(idx_));
-		_cc_lrc = detect::cc_lrc(data_->Branches::cc_segm(idx_));
+		if(data_->Branches::cc(idx_)>0){
+			_cc_seg = detect::cc_segment(data_->Branches::cc_segm(idx_));
+			_cc_lrc = detect::cc_lrc(data_->Branches::cc_segm(idx_));
+		}
 		if(_q > 0){
 			if(_pid[1]){//Proton
 				_sanity_pass[1] = true;
@@ -125,12 +135,20 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_fid_pass[1] = true;
 				_sc_eff_pass[1] = true;
 				_id_pass[1] = true;
+				_geo_cc_pass[1] = true;
+				_geo_sc_pass[1] = true;
+				_geo_ec_pass[1] = true;
+				_kin_eff_pass[1] = true;
 			}else{
 				_sanity_pass[1] = pid::sanity_pro(idx_,data_,flags_);
 				if(_sanity_pass[1]){
 					_dt_pass[1] = pid::delta_t_pro(idx_,data_,flags_);
 					_fid_pass[1] = pid::fid_pro(idx_,data_,flags_);
 					_sc_eff_pass[1] = pid::sc_eff(1, idx_, data_, flags_);
+					_geo_cc_pass[1] = pid::geo_cc_cut(1,idx_,data_,flags_);
+					_geo_sc_pass[1] = pid::geo_sc_cut(1,idx_,data_,flags_);
+					_geo_ec_pass[1] = pid::geo_ec_cut(1,idx_,data_,flags_);
+					_kin_eff_pass[1] = pid::kin_eff_cut(1,idx_,data_,flags_);
 				}
 				_id_pass[1] = pid::id_bank(idx_,data_,flags_,_pro_);
 			}
@@ -140,12 +158,20 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_fid_pass[2] = true;
 				_id_pass[2] = true;
 				_sc_eff_pass[2] = true;
+				_geo_cc_pass[2] = true;
+				_geo_sc_pass[2] = true;
+				_geo_ec_pass[2] = true;
+				_kin_eff_pass[2] = true;
 			}else{
 				_sanity_pass[2] = pid::sanity_pip(idx_,data_,flags_);
 				if(_sanity_pass[2]){
 					_dt_pass[2] = pid::delta_t_pip(idx_,data_,flags_);
 					_fid_pass[2] = pid::fid_pip(idx_,data_,flags_);
 					_sc_eff_pass[2] = pid::sc_eff(2, idx_, data_, flags_);
+					_geo_cc_pass[2] = pid::geo_cc_cut(2,idx_,data_,flags_);
+					_geo_sc_pass[2] = pid::geo_sc_cut(2,idx_,data_,flags_);
+					_geo_ec_pass[2] = pid::geo_ec_cut(2,idx_,data_,flags_);
+					_kin_eff_pass[2] = pid::kin_eff_cut(2,idx_,data_,flags_);
 				}
 				_id_pass[2] = pid::id_bank(idx_,data_,flags_,_pip_);
 			}
@@ -162,6 +188,10 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 					_dt_pass[3] = pid::delta_t_pim(idx_,data_,flags_);
 					_fid_pass[3] = pid::fid_pim(idx_,data_,flags_);
 					_sc_eff_pass[3] = pid::sc_eff(3, idx_, data_, flags_);
+					_geo_cc_pass[3] = pid::geo_cc_cut(3,idx_,data_,flags_);
+					_geo_sc_pass[3] = pid::geo_sc_cut(3,idx_,data_,flags_);
+					_geo_ec_pass[3] = pid::geo_ec_cut(3,idx_,data_,flags_);
+					_kin_eff_pass[3] = pid::kin_eff_cut(3,idx_,data_,flags_);
 				}
 				_id_pass[3] = pid::id_bank(idx_,data_,flags_,_pim_);
 			}
@@ -198,6 +228,18 @@ bool Particle::Pass_vertex(){
 }
 bool Particle::Pass_SC_Eff(int i){
 	return _sc_eff_pass[i];
+}
+bool Particle::Pass_Geo_CC(int i){
+	return _geo_cc_pass[i];
+}
+bool Particle::Pass_Geo_SC(int i){
+	return _geo_sc_pass[i];
+}
+bool Particle::Pass_Geo_EC(int i){
+	return _geo_ec_pass[i];
+}
+bool Particle::Pass_Kin_Eff(int i){
+	return _kin_eff_pass[i];
 }
 bool Particle::Corr_p(){
 	return _p_corr; 

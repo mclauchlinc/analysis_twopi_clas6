@@ -57,6 +57,10 @@ private:
 	bool _beta_pass[4] = {false,false,false,false};//Pass Beta {ele,pro,pip,pim}
 	bool _id_pass[4] = {false,false,false,false};//Pass ID bank {ele,pro,pip,pim}
 	bool _sp_dt_pass[3] = {false,false, false};
+	bool _geo_cc_pass[4] = {false,false,false,false};
+	bool _geo_sc_pass[4] = {false,false,false,false};
+	bool _geo_ec_pass[4] = {false,false,false,false};
+	bool _kin_eff_pass[4] = {false,false,false,false};
 	bool _vertex_pass = false;//Did it fall within the determined vertex region?
 	bool _p_corr = false; //Performed Momentum Correction
 	int _id_crisis = 0;//{0,1,2} = {none, pro/pip, pim/e}
@@ -90,6 +94,10 @@ public:
 	bool Pass_pid(int i);
 	bool Pass_vertex();
 	bool Pass_SC_Eff(int i);
+	bool Pass_Geo_CC(int i);
+	bool Pass_Geo_SC(int i);
+	bool Pass_Geo_EC(int i);
+	bool Pass_Kin_Eff(int i);
 	bool Corr_p();
 	int ID_crisis();
 	bool IDed();
