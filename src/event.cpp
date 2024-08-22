@@ -550,15 +550,39 @@ void Event::Vars(){
 	if(_MMb[2] != _MM2b[1] ){
 		std::cout<<"Difference in M(p,pim)!" <<_MMb[2] <<" " <<_MM2b[1] <<"\n";
 	}
+	int top_rel = -1; 
 	for(int j=0; j<3; j++){
 		if(_thetab[j] < 0.0 || _thetab[j] >=180.0 || isnan(_thetab[j])){
-			std::cout<<"thetab " <<j <<" is bad: " <<_thetab[j] <<"\n";
+			if(j==0){
+				top_rel = 2;
+			}else if(j==1){
+				top_rel = 0;
+			}else if(j==2){
+				top_rel=1;
+			}
+			if(_thetab[j]==180.0){ 
+				_thetab[j] = 179.99;
+			}else if(!_pass_top == top_rel){
+				std::cout<<"thetab " <<j <<" is bad: " <<_thetab[j] <<"\n";
+			}else{
+				std::cout<<"thetab " <<j <<" is bad: " <<_thetab[j] <<" in it's missing topology\n";
+			}
+			
 		}
 		if(_alphab[j] < 0.0 || _alphab[j] >=360.0 || isnan(_alphab[j])){
-			std::cout<<"Alphab " <<j <<" is bad: " <<_alphab[j] <<"\n";
+			if(_alphab[j] == 360.0){
+				_alphab[j] = 0.0;
+			}else{
+				std::cout<<"Alphab " <<j <<" is bad: " <<_alphab[j] <<"\n";
+			}
 		}
 		if(_phib[j] < 0.0 || _phib[j] >=360.0 || isnan(_phib[j])){
-			std::cout<<"phib " <<j <<" is bad: " <<_phib[j] <<"\n";
+			if(_phib[j] == 360.0){
+				_phib[j] = 0.0;
+			}else{
+				std::cout<<"phib " <<j <<" is bad: " <<_phib[j] <<"\n";
+			}
+			
 		}
 	}
 	//std::cout<<"++++Event Diff in MM++++" <<"\n\tM(p,pip):" <<_MMb[0]-_MM2b[2] <<"\n\tM(pip,pim):" <<_MMb[1]-_MM2b[0] <<"\n\tM(p,pim):" <<_MMb[2]-_MM2b[1] <<"\n"; 
@@ -738,4 +762,18 @@ float Event::Y_Det(int species_, int det_,std::shared_ptr<Flags> flags_){
 	}else{
 		return NAN;
 	}
+}
+
+bool Event::No_Nan(){
+	bool all_good = true;
+	if(isnan(_W)){all_good &= false;} 
+	if(isnan(_Q2)){all_good &= false;} 
+	for(int i=0; i<3; i++){
+		if(isnan(_MMb[i])){all_good &= false;} 
+		if(isnan(_MM2b[i])){all_good &= false;} 
+		if(isnan(_thetab[i])){all_good &= false;} 
+		if(isnan(_alphab[i])){all_good &= false;} 
+		if(isnan(_phib[i])){all_good &= false;} 
+	}
+	return all_good;
 }

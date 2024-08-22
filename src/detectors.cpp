@@ -133,7 +133,7 @@ float detect::cc_y(std::shared_ptr<Branches> data_, int idx_){
 }
 
 float detect::cc_eff(int run_, int sec_, int seg_, int pos_){
-	return detect::cc_eff_vals[run_][sec_-1][seg_][pos_];
+	return detect::cc_eff_vals[run_][sec_-1][pos_][seg_][1];//Right now just mid cut
 }
 
 

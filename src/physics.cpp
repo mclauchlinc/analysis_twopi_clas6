@@ -619,8 +619,12 @@ float physics::alpha(int top, TLorentzVector p1, TLorentzVector p2, TLorentzVect
 		alph = alph - 360.0;
 	}
 	//std::cout<<std::endl <<"alpha: " <<alph;
-	
-	std::cout<<"alpha post = " <<alph <<std::endl;
+	if(alph == 360){
+		alph = 0.0;
+	}
+
+
+	//std::cout<<"alpha post = " <<alph <<std::endl;
 	//std::cout<<std::endl <<"aCos(-.5)" <<TMath::ACos(-0.5) <<std::endl;
 
 	
@@ -710,6 +714,9 @@ float physics::alpha(int top, TLorentzVector k0, TLorentzVector p1, TLorentzVect
 	if(alph>=360.0){
 		alph = alph - 360.0;
 	}
+	if(alph == 360.0){
+		alph = 0.0;
+	}
 	//std::cout<<std::endl <<"alpha: " <<alph;
 	
 	//std::cout<<"alpha post = " <<alph <<std::endl;
@@ -777,9 +784,11 @@ float physics::Qfaraday(float q_last, float q_next, float q_tot, int run1, int r
 //Faraday Cup counting 
 float physics::Ev_Theta(int top, TLorentzVector k0, TLorentzVector p1, TLorentzVector p2, TLorentzVector p3, TLorentzVector p4, bool COM){
 	float event_theta = NAN;
-	//if(!COM){
-	//	physics::COM_gp(k0,p1,p2,p3,p4);
-	//}
+	if(!COM){
+		std::cout<<"Bruh, put things in the center of mass frame\n";
+		return event_theta;
+		//	physics::COM_gp(k0,p1,p2,p3,p4);
+	}
 	switch(top){
 		case 0: event_theta = physics::get_theta(p4[2]/physics::Vec3_Mag(p4)); break;//looking for pim
 		case 1: event_theta = physics::get_theta(p2[2]/physics::Vec3_Mag(p2)); break;//looking for pro
@@ -797,6 +806,9 @@ float physics::Ev_Phi(int top, TLorentzVector k0, TLorentzVector p1, TLorentzVec
 		case 0: event_phi = physics::get_phi_pos(-p4[0]/physics::Vec3_Mag(p4),-p4[1]/physics::Vec3_Mag(p4)); break;//looking for pim
 		case 1: event_phi = physics::get_phi_pos(-p2[0]/physics::Vec3_Mag(p2),-p2[1]/physics::Vec3_Mag(p2)); break;//looking for pro
 		case 2: event_phi = physics::get_phi_pos(-p3[0]/physics::Vec3_Mag(p3),-p3[1]/physics::Vec3_Mag(p3)); break;//looking for pip
+	}
+	if(event_phi == 360.0){
+		event_phi = 0.0;
 	}
 	return event_phi;
 }

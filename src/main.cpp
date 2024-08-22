@@ -14,6 +14,7 @@ int main(int argc, char **argv){
 	//start timer
 	std::cout<<"Starting Clock\n";
 	auto start = std::chrono::high_resolution_clock::now();
+	//std::cout<<"Clock reads:" <<start <<"\n";
 	//std::cout<<"The res for DTx is: " <<DTxres <<" and the rest for DTy is: " <<DTyres <<std::endl;
 	
 	
@@ -40,7 +41,7 @@ int main(int argc, char **argv){
 	//Define variable for total number of events
 	size_t events = 0; 
 
-	std::shared_ptr<double> q_tot;
+	std::shared_ptr<float> q_tot;
 
 	for(int i=0; i<std::distance(std::begin(_ecuts_), std::end(_ecuts_)); i++){
 		std::cout<<"ecut:" <<_ecuts_[i] <<" cut:" <<fun::ecut_perform(_ecuts_[i],flags) <<" mod_idx:" <<fun::ecut_idx(_ecuts_[i])+fun::ecut_offset(_ecuts_[i],flags) <<"\n";
@@ -105,6 +106,10 @@ int main(int argc, char **argv){
 	for(int i=0; i<4; i++){
 		std::cout<<"\t" <<_top_[i] <<":" <<hists->Histogram::Clean_and_Isolated_Top(i);
 	}
+	std::cout<<"\n\tPassed over events:\n";
+	for(int i=0; i<4; i++){
+		std::cout<<"\t" <<_top_[i] <<":" <<hists->Histogram::NPTop(i);
+	}
 	//std::cout<<std::endl <<"Total Number of Files: " <<envi->Environment::was_num_file() <<std::endl; 
 	std::cout<<"\n***Integrated Charge was " <<q_tot <<"**\n";
 
@@ -126,8 +131,17 @@ int main(int argc, char **argv){
 		}
 		
 	}
+	
+	std::cout<<"Number of filled events:\t" <<hists->Histogram::Number_of_Events() <<"\n";
+	std::cout<<"Number of attempted events:\t" <<hists->Histogram::Number_of_Attempted_Events() <<"\n";
+	for(int i=0; i<3; i++){
+		std::cout<<"Number of filled events for var " <<i <<":\t" <<hists->Histogram::Number_of_Filled_Var(i) <<"\n";
+		std::cout<<"Number of unfilled events for var " <<i <<":\t" <<hists->Histogram::Number_of_Unfilled_Var(i) <<"\n";
+	}
 	std::cout<<"\nWriting Histograms\n";
+
 	hists->Histogram::Write(flags);
+
 	//hists->Histogram::Print(output_name,envi);
 
 	std::cout<<"\n\nOutput File:\n\t" <<flags->Flags::Output_Name() <<"\n\n";
@@ -139,5 +153,4 @@ int main(int argc, char **argv){
 	std::cout<< elapsed_full.count() << " Sec" <<std::endl;//Total elapsed time
 	std::cout<< events/elapsed_full.count() <<" Hz" <<std::endl; 
 	return 0; 
-
 }

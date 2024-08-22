@@ -133,6 +133,8 @@ public:
 	void Check_Event(bool thrown_, std::shared_ptr<Flags> flags_);
 	float X_Det(int species_, int det_,std::shared_ptr<Flags> flags_);
 	float Y_Det(int species_, int det_,std::shared_ptr<Flags> flags_);
+	//int Friend_Idx(int i_, int var_);
+	bool No_Nan();
 };
 
 

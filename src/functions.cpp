@@ -302,6 +302,13 @@ int fun::species_offset(const char* species_, const char* pcut_, std::shared_ptr
       }
     }
   }
+  if(pcut_==_kin_eff_cut_){
+    for(int i=0; i<fun::species_idx(species_); i++){
+      if(!flags_->Flags::Plot_Kin_Eff(i)){
+        offset-=1;
+      }
+    }
+  }
   /*if(pcut_==_beta_cut_){
     for(int i=0; i<fun::species_idx(species_);i++){
       if(!flags_->Flags::Plot_Beta(i)){
@@ -598,78 +605,38 @@ bool fun::is_num_in_list(int num_, const int list_[]){
 
 bool fun::correct_run(int run_num_, std::shared_ptr<Flags> flags_){
   if(flags_->Sim()){ return true;}
-  bool empty = false;
-  bool beam = false;
-  bool other = false;
+  bool correct = false;
   if(flags_->Run()==_e16_){//e16
-    for(int i=0; i<(sizeof(_empty_e16_)/sizeof(_empty_e16_[0])); i++){
-      if(run_num_ == _empty_e16_[i]){
-        empty=true;
+    if(flags_->Fill()){//
+      for(int i=0; i<(sizeof(_beam_e16_)/sizeof(_beam_e16_[0])); i++){
+        if(run_num_ == _beam_e16_[i]){
+          return true;
+        }
       }
-    }
-    //empty = fun::is_num_in_list(run_num_,_empty_e16_);
-    //std::cout<<"Checking Beam| size: " <<sizeof(_beam_e16_)/sizeof(_beam_e16_[0]) <<"\n";
-    for(int i=0; i<(sizeof(_beam_e16_)/sizeof(_beam_e16_[0])); i++){
-      if(run_num_ == _beam_e16_[i]){
-        beam=true;
+    }else{
+      for(int i=0; i<(sizeof(_empty_e16_)/sizeof(_empty_e16_[0])); i++){
+        if(run_num_ == _empty_e16_[i]){
+          return true;
+        }
       }
-    }
-    //beam = fun::is_num_in_list(run_num_,_beam_e16_);
-    for(int i=0; i<(sizeof(_other_e16_)/sizeof(_other_e16_[0])); i++){
-      if(run_num_ == _other_e16_[i]){
-        other=true;
-      }
-    }
-    //std::cout<<"Checking Other| size: " <<sizeof(_other_e16_)/sizeof(_other_e16_[0]) <<"\n";
-    //other = fun::is_num_in_list(run_num_,_other_e16_);
-    if(flags_->Fill()){//Filled Target
-      return (beam && !empty && !other);
-    }else{//Empty Target
-      return (beam && empty);
     }
   }else if(flags_->Run()==_e1f_){//e1f
     //std::cout<<"We are doing e1f!\n";
-    for(int i=0; i<(sizeof(_empty_e1f_)/sizeof(_empty_e1f_[0])); i++){
-      if(run_num_ == _empty_e1f_[i]){
-        empty=true;
+    if(flags_->Fill()){//
+      for(int i=0; i<(sizeof(_beam_e1f_)/sizeof(_beam_e1f_[0])); i++){
+        if(run_num_ == _beam_e1f_[i]){
+          return true;
+        }
       }
-    }
-    //empty = fun::is_num_in_list(run_num_,_empty_e16_);
-    //std::cout<<"Checking Beam| size: " <<sizeof(_beam_e16_)/sizeof(_beam_e16_[0]) <<"\n";
-    for(int i=0; i<(sizeof(_beam_e1f_)/sizeof(_beam_e1f_[0])); i++){
-      if(run_num_ == _beam_e1f_[i]){
-        beam=true;
+    }else{
+      for(int i=0; i<(sizeof(_empty_e1f_)/sizeof(_empty_e1f_[0])); i++){
+        if(run_num_ == _empty_e1f_[i]){
+          return true;
+        }
       }
-    }
-    //beam = fun::is_num_in_list(run_num_,_beam_e16_);
-    for(int i=0; i<(sizeof(_other_e1f_)/sizeof(_other_e1f_[0])); i++){
-      if(run_num_ == _other_e1f_[i]){
-        other=true;
-      }
-    }
-    //std::cout<<"Checking Other| size: " <<sizeof(_other_e16_)/sizeof(_other_e16_[0]) <<"\n";
-    //other = fun::is_num_in_list(run_num_,_other_e16_);
-    if(flags_->Fill()){//Filled Target
-      return (beam && !empty && !other);
-    }else{//Empty Target
-      return (beam && empty);
     }
   }
-
-
-
-    //if(flags_->Fill()){//Filled Target
-    // return (fun::is_num_in_list(run_num_,_beam_e16_,_beam_e16_.size()) && !fun::is_num_in_list(run_num_,_empty_e16_,_empty_e16_.size()) && !fun::is_num_in_list(run_num_,_other_e16_,_other_e16_.size()));
-    //}else{//Empty Target
-    //  return (fun::is_num_in_list(run_num_,_beam_e16_,_beam_e16_.size()) && fun::is_num_in_list(run_num_,_empty_e16_,_empty_e16_.size()));
-    //}
-  /*}else if(flags_->Run()==_e1f_){
-    if(flags_->Fill()){//Filled Target
-      return (fun::is_num_in_list(run_num_,_beam_e1f_,_beam_e1f_.size()) && !fun::is_num_in_list(run_num_,_empty_e1f_,_empty_e1f_.size()) && !fun::is_num_in_list(run_num_,_other_e1f_,_other_e1f_.size()));
-    }else{//Empty Target
-      return (fun::is_num_in_list(run_num_,_beam_e1f_,_beam_e1f_.size()) && fun::is_num_in_list(run_num_,_empty_e1f_,_empty_e1f_.size()));
-    }
-  }*/
+  return correct;
 }
 
   float fun::poly_4(float x_, float a_, float b_, float c_, float d_, float e_){
@@ -794,4 +761,24 @@ int fun::geo_det_idx(const char* detector_){
   }else{
     return -1;
   }
+}
+
+bool fun::vector_in_vector_of_vectors(std::vector<std::vector<int>> vov_, std::vector<int> vec_){
+  if(vov_.size()==0){return false;}
+  for(int i=0; i<vov_.size(); i++){
+    if(vov_[i] == vec_){
+      return true;
+    }
+  }
+  return false;
+}
+
+bool fun::idx_in_vector_of_idx(std::vector<int> vec_, int idx_){
+  if(vec_.size()==0){return false;}
+  for(int i=0; i<vec_.size(); i++){
+    if(vec_[i] == idx_){
+      return true;
+    }
+  }
+  return false;
 }

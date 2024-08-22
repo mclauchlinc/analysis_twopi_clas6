@@ -50,6 +50,7 @@ void Particle::PID_Thrown(int idx_, std::shared_ptr<Branches> data_){
 
 void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
 	//Kinematic Quantities
+	//std::cout<<"\t\t**IDing Reconstructed Particle**\n";
 	if(idx_==0 && flags_->E_PCorr()){
 		//if(flags_->E_Theta_Corr()){
 			_p = corr::p_corr_e(data_->Branches::p(idx_),corr::theta_e_corr(physics::get_theta(data_->Branches::cz(idx_)),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run()),physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)),flags_->Run());
@@ -107,7 +108,8 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 			_kin_eff_pass[0] = true;
 		}else{
 			_sanity_pass[0] = pid::sanity_ele(idx_,data_,flags_);
-			if(_sanity_pass[0]){
+			//if(_sanity_pass[0]){
+			if(true){
 				_sf_pass = pid::sf(idx_,data_,flags_);
 				_min_ec_pass = pid::min_ec(idx_,data_,flags_);
 				_cc_pass = pid::min_cc(idx_,data_,flags_);
@@ -141,7 +143,8 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_kin_eff_pass[1] = true;
 			}else{
 				_sanity_pass[1] = pid::sanity_pro(idx_,data_,flags_);
-				if(_sanity_pass[1]){
+				//if(_sanity_pass[1]){
+				if(true){
 					_dt_pass[1] = pid::delta_t_pro(idx_,data_,flags_);
 					_fid_pass[1] = pid::fid_pro(idx_,data_,flags_);
 					_sc_eff_pass[1] = pid::sc_eff(1, idx_, data_, flags_);
@@ -164,7 +167,8 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_kin_eff_pass[2] = true;
 			}else{
 				_sanity_pass[2] = pid::sanity_pip(idx_,data_,flags_);
-				if(_sanity_pass[2]){
+				//if(_sanity_pass[2]){
+				if(true){
 					_dt_pass[2] = pid::delta_t_pip(idx_,data_,flags_);
 					_fid_pass[2] = pid::fid_pip(idx_,data_,flags_);
 					_sc_eff_pass[2] = pid::sc_eff(2, idx_, data_, flags_);
@@ -182,9 +186,13 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 				_fid_pass[3] = true;
 				_id_pass[3] = true;
 				_sc_eff_pass[0] = true;
+				_geo_cc_pass[3] = true;
+				_geo_sc_pass[3] = true;
+				_geo_ec_pass[3] = true;
 			}else{
 				_sanity_pass[3] = pid::sanity_pim(idx_,data_,flags_);
-				if(_sanity_pass[3]){
+				//if(_sanity_pass[3]){
+				if(true){
 					_dt_pass[3] = pid::delta_t_pim(idx_,data_,flags_);
 					_fid_pass[3] = pid::fid_pim(idx_,data_,flags_);
 					_sc_eff_pass[3] = pid::sc_eff(3, idx_, data_, flags_);
@@ -197,6 +205,13 @@ void Particle::PID_Recon(int idx_, std::shared_ptr<Branches> data_, std::shared_
 			}
 		}
 	}
+	//if(_ided && idx_>0){
+		//std::cout<<"In Particle| ele " <<_pid[0] <<" | sc_fid_geo:" <<_geo_sc_pass[0] <<" sc_x:" <<_x[1] <<" sc_y:" <<_y[1] <<" sc_pad:" <<_sc_pd <<" sec:" <<physics::get_sector(_phi) <<"\n";
+		//std::cout<<"In Particle| pro " <<_pid[1] <<" | sc_fid_geo:" <<_geo_sc_pass[1] <<" sc_x:" <<_x[1] <<" sc_y:" <<_y[1] <<" sc_pad:" <<_sc_pd <<" sec:" <<physics::get_sector(_phi) <<"\n";
+		//std::cout<<"In Particle| pip " <<_pid[2] <<" | sc_fid_geo:" <<_geo_sc_pass[2] <<" sc_x:" <<_x[1] <<" sc_y:" <<_y[1] <<" sc_pad:" <<_sc_pd <<" sec:" <<physics::get_sector(_phi) <<"\n";
+	//	std::cout<<"In Particle| pim " <<_pid[3] <<" | sc_fid_geo:" <<_geo_sc_pass[3] <<" sc_x:" <<_x[1] <<" sc_y:" <<_y[1] <<" sc_pad:" <<_sc_pd <<" sec:" <<physics::get_sector(_phi) <<"\n";
+	//	std::cout<<"Double Confirm Geo_Fid_SC:\n" <<pid::geo_sc_cut(3,idx_,data_,flags_) <<"\n";
+	//}
 }
 
 bool Particle::Pass_Sanity(int i){

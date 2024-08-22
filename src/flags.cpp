@@ -306,6 +306,7 @@ void Flags::Plot_Flag(std::string str, bool include){
 					_plot_fid_geo[i][j] = true;
 			}
 			_plot_kin_eff[i] = true;
+			_plot_top_check[i] = false;
 		}
 		_plot_sf = true;
 		_plot_cc = true;
@@ -318,6 +319,7 @@ void Flags::Plot_Flag(std::string str, bool include){
 		_plot_elastic = true;
 		_plot_check = true;
 		_plot_all = true;
+		//_plot_isolated = true;
 	}
 	if(include && !_plot_all){
 		if(str == _plot_wq2_){
@@ -350,6 +352,10 @@ void Flags::Plot_Flag(std::string str, bool include){
 					std::cout<<"Will Plot fid geo " <<i <<" " <<j <<"\n";
 					_plot_fid_geo[i][j] = true;
 				}
+			}
+			if(str == _plot_top_check_[i]){
+				std::cout<<"Will Plot top_check " <<i <<"\n";
+				_plot_top_check[i] = true;
 			}
 		}
 		if(str == _plot_sf_){
@@ -408,6 +414,10 @@ void Flags::Plot_Flag(std::string str, bool include){
 			std::cout<<"Will Plot Electron Mag Corrections\n";
 			_plot_ecorr_mag = true;
 		}
+		if(str == _plot_isolated_){
+			std::cout<<"Will Plot Isolated Event Selection\n";
+			_plot_isolated = true;
+		}
 	}
 	if(!include && _plot_all){
 		if(str == _plot_wq2_){
@@ -439,6 +449,10 @@ void Flags::Plot_Flag(std::string str, bool include){
 					std::cout<<"Will Not Plot fid geo " <<i <<" " <<j <<"\n";
 					_plot_fid_geo[i][j] = false;
 				}
+			}
+			if(str == _plot_top_check_[i]){
+				std::cout<<"Will NOT Plot top_check " <<i <<"\n";
+				_plot_top_check[i] = false;
 			}
 		}
 		if(str == _plot_sf_){
@@ -483,6 +497,10 @@ void Flags::Plot_Flag(std::string str, bool include){
 		if(str == _plot_ecorr_angle_){
 			_plot_ecorr_angle = false;
 		}
+		if(str == _plot_isolated_){
+			_plot_isolated = false;
+		}
+
 	}
 }
 void Flags::Eff_Flag(std::string str, bool include){
@@ -757,6 +775,14 @@ bool Flags::Plot_Electron_Mag_Corr(){
 	return _plot_ecorr_mag;
 }
 
+bool Flags::Plot_Top_Check(int i_){
+	return _plot_top_check[i_];
+}
+
+bool Flags::Plot_Isolated(){
+	return _plot_isolated;
+}
+
 //Histogram Separation
 
 //THnSparse
@@ -815,7 +841,7 @@ void Flags::Print_Flags(){
 	std::cout<<"Geo Cut:\n";
 	for(int i=0; i<4; i++){
 		for(int j=0; j<3; j++){
-			std::cout<<"\t" <<i <<" " <<j <<Geo_Cut(i,j) <<"\n";
+			std::cout<<"\t" <<i <<" " <<j <<" " <<Geo_Cut(i,j) <<"\n";
 		}
 	}
 	std::cout<<"Kinematic Efficiency Cut:\n";
@@ -861,8 +887,8 @@ void Flags::Print_Flags(){
 		std::cout<<"\t" <<i <<Plot_Delta(i) <<"\n";
 	}
 	std::cout<<"Plot Geo:\n";
-	for(int i=0; i<4; i++){
-		for(int j=0; j<3; j++){
+	for(int i=0; i<4; i++){//Particle
+		for(int j=0; j<3; j++){//{cc,sc,ec}
 			std::cout<<"\t" <<i <<" " <<j <<" perf:"<<Plot_Fid_Geo(i,j) <<"\n";
 		}
 	}

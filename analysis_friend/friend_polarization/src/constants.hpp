@@ -21,6 +21,9 @@ static const float _pol_e16_ = 0.70;//Not accurate and needs to be updated 12/6/
 static const float _pol_e1f_ = 0.70;//Not accurate and needs to be updated 12/6/22
 static const float _beam_pol_[] = {_pol_e16_,_pol_e1f_};
 
+//Cut Values
+static const double _Acceptance_Rel_Error_Max_ = 0.75;
+
 //Target info for luminosity
 static const double _length_target_ = 5.; //cm
 static const double _density_target_ = 0.073; //g/cm^3 

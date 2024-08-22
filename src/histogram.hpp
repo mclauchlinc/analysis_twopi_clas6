@@ -45,12 +45,12 @@ static int _fid_xbin_ = 400;//Degrees
 static float _fid_ymin_ = 0.0;//Degrees
 static float _fid_ymax_ = 180.0; //Degrees
 static int _fid_ybin_ = 300;//Degrees
-static float _geo_fid_xmin_[3] = {-200.0,-175.0,-200.0};//Made for detector centering {-600.0,0.0,-400.0};//mm
-static float _geo_fid_xmax_[3] = {200.0,175.0,200.0};//Made for detector centering {600.0,400.0,400.0}; //mm
+static float _geo_fid_xmin_[3] = {-250.0,-250.0,-200.0};//Made for detector centering {-600.0,0.0,-400.0};//mm
+static float _geo_fid_xmax_[3] = {250.0,250.0,200.0};//Made for detector centering {600.0,400.0,400.0}; //mm
 static int _geo_fid_xbin_[3] = {200,200,200};//cm
 static float _geo_fid_ymin_[3] = {50.0,50.0,50.0};//Made for detector centering{-600.0,-250.0,-400.0};//mm
-static float _geo_fid_ymax_[3] = {400.0,400.0,400.0};//Made for detector centering{600.0,250.0,400.0}; //mm
-static int _geo_fid_ybin_[3] = {200,200,200};//cm
+static float _geo_fid_ymax_[3] = {500.0,500.0,500.0};//Made for detector centering{600.0,250.0,400.0}; //mm
+static int _geo_fid_ybin_[3] = {200,250,250};//cm
 static int _geo_fid_cc_segments_ = 18;
 static int _geo_fid_cc_sides_ = 3;
 static int _geo_fid_sc_paddles_ = 48;
@@ -98,16 +98,16 @@ static int _ec_bin_ = 200;
 
 //Detector Plots
 //Vertex
-static float _vertex_min_[2] = {-12.0,-35.0};
-static float _vertex_max_[2] = {5.0,2.0};
-static int _vertex_bin_[2] = {200,400};
+static float _vertex_min_[2] = {-10.0,-35.0};
+static float _vertex_max_[2] = {10.0,2.0};
+static int _vertex_bin_[2] = {300,400};
 //CC Eff
 	//Momentum vs. Theta
 static float _cc_eff1_xmin_ = 0.0;//GeV
 static float _cc_eff1_xmax_ = 5.0;//GeV
 static int _cc_eff1_xbin_ = 300;
 static float _cc_eff1_ymin_ = 0.0;//Degrees
-static float _cc_eff1_ymax_ = 80.0;//Degrees
+static float _cc_eff1_ymax_ = 120.0;//Degrees
 static int _cc_eff1_ybin_ = 300;
 	//Sector and Segment yields
 static float _cc_eff2_xmin_ = 0.5;//Sector
@@ -165,6 +165,11 @@ static float _ppi_offset_ = 0.012565; //changed 7-12-23//GeV offset from thresho
 static float _pipi_offset_ = 0.0324895; //changed 7-12-23//GeV offset from threshold MM value of missing proton
 static float _MM_offset_[3] = {_mpi_+_ppi_offset_,_mp_+_pipi_offset_,_mpi_+_ppi_offset_};
 static float _MM2_offset_[3] = {_MM_offset_[1],_MM_offset_[2],_MM_offset_[0]};
+
+static int _top_check_bins_ = 16;
+static int _top_check_min_ = 0;
+static int _top_check_max_ = 16;
+
 
 //static float _bin_low_ = {_W_min_,_Q2_min_,_MM}
 
@@ -314,9 +319,9 @@ protected:
 	double min_phi_pecorr = -25.0;
 	double max_phi_pecorr = 25.0;
 	double res_phi_pecorr = 1.0;
-	float min_delta_theta = -0.2;
-	float max_delta_theta = 0.2;
-	int bins_delta_theta = 200;
+	float min_delta_theta = -0.4;
+	float max_delta_theta = 0.4;
+	int bins_delta_theta = 400;
 	float min_delta_p = 0.9;
 	float max_delta_p = 1.1;
 	int bins_delta_p = 200;
@@ -350,6 +355,11 @@ protected:
 	long _cnitop[4] = {0,0,0,0};//clean but not isolated topologies
 	long _caitop[4] = {0,0,0,0};//clean and isolated topologies
 
+	long _nevnts = 0;
+	long _n_attempted_evnts = 0;
+	long _nvar[3] = {0,0,0};
+	long _bvar[3] = {0,0,0};
+
 
 	 //Making the Histograms
 
@@ -369,6 +379,7 @@ protected:
 	//Kinematic Efficencies
 	TH1F_ptr_4d _Kinematic_Eff2_hist;
 	TH2F_ptr_5d _Kinematic_Eff1_hist;
+	TH2F_ptr_3d _Kinematic_Eff_SC_Seg_hist;
 
 	//SC Histograms
 	TH1F_ptr_4d _SC_Eff_hist;
@@ -407,6 +418,9 @@ protected:
 	THnSparseD* _Friend1[3][29][5];//Only doing mall for memory issues 6-28-23[5];//[30][5];//For positive Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 	THnSparseD* _Friend2[3][29][5];//Only doing mall for memory issues 6-28-23[5];//[30][5];//For negative Helicity {Variable sets,topologies} => top->{pro,pip,pim,zero,all}
 	THnSparseD* _Thrown[3][29][5];//[30][5];//Variable Sets
+	THnSparseD* _Duo[3][29][5];//Systematics for multiple events counted
+	THnSparseD* _Duo1[3][29][5];//Systematics for multiple events counted
+	THnSparseD* _Duo2[3][29][5];//Systematics for multiple events counted
 	
 	//TH1D* _W_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
 	//TH1D* _Q2_Dist[3][29][5];//Only doing mall for memory issues 6-28-23[5];
@@ -424,11 +438,16 @@ protected:
 	TH1D* _Alpha_Dist_thr[3][29][5];//Only doing mall for memory issues 6-28-23[5];
 	TH1D* _Phi_Dist_thr[3][29][5];//Only doing mall for memory issues 6-28-23[5];
 
+	TH1D* _Top_Check_hist;
+	TH1D* _Top_Check_hist2[0];
 
 	TH1F_ptr_3d _PCorr_Check_hist;
 
 	TH1D_ptr_6d _Bin_Center_hist;//[W][Q2][Var Set][Xij][Bin Xij][W,Q2,Xij projection]
-	TH1D_ptr_7d _Bin_Center2_hist;//[W][Q2][Var Set][Xij][Bin Xij][Phi Bin][W,Q2,Xij,Phi projection]
+	TH1D_ptr_6d _Bin_Center2_hist1;//[W][Q2][Var Set][Xij][Bin Xij][Phi Bin][W,Q2,Xij,Phi projection]
+	TH1D_ptr_6d _Bin_Center2_hist2;//[W][Q2][Var Set][Xij][Bin Xij][Phi Bin][W,Q2,Xij,Phi projection]
+	TH1D_ptr_6d _Bin_Center2_hist3;//[W][Q2][Var Set][Xij][Bin Xij][Phi Bin][W,Q2,Xij,Phi projection]
+	TH1D_ptr_6d _Bin_Center2_hist4;//[W][Q2][Var Set][Xij][Bin Xij][Phi Bin][W,Q2,Xij,Phi projection]
 
 
 public:
@@ -467,7 +486,7 @@ public:
 	void Fid_Make(std::shared_ptr<Flags> flags_);
 	int hcut_idx(char * hcut_, int hadron_, std::shared_ptr<Flags> flags_);
 	int hcut_idx(const char * hcut_, int hadron_, std::shared_ptr<Flags> flags_);
-	bool Made_Fid_idx(const char* species_, const char* pcut_,const char * sector_, const char * cut_, const char * top_, const char * weight_);
+	//bool Made_Fid_idx(const char* species_, const char* pcut_,const char * sector_, const char * cut_, const char * top_, const char * weight_);
 	std::vector<int> Fid_cut_idx(const char* species_, const char* pcut_,const char * sector_, const char * cut_, const char * top_, const char * weight_,const char * p_dep_, float p_, std::shared_ptr<Flags> flags_);
 	void Fid_Fill(const char * species_, float theta_, float phi_,const char* pcut_,const char * sector_,const char *cut_, const char* top_, float p_, std::shared_ptr<Flags> flags_, float weight_);
 	void Fid_Write(std::shared_ptr<Flags> flags_);
@@ -537,6 +556,7 @@ public:
 	void Print_Friend_Bin(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_, int var_);
 	bool Good_Friend_Idx(float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_);
 	void Friend_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float cc_eff_, int top_passed_, std::shared_ptr<Flags> flags_);
+	void Duo_Fill(const char* top_, float W_, float Q2_, float MM_, float MM2_, float theta_, float alpha_, float phi_ , int var_, bool thrown_, float weight_, int helicity_, float cc_eff_, int top_passed_, std::shared_ptr<Flags> flags_);
 	void Friend_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End Friend Plot----------------------------*
 	//*-------------------------------Start PCorr Check Plot----------------------------*
@@ -615,6 +635,30 @@ public:
 	void Bin_Centering2_Fill(float W_, float Q2_, int var_set_, int Xij_, double Xij_val_, double phi_val_, int variable_, double weight_, std::shared_ptr<Flags> flags_);
 	void Bin_Centering2_Write(std::shared_ptr<Flags> flags_);
 	//*------------------------------End Bin Centering Corrections for Polarization------------------*
+	void Make_Top_Check(std::shared_ptr<Flags> flags_);
+	void Fill_Top_Check(bool mpro_pass_, bool mpip_pass_, bool mpim_pass_, bool mzero_pass_, int npro_, int npip_, int npim_, int nzero_, std::shared_ptr<Flags> flags_);
+	void Write_Top_Check(std::shared_ptr<Flags> flags_);
+
+	//*----------- Event Idx ------------*
+	//int Friend_Event_Idx(Event event_, int i_, int var_);
+	int Friend_Event_Idx1(float W_);
+	int Friend_Event_Idx2(float Q2_);
+	int Friend_Event_Idx3(float MM_, float W_, int var_);
+	int Friend_Event_Idx4(float MM2_, float W_, int var_);
+	int Friend_Event_Idx5(float theta_);
+	int Friend_Event_Idx6(float alpha_);
+	int Friend_Event_Idx7(float phi_);
+
+	long Number_of_Events();
+	long Number_of_Attempted_Events();
+	long Number_of_Filled_Var(int i_);
+	long Number_of_Unfilled_Var(int i_);
+
+	//*--------------------SC Segment Separated Kinematic Efficiency Plots ---------------------*
+	void Kin_Eff_SC_Seg_Make(std::shared_ptr<Flags> flags_);
+	std::vector<int> Kin_Eff_SC_Seg_idx(const char* species_, const char* sector_, int seg_, std::shared_ptr<Flags> flags_);
+	void Kin_Eff_SC_Seg_Fill(float p_, float theta_, float weight_, const char* species_, const char* sector_, int seg_, std::shared_ptr<Flags> flags_);
+	void Kin_Eff_SC_Seg_Write(std::shared_ptr<Flags> flags_);
 };	
 
 

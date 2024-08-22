@@ -74,7 +74,7 @@ static std::string _plot_wq2_ = "wq2";
 static std::string _plot_fid_[4] = {"fid_ele","fid_pro","fid_pip","fid_pim"}; //{ele,pro,pip,pim}
 static std::string _plot_sf_ = "sf";
 static std::string _plot_cc_ = "cc";
-static std::string _plot_dt_[4] = {"dt_ele","dt_pro","dt_pip","dt_pim"}; //{ele,pro,pip,pim}
+static std::string _plot_dt_[4] = {"delta_ele","delta_pro","delta_pip","delta_pim"}; //{ele,pro,pip,pim}
 static std::string _plot_cc_eff_ = "cc_eff";
 static std::string _plot_sc_eff_ = "sc_eff";
 static std::string _plot_ec_eff_ = "ec_eff";
@@ -94,6 +94,8 @@ static std::string _plot_bin_centering_ = "bin_centering";//Single Differential 
 static std::string _plot_bin_centering2_ = "bin_centering2";//Polarization Obs. 
 static std::string _plot_ecorr_angle_ = "e_pcorr_theta";
 static std::string _plot_ecorr_mag_ = "e_pcorr_mag";
+static std::string _plot_top_check_[4] = {"plot_check_pro","plot_check_pip","plot_check_pim","plot_check_zero"};
+static std::string _plot_isolated_ = "isolated";
 static std::string _loose_cut_ = "-loose=";
 static std::string _tight_cut_ = "-tight=";
 //Histogram Separation
@@ -108,6 +110,8 @@ static std::string _num_files_ = "-n=";
 static std::string _num_cores_= "-cores=";
 //Weighting
 static std::string _flux_weight_ = "-flux=";//(y or n)
+
+
 
 
 
@@ -183,6 +187,8 @@ private:
 	bool _plot_bin_centering2 = false;
 	bool _plot_ecorr_angle = false;
 	bool _plot_ecorr_mag = false;
+	bool _plot_top_check[4] = {false,false,false,false};
+	bool _plot_isolated = false;
 
 	std::string _loose_cut = "";
 	std::string _tight_cut = "";
@@ -268,7 +274,8 @@ public:
 	bool Plot_Bin_Centering2();
 	bool Plot_Electron_Angle_Corr();
 	bool Plot_Electron_Mag_Corr();
-	
+	bool Plot_Top_Check(int i_);	
+	bool Plot_Isolated();	
 	//Portions of Histograms
 	//bool Ele_Cut(const char * ecut_);
 

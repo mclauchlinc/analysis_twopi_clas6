@@ -106,7 +106,7 @@ static float _MM_max_[3][29] = {	{1.28543, 1.43543, 1.43543, 1.43543, 1.43543, 1
 									{0.486728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.911728, 0.911728, 0.911728, 0.911728, 0.911728, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.18673, 1.18673, 1.18673, 1.18673, 1.18673}, 
 									{1.28543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.71043, 1.71043, 1.71043, 1.71043, 1.71043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.98543, 1.98543, 1.98543, 1.98543, 1.98543}};
 static int _MM_bins_ = 14;//8/28/23 to Arjun's actual binning;
-static int _MM_wider_ = 3; 
+static int _MM_wider_ = 5; 
 static float _MM2_min_[3] = {_MM_min_[1],_MM_min_[2],_MM_min_[0]};//changed 7-12-23//{0.3,1.1,1.1};//Changed 5/5/23//Changed 8-28-23 to match Arjun
 //static float _MM2_max_[3][29] = {_MM_max_[1],_MM_max_[2],_MM_max_[0]};//{1.1,2.0,2.0};//Changed 5/5/23
 static float _MM2_max_[3][29] = {	{0.486728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.911728, 0.911728, 0.911728, 0.911728, 0.911728, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.18673, 1.18673, 1.18673, 1.18673, 1.18673},
@@ -179,6 +179,11 @@ protected:
 	THnSparseD *_exp_data_5d_neg[29][5];
     THnSparseD *_sim_data_5d[29][5];
 
+	THnSparseD *_exp_data_5d_acc_corr[29][5];
+	THnSparseD *_exp_data_5d_acc_corr_pos[29][5];
+	THnSparseD *_exp_data_5d_acc_corr_neg[29][5];
+    THnSparseD *_sim_data_5d_acc_corr[29][5];
+
 	THnSparseD *_exp_data_5d_bop[29][5];
 	THnSparseD *_exp_data_5d_bop_pos[29][5];
 	THnSparseD *_exp_data_5d_bop_neg[29][5];
@@ -232,14 +237,37 @@ protected:
 	TH1D * _sf_hist_pos[29][5];
 	TH1D * _sf_hist_neg[29][5];
 	TH1D * _acceptance_dist[29][5];
+	TH1D * _acceptance_dist2[29][5];
+	TH1D * _acceptance_dist3[29][5];
+	TH1D * _nacceptance_dist[29][5];
 	TH1D * _rel_acceptance_dist[29][5];
 	TH1D * _hole_err_hist[29][5];
+	TH1D * _sf_rel_err_hist[29][5];
 	TH1D * _hole_err_hist_pos[29][5];
 	TH1D * _hole_err_hist_neg[29][5];
+	TH1D * _sf_rel_err_hist_pos[29][5];
+	TH1D * _sf_rel_err_hist_neg[29][5];
+	
 
 	TH1D * _hole_radius_hist[29][5];
 	TH1D * _hole_radius_hist_pos[29][5];
 	TH1D * _hole_radius_hist_neg[29][5];
+
+	TH2D * _global_sf;
+	TH2D * _global_sf_pos;
+	TH2D * _global_sf_neg;
+
+	TH2D * _zero_acc_w_exp_data;
+	TH2D * _zero_acc_w_exp_data_pos;
+	TH2D * _zero_acc_w_exp_data_neg;
+
+	TH2D * _lost_exp_events;
+	TH2D * _lost_exp_events_pos;
+	TH2D * _lost_exp_events_neg;
+
+
+	TH2D * _frac_bins_holes_to_exp;
+	TH2D * _frac_events_holes_to_exp;
 
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
@@ -276,7 +304,7 @@ public:
     float Q2_top(int i_);
     float W_mid(int i_);
     float Q2_mid(int i_);
-	void Fill_Acceptance_Rel_Hist();
+	void Make_Acceptance_Rel_Error(Flags flags_);
 	void Acceptance_Rel_Error_Cut();
 
 	

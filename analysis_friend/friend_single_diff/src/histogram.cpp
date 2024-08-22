@@ -42,7 +42,7 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 			}
 			sprintf(hname,"N_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
             _N_5d[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
-            _acceptance_5d[i][j]->SetNameTitle(hname,hname);
+            _N_5d[i][j]->SetNameTitle(hname,hname);
             _N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
             _N_5d[i][j]->Divide(_acceptance_5d[i][j]);
             sprintf(hname,"Localized_Holes_50_W:%.3f-%.3f_Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));

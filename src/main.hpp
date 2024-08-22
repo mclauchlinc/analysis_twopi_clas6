@@ -29,17 +29,17 @@ std::vector<std::vector<float>> fara_q_size_f;
 int run_n = 0;
 //int old_run_num[_NUM_THREADS_];
 //int run_number[_NUM_THREADS_];
-
+//std::shared_ptr<float> q_inc[15] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};//If this is less than the number of threads being attempted, it will fail
 int _cut_par=0;
 int _hist_par=0;
 int _other_par=0;
 std::string _file_list;
 
 //double q_prev = NAN;
-//double q_tot = NAN;
+//std::shared_ptr<float> q_tot = NAN;
 
 
-size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, int thread_id_, std::shared_ptr<double> qtot_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
+size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, int thread_id_, std::shared_ptr<float> qtot_, std::shared_ptr<Flags> flags_){//, int &num_ppip){
 	//Number of events in this thread
 	std::cout<<"Time to run!\n\tCalculating number of events for this thread\n";
 	int num_events = (long) chain_->GetEntries();
@@ -47,6 +47,10 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	std::cout<<"Thread " <<thread_id_ <<": " <<num_events <<" Events\n";
 	double q_prev=0.0;
 	double q_tot=0.0;
+	//q_inc[thread_idx_] = 0.0;
+	//if(std::distance(std::begin(q_inc), std::end(q_inc)) < (thread_id_+1)){
+	//	std::cout<<"\n**ERROR TOO MANY THREADS FOR Q_INC**\n";
+	//}
 	//Make a data object which all the branches can be accessed from
 	auto data = std::make_shared<Branches>(chain_,flags_->Flags::Sim());
 	float pe = 0.0;
@@ -59,6 +63,9 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	int sector = 0;
 
 	int run_num = 0;//fun::extract_run_number(chain_->GetFile()->GetName(),flags_); //Not Finished so using temporary run number
+	int prev_run_num = 0;
+	float delta_q = 0.0;
+	std::cout<<"Begin dive into Thread:" <<thread_id_ <<"\n";
 	for(size_t curr_event = 0; curr_event < num_events; curr_event++){
 		//Get singular event
 		chain_->GetEntry(curr_event);
@@ -72,13 +79,24 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			//Update on Progress through Analysis
 			//if((thread_id_ == 0 || flags_->Flags::Make_Friend()) && curr_event%(num_events/100) == 0){
 			if(thread_id_ == 0 && curr_event%(num_events/100) == 0){
+			//if(thread_id_ == 0 && curr_event%(num_events/10000) == 0){
 				//curr_file_name = 
 				std::cout<<"\r" <<"\t" <<(100*curr_event/num_events) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
+				//std::cout<<"\r" <<"\t" <<(100.0*(float)(curr_event/num_events)) <<" %"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
+				//std::cout<<"\r" <<"\t" <<(100*curr_event/num_events) <<"/10000"  <<std::flush ;//<<"|| File: " <<chain_->GetFile()->GetName() <<std::flush;//;
 			}
 			if(data->Branches::q_l()>0 && !flags_->Flags::Sim()){
-				if(data->Branches::q_l()>q_prev && data->Branches::q_l()>0){
-					//qtot_ = std::make_shared<double>((double)data->Branches::q_l() - q_prev) + qtot_; 
-					q_tot += data->Branches::q_l() - q_prev;
+				if(data->Branches::q_l()>q_prev && data->Branches::q_l()>0.0 && q_prev>0.0){
+					if(run_num == prev_run_num || prev_run_num == 0){
+						delta_q = data->Branches::q_l() - q_prev;
+						//qtot_ = std::make_shared<double>((double)data->Branches::q_l() - q_prev) + qtot_; 
+						//*q_inc[thread_id_] += delta_q;
+						q_tot += data->Branches::q_l() - q_prev;
+						//TThread::Lock();
+						//*qtot_ += delta_q;
+						//TThread::UnLock();
+						//qtot_ += q_inc[thread_id_];
+					}
 				}
 				q_prev = data->Branches::q_l();
 			}
@@ -135,15 +153,18 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 		}else{
 			//std::cout<<"failed\n";
 		}
+		prev_run_num = run_num;
 	}
 	if(!flags_->Flags::Sim()){
 		std::cout<<"\n\n***For thread " <<thread_id_ <<" the integrated charge is: " <<q_tot <<"***\n\n";
+		//std::cout<<"\n\n***For thread " <<thread_id_ <<" the total integrated charge now is: " <<qtot_ <<"***\n\n";
+		//std::cout<<"\n\n***For thread " <<thread_id_ <<" the integrated charge is: " <<*q_inc[thread_id_] <<"***\n\n";
 		//It seems like the q_tot is adding up between all the threads, but separately too? So whatever the last thread to truly finish is ends up having the true q_tot
 	}
 }
 
 
-size_t run_files( std::shared_ptr<Histogram> hists_, int thread_id_, int max_, std::shared_ptr<double> qtot_, std::shared_ptr<Flags> flags_){//, int &num_ppip){std::vector<std::string> files_,
+size_t run_files( std::shared_ptr<Histogram> hists_, int thread_id_, int max_, std::shared_ptr<float> qtot_, std::shared_ptr<Flags> flags_){//, int &num_ppip){std::vector<std::string> files_,
 	//Called once per thread
 	//Make a new chain to process for this thread
 	auto chain = std::make_shared<TChain>("h10");

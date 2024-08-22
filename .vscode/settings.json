@@ -73,6 +73,7 @@
         "compare": "cpp",
         "concepts": "cpp",
         "algorithm": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "filesystem": "cpp"
     }
 }

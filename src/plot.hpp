@@ -35,6 +35,7 @@ namespace plot{
 	void plot_event(Event event_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, bool thrown_ = false);
 	void plot_clean_event(Event event_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
 	void plot_isolated_event(Event event_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int top_passed_);
+	void plot_mixed_events(Event event_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int top_passed_, int num_events_);
 }
 
 #endif

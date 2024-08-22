@@ -88,6 +88,9 @@ int pip_cut_width(const char* cut_, std::shared_ptr<Flags> flags_);
 int pim_cut_width(const char* cut_, std::shared_ptr<Flags> flags_);
 int cut_width(const char* species_, const char* cut_, std::shared_ptr<Flags> flags_);
 int geo_det_idx(const char* detector_);
+bool vector_in_vector_of_vectors(std::vector<std::vector<int>> vov_, std::vector<int> vec_);
+bool idx_in_vector_of_idx(std::vector<int> vec_, int idx_);
+
 
 }
 

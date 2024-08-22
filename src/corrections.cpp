@@ -55,7 +55,14 @@ float corr::p_corr_e(float p_e_, float theta_e_, float phi_e_, int run_, bool ce
 		}
 	}
 	float phi = physics::phi_center(phi_e_);
-	return p_e_/fun::poly_3(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3]);
+	return p_e_/pow(fun::poly_3(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3]),corr::p_supress(theta_e_));
+}
+
+float corr::p_supress(float theta_){
+	float a = 0.85;
+	float b = 2.04;
+	float c =30;
+	return pow(1-(1/(1+TMath::Exp(-a*(theta_-c)))),b);
 }
 
 float corr::theta_e_corr(float theta_e_, float phi_e_, int run_, bool centered_, int sector_){
@@ -80,7 +87,7 @@ float corr::theta_e_corr(float theta_e_, float phi_e_, int run_, bool centered_,
 		}
 		//std::cout<<"\tPoly: " <<fun::poly_4(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<" c0:" <<phi_const[0] <<" c1:" <<phi_const[1] <<" c2:" <<phi_const[2] <<" c3:" <<phi_const[3] <<" c4:" <<phi_const[4] <<"\n"; 
 		//std::cout<<"\tCorrected Theta: " <<theta_e_-fun::poly_4(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<"\n";
-		return theta_e_-fun::poly_4(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]);
+		return theta_e_-(fun::poly_4(phi_e_,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4])*corr::p_supress(theta_e_));
 		//return theta_e_-fun::poly_4(phi_e_,phi_const[4],phi_const[3],phi_const[2],phi_const[1],phi_const[0]);
 	}else{
 		int sector = physics::get_sector(phi_e_);
@@ -98,7 +105,7 @@ float corr::theta_e_corr(float theta_e_, float phi_e_, int run_, bool centered_,
 		float phi = physics::phi_center(phi_e_);
 		//std::cout<<"\tPoly: " <<fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<" c0:" <<phi_const[0] <<" c1:" <<phi_const[1] <<" c2:" <<phi_const[2] <<" c3:" <<phi_const[3] <<" c4:" <<phi_const[4] <<"\n"; 
 		//std::cout<<"\tCorrected Theta: " <<theta_e_-fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]) <<"\n";
-		return theta_e_-fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4]);
+		return theta_e_-(fun::poly_4(phi,phi_const[0],phi_const[1],phi_const[2],phi_const[3],phi_const[4])*corr::p_supress(theta_e_));
 		//return theta_e_-fun::poly_4(phi_e_,phi_const[4],phi_const[3],phi_const[2],phi_const[1],phi_const[0]);
 	}
 }

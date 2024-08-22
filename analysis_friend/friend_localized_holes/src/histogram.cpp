@@ -6,13 +6,14 @@ Histogram::Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFi
     //Histogram::Rad_Corr();
     //Histogram::Sparse_7to5(flags_);
     //Histogram::Single_Diff(flags_);
-	Histogram::Localized_Holes(flags_,flags_.Flags::Min_Local_Dist(),20);
+	Histogram::Localized_Holes(flags_,flags_.Flags::Min_Local_Dist(),24);
 }
 
 
 void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_){
     std::cout<<"Extract 5d Histograms\n";
 	char hname[100];
+	char hname2[300];
 	sprintf(hname,"Thrown_%s",_sparse_names_[flags_.Flags::Var_idx()]);
 	std::cout<<"Getting Thrown THnSparse " <<hname <<"\n";
 	//int i = flags_.Flags::W_Bin();
@@ -20,24 +21,75 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
     for(int i=0; i<_W_nbins_; i++){
         for(int j=0; j<_Q2_nbins_; j++){
             sprintf(hname,"Thrown_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-            _thrown_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
+            //sprintf(hname2,"Thrown_2#pi_off_proton_#Delta^{++}_W:1.400-1.425_Q2:2.00-2.40;1-2#pi_off_proton_#Delta^{0}_mall_MM_Delta0_W:2.100-2.125_Q1:4.20-5.00/%s",hname);
+			//std::cout<<"hname: \t" <<hname <<"\n";
+			//std::cout<<"hname2:\t" <<hname2 <<"\n";
+			_thrown_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
+			//_thrown_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname2);
             _thrown_no_rad_5d[i][j] = (THnSparseD *)nr_sim_tree_->Get(hname);
             sprintf(hname,"%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-            _sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
+            //sprintf(hname2,"Thrown_2#pi_off_proton_#Delta^{++}_W:1.400-1.425_Q2:2.00-2.40;1-2#pi_off_proton_#Delta^{0}_mall_MM_Delta0_W:2.100-2.125_Q1:4.20-5.00/%s",hname);
+			//std::cout<<"hname: \t" <<hname <<"\n";
+			//std::cout<<"hname2:\t" <<hname2 <<"\n";
+			//_sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
+			/*if(i==_W_nbins_-1 && j==_Q2_nbins_-1 && flags_.Flags::Var_idx()==2){
+				_sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
+			}else{
+				_sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname2);
+			}*/
+			_sim_data_5d[i][j] = (THnSparseD *)sim_tree_->Get(hname);
             _exp_data_5d[i][j] = (THnSparseD *)exp_tree_->Get(hname);
+			//std::cout<<"Here is a fun test\n" <<"exp dimensions " <<_exp_data_5d[i][j]->GetNdimensions() <<"\n";
+
+			/*for(int k = 0; k<_thrown_5d[0][0]->GetNdimensions(); k++){
+				//_n_bins_7d.push_back(_thrown_7d->GetAxis(i)->GetNbins());
+				//_n_bins_5d.push_back(_thrown_5d[i][j]->GetAxis(k)->GetNbins());
+				std::cout<<"Thrown #bins axis:" <<k <<" " <<_thrown_5d[0][0]->GetAxis(k)->GetNbins() <<"\n";
+				std::cout<<"Sim #bins axis:" <<k <<" " <<_sim_data_5d[0][0]->GetAxis(k)->GetNbins() <<"\n";
+				std::cout<<"Exp #bins axis:" <<k <<" " <<_exp_data_5d[0][0]->GetAxis(k)->GetNbins() <<"\n";
+				//std::cout<<"Thrown #bins axis:" <<k <<" " <<_thrown_5d[0][0]->GetAxis(k)->GetNbins() <<"\n";
+			}*/
+
+
             //_empty_5d[i][j] = (THnSparseD *)exp_tree_->Get(hname);
+			//std::cout<<"Making Acceptance\n";
             _acceptance_5d[i][j] = (THnSparseD*)_sim_data_5d[i][j]->Clone();
-            _acceptance_5d[i][j]->Divide(_thrown_5d[i][j]);
-			std::cout<<"Acceptance Made, making relative error hist for it\n";
-			Histogram::Fill_Acceptance_Rel_Hist();
-			std::cout<<"Cutting Acceptance based on relative error cut\n";
-			Histogram::Acceptance_Rel_Error_Cut()
 			
-            std::cout<<"Making the sync clone\n";
+
+            _acceptance_5d[i][j]->Divide(_thrown_5d[i][j]);
+			sprintf(hname,"acceptance_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			_acceptance_5d[i][j]->SetNameTitle(hname,hname);
+			for(long k=0; k<_acceptance_5d[i][j]->GetNbins(); k++){
+				if(_acceptance_5d[i][j]->GetBinContent(k) >0.0){
+					if(_acceptance_5d[i][j]->GetBinError(k)/_acceptance_5d[i][j]->GetBinContent(k) > _Acceptance_Rel_Error_Max_){
+						_acceptance_5d[i][j]->SetBinContent(k,0.0);
+						_acceptance_5d[i][j]->SetBinError(k,0.0);
+					}
+				}
+			}
+
+			_exp_data_5d_acc_corr[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
+			_exp_data_5d_acc_corr[i][j]->Divide(_acceptance_5d[i][j]);
+			sprintf(hname,"exp_acc_corr_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			_exp_data_5d_acc_corr[i][j]->SetNameTitle(hname,hname);
+			_sim_data_5d_acc_corr[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
+			_sim_data_5d_acc_corr[i][j]->Divide(_acceptance_5d[i][j]);
+			sprintf(hname,"sim_acc_corr_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+			_sim_data_5d_acc_corr[i][j]->SetNameTitle(hname,hname);
+			//std::cout<<"Acceptance Made, making relative error hist for it\n";
+			//Histogram::Make_Acceptance_Rel_Error(flags_);
+			//std::cout<<"Cutting Acceptance based on relative error cut\n";
+			//Histogram::Acceptance_Rel_Error_Cut();
+			
+            //std::cout<<"Making the sync clone\n";
 			_sim_exp_5d_sync[i][j] = (THnSparseD*)_sim_data_5d[i][j]->Clone();
 			sprintf(hname,"sync_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-			_sim_exp_5d_sync[i][j]->SetNameTitle(hname,hname);
+			
+			//std::cout<<"Dividing by Experimental vals\n";
 			_sim_exp_5d_sync[i][j]->Divide(_exp_data_5d[i][j]);
+			//std::cout<<"looping through sync\n";
+			//std::cout<<"Changing sync name to " <<hname <<"\n";
+			_sim_exp_5d_sync[i][j]->SetNameTitle(hname,hname);
 			if(_sim_exp_5d_sync[i][j]->GetNbins() >0){
 				Int_t* coord = new Int_t[_sim_exp_5d_sync[i][j]->GetNdimensions()];
 				for (Long64_t k = 0; k < _sim_exp_5d_sync[i][j]->GetNbins(); ++k) {
@@ -193,7 +245,7 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 	int bin_low2[5];
 	int bin_top2[5];
 	std::vector<std::vector<int>> surr_bins; 
-	long dist_dist[3][20] = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}; 
+	long dist_dist[3][24] = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}; 
 	long total_ev[29][5];
 	long curr_ev[29][5];
 	int proj_bins[4] = {2,3,4,5};
@@ -246,54 +298,199 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 	//int i = flags_.Flags::W_Bin();
 	//int j = flags_.Flags::Q2_Bin();
 	//std::cout<<"Looking at W bin:" <<i <<" and Q2 bin:" <<j <<"\n";
+
+	std::cout<<"Making acceptance output histograms\n";
+	Double_t Q2_bin[6] = {_Q2_bins_[0],_Q2_bins_[1],_Q2_bins_[2],_Q2_bins_[3],_Q2_bins_[4],_Q2_bins_[5]};
+	sprintf(hname,"Global Scale Factor");
+	_global_sf = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+	sprintf(hname,"Fraction of Zero Acceptance Bins where Exp Exists");
+	_zero_acc_w_exp_data = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+	sprintf(hname,"Fraction of Lost Exp Events due to Acceptance Limitations");
+	_lost_exp_events = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+	sprintf(hname,"Fraction of Hole Bins to Exp Bins");
+	_frac_bins_holes_to_exp = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+	sprintf(hname,"Fraction Hole Events to Exp Acceptance Corr Events");
+	_frac_events_holes_to_exp = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+	if(flags_.Flags::Helicity()){
+		sprintf(hname,"Global Scale Factor Pos");
+		_global_sf_pos = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+		sprintf(hname,"Global Scale Factor Neg");
+		_global_sf_neg = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+		sprintf(hname,"Fraction of Zero Acceptance Bins where Pos Exp Exists");
+		_zero_acc_w_exp_data_pos = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+		sprintf(hname,"Fraction of Zero Acceptance Bins where Neg Exp Exists");
+		_zero_acc_w_exp_data_neg = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+		sprintf(hname,"Fraction of Lost Pos Exp Events due to Acceptance Limitations");
+		_lost_exp_events_pos = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+		sprintf(hname,"Fraction of Lost Neg Exp Events due to Acceptance Limitations");
+		_lost_exp_events_neg = new TH2D(hname,hname,29,_W_min_,_W_max_,5,Q2_bin);
+	}
+	std::cout<<"Beginning Acceptance output Histogram loop\n";
 	for(int i=0; i<_W_nbins_; i++){
 		for(int j=0; j<_Q2_nbins_; j++){
 			if(flags_.Flags::Helicity()){
 				sprintf(hname,"pos scale factor distribution W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
 				_sf_hist_pos[i][j] = new TH1D(hname,hname,500,1.0,10000);
+				//_sf_hist_pos[i][j] = new TH1D(hname,hname,200,0.0,100.0);
 				sprintf(hname,"neg scale factor distribution W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
 				_sf_hist_neg[i][j] = new TH1D(hname,hname,500,1.0,10000);
+				//_sf_hist_neg[i][j] = new TH1D(hname,hname,200,0.0,100.0);
 				sprintf(hname,"pos localized holes relative error W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-				_hole_err_hist_pos[i][j] = new TH1D(hname,hname,400,0.0,4.0);
+				_hole_err_hist_pos[i][j] = new TH1D(hname,hname,400,0.0,1.6);
 				sprintf(hname,"neg localized holes relative error W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-				_hole_err_hist_neg[i][j] = new TH1D(hname,hname,400,0.0,4.0);
+				_hole_err_hist_neg[i][j] = new TH1D(hname,hname,400,0.0,1.6);
 				sprintf(hname,"pos localized radius W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-				_hole_radius_hist_pos[i][j] = new TH1D(hname,hname,20,0.5,20.5);
+				_hole_radius_hist_pos[i][j] = new TH1D(hname,hname,24,0.5,24.5);
 				sprintf(hname,"neg localized radius W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-				_hole_radius_hist_neg[i][j] = new TH1D(hname,hname,20,0.5,20.5);
-			}else{
-				sprintf(hname,"scale factor distribution W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-				_sf_hist[i][j] = new TH1D(hname,hname,500,1.0,10000);
-				sprintf(hname,"Acceptance Distribution W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-				_acceptance_dist[i][j] = new TH1D(hname,hname,200,0.0,0.2);
-				sprintf(hname,"Relative Acceptance Distribution W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-				_rel_acceptance_dist[i][j] = new TH1D(hname,hname,100,0.0,1.5);
-				sprintf(hname,"localized holes relative error W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-				_hole_err_hist[i][j] = new TH1D(hname,hname,400,0.0,4.0);
-				sprintf(hname,"localized radius W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
-				_hole_radius_hist[i][j] = new TH1D(hname,hname,20,0.5,20.5);
+				_hole_radius_hist_neg[i][j] = new TH1D(hname,hname,24,0.5,24.5);
+				sprintf(hname,"scale factor pos relative error W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				_sf_rel_err_hist_pos[i][j] = new TH1D(hname,hname,400,0.0,1.6);
+				sprintf(hname,"scale factor neg relative error W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				_sf_rel_err_hist_neg[i][j] = new TH1D(hname,hname,400,0.0,1.6);
+				float num_zeros_pos = 0.0;
+				float num_total_pos = 0.0;
+				double num_exp_events_pos = 0.0;
+				double num_lost_exp_events_pos = 0.0;
+				float num_zeros_neg = 0.0;
+				float num_total_neg = 0.0;
+				double num_exp_events_neg = 0.0;
+				double num_lost_exp_events_neg = 0.0;
+				//std::cout<<"made histograms for W:" <<W_mid(i) <<" Q2:" <<Q2_mid(j) <<"\n";
 				while(cart.GetNextCombination()){
 					for(int q=0; q<5; q++){
 						binning[q] = cart[q]+1;
 					}
-					if(_exp_data_5d[i][j]->GetBinContent(binning)){
-						_acceptance_dist[i][j]->Fill(_acceptance_5d[i][j]->GetBinContent(binning));
+					if(_exp_data_5d_pos[i][j]->GetBinContent(binning) > 0.0){
+						num_total_pos += 1.0;
+						num_exp_events_pos += _exp_data_5d_pos[i][j]->GetBinContent(binning);
+						//_acceptance_dist_pos[i][j]->Fill(_acceptance_5d[i][j]->GetBinContent(binning));
+						if(_acceptance_5d[i][j]->GetBinContent(binning) == 0.0){
+							num_zeros_pos += 1.0;
+							num_lost_exp_events_pos += _exp_data_5d[i][j]->GetBinContent(binning);
+						}
+					}//else{
+					//	_acceptance_dist[i][j]->Fill(_acceptance_5d[i][j]->GetBinContent(binning));
+					//}
+					if(_exp_data_5d_neg[i][j]->GetBinContent(binning) > 0.0){
+						num_total_neg += 1.0;
+						num_exp_events_neg += _exp_data_5d_neg[i][j]->GetBinContent(binning);
+						//_acceptance_dist_neg[i][j]->Fill(_acceptance_5d[i][j]->GetBinContent(binning));
+						if(_acceptance_5d[i][j]->GetBinContent(binning) == 0.0){
+							num_zeros_neg += 1.0;
+							num_lost_exp_events_neg += _exp_data_5d[i][j]->GetBinContent(binning);
+						}
 					}
 				}
-				for (Long64_t l = 0; l < _acceptance_5d[i][j]->GetNbins(); ++l) {
-					_rel_acceptance_dist[i][j]->Fill(_acceptance_5d[i][j]->GetBinError(l)/_acceptance_5d[i][j]->GetBinContent(l));
+				_lost_exp_events_pos->Fill(W_mid(i),Q2_mid(j),num_lost_exp_events_pos/num_exp_events_pos);
+				//std::cout<<"Filling zero acc histogram\n";
+				_zero_acc_w_exp_data_pos->Fill(W_mid(i),Q2_mid(j),num_zeros_pos/num_total_pos);
+				_lost_exp_events_neg->Fill(W_mid(i),Q2_mid(j),num_lost_exp_events_neg/num_exp_events_neg);
+				//std::cout<<"Filling zero acc histogram\n";
+				_zero_acc_w_exp_data_neg->Fill(W_mid(i),Q2_mid(j),num_zeros_neg/num_total_neg);
+
+
+			}else{
+				sprintf(hname,"scale factor distribution W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				_sf_hist[i][j] = new TH1D(hname,hname,500,1.0,10000);
+				//_sf_hist[i][j] = new TH1D(hname,hname,200,0.0,100.0);
+				sprintf(hname,"Acceptance Distribution in Exp PS W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				//_acceptance_dist[i][j] = new TH1D(hname,hname,200,0.0,0.2);
+				_acceptance_dist[i][j] = new TH1D(hname,hname,300,0.0,0.2);
+				sprintf(hname,"Acceptance Distribution NonZero W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				//_acceptance_dist[i][j] = new TH1D(hname,hname,200,0.0,0.2);
+				_acceptance_dist2[i][j] = new TH1D(hname,hname,300,0.0,0.2);
+				sprintf(hname,"Acceptance Distribution Full W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				//_acceptance_dist[i][j] = new TH1D(hname,hname,200,0.0,0.2);
+				_acceptance_dist3[i][j] = new TH1D(hname,hname,300,0.0,0.2);
+				sprintf(hname,"Acceptance Distribution non-exp phase space W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				//_acceptance_dist[i][j] = new TH1D(hname,hname,200,0.0,0.2);
+				_nacceptance_dist[i][j] = new TH1D(hname,hname,200,0.0,0.002);
+				sprintf(hname,"Relative Acceptance Distribution W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				_rel_acceptance_dist[i][j] = new TH1D(hname,hname,100,0.0,1.2);
+				sprintf(hname,"localized holes relative error W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				_hole_err_hist[i][j] = new TH1D(hname,hname,400,0.0,1.6);
+				sprintf(hname,"scale factor relative error W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				_sf_rel_err_hist[i][j] = new TH1D(hname,hname,400,0.0,1.6);
+				sprintf(hname,"localized radius W:%.3f-%.3f Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+				_hole_radius_hist[i][j] = new TH1D(hname,hname,24,0.5,24.5);
+				float num_zeros = 0.0;
+				float num_total = 0.0;
+				double num_exp_events = 0.0;
+				double num_lost_exp_events = 0.0;
+				//std::cout<<"made histograms for W:" <<W_mid(i) <<" Q2:" <<Q2_mid(j) <<"\n";
+				while(cart.GetNextCombination()){
+					for(int q=0; q<5; q++){
+						binning[q] = cart[q]+1;
+					}
+					if(_exp_data_5d[i][j]->GetBinContent(binning) > 0.0){
+						num_total += 1.0;
+						num_exp_events += _exp_data_5d[i][j]->GetBinContent(binning);
+						_acceptance_dist[i][j]->Fill(_acceptance_5d[i][j]->GetBinContent(binning));
+						if(_acceptance_5d[i][j]->GetBinContent(binning) == 0.0){
+							num_zeros += 1.0;
+							num_lost_exp_events += _exp_data_5d[i][j]->GetBinContent(binning);
+						}
+					}//else{
+					//	_acceptance_dist[i][j]->Fill(_acceptance_5d[i][j]->GetBinContent(binning));
+					//}
 				}
+				_lost_exp_events->Fill(W_mid(i),Q2_mid(j),num_lost_exp_events/num_exp_events);
+				//std::cout<<"Filling zero acc histogram\n";
+				_zero_acc_w_exp_data->Fill(W_mid(i),Q2_mid(j),num_zeros/num_total);
+				double min_acc = 1.0;
+				double max_acc = 0.0;
+				//std::cout<<"filling rel error acceptance histograms\n";
+				for (Long64_t l = 0; l < _acceptance_5d[i][j]->GetNbins(); ++l) {
+					_acceptance_dist3[i][j]->Fill(_acceptance_5d[i][j]->GetBinContent(l));
+					if(_acceptance_5d[i][j]->GetBinContent(l) >0.0){
+						_rel_acceptance_dist[i][j]->Fill(_acceptance_5d[i][j]->GetBinError(l)/_acceptance_5d[i][j]->GetBinContent(l));
+						_acceptance_dist2[i][j]->Fill(_acceptance_5d[i][j]->GetBinContent(l));
+						if(_acceptance_5d[i][j]->GetBinContent(l)<min_acc ){
+							min_acc = _acceptance_5d[i][j]->GetBinContent(l);
+						}
+						if(_acceptance_5d[i][j]->GetBinContent(l)>max_acc ){
+							max_acc = _acceptance_5d[i][j]->GetBinContent(l);
+						}
+					}
+				}
+				//std::cout<<"\tW:" <<W_mid(i) <<" Q2:" <<Q2_mid(j) <<"\tmin_acc:" <<min_acc <<"\tmax_acc:" <<max_acc <<"\n"; 
 				_acceptance_dist[i][j]->Write();
+				_acceptance_dist2[i][j]->Write();
+				_acceptance_dist3[i][j]->Write();
 				_rel_acceptance_dist[i][j]->Write();
 			}
 		}
 	}
+	std::cout<<"Made it out of acceptance output loop\n";
+	if(flags_.Flags::Helicity()){
+		_zero_acc_w_exp_data_pos->SetXTitle("W (GeV)");
+		_zero_acc_w_exp_data_pos->SetYTitle("^{}Q^{2} (^{}GeV^{2})");
+		_zero_acc_w_exp_data_pos->Write();
+		_zero_acc_w_exp_data_neg->SetXTitle("W (GeV)");
+		_zero_acc_w_exp_data_neg->SetYTitle("^{}Q^{2} (^{}GeV^{2})");
+		_zero_acc_w_exp_data_neg->Write();
+		_lost_exp_events_pos->SetXTitle("W (GeV)");
+		_lost_exp_events_pos->SetYTitle("^{}Q^{2} (^{}GeV^{2})");
+		_lost_exp_events_pos->Write();
+		_lost_exp_events_neg->SetXTitle("W (GeV)");
+		_lost_exp_events_neg->SetYTitle("^{}Q^{2} (^{}GeV^{2})");
+		_lost_exp_events_neg->Write();
+	}else{
+		_zero_acc_w_exp_data->SetXTitle("W (GeV)");
+		_zero_acc_w_exp_data->SetYTitle("^{}Q^{2} (^{}GeV^{2})");
+		_zero_acc_w_exp_data->Write();
+		_lost_exp_events->SetXTitle("W (GeV)");
+		_lost_exp_events->SetYTitle("^{}Q^{2} (^{}GeV^{2})");
+		_lost_exp_events->Write();
+	}
+	
 
 	std::cout<<"*****************The helicity flag is " <<flags_.Flags::Helicity() <<"\n";
 	for(int i=0; i<_W_nbins_; i++){
+	//for(int i=0; i<10; i++){
 		for(int j=0; j<_Q2_nbins_; j++){
 			for(int k=0; k<3; k++){
-				for(int l=0; l<20; l++){
+				for(int l=0; l<24; l++){
 					dist_dist[k][l] = 0;
 				}
 			}
@@ -532,6 +729,7 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 										_scale_sim_5d_pos[i][j]->SetBinError2(_scale_sim_5d_pos[i][j]->GetBin(bin),loc_sim_err2_pos);
 										dist_dist[1][dist-1]++;
 										_hole_radius_hist_pos[i][j]->Fill(dist);
+										_sf_rel_err_hist_pos[i][j]->Fill(sf_rel_err_pos);
 									}
 								}
 								if(look_further_neg){
@@ -634,7 +832,7 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 										_scale_sim_5d_neg[i][j]->SetBinError2(_scale_sim_5d_neg[i][j]->GetBin(bin),loc_sim_err2_neg);
 										dist_dist[2][dist-1]++;
 										_hole_radius_hist_neg[i][j]->Fill(dist);
-										
+										_sf_rel_err_hist_neg[i][j]->Fill(sf_rel_err_neg);
 									}
 								}
 							}else{
@@ -751,7 +949,7 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 										_scale_exp_5d[i][j]->SetBinError2(_scale_exp_5d[i][j]->GetBin(bin),loc_exp_err2);
 										//std::cout<<"Setting sim bin error\n";
 										_scale_sim_5d[i][j]->SetBinError2(_scale_sim_5d[i][j]->GetBin(bin),loc_sim_err2);
-										
+										_sf_rel_err_hist[i][j]->Fill(sf_rel_err);
 									}
 								}
 							}
@@ -777,8 +975,10 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 			std::cout<<"\nW:" <<Histogram::W_low(i) <<"-" <<Histogram::W_top(i) <<" Q2:" <<Histogram::Q2_low(j) <<"-" <<Histogram::Q2_top(j) <<" " <<wq2_bin <<"/" <<29*5 <<"\n";
 			std::cout<<"\tThrown Bins: " <<_thrown_5d[i][j]->GetNbins() <<" Recon Bins: " <<_sim_data_5d[i][j]->GetNbins() <<" Sim Holes Bins: " <<_sim_holes_5d[i][j]->GetNbins() <<"\n";
 			std::cout<<"\tShould have: " <<_thrown_5d[i][j]->GetNbins()-_sim_data_5d[i][j]->GetNbins() <<" bins localized\n";
-			std::cout<<"\tScale Sim nbins = " <<_scale_sim_5d_pos[i][j]->GetNbins() <<" Scale exp nbins = " <<_scale_exp_5d_pos[i][j]->GetNbins() <<"\n"; 
-			std::cout<<"\tScale Sim nbins = " <<_scale_sim_5d_neg[i][j]->GetNbins() <<" Scale exp nbins = " <<_scale_exp_5d_neg[i][j]->GetNbins() <<"\n"; 
+			if(flags_.Flags::Helicity()){
+				std::cout<<"\tScale Sim pos nbins = " <<_scale_sim_5d_pos[i][j]->GetNbins() <<" Scale exp pos nbins = " <<_scale_exp_5d_pos[i][j]->GetNbins() <<"\n"; 
+				std::cout<<"\tScale Sim neg nbins = " <<_scale_sim_5d_neg[i][j]->GetNbins() <<" Scale exp neg nbins = " <<_scale_exp_5d_neg[i][j]->GetNbins() <<"\n"; 
+			}
 			double exp_nonlocal = 0.0;
 			double sim_nonlocal = 0.0;
 			for( long v_idx = 0; v_idx< _exp_data_5d[i][j]->GetNbins(); v_idx++){
@@ -791,8 +991,40 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 					}
 				}
 			}
+			std::cout<<"Method 1:\n";
 			std::cout<<"\tloc exp: " <<exp_nonlocal <<" loc sim: " <<sim_nonlocal <<"\n";
 			std::cout<<"\tNonLocal Scale would be = " <<exp_nonlocal/sim_nonlocal <<"\n";
+			_global_sf->Fill(W_mid(i),Q2_mid(j),exp_nonlocal/sim_nonlocal);
+			if(flags_.Flags::Helicity()){
+				double exp_nonlocal_pos = 0.0;
+				double sim_nonlocal_pos = 0.0;
+				for( long v_idx = 0; v_idx< _exp_data_5d_pos[i][j]->GetNbins(); v_idx++){
+					Double_t v_nonlocal_pos = _exp_data_5d_pos[i][j]->GetBinContent(v_idx,coord);
+					if(v_nonlocal_pos >0.0){
+						Double_t w_nonlocal_pos = _sim_data_5d[i][j]->GetBinContent(coord);
+						if(w_nonlocal_pos > 0.0){
+							exp_nonlocal_pos += v_nonlocal_pos;
+							sim_nonlocal_pos += w_nonlocal_pos;
+						}
+					}
+				}
+				double exp_nonlocal_neg = 0.0;
+				double sim_nonlocal_neg = 0.0;
+				for( long v_idx = 0; v_idx< _exp_data_5d_neg[i][j]->GetNbins(); v_idx++){
+					Double_t v_nonlocal_neg = _exp_data_5d_neg[i][j]->GetBinContent(v_idx,coord);
+					if(v_nonlocal_neg >0.0){
+						Double_t w_nonlocal_neg = _sim_data_5d[i][j]->GetBinContent(coord);
+						if(w_nonlocal_neg > 0.0){
+							exp_nonlocal_neg += v_nonlocal_neg;
+							sim_nonlocal_neg += w_nonlocal_neg;
+						}
+					}
+				}
+				std::cout<<"\tNonLocal Scale Pos would be = " <<exp_nonlocal_pos/sim_nonlocal_pos <<"\n";
+				std::cout<<"\tNonLocal Scale Neg would be = " <<exp_nonlocal_neg/sim_nonlocal_neg <<"\n";
+				_global_sf_pos->Fill(W_mid(i),Q2_mid(j),exp_nonlocal_pos/sim_nonlocal_pos);
+				_global_sf_neg->Fill(W_mid(i),Q2_mid(j),exp_nonlocal_neg/sim_nonlocal_neg);
+			}
 			for(int n=0; n<5; n++){
 				if(flags_.Flags::Helicity()){
 					_exp_data_5d_pos[i][j]->GetAxis(n)->SetRange(1,_n_bins_5d[n]);
@@ -814,11 +1046,12 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 					}
 				}
 			}
+			std::cout<<"Method 2:\n";
 			std::cout<<"\tloc exp: " <<exp_nonlocal2 <<" loc sim: " <<sim_nonlocal2 <<"\n";
 			std::cout<<"\tNonLocal Scale would be = " <<exp_nonlocal2/sim_nonlocal2 <<"\n";
 			
 			for(int k=0; k<3; k++){
-				for(int l=0; l<20; l++){
+				for(int l=0; l<24; l++){
 					std::cout<<dist_dist[k][l] <<" ";
 				}
 				std::cout<<"\n";
@@ -873,8 +1106,11 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 				_sf_hist_neg[i][j]->Write();
 				_hole_err_hist_pos[i][j]->Write();
 				_hole_err_hist_neg[i][j]->Write();
+				_sf_rel_err_hist_pos[i][j]->Write();
+				_sf_rel_err_hist_neg[i][j]->Write();
 				_hole_radius_hist_pos[i][j]->Write();
 				_hole_radius_hist_neg[i][j]->Write();
+				std::cout<<"Wrote Helicity Histograms\n";
 			}else{
 				//std::cout<<"Dividing exp by sim scales\n";
 				//_scale_exp_7d->Divide(_acceptance_7d);//They're both not acceptance corrected, so adding this would be pointless
@@ -907,9 +1143,36 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 				_N_holes_fifty_5d[i][j]->Write();
 				_sf_hist[i][j]->Write();
 				_hole_err_hist[i][j]->Write();
+				_sf_rel_err_hist[i][j]->Write();
 				_hole_radius_hist[i][j]->Write();
+				std::cout<<"Wrote Non-Helicity Histograms\n";
+
+				long num_hole_bins = 0;
+				long num_exp_bins = 0;
+				double num_hole_evts = 0.0;
+				double num_exp_evts = 0.0;
+				for(long m=0; m<_N_holes_5d[i][j]->GetNbins(); m++){
+					if(_N_holes_5d[i][j]->GetBinContent(m)>0.0){
+						num_hole_bins++;
+						num_hole_evts += _N_holes_5d[i][j]->GetBinContent(m);
+					}
+				}
+				for(long m=0; m<_exp_data_5d_acc_corr[i][j]->GetNbins(); m++){
+					if(_exp_data_5d_acc_corr[i][j]->GetBinContent(m)>0.0){
+						num_exp_bins++;
+						num_exp_evts += _exp_data_5d_acc_corr[i][j]->GetBinContent(m);
+					}
+				}
+				_frac_bins_holes_to_exp->Fill(W_mid(i),Q2_mid(j),num_hole_bins/num_exp_bins);
+				_frac_events_holes_to_exp->Fill(W_mid(i),Q2_mid(j),num_hole_evts/num_exp_evts);
+
 			}
 		}
+	}
+	_global_sf->Write();
+	if(flags_.Flags::Helicity()){
+		_global_sf_pos->Write();
+		_global_sf_neg->Write();
 	}
 	std::cout<<"Finished Making the Localized holes\n";
 	//Assign Errors 
@@ -954,12 +1217,12 @@ float Histogram::Q2_mid(int i_){
     return (_Q2_bins_[i_] + _Q2_bins_[i_+1])/2.0;
 }
 
-void Histogram::Make_Acceptance_Rel_Error(){
+void Histogram::Make_Acceptance_Rel_Error(Flags flags_){
 	char hname[100];
 	for(int a=0; a<_W_nbins_; a++){
 		for(int b=0; b<_Q2_nbins_; b++){
 			//Int_t* coord = new Int_t[_acceptance_5d[i][j]->GetNbins()];
-			_acceptance_rel_err_5d[a][b] = (THnSparse*) _acceptance_5d[a][b]->Clone();
+			_acceptance_rel_err_5d[a][b] = (THnSparseD*) _acceptance_5d[a][b]->Clone();
 			sprintf(hname,"Acceptance Relative Error %s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(a),Histogram::W_top(a),Histogram::Q2_low(b),Histogram::Q2_top(b));
 			_acceptance_rel_err_5d[a][b]->SetNameTitle(hname,hname);
 			for(Long64_t i =0; i<_acceptance_5d[a][b]->GetNbins(); i++ ){

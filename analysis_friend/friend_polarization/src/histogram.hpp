@@ -183,6 +183,7 @@ protected:
     THnSparseD *_sim_holes_tmp_5d[29][5];
     THnSparseD *_N_holes_5d[29][5];
     THnSparseD *_acceptance_5d[29][5];
+	THnSparseD *_acceptance_rel_err_5d[29][5];
     THnSparseD *_N_5d[29][5];
 
 
@@ -226,7 +227,8 @@ public:
 	//double MM2_max(int W_bin_, int var_set_);
     double CosTheta(int theta_bin_);
 	
-
+	void Make_Acceptance_Rel_Error(Flags flags_);
+	void Acceptance_Rel_Error_Cut();
 	
 };
 

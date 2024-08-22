@@ -65,14 +65,6 @@
         "chrono": "cpp",
         "compare": "cpp",
         "concepts": "cpp",
-        "algorithm": "cpp",
-        "__tree": "cpp",
-        "condition_variable": "cpp",
-        "map": "cpp",
-        "span": "cpp",
-        "thread": "cpp",
-        "unordered_set": "cpp",
-        "charconv": "cpp",
-        "execution": "cpp"
+        "algorithm": "cpp"
     }
 }
