@@ -202,11 +202,11 @@ protected:
 	THnSparseD *_sim_exp_5d_sync_pos[29][5];
 	THnSparseD *_sim_exp_5d_sync_neg[29][5];
 
-    THnSparseD *_empty_5d[29][5];
-	THnSparseD *_empty_5d_pos[29][5];
-	THnSparseD *_empty_5d_neg[29][5];
+    //THnSparseD *_empty_5d[29][5];
+	//THnSparseD *_empty_5d_pos[29][5];
+	//THnSparseD *_empty_5d_neg[29][5];
     THnSparseD *_thrown_5d[29][5];
-    THnSparseD *_thrown_no_rad_5d[29][5];
+    //THnSparseD *_thrown_no_rad_5d[29][5];
     THnSparseD *_sim_holes_5d[29][5];
     THnSparseD *_sim_holes_tmp_5d[29][5];
 	THnSparseD *_sim_holes_5d_pos[29][5];
@@ -216,9 +216,12 @@ protected:
     THnSparseD *_N_holes_5d[29][5];
 	THnSparseD *_N_holes_5d_pos[29][5];
 	THnSparseD *_N_holes_5d_neg[29][5];
-	THnSparseD *_N_holes_fifty_5d[29][5];
-	THnSparseD *_N_holes_fifty_5d_pos[29][5];
-	THnSparseD *_N_holes_fifty_5d_neg[29][5];
+	//THnSparseD *_N_holes_fifty_5d[29][5];
+	//THnSparseD *_N_holes_fifty_5d_pos[29][5];
+	//THnSparseD *_N_holes_fifty_5d_neg[29][5];
+	THnSparseD *_N_holes_global_5d[29][5];
+	THnSparseD *_N_holes_global_5d_pos[29][5];
+	THnSparseD *_N_holes_global_5d_neg[29][5];
     THnSparseD *_acceptance_5d[29][5];
 	THnSparseD *_acceptance_rel_err_5d[29][5];
 
@@ -305,7 +308,7 @@ public:
     float W_mid(int i_);
     float Q2_mid(int i_);
 	void Make_Acceptance_Rel_Error(Flags flags_);
-	void Acceptance_Rel_Error_Cut();
+	void Acceptance_Rel_Error_Cut(Flags flags_);
 
 	
 };

@@ -30,7 +30,7 @@ static const double _MH_ = 1.007; //g/mol molar mass of hydrogen
 static const double _Q_tot_ = 21.32*pow(10.,-3.); //Coulombs from Arjun's Thesis. need to calculate myself 
 
 //Cut Values
-static const double _Acceptance_Rel_Error_Max_ = 0.75;
+static const double _Acceptance_Rel_Error_Max_[4] ={0.57,0.7,0.98,1.2};// 0.75;
 
 static const char * _sparse_names_[] = {"2#pi_off_proton_#Delta^{++}","2#pi_off_proton_#rho","2#pi_off_proton_#Delta^{0}"};
 static const  char * _mpro_ = "mpro";

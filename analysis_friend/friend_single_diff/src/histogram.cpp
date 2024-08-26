@@ -20,7 +20,7 @@ Histogram::Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFi
 
 
 void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_){
-    std::cout<<"Extract 5d Histograms\n";
+    std::cout<<"Extract 5d Histograms including kinematic holes\n";
 	char hname[100];
     for(int i=0; i<_W_nbins_; i++){
         for(int j=0; j<_Q2_nbins_; j++){
@@ -36,8 +36,9 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
             sprintf(hname,"Acceptance_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
             _acceptance_5d[i][j]->SetNameTitle(hname,hname);
             for(long k=0; k<_acceptance_5d[i][j]->GetNbins(); k++){
-				if(_acceptance_5d[i][j]->GetBinError(k)/_acceptance_5d[i][j]->GetBinContent(k) > 0.98){
+				if(_acceptance_5d[i][j]->GetBinError(k)/_acceptance_5d[i][j]->GetBinContent(k) > 0.75){
 					_acceptance_5d[i][j]->SetBinContent(k,0.0);
+					_acceptance_5d[i][j]->SetBinError(k,0.0);
 				}
 			}
 			sprintf(hname,"N_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_sparse_names_[flags_.Flags::Var_idx()],_top_[flags_.Flags::Top_idx()],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
@@ -45,7 +46,7 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
             _N_5d[i][j]->SetNameTitle(hname,hname);
             _N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
             _N_5d[i][j]->Divide(_acceptance_5d[i][j]);
-            sprintf(hname,"Localized_Holes_50_W:%.3f-%.3f_Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
+            sprintf(hname,"Localized_Holes_W:%.3f-%.3f_Q2:%.2f-%.2f",Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j));
             _N_holes_5d[i][j] = (THnSparseD *)holes_->Get(hname);
 	        _N_5d[i][j]->Add(_N_holes_5d[i][j]);
         }
@@ -92,7 +93,7 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 			std::cout<<"\tDividing by Thrown\n";
             _acceptance_5d[i][j]->Divide(_thrown_5d[i][j]);
 			for(long k=0; k<_acceptance_5d[i][j]->GetNbins(); k++){
-				if(_acceptance_5d[i][j]->GetBinError(k)/_acceptance_5d[i][j]->GetBinContent(k) > 0.98){
+				if(_acceptance_5d[i][j]->GetBinError(k)/_acceptance_5d[i][j]->GetBinContent(k) > 0.75){
 					_acceptance_5d[i][j]->SetBinContent(k,0.0);
 				}
 			}
@@ -100,6 +101,7 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
             _N_5d[i][j] = (THnSparseD*)_exp_data_5d[i][j]->Clone();
             _N_5d[i][j]->Add(_empty_5d[i][j],-flags_.Flags::Qr());//Empty target subtraction
 	        _N_5d[i][j]->Divide(_acceptance_5d[i][j]);
+			/*
 			if(flags_.Flags::Nonlocal_Holes()){
 				_sim_holes_tmp_5d[i][j] = (THnSparseD*)_sim_data_5d[i][j]->Clone();
 				_sim_holes_tmp_5d[i][j]->Divide(_acceptance_5d[i][j]);
@@ -112,6 +114,7 @@ void Histogram::Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile 
 				_N_holes_5d[i][j]->Scale(fun::nSparseIntegral(_exp_data_5d[i][j])/fun::nSparseIntegral(_sim_data_5d[i][j]));
 				_N_5d[i][j]->Add(_N_holes_5d[i][j],1.0);
 			}
+			*/
         }
     }
     for(int i = 0; i<_thrown_5d[0][0]->GetNdimensions(); i++){
@@ -260,7 +263,7 @@ void Histogram::Single_Diff(Flags flags_){
 				sprintf(hname,"%s_single_diff_W:%.3f-%.3f_Q2:%.2f-%.2f_top:%s_var:%s",_five_dim_[k],Histogram::W_low(i),Histogram::W_top(i),Histogram::Q2_low(j),Histogram::Q2_top(j),flags_.Flags::Top().c_str(),flags_.Flags::Var_Set().c_str());
 				sprintf(xlabel,"%s %s",_five_dim_[k],_dim_units_[k]);
 				sprintf(ylabel,"Diff CS (microbarns/(%s))",_dim_units_y_[k]);
-                //std::cout<<"\tpushing back projection\n";
+                //std::cout<<"\tpushing back projection " <<_N_5d[i][j]->Projection(k,"E") <<"\n";
 				exp_ch_1d.push_back(_N_5d[i][j]->Projection(k,"E"));
 				//std::cout<<"\tDenominator time\n\t\tvirtual photon flux\n";
                 denom *= physics::Virtual_Photon_Flux((double)Histogram::W_mid(i),(double)Histogram::Q2_mid(j),_beam_energy_[0]);

@@ -184,6 +184,10 @@ protected:
     THnSparseD *_N_holes_5d[29][5];
     THnSparseD *_acceptance_5d[29][5];
     THnSparseD *_N_5d[29][5];
+	THnSparseD *_N_5d_acc[29][5];
+	THnSparseD *_N_5d_global_holes[29][5];
+	THnSparseD *_N_5d_loc_holes[29][5];
+	THnSparseD *_N_5d_raw_yield[29][5];
 
 
 
@@ -203,7 +207,12 @@ protected:
 
 	//Single Differential Histograms
 	TH1D_3d_star _single_diff_hist;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
-	TH1D_3d_star _single_difference_hist;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
+	TH1D_3d_star _single_diff_hist_loc_holes;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+	TH1D_3d_star _single_diff_hist_global_holes;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+	TH1D_3d_star _single_difference_hist_raw_yield;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
+	TH1D_3d_star _single_difference_hist_acc;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
+	TH1D_3d_star _single_difference_hist_loc_holes;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
+	TH1D_3d_star _single_difference_hist_global_holes;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
 
 	TH1D *_acceptance_rel_err_hist[29][5];//W,Q2
 	

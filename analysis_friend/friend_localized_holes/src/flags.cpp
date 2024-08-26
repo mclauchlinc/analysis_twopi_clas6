@@ -230,6 +230,16 @@ Flags::Flags(){}
 				_has_localized_holes = false;
 				std::cout<<"\tIDed: Sim No Rad File2 is " <<_sim_no_rad_loc2 <<"\n"; 
 			}
+			if(str.substr(0,13) == _acc_rel_cut_){
+				if(str.substr(13,str_len) == _tight_){
+					_acc_rel_cut = 0;
+				}else if(str.substr(13,str_len) == _mid_){
+					_acc_rel_cut = 1;
+				}else if(str.substr(13,str_len) == _loose_){
+					_acc_rel_cut = 2;
+				}
+				std::cout<<"\tIDed: Acceptance Relative Error Cut idx is " <<_acc_rel_cut <<"\n"; 
+			}
         }
 	}
 
@@ -509,4 +519,8 @@ Flags::Flags(){}
 
 	int Flags::Min_Local_Dist(){
 		return _loc_holes_dist;
+	}
+
+	int Flags::Acc_Rel_Error_Cut(){
+		return _acc_rel_cut;
 	}

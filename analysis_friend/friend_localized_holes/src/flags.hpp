@@ -91,6 +91,11 @@ static std::string _qratio2_ = "-qr2=";
 
 static std::string _image_name_ = "-image=";
 
+static std::string _acc_rel_cut_ = "-acc_rel_cut=";
+static std::string _tight_ = "tight";
+static std::string _mid_ = "mid";
+static std::string _loose_ = "loose";
+
 
 
 
@@ -160,6 +165,8 @@ private:
 
 	std::string _var_set = "";
 	int _var_idx = -1; 
+
+	int _acc_rel_cut = 3;
 
 	float _luminosity = NAN;//Integrated luminosity for the given run
 	float _luminosity2 = NAN;
@@ -234,6 +241,7 @@ public:
 	int W_Bin();
 	int Q2_Bin();
 	int Min_Local_Dist();
+	int Acc_Rel_Error_Cut();
 };
 
 
