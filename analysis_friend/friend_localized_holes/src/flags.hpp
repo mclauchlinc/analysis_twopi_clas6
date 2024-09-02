@@ -180,7 +180,7 @@ private:
 	int _W_bin = -1;
 	int _Q2_bin = -1;
 
-	int _loc_holes_dist = 4;
+	int _loc_holes_dist = 2;
 
 	
 public:

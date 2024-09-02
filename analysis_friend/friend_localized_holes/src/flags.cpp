@@ -237,6 +237,8 @@ Flags::Flags(){}
 					_acc_rel_cut = 1;
 				}else if(str.substr(13,str_len) == _loose_){
 					_acc_rel_cut = 2;
+				}else{
+					_acc_rel_cut = 3;
 				}
 				std::cout<<"\tIDed: Acceptance Relative Error Cut idx is " <<_acc_rel_cut <<"\n"; 
 			}

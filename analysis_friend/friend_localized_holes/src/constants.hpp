@@ -45,6 +45,7 @@ static const bool _cluster_loc_[] = {false,true};
 static const char * _five_dim_[] = {"MM1","MM2","Theta","Alpha","Phi"};
 static const char * _dim_units_[] = {"GeV","GeV","Angle (deg)","Angle (deg)","Angle (deg)"};
 static const char * _dim_units_y_[] = {"GeV","GeV","rad","rad","rad"};
+static const char * _cut_width_[] = {"tight","mid","loose","none"};
 
 //const int * some_bins[] = {{0,4},{1,4},{2,4},{3,4}};
 

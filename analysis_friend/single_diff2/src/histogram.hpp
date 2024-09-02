@@ -106,7 +106,7 @@ static float _MM_max_[3][29] = {	{1.28543, 1.43543, 1.43543, 1.43543, 1.43543, 1
 									{0.486728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.911728, 0.911728, 0.911728, 0.911728, 0.911728, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.18673, 1.18673, 1.18673, 1.18673, 1.18673}, 
 									{1.28543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.43543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.58543, 1.71043, 1.71043, 1.71043, 1.71043, 1.71043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.86043, 1.98543, 1.98543, 1.98543, 1.98543, 1.98543}};
 static int _MM_bins_ = 14;//8/28/23 to Arjun's actual binning;
-static int _MM_wider_ = 5; 
+static int _MM_wider_ = 3; 
 static float _MM2_min_[3] = {_MM_min_[1],_MM_min_[2],_MM_min_[0]};//changed 7-12-23//{0.3,1.1,1.1};//Changed 5/5/23//Changed 8-28-23 to match Arjun
 //static float _MM2_max_[3][29] = {_MM_max_[1],_MM_max_[2],_MM_max_[0]};//{1.1,2.0,2.0};//Changed 5/5/23
 static float _MM2_max_[3][29] = {	{0.486728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.636728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.786728, 0.911728, 0.911728, 0.911728, 0.911728, 0.911728, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.06173, 1.18673, 1.18673, 1.18673, 1.18673, 1.18673},
@@ -175,181 +175,38 @@ protected:
     */
 
     THnSparseD *_exp_data_5d[29][5];
-	THnSparseD *_exp_data_5d_pos[29][5];
-	THnSparseD *_exp_data_5d_neg[29][5];
     THnSparseD *_sim_data_5d[29][5];
-
-	THnSparseD *_exp_data_5d_acc_corr[29][5];
-	THnSparseD *_exp_data_5d_acc_corr_pos[29][5];
-	THnSparseD *_exp_data_5d_acc_corr_neg[29][5];
-    THnSparseD *_sim_data_5d_acc_corr[29][5];
-
-	THnSparseD *_exp_data_5d_bop[29][5];
-	THnSparseD *_exp_data_5d_bop_pos[29][5];
-	THnSparseD *_exp_data_5d_bop_neg[29][5];
-    THnSparseD *_sim_data_5d_bop[29][5];
-	THnSparseD *_sim_data_5d_bop_pos[29][5];
-	THnSparseD *_sim_data_5d_bop_neg[29][5];
-
-	THnSparseD *_exp_data_5d_bop2[29][5];
-	THnSparseD *_exp_data_5d_bop2_pos[29][5];
-	THnSparseD *_exp_data_5d_bop2_neg[29][5];
-    THnSparseD *_sim_data_5d_bop2[29][5];
-	THnSparseD *_sim_data_5d_bop2_pos[29][5];
-	THnSparseD *_sim_data_5d_bop2_neg[29][5];
-
-	THnSparseD *_sim_exp_5d_sync[29][5];
-	THnSparseD *_sim_exp_5d_sync_pos[29][5];
-	THnSparseD *_sim_exp_5d_sync_neg[29][5];
-
-	THnSparseD *_exp_5d_sync_to_sim[29][5];
-	THnSparseD *_exp_5d_sync_to_sim_pos[29][5];
-	THnSparseD *_exp_5d_sync_to_sim_neg[29][5];
-
-    //THnSparseD *_empty_5d[29][5];
-	//THnSparseD *_empty_5d_pos[29][5];
-	//THnSparseD *_empty_5d_neg[29][5];
+    THnSparseD *_empty_5d[29][5];
     THnSparseD *_thrown_5d[29][5];
-    //THnSparseD *_thrown_no_rad_5d[29][5];
+    THnSparseD *_thrown_no_rad_5d[29][5];
     THnSparseD *_sim_holes_5d[29][5];
     THnSparseD *_sim_holes_tmp_5d[29][5];
-	THnSparseD *_sim_holes_5d_pos[29][5];
-    THnSparseD *_sim_holes_tmp_5d_pos[29][5];
-	THnSparseD *_sim_holes_5d_neg[29][5];
-    THnSparseD *_sim_holes_tmp_5d_neg[29][5];
-    THnSparseD *_N_holes_5d[29][5];
-	THnSparseD *_N_holes_5d_pos[29][5];
-	THnSparseD *_N_holes_5d_neg[29][5];
-
-	THnSparseD *_sim_holes_5d_old[29][5];
-	THnSparseD *_sim_holes_5d_old_pos[29][5];
-	THnSparseD *_sim_holes_5d_old_neg[29][5];
-
-	THnSparseD *_N_holes_5d_old[29][5];
-	THnSparseD *_N_holes_5d_old_pos[29][5];
-	THnSparseD *_N_holes_5d_old_neg[29][5];
-
-	//THnSparseD *_N_holes_fifty_5d[29][5];
-	//THnSparseD *_N_holes_fifty_5d_pos[29][5];
-	//THnSparseD *_N_holes_fifty_5d_neg[29][5];
-	THnSparseD *_N_holes_global_5d[29][5];
-	THnSparseD *_N_holes_global_5d_pos[29][5];
-	THnSparseD *_N_holes_global_5d_neg[29][5];
-	THnSparseD *_N_holes_old_global_5d[29][5];
-	THnSparseD *_N_holes_old_global_5d_pos[29][5];
-	THnSparseD *_N_holes_old_global_5d_neg[29][5];
+    THnSparseD *_N_local_holes_5d[29][5];
+	THnSparseD *_N_global_holes_5d[29][5];
     THnSparseD *_acceptance_5d[29][5];
-	THnSparseD *_acceptance_rel_err_5d[29][5];
+    THnSparseD *_N_5d[29][5];
+	THnSparseD *_N_5d_acc[29][5];
 
-	THnSparseD *_scale_exp_5d[29][5];
-	THnSparseD *_scale_exp_5d_pos[29][5];
-	THnSparseD *_scale_exp_5d_neg[29][5];
-	THnSparseD *_scale_sim_5d[29][5];
-	THnSparseD *_scale_sim_5d_pos[29][5];
-	THnSparseD *_scale_sim_5d_neg[29][5];
-	THnSparseD *_scale_5d[29][5];
-	THnSparseD *_scale_5d_pos[29][5];
-	THnSparseD *_scale_5d_neg[29][5];
+	THnSparseD *_N_local_holes_5d_old[29][5];
+	THnSparseD *_N_global_holes_5d_old[29][5];
 
-	THnSparseD *_scale_exp_5d_old[29][5];
-	THnSparseD *_scale_sim_5d_old[29][5];
-	THnSparseD *_scale_5d_old[29][5];
+	THnSparseD *_N_5d_local_holes[29][5];
+	THnSparseD *_N_5d_global_holes[29][5];
 
-	THnSparseD *_scale_exp_5d_global[29][5];
-	THnSparseD *_scale_exp_5d_global_pos[29][5];
-	THnSparseD *_scale_exp_5d_global_neg[29][5];
-	THnSparseD *_scale_sim_5d_global[29][5];
-	THnSparseD *_scale_sim_5d_global_pos[29][5];
-	THnSparseD *_scale_sim_5d_global_neg[29][5];
-	THnSparseD *_scale_5d_global[29][5];
-	THnSparseD *_scale_5d_global_pos[29][5];
-	THnSparseD *_scale_5d_global_neg[29][5];
-    //THnSparseD *_N_5d[29][5];
-
-	THnSparseD *_scale_exp_5d_global_old[29][5];
-	THnSparseD *_scale_sim_5d_global_old[29][5];
-	THnSparseD *_scale_5d_global_old[29][5];
-
-	TH1D * _sf_hist[29][5];
-	TH1D * _sf_hist_pos[29][5];
-	TH1D * _sf_hist_neg[29][5];
-	TH1D * _acceptance_dist[29][5];
-	TH1D * _acceptance_dist2[29][5];
-	TH1D * _acceptance_dist3[29][5];
-	TH1D * _nacceptance_dist[29][5];
-	TH1D * _rel_acceptance_dist[29][5];
-	TH1D * _hole_err_hist[29][5];
-	TH1D * _global_hole_err_hist[29][5];
-	TH1D * _sf_rel_err_hist[29][5];
-	TH1D * _hole_err_hist_pos[29][5];
-	TH1D * _hole_err_hist_neg[29][5];
-
-	TH1D * _global_hole_err_hist_pos[29][5];
-	TH1D * _global_hole_err_hist_neg[29][5];
-	TH1D * _sf_rel_err_hist_pos[29][5];
-	TH1D * _sf_rel_err_hist_neg[29][5];
-
-	TH1D * _sf_hist_old[29][5];
-	TH1D * _hole_err_hist_old[29][5];
-	TH1D * _global_hole_err_hist_old[29][5];
-	TH1D * _sf_rel_err_hist_old[29][5];
+	THnSparseD *_N_5d_local_holes_old[29][5];
+	THnSparseD *_N_5d_global_holes_old[29][5];
 	
+	THnSparseD *_N_5d_raw_yield[29][5];
 
-	TH1D * _hole_radius_hist[29][5];
-	TH1D * _hole_radius_hist_pos[29][5];
-	TH1D * _hole_radius_hist_neg[29][5];
-
-	TH2D * _global_sf;
-	TH2D * _global_sf2;
-	TH2D * _global_sf_pos;
-	TH2D * _global_sf_neg;
-
-	TH2D * _global_sf_old;
-	TH2D * _global_sf2_old;
-
-	TH2D * _global_sf_rel_err;
-	TH2D * _global_sf2_rel_err;
-	TH2D * _global_sf_pos_rel_err;
-	TH2D * _global_sf_neg_rel_err;
-
-	double _value_global_sf[29][5];
-	double _value_global_sf_pos[29][5];
-	double _value_global_sf_neg[29][5];
-	double _value_global_sf_err[29][5];
-	double _value_global_sf_err_pos[29][5];
-	double _value_global_sf_err_neg[29][5];
-
-	double _value_global_sf_old[29][5];
-	double _value_global_sf_old_pos[29][5];
-	double _value_global_sf_old_neg[29][5];
-	double _value_global_sf_err_old[29][5];
-	double _value_global_sf_err_old_pos[29][5];
-	double _value_global_sf_err_old_neg[29][5];
-
-
-	TH2D * _zero_acc_w_exp_data;
-	TH2D * _zero_acc_w_exp_data_pos;
-	TH2D * _zero_acc_w_exp_data_neg;
-
-	TH2D * _lost_exp_events;
-	TH2D * _lost_exp_events_pos;
-	TH2D * _lost_exp_events_neg;
-
-
-	TH2D * _frac_bins_holes_to_exp;
-	TH2D * _frac_events_holes_to_exp;
-
-	TH2D * _frac_bins_holes_to_exp_old;
-	TH2D * _frac_events_holes_to_exp_old;
 
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
 	TH1D* _phi_bin_sizes;//Width of phi bins 
 
-	//TH2D* _rad_corr;//Radiative Corrections
-	//double_2d _rad_corr_array;
-	//double _rad_corr_mu;//integral thrown over integral thrown no-radiative effects
-	//double_2d _rad_error;//Statistical Error for radiative corrections
+	TH2D* _rad_corr;//Radiative Corrections
+	double_2d _rad_corr_array;
+	double _rad_corr_mu;//integral thrown over integral thrown no-radiative effects
+	double_2d _rad_error;//Statistical Error for radiative corrections
 	
 
 	//Topology Yields
@@ -359,26 +216,39 @@ protected:
 
 	//Single Differential Histograms
 	TH1D_3d_star _single_diff_hist;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+	TH1D_3d_star _single_diff_hist_loc_holes;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+	TH1D_3d_star _single_diff_hist_global_holes;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+	TH1D_3d_star _holes_single_diff_hist_local_holes;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+	TH1D_3d_star _holes_single_diff_hist_global_holes;//{w,q2,X} X->{MM1,MM2,theta,alpha,phi}
+	TH1D_3d_star _single_difference_hist_raw_yield;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
+	TH1D_3d_star _single_difference_hist_acc;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
+	TH1D_3d_star _single_difference_hist_loc_holes;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
+	TH1D_3d_star _single_difference_hist_global_holes;//{w,q2,X} X->{MMppip,MMpippim,MMppim}
 
+	TH1D *_acceptance_rel_err_hist[29][5];//W,Q2
 	
 public:
-	//Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
+	Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
     Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
-	//void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
+	void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
     void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
 	//void Extract_Bin_Info(Flags flags_);//Extract binning information for 7 and 5d histograms
 	//void Sparse_7to5(Flags flags_);//Convert 7d histograms to 5d histograms
-    //void Rad_Corr();
-	//void Single_Diff(Flags flags_);//Making Single Differential Histograms
-    void Localized_Holes(Flags flags_, int min_dist_, int max_dist_);//Localized Holes!
-	float W_low(int i_);
+    void Rad_Corr();
+	void Polarization(Flags flags_);
+	void Single_Diff(Flags flags_);
+    float W_low(int i_);
     float W_top(int i_);
     float Q2_low(int i_);
     float Q2_top(int i_);
     float W_mid(int i_);
     float Q2_mid(int i_);
-	void Make_Acceptance_Rel_Error(Flags flags_);
-	void Acceptance_Rel_Error_Cut(Flags flags_);
+    //double MM_max(int W_bin_, int var_set_);
+	//double MM2_max(int W_bin_, int var_set_);
+    double CosTheta(int theta_bin_);
+	void Make_Acceptance_Rel_Hist(Flags flags_);
+	void Fill_Acceptance_Rel_Hist();
+	
 
 	
 };

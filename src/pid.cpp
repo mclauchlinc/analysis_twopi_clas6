@@ -49,6 +49,8 @@
 			pass &= pid::geo_cc_cut(0,idx_,data_,flags_);
 			pass &= pid::geo_sc_cut(0,idx_,data_,flags_);
 			pass &= pid::geo_ec_cut(0,idx_,data_,flags_);
+			pass &= pid::good_sc_paddle(0,idx_,data_,flags_);
+			pass &= pid::good_cc_segment(0,idx_,data_,flags_);
 			pass &= pid::kin_eff_cut(0,idx_,data_,flags_);
 			/*
 			std::cout<<"ele sanity:" <<pid::sanity_ele(idx_,data_,flags_) <<"\n";
@@ -81,6 +83,7 @@
 			pass &= pid::geo_sc_cut(1,idx_,data_,flags_);
 			//pass &= pid::geo_ec_cut(1,idx_,data_,flags_);
 			pass &= pid::kin_eff_cut(1,idx_,data_,flags_);
+			pass &= pid::good_sc_paddle(1,idx_,data_,flags_);
 			/*
 			std::cout<<"pro sanity:" <<pid::sanity_pro(idx_,data_,flags_) <<"\n";
 			std::cout<<"pro delta t:" <<pid::delta_t_pro(idx_,data_,flags_) <<"\n";
@@ -109,6 +112,7 @@
 			pass &= pid::geo_sc_cut(2,idx_,data_,flags_);
 			//pass &= pid::geo_ec_cut(2,idx_,data_,flags_);
 			pass &= pid::kin_eff_cut(2,idx_,data_,flags_);
+			pass &= pid::good_sc_paddle(2,idx_,data_,flags_);
 			/*
 			std::cout<<"pip sanity:" <<pid::sanity_pip(idx_,data_,flags_) <<"\n";
 			std::cout<<"pip delta t:" <<pid::delta_t_pip(idx_,data_,flags_) <<"\n";
@@ -137,6 +141,7 @@
 			pass &= pid::geo_sc_cut(3,idx_,data_,flags_);
 			//pass &= pid::geo_ec_cut(3,idx_,data_,flags_);
 			pass &= pid::kin_eff_cut(3,idx_,data_,flags_);
+			pass &= pid::good_sc_paddle(3,idx_,data_,flags_);
 			/*std::cout<<"pim sanity:" <<pid::sanity_pim(idx_,data_,flags_) <<"\n";
 			std::cout<<"pim delta t:" <<pid::delta_t_pim(idx_,data_,flags_) <<"\n";
 			//std::cout<<"pim sanity:" <<pid::sc_eff(3, idx_, data_, flags_);
@@ -439,4 +444,15 @@
 		int sector = physics::get_sector(physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)));
 		pass &= cuts::kin_eff_cut(par_,sector,p,theta,flags_);
 		return pass;
+	}
+
+	bool pid::good_sc_paddle(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
+		int sector = physics::get_sector(physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)));
+		return cuts::sc_good_paddle(par_,sector-1,data_->Branches::sc_pd(idx_),flags_);
+		
+
+	}
+	bool pid::good_cc_segment(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_){
+		int sector = physics::get_sector(physics::get_phi(data_->Branches::cx(idx_),data_->Branches::cy(idx_)));
+		return cuts::cc_good_segment(par_,sector-1,detect::cc_segment(data_->Branches::cc_segm(idx_)),flags_);
 	}

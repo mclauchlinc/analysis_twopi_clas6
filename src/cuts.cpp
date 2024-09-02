@@ -649,6 +649,14 @@ bool cuts::cc_geo_cut(int par_, float x_, float y_, int sec_,int side_, int seg_
 	pass &=  cuts::cc_geo_seg_cut(par_,x_,y_,sec_,side_,seg_,flags_);
 	return pass; 
 }
+bool cuts::cc_good_segment(int par_, int sec_, int seg_, std::shared_ptr<Flags> flags_){
+	return _cc_good_segments[flags_->Flags::Run()][seg_][sec_];
+}
+
+bool cuts::sc_good_paddle(int par_, int sec_, int pad_, std::shared_ptr<Flags> flags_){
+	return _cc_good_segments[flags_->Flags::Run()][pad_][sec_];
+}
+
 bool cuts::sc_geo_left_cut(int par_, float x_, float y_, int sec_,int pad_, std::shared_ptr<Flags> flags_){
 	bool pass = true;
 	float x_cen = detect::x_det_center(x_,y_,1);

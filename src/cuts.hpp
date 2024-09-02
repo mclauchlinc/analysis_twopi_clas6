@@ -3752,6 +3752,142 @@ static float _mm2_par_[2][2][4][6][2][2] = {
 	}
 	};
 
+//{e16/e1f}{segment}{sector}
+static const bool _cc_good_segments[2][18][6] = {	{	{true,true,true,true,true,true},//1
+														{true,true,true,true,true,true},//2
+														{true,true,true,true,true,true},//3
+														{true,true,true,true,true,true},//4
+														{true,true,true,true,true,true},//5
+														{true,true,true,true,true,true},//6
+														{true,true,true,true,true,true},//7
+														{true,true,true,true,true,true},//8
+														{true,true,true,true,true,true},//9
+														{true,true,true,true,true,true},//10
+														{true,true,true,true,true,true},//11
+														{true,true,true,true,true,true},//12
+														{true,true,true,true,true,true},//13
+														{true,true,true,true,true,true},//14
+														{true,true,true,true,true,true},//15
+														{true,true,true,true,true,true},//16
+														{true,true,true,true,true,true},//17
+														{true,true,true,true,true,true}},//18
+													{	{true,true,true,true,true,true},//1
+														{true,true,true,true,true,true},//2
+														{true,true,true,true,true,true},//3
+														{true,true,true,true,true,true},//4
+														{true,true,true,true,true,true},//5
+														{true,true,true,true,true,true},//6
+														{true,true,true,true,true,true},//7
+														{true,true,true,true,true,true},//8
+														{true,true,true,true,true,true},//9
+														{true,true,true,true,true,true},//10
+														{true,true,true,true,true,true},//11
+														{true,true,true,true,true,true},//12
+														{true,true,true,true,true,true},//13
+														{true,true,true,true,true,true},//14
+														{true,true,true,true,true,true},//15
+														{true,true,true,true,true,true},//16
+														{true,true,true,true,true,true},//17
+														{true,true,true,true,true,true}}};//18}
+
+
+//{e16/e1f}{paddle}{sector}//E16 updated as of 8/27/24
+static const bool _sc_good_paddles[2][48][6] = {	{	{true,true,true,true,true,true},//1
+														{true,true,true,true,true,true},//2
+														{true,true,true,true,true,true},//3
+														{true,true,true,true,true,true},//4
+														{true,true,true,true,true,true},//5
+														{true,true,true,true,true,true},//6
+														{true,true,true,true,true,true},//7
+														{true,true,true,true,true,true},//8
+														{true,true,true,true,true,true},//9
+														{true,true,true,true,true,true},//10
+														{true,true,true,true,true,true},//11
+														{true,true,true,true,true,true},//12
+														{true,true,true,true,true,true},//13
+														{true,true,true,true,true,true},//14
+														{true,true,true,true,true,true},//15
+														{true,true,true,true,true,true},//16
+														{true,true,true,true,true,true},//17
+														{true,true,true,true,true,true},//18
+														{true,true,true,true,true,true},//19
+														{true,true,true,true,true,true},//20
+														{true,true,true,true,true,true},//21
+														{true,true,true,true,true,true},//22
+														{true,true,true,true,true,true},//23
+														{true,true,true,true,true,true},//24
+														{true,true,false,true,true,true},//25														{true,true,true,true,true,true},//
+														{true,true,true,true,true,true},//26
+														{true,true,true,false,true,true},//27
+														{true,true,true,true,true,true},//28
+														{true,true,true,true,true,true},//29
+														{true,true,true,true,true,true},//30
+														{true,true,true,true,true,true},//31
+														{true,true,true,true,true,true},//32
+														{true,true,true,true,true,true},//33
+														{true,true,true,true,true,true},//34
+														{true,true,true,false,true,true},//35
+														{true,true,true,true,true,true},//36
+														{true,true,true,true,true,false},//37
+														{true,true,false,true,true,false},//38
+														{true,true,false,true,true,true},//39
+														{true,true,true,true,true,true},//40
+														{true,true,true,true,true,true},//41
+														{true,true,true,true,false,true},//42
+														{true,true,false,true,false,true},//43
+														{true,true,true,true,true,true},//44
+														{true,true,false,true,true,false},//45
+														{false,false,false,true,true,true},//46
+														{true,true,false,true,true,true},//47
+														{true,true,false,true,false,true}},//48
+													{	{true,true,true,true,true,true},//1
+														{true,true,true,true,true,true},//2
+														{true,true,true,true,true,true},//3
+														{true,true,true,true,true,true},//4
+														{true,true,true,true,true,true},//5
+														{true,true,true,true,true,true},//6
+														{true,true,true,true,true,true},//7
+														{true,true,true,true,true,true},//8
+														{true,true,true,true,true,true},//9
+														{true,true,true,true,true,true},//10
+														{true,true,true,true,true,true},//11
+														{true,true,true,true,true,true},//12
+														{true,true,true,true,true,true},//13
+														{true,true,true,true,true,true},//14
+														{true,true,true,true,true,true},//15
+														{true,true,true,true,true,true},//16
+														{true,true,true,true,true,true},//17
+														{true,true,true,true,true,true},//18
+														{true,true,true,true,true,true},//19
+														{true,true,true,true,true,true},//20
+														{true,true,true,true,true,true},//21
+														{true,true,true,true,true,true},//22
+														{true,true,true,true,true,true},//23
+														{true,true,true,true,true,true},//24
+														{true,true,true,true,true,true},//25														{true,true,true,true,true,true},//
+														{true,true,true,true,true,true},//26
+														{true,true,true,true,true,true},//27
+														{true,true,true,true,true,true},//28
+														{true,true,true,true,true,true},//29
+														{true,true,true,true,true,true},//30
+														{true,true,true,true,true,true},//31
+														{true,true,true,true,true,true},//32
+														{true,true,true,true,true,true},//33
+														{true,true,true,true,true,true},//34
+														{true,true,true,true,true,true},//35
+														{true,true,true,true,true,true},//36
+														{true,true,true,true,true,true},//37
+														{true,true,true,true,true,true},//38
+														{true,true,true,true,true,true},//39
+														{true,true,true,true,true,true},//40
+														{true,true,true,true,true,true},//41
+														{true,true,true,true,true,true},//42
+														{true,true,true,true,true,true},//43
+														{true,true,true,true,true,true},//44
+														{true,true,true,true,true,true},//45
+														{true,true,true,true,true,true},//46
+														{true,true,true,true,true,true},//47
+														{true,true,true,true,true,true}}};//48}
 
 //Efficiency Cuts
 //	CC
@@ -3834,6 +3970,8 @@ namespace cuts{
 	bool cc_geo_right_cut(int par_, float x_, float y_, int sec_,int side_, int seg_, std::shared_ptr<Flags> flags_);
 	bool cc_geo_seg_cut(int par_, float x_, float y_, int sec_,int side_, int seg_, std::shared_ptr<Flags> flags_);
 	bool cc_geo_cut(int par_, float x_, float y_, int sec_, int side_, int seg_, std::shared_ptr<Flags> flags_);
+	bool cc_good_segment(int par_, int sec_, int seg_, std::shared_ptr<Flags> flags_);
+	bool sc_good_paddle(int par_, int sec_, int pad_, std::shared_ptr<Flags> flags_);
 	bool sc_geo_left_cut(int par_,float x_, float y_, int sec_, int pad_, std::shared_ptr<Flags> flags_);
 	bool sc_geo_right_cut(int par_, float x_, float y_, int sec_,int pad_, std::shared_ptr<Flags> flags_);
 	bool sc_geo_pad_cut(int par_, float x_, float y_, int sec_,int pad_, std::shared_ptr<Flags> flags_);
@@ -3845,6 +3983,8 @@ namespace cuts{
 	bool ec_geo_cut(int par_, float x_, float y_, int sec_,std::shared_ptr<Flags> flags_);
 
 	bool kin_eff_cut(int par_, int sec_, float p_, float theta_, std::shared_ptr<Flags> flags_);
+
+	
 };
 
 

@@ -48,6 +48,8 @@ namespace pid {
 	bool geo_sc_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 	bool geo_ec_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 	bool kin_eff_cut(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
+	bool good_sc_paddle(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
+	bool good_cc_segment(int par_, int idx_, std::shared_ptr<Branches> data_, std::shared_ptr<Flags> flags_);
 }
 
 #endif
