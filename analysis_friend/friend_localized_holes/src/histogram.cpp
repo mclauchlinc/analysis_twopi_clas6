@@ -984,7 +984,6 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 									//if(_exp_data_5d[i][j]->GetNbins() > 0){
 									if(_sim_data_5d_acc_corr[i][j]->GetNbins() > 0){
 										for( long v_idx = 0; v_idx< _sim_data_5d_acc_corr[i][j]->GetNbins(); v_idx++){
-											Double_t v_old = _sim_data_5d_acc_corr[i][j]->GetBinContent(v_idx,coord);
 											Double_t v = _sim_data_5d_acc_corr[i][j]->GetBinContent(v_idx,coord);
 											bool pass_old = true;
 											for(int z = 0; z<5; z++){
@@ -992,16 +991,16 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 												pass_old &= coord[z] <= bin_top[z];
 											}
 											if(pass_old){
-												if(v_old>0.0){
+												if(v>0.0){
 													//Double_t w_old = _exp_5d_sync_to_sim[i][j]->GetBinContent(coord);
-													Double_t w_old = _exp_data_5d_acc_corr[i][j]->GetBinContent(coord);
-													loc_exp_old += w_old;
-													loc_sim_old += v_old; 
+													Double_t w = _exp_data_5d_acc_corr[i][j]->GetBinContent(coord);
+													loc_exp_old += w;
+													loc_sim_old += v; 
 
 													//loc_exp_err2_old += _exp_5d_sync_to_sim[i][j]->GetBinError2(_exp_5d_sync_to_sim[i][j]->GetBin(coord));
 													loc_exp_err2_old += _exp_data_5d_acc_corr[i][j]->GetBinError2(_exp_data_5d_acc_corr[i][j]->GetBin(coord));
 													loc_sim_err2_old += _sim_data_5d_acc_corr[i][j]->GetBinError2(v_idx);
-													Double_t w = _exp_data_5d_acc_corr[i][j]->GetBinContent(coord);
+													
 													if(w>0.0){
 														loc_exp += w;
 														loc_sim += v; 
@@ -1152,20 +1151,18 @@ void Histogram::Localized_Holes(Flags flags_, int min_dist_, int max_dist_){
 			double exp_err_nonlocal_old = 0.0;
 			double sim_err_nonlocal_old = 0.0;
 			for( long v_idx = 0; v_idx< _sim_data_5d_acc_corr[i][j]->GetNbins(); v_idx++){
-				Double_t v_nonlocal_old = _sim_data_5d_acc_corr[i][j]->GetBinContent(v_idx,coord);
 				Double_t v_nonlocal = _sim_data_5d_acc_corr[i][j]->GetBinContent(v_idx,coord);
-				if(v_nonlocal_old >0.0){
-					Double_t w_nonlocal_old = _exp_data_5d_acc_corr[i][j]->GetBinContent(coord);
-					exp_nonlocal_old += w_nonlocal_old;
-					sim_nonlocal_old += v_nonlocal_old;
-					exp_err_nonlocal_old += w_nonlocal_old*v_nonlocal_old;
-					sim_err_nonlocal_old += v_nonlocal_old*w_nonlocal_old;
-					Double_t w_nonlocal = _sim_data_5d_acc_corr[i][j]->GetBinContent(coord);
+				if(v_nonlocal >0.0){
+					Double_t w_nonlocal = _exp_data_5d_acc_corr[i][j]->GetBinContent(coord);
+					exp_nonlocal_old += w_nonlocal;
+					sim_nonlocal_old += v_nonlocal;
+					exp_err_nonlocal_old += _exp_data_5d_acc_corr[i][j]->GetBinError2(_exp_data_5d_acc_corr[i][j]->GetBin(coord));//w_nonlocal*w_nonlocal;
+					sim_err_nonlocal_old += _sim_data_5d_acc_corr[i][j]->GetBinError2(v_idx);//v_nonlocal*v_nonlocal;
 					if(w_nonlocal > 0.0){
 						exp_nonlocal += w_nonlocal;
 						sim_nonlocal += v_nonlocal;
-						exp_err_nonlocal += w_nonlocal*w_nonlocal;
-						sim_err_nonlocal += v_nonlocal*v_nonlocal;
+						exp_err_nonlocal += _exp_data_5d_acc_corr[i][j]->GetBinError2(_exp_data_5d_acc_corr[i][j]->GetBin(coord));//w_nonlocal*w_nonlocal;
+						sim_err_nonlocal += _sim_data_5d_acc_corr[i][j]->GetBinError2(v_idx);//v_nonlocal*v_nonlocal;
 					}
 				}
 			}
