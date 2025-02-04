@@ -10,13 +10,15 @@
 //#include <vector>
 #include "THnSparse.h"
 
-TFile *exp_file;
-TFile *sim_file;
-TFile *empty_file;
-TFile *sim_no_rad_file;
-TFile *hole_file;
-TFile *hole_pos_file;
-TFile *hole_neg_file;
+/*
+TFile* exp_file;
+TFile* sim_file;
+TFile* empty_file;
+TFile* sim_no_rad_file;
+TFile* hole_file;
+TFile* hole_pos_file;
+TFile* hole_neg_file;
+*/
 
 
 

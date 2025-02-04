@@ -60,6 +60,7 @@ namespace physics{
 	float Get_phie(TLorentzVector k0, TLorentzVector p0);
 	void Rotate_4Vec(int set, float theta, float phi, float phie, TLorentzVector &p1); //Rotate Four vectors along the theta and phi angles
 	void Rotate_4Vec(float theta, float phi, float phie, TLorentzVector &p1);
+	void Rotate_4Vec_New(float t1_, float t2_, TLorentzVector &p1);
 	void Boost_4Vec(float beta, TLorentzVector &p1 );// Boost a four vector in the z direction 
 	void COM_gp(int set, TLorentzVector &p0, TLorentzVector &p1, TLorentzVector &p2, TLorentzVector &p3); //Bring four vectors into the COM reference frame for excited nucleon 
 	void COM_gp(TLorentzVector &k0, TLorentzVector &p0, TLorentzVector &p1, TLorentzVector &p2, TLorentzVector &p3);

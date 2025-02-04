@@ -47,6 +47,24 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	std::cout<<"Thread " <<thread_id_ <<": " <<num_events <<" Events\n";
 	double q_prev=0.0;
 	double q_tot=0.0;
+
+	double q_prev_pos = 0.0;
+	double q_tot_pos = 0.0;
+	double q_prev_neg = 0.0;
+	double q_tot_neg = 0.0;
+
+	
+
+	float curr_hel = 0.0;
+	float prev_hel = 0.0;
+
+	float delta_q2 = 0.0;
+	float q_prev2 = 0.0;
+	float hel_2 = 0.0;
+	float hel_2_prev = 0.0;
+
+	long number_of_events = 0;
+	long number_of_recon = 0;
 	//q_inc[thread_idx_] = 0.0;
 	//if(std::distance(std::begin(q_inc), std::end(q_inc)) < (thread_id_+1)){
 	//	std::cout<<"\n**ERROR TOO MANY THREADS FOR Q_INC**\n";
@@ -62,6 +80,22 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 	float phi_e_center =0.0;
 	int sector = 0;
 
+	int hel_idx = -1;
+	float weight = 0.0;
+	float Q2 = 0.0;
+
+
+	float w0 = 0.0;
+	float old_max_q = 0.0;
+	float curr_max_q = 0.0;
+	float run_sum_q = 0.0;
+	int prev_run = 0;
+	int run_evts = 0;
+
+	std::string prev_filename = "";
+	std::string curr_filename = "";
+
+
 	int run_num = 0;//fun::extract_run_number(chain_->GetFile()->GetName(),flags_); //Not Finished so using temporary run number
 	int prev_run_num = 0;
 	float delta_q = 0.0;
@@ -71,8 +105,70 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 		chain_->GetEntry(curr_event);
 		if(!flags_->Sim()){
 			run_num = fun::extract_run_number(chain_->GetFile()->GetName(),flags_);
+			
 			//std::cout<<"Run group: " <<flags_->Run() <<" Run Number is: " <<run_num <<" and it: ";
+			if(flags_->Flags::Golden_Run()){
+				if(flags_->Flags::Helicity()){
+					hel_2 = fun::Corr_Helicity(data->Branches::evntclas2(),run_num,flags_);
+				}else{
+					hel_2 = 0.0;
+				}
+				if(curr_event == 0){
+					prev_run = run_num;
+					q_prev2 = data->Branches::q_l();
+					delta_q2 = 0.0;
+					hists_->Histogram::Golden_Indiv_Fill(run_num,delta_q2,hel_2);
+				}else{
+					curr_filename = chain_->GetFile()->GetName();
+					if(prev_filename == curr_filename && data->Branches::q_l() >= q_prev2 && q_prev2>0.0){
+					//if(prev_run == run_num && data->Branches::q_l() >= q_prev2){//&& curr_event != num_events-1 ){
+						delta_q2 = data->Branches::q_l() - q_prev2; 
+						hists_->Histogram::Golden_Indiv_Fill(run_num,delta_q2,hel_2_prev);
+					}
+					if(prev_filename == curr_filename && data->Branches::q_l() >= q_prev2){
+						delta_q2 = data->Branches::q_l() - q_prev2; 
+						hists_->Histogram::Golden_Indiv_Fill2(run_num,delta_q2,hel_2_prev);
+					}
+					if(prev_filename == curr_filename ){
+						delta_q2 = data->Branches::q_l() - q_prev2; 
+						hists_->Histogram::Golden_Indiv_Fill3(run_num,delta_q2,hel_2_prev);
+					}
+					if(prev_run == run_num  && data->Branches::q_l() >= q_prev2 && q_prev2>0.0){
+					//if(prev_run == run_num && data->Branches::q_l() >= q_prev2){//&& curr_event != num_events-1 ){
+						delta_q2 = data->Branches::q_l() - q_prev2; 
+						hists_->Histogram::Golden_Indiv_Fill4(run_num,delta_q2,hel_2_prev);
+					}
+					if(prev_run == run_num  && data->Branches::q_l() >= q_prev2){
+						delta_q2 = data->Branches::q_l() - q_prev2; 
+						hists_->Histogram::Golden_Indiv_Fill5(run_num,delta_q2,hel_2_prev);
+					}
+					if(prev_run == run_num ){
+						delta_q2 = data->Branches::q_l() - q_prev2; 
+						hists_->Histogram::Golden_Indiv_Fill6(run_num,delta_q2,hel_2_prev);
+					}
+				}
+				q_prev2 = data->Branches::q_l();
+				hel_2_prev = hel_2;
+			
+				prev_run = run_num;
+				prev_filename = chain_->GetFile()->GetName();
+			}
+			
+
 		}
+		/*
+		if(flags_->Sim()){
+			run_num = fun::extract_run_number_sim(chain_->GetFile()->GetName(),flags_);
+			//std::cout<<"run_num sim: " <<run_num <<"\n";
+			//if(flags_->Flags::Sim()){
+			//	if(data->Branches::vz(0) < 0.0 && data->Branches::vz(0) > -8.0){
+			//		hists_->Histogram::Sim_Vertex_Fill(run_num,flags_);
+			//	}
+			//}
+		}*/
+		
+
+		
 		if(fun::correct_run(run_num,flags_)){
 			//std::cout<<" event is valid for what we are doing\n";
 			//std::cout<<"Run Number is: " <<run_num <<" and it: passed";
@@ -88,10 +184,10 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			if(data->Branches::q_l()>0 && !flags_->Flags::Sim()){
 				if(data->Branches::q_l()>q_prev && data->Branches::q_l()>0.0 && q_prev>0.0){
 					if(run_num == prev_run_num || prev_run_num == 0){
-						delta_q = data->Branches::q_l() - q_prev;
+						//delta_q = data->Branches::q_l() - q_prev;
 						//qtot_ = std::make_shared<double>((double)data->Branches::q_l() - q_prev) + qtot_; 
 						//*q_inc[thread_id_] += delta_q;
-						q_tot += data->Branches::q_l() - q_prev;
+						q_tot += (data->Branches::q_l() - q_prev);
 						//TThread::Lock();
 						//*qtot_ += delta_q;
 						//TThread::UnLock();
@@ -102,8 +198,42 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 			}
 			//Particle ID, Event Selection, and Histogram Filling
 			//std::cout<<"Going into a given event\n";
+			number_of_events++;
+			
 			auto analysis = std::make_shared<Analysis>(data,hists_, thread_id_, run_num, flags_);
-
+			if(flags_->Flags::Helicity() && !flags_->Flags::Sim()){
+				curr_hel = analysis->Analysis::Corr_Helicity(data->Branches::evntclas2(),run_num,flags_);
+				if(curr_hel == 1.0){
+					if(data->Branches::q_l()>q_prev_pos && data->Branches::q_l()>0.0 && q_prev_pos>0.0){
+						if(run_num == prev_run_num || prev_run_num == 0){
+							if(prev_hel == -1.0){
+								q_tot_neg += data->Branches::q_l() - q_prev_neg;
+							}else if(prev_hel == 1.0){
+								q_tot_pos += data->Branches::q_l() - q_prev_pos;
+							}
+						}
+					}
+					
+				}else if(curr_hel == -1.0){
+					if(data->Branches::q_l()>q_prev_neg && data->Branches::q_l()>0.0 && q_prev_neg>0.0){
+						if(run_num == prev_run_num || prev_run_num == 0){
+							if(prev_hel == 1.0){
+								q_tot_pos += data->Branches::q_l() - q_prev_pos;
+							}else if(prev_hel == -1.0){
+								q_tot_neg += data->Branches::q_l() - q_prev_neg;
+							}
+						}
+					}
+				}
+				q_prev_pos = data->Branches::q_l();
+				q_prev_neg = data->Branches::q_l();
+				prev_hel = curr_hel; 
+			}
+			
+			
+			if(analysis->Analysis::Valid_Event()){
+				number_of_recon++;
+			}
 			if((flags_->Flags::Plot_Electron_Angle_Corr() || flags_->Flags::Plot_Elastic()) && !flags_->Flags::Sim() && data->Branches::gpart()>=2){
 				phi_e = physics::get_phi(0,data);
 				pe = data->Branches::p(0);
@@ -113,6 +243,9 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 				theta_e = physics::get_theta(0,data);
 				W0 = physics::W(physics::Make_4Vector(true,pe,theta_e,phi_e,_me_),flags_->Flags::Run());
 				hists_->Histogram::Elastic_Peak_Fill(W0,0,sector,flags_);
+				if(W0 >= 0.7 && W0 < 1.05){
+					hists_->Histogram::PCorr_Elast_Theta_Fill(theta_e, theta_p, sector, flags_);
+				}
 				//hists_->Histogram::Elastic_Peak_Fill(physics::W(physics::Make_4Vector(true,pe,physics::get_theta(0,data),phi_e,_me_),flags_->Flags::Run()),0,sector,flags_);
 				if(flags_->Flags::E_Theta_Corr()){
 					theta_e = corr::theta_e_corr(physics::get_theta(0,data),phi_e_center,flags_->Flags::Run(),true,sector-1);
@@ -151,16 +284,23 @@ size_t run(std::shared_ptr<TChain> chain_, std::shared_ptr<Histogram> hists_, in
 				}
 			}
 		}else{
-			//std::cout<<"failed\n";
+			//if(run_num != prev_run_num){
+			//	std::cout<<"\n\tfailed for run " <<run_num <<"\n";
+			//}
 		}
 		prev_run_num = run_num;
 	}
 	if(!flags_->Flags::Sim()){
 		std::cout<<"\n\n***For thread " <<thread_id_ <<" the integrated charge is: " <<q_tot <<"***\n\n";
+		if(flags_->Flags::Helicity()){
+			std::cout<<"\n\n***For thread " <<thread_id_ <<" the pos hel integrated charge is: " <<q_tot_pos <<"***\n\n";
+			std::cout<<"\n\n***For thread " <<thread_id_ <<" the neg hel integrated charge is: " <<q_tot_neg <<"***\n\n";
+		}
 		//std::cout<<"\n\n***For thread " <<thread_id_ <<" the total integrated charge now is: " <<qtot_ <<"***\n\n";
 		//std::cout<<"\n\n***For thread " <<thread_id_ <<" the integrated charge is: " <<*q_inc[thread_id_] <<"***\n\n";
 		//It seems like the q_tot is adding up between all the threads, but separately too? So whatever the last thread to truly finish is ends up having the true q_tot
 	}
+	std::cout<<"\t**thread " <<thread_id_ <<" should have had " << num_events <<" events, but actually had" <<number_of_events <<" attempted events with " <<number_of_recon <<" events reconstructed\n";
 }
 
 

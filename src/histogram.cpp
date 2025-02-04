@@ -36,7 +36,10 @@ Histogram::Histogram(std::shared_ptr<Flags> flags_){
 	Histogram::Ele_Angle_Corr_Make(flags_);
 	Histogram::Ele_Mag_Corr_Make(flags_);
 	Histogram::Make_Top_Check(flags_);
-	Histogram:Geo_Fid_Make(flags_);
+	Histogram::Geo_Fid_Make(flags_);
+	Histogram::Sim_Vertex_Make(flags_);
+	Histogram::Hel_Ratio_Make(flags_);
+	Histogram::Golden_Make(flags_);
 }
 
 bool Histogram::OK_Idx(std::vector<int> idx_){
@@ -95,6 +98,12 @@ void Histogram::Write(std::shared_ptr<Flags> flags_){
 	Histogram::Geo_Fid_Write(flags_);
 	std::cout<<"Thinking about writing Top Check histograms\n";
 	Histogram::Write_Top_Check(flags_);
+	std::cout<<"Thinking about writing Sim Vertex Runs\n";
+	Histogram::Sim_Vertex_Write(flags_);
+	std::cout<<"Thinking about writing Helicity Ratio Histograms\n";
+	Histogram::Hel_Ratio_Write(flags_);
+	std::cout<<"Thinking about writing Golden Histograms\n";
+	Histogram::Golden_Write(flags_);
 	//Histogram::XY_Write(_envi);
 	//Histogram::Fid_Det_Write(_envi);
 	//Friend_Write(_envi);
@@ -4523,37 +4532,37 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 					//std::cout<<"xmin[" <<l <<"]: " <<xmin[l] <<"  xmax[" <<l <<"]: " <<xmax[l] <<"\n";
 				}
 				for(int k=0; k<5; k++){//Q2
-					sprintf(hname,"2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+					sprintf(hname,"2#pi_off_proton_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 					_Friend[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
 					_Friend[i][j][k]->Sumw2();//Weights as normal
-					sprintf(hname,"sys_err_2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+					sprintf(hname,"sys_err_2#pi_off_proton_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 					_Duo[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
 					_Duo[i][j][k]->Sumw2();//Weights as normal
 					if(flags_->Flags::Helicity()){
-						sprintf(hname,"2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f_pos",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+						sprintf(hname,"2#pi_off_proton_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)_pos",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 						_Friend1[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
 						_Friend1[i][j][k]->Sumw2();//Normal Weights
-						sprintf(hname,"2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f_neg",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+						sprintf(hname,"2#pi_off_proton_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)_neg",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 						_Friend2[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
 						_Friend2[i][j][k]->Sumw2();//Normal Weights
-						sprintf(hname,"sys_err_2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f_pos",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+						sprintf(hname,"sys_err_2#pi_off_proton_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)_pos",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 						_Duo1[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
 						_Duo1[i][j][k]->Sumw2();//Normal Weights
-						sprintf(hname,"sys_err_2#pi_off_proton_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f_neg",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+						sprintf(hname,"sys_err_2#pi_off_proton_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)_neg",_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 						_Duo2[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
 						_Duo2[i][j][k]->Sumw2();//Normal Weights
 					}
 				
 					for(int l=0; l<5; l++){
 						if(l>1){
-							sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_friend_pars_[l+2],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
-							sprintf(hname2,"Thrown_%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_friend_pars_[l+2],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+							sprintf(hname,"%s_Friend_Dist_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)",_friend_pars_[l+2],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+							sprintf(hname2,"Thrown_%s_Friend_Dist_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)",_friend_pars_[l+2],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
 						}else if(l==0){
-							sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM1_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
-							sprintf(hname2,"Thrown_%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM1_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+							sprintf(hname,"%s_Friend_Dist_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)",_MM1_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+							sprintf(hname2,"Thrown_%s_Friend_Dist_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)",_MM1_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
 						}else if(l==1){
-							sprintf(hname,"%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM2_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
-							sprintf(hname2,"Thrown_%s_Friend_Dist_%s_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_MM2_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+							sprintf(hname,"%s_Friend_Dist_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)",_MM2_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
+							sprintf(hname2,"Thrown_%s_Friend_Dist_%s_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)",_MM2_[i],_var_names_[i],_mall_,Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));//_top_[j]);
 						}
 							
 						//used to be [i][j] for topologies
@@ -4607,7 +4616,7 @@ void Histogram::Friend_Make(std::shared_ptr<Flags> flags_){
 						}
 					}
 					if(flags_->Flags::Sim()){
-						sprintf(hname,"Thrown_2#pi_off_proton_%s_W:%.3f-%.3f_Q2:%.2f-%.2f",_var_names_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
+						sprintf(hname,"Thrown_2#pi_off_proton_%s_W:[%.3f,%.3f)_Q2:[%.2f,%.2f)",_var_names_[i],Histogram::W_bot(j),Histogram::W_top(j),Histogram::Q2_bot(k),Histogram::Q2_top(k));
 						_Thrown[i][j][k] = new THnSparseD(hname,hname,5,bins_5d,xmin,xmax);
 						//_Thrown[i][j][k]->GetAxis(1)->Set(5,_Q2_bins_);
 						_Thrown[i][j][k]->Sumw2();//Allow Weights with virtual photon flux, etc. 
@@ -4786,8 +4795,10 @@ int Histogram::Friend_MM_idx(float MM_, int var_, int W_bin_){
   float top, bot; 
   float res = ((_MM_max_[var_][W_bin_]-_MM_min_[var_])/_MM_bins_);
   for(int i = 0; i < (_MM_bins_+2*_MM_wider_); i++){//constants.hpp
-    top = _MM_min_[var_]-(_MM_wider_-(i+1))*res;//constants.hpp
-    bot = top - res; 
+    bot = _MM_min_[var_] + ((i)- _MM_wider_)*res;
+	top = bot + res;
+	//top = _MM_min_[var_]-(_MM_wider_-(i+1))*res;//constants.hpp
+    //bot = top - res; 
     if(MM_ < top && MM_ >= bot){
       j = i; 
     }
@@ -4799,8 +4810,10 @@ int Histogram::Friend_MM2_idx(float MM_, int var_, int W_bin_){
   float top, bot; 
   float res = ((_MM2_max_[var_][W_bin_]-_MM2_min_[var_])/_MM_bins_);
   for(int i = 0; i < (_MM_bins_+2*_MM_wider_); i++){//constants.hpp
-    top = _MM2_min_[var_]-(_MM_wider_-(i+1))*res;//constants.hpp
-    bot = top - res; 
+    bot = _MM2_min_[var_] + ((i)- _MM_wider_)*res;
+	top = bot + res;
+	//top = _MM2_min_[var_]-(_MM_wider_-(i+1))*res;//constants.hpp
+    //bot = top - res; 
     if(MM_ < top && MM_ >= bot){
       j = i; 
     }
@@ -5317,6 +5330,13 @@ void Histogram::PCorr_Check_Make(std::shared_ptr<Flags> flags_){
 	CartesianGenerator cart(space_dims);
 	char hname[100];
 
+	for(int i=0; i<6; i++){
+		sprintf(hname,"Elastic Theta Relation Sec:%d",i+1);
+		_Elastic_Theta_hist[i] = new TH2F(hname,hname,300,0.0,55.0,300,0.0,55.0);
+	}
+	sprintf(hname,"Elastic Theta Relation Sec:All");
+	_Elastic_Theta_hist[6] = new TH2F(hname,hname,300,0.0,55.0,300,0.0,55.0);
+
 	while(cart.GetNextCombination()){
 		//std::cout<<"Trying to make: sector:" <<cart[0]+1 <<" ele_corr:" <<_ele_corr_[cart[2]] <<" pro_thres:" <<_proton_threshold_[cart[1]] <<"\n";
 		//std::cout<<"Making Check Histogram: " <<_Check_hist.size() <<" " <<plot_1d.size() <<"\n";
@@ -5374,6 +5394,16 @@ void Histogram::PCorr_Check_Fill(float MM2_, int sector_, const char* top_, cons
 	}
 }
 
+void Histogram::PCorr_Elast_Theta_Fill(float theta_e, float theta_p, int sector, std::shared_ptr<Flags> flags_){
+	//std::cout<<"trying to Pcorr_Elast_Theta_Fill with " <<theta_e <<" " <<theta_p <<" and " <<sector <<"\n";
+	if(!flags_->Flags::Plot_Check()){ return;}
+	if(isnan(theta_e)){return ;}
+	if(isnan(theta_p)){return ;}
+	_Elastic_Theta_hist[sector-1]->Fill(theta_p, theta_e);
+	_Elastic_Theta_hist[6]->Fill(theta_p, theta_e);
+	//std::cout<<"Success \n";
+}
+
 void Histogram::PCorr_Check_Write(std::shared_ptr<Flags> flags_){
 	if(!flags_->Flags::Plot_Check()){ return ;}
 	std::cout<<"Writing PCorr Check Plots\n";
@@ -5399,6 +5429,17 @@ void Histogram::PCorr_Check_Write(std::shared_ptr<Flags> flags_){
 	CartesianGenerator cart(space_dims);
 	char hname[100];
 	std::vector<int> idx;
+
+	for(int i=0; i<6; i++){
+		dir_sub[i][0]->cd();
+		_Elastic_Theta_hist[i]->SetXTitle("Theta p (deg)");
+		_Elastic_Theta_hist[i]->SetYTitle("Theta e (deg)");
+		_Elastic_Theta_hist[i]->Write();
+	}
+	dir_check->cd();
+	_Elastic_Theta_hist[6]->SetXTitle("Theta p (deg)");
+	_Elastic_Theta_hist[6]->SetYTitle("Theta e (deg)");
+	_Elastic_Theta_hist[6]->Write();
 
 	while(cart.GetNextCombination()){
 		idx = PCorr_Check_idx(cart[0]+1,_top_[cart[1]],_ele_corr_[cart[2]],flags_);
@@ -7301,5 +7342,555 @@ void Histogram::Kin_Eff_SC_Seg_Write(std::shared_ptr<Flags> flags_){
 				_Kinematic_Eff_SC_Seg_hist[idx[0]][idx[1]][idx[2]]->Write();
 			}
 		}
+	}
+}
+
+
+//*----------- Sim Vertex Determination ------ 
+void Histogram::Sim_Vertex_Make(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Sim()){ return;}
+	char hname[100];
+	sprintf(hname,"Sim_Vertex_Runs");
+	_Sim_Vertex_Runs = new TH1D(hname,hname,600,106000,36000000);
+}
+void Histogram::Sim_Vertex_Fill(int run_num_, std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Sim()){ return;}
+	_Sim_Vertex_Runs->Fill(run_num_);
+}
+void Histogram::Sim_Vertex_Write(std::shared_ptr<Flags> flags_){
+	if(!flags_->Flags::Sim()){ return;}
+	std::cout<<"\tWriting Sim Vertex Runs\n";
+	char dir_name[100];
+	//std::cout<<"Making Large Directory:";
+	TDirectory* dir_sim_vert= _RootOutputFile->mkdir("Sim Vertex Runs");
+	dir_sim_vert->cd();
+	_Sim_Vertex_Runs->SetXTitle("Sim Run Number");
+	_Sim_Vertex_Runs->SetYTitle("N Events passed Vertex Cut");
+	_Sim_Vertex_Runs->Write();
+}
+
+
+//*---------- Helicity Ratio --------
+void Histogram::Hel_Ratio_Make(std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Sim()){ return;}
+	if(!flags_->Flags::Helicity()){ return;}
+	std::cout<<"Making Helicity Ratio Histograms\n";
+	Double_t Q2_bin[6] = {_Q2_bins_[0],_Q2_bins_[1],_Q2_bins_[2],_Q2_bins_[3],_Q2_bins_[4],_Q2_bins_[5]};
+	char hname[100];
+	sprintf(hname,"Positive Helicity Raw Yield");
+	_Pos_Hel_wq2_hist[0] = new TH2D(hname,hname,Histogram::W_bins(),_W_min_,_W_max_,5,Q2_bin);
+	sprintf(hname,"Positive Helicity Event Yield");
+	_Pos_Hel_wq2_hist[1] = new TH2D(hname,hname,Histogram::W_bins(),_W_min_,_W_max_,5,Q2_bin);
+	sprintf(hname,"Negative Helicity Raw Yield");
+	_Neg_Hel_wq2_hist[0] = new TH2D(hname,hname,Histogram::W_bins(),_W_min_,_W_max_,5,Q2_bin);
+	sprintf(hname,"Negative Helicity Event Yield");
+	_Neg_Hel_wq2_hist[1] = new TH2D(hname,hname,Histogram::W_bins(),_W_min_,_W_max_,5,Q2_bin);
+	sprintf(hname,"Pos/Neg Helicity Ratio Raw");
+	_Ratio_Hel_wq2_hist[0] = new TH2D(hname,hname,Histogram::W_bins(),_W_min_,_W_max_,5,Q2_bin);
+	sprintf(hname,"Pos/Neg Helicity Ratio Event");
+	_Ratio_Hel_wq2_hist[1] = new TH2D(hname,hname,Histogram::W_bins(),_W_min_,_W_max_,5,Q2_bin);
+
+}
+void Histogram::Hel_Ratio_Fill(float weight_, int hel_idx_, float W_, float Q2_, int event_stat_,std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Sim()){ return;}
+	if(!flags_->Flags::Helicity()){ return;}
+	//if(event_stat_==1){
+	//	std::cout<<"Filling Hel Ratio " <<weight_ <<" hel_idx:" <<hel_idx_ <<" W:" <<W_ <<" Q2:" <<Q2_ <<" event_stat:" <<event_stat_ <<"\n";
+	//}
+	if(hel_idx_==0){
+		_Pos_Hel_wq2_hist[event_stat_]->Fill(W_,Q2_,weight_);
+	}else if(hel_idx_==1){
+		_Neg_Hel_wq2_hist[event_stat_]->Fill(W_,Q2_,weight_);
+	}
+}
+void Histogram::Hel_Ratio_Write(std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Sim()){ return;}
+	if(!flags_->Flags::Helicity()){ return;}
+	std::cout<<"\tWriting Helicity Yields\n";
+	char dir_name[100];
+	char hname[100];
+	//std::cout<<"Making Large Directory:";
+	TDirectory* dir_hel_ratio= _RootOutputFile->mkdir("Helicity Yields and Ratios");
+	dir_hel_ratio->cd();
+	char* Rname[2] = {"Raw","Event"};
+	for(int i=0; i< 2; i++){
+		_Pos_Hel_wq2_hist[i]->SetXTitle("W (GeV)");
+		_Pos_Hel_wq2_hist[i]->SetYTitle("Q2 (GeV^2)");
+		_Pos_Hel_wq2_hist[i]->Write();
+		_Neg_Hel_wq2_hist[i]->SetXTitle("W (GeV)");
+		_Neg_Hel_wq2_hist[i]->SetYTitle("Q2 (GeV^2)");
+		_Neg_Hel_wq2_hist[i]->Write();
+		_Ratio_Hel_wq2_hist[i] = (TH2D*) _Pos_Hel_wq2_hist[i]->Clone();
+		_Ratio_Hel_wq2_hist[i]->Divide(_Neg_Hel_wq2_hist[i]);
+		_Ratio_Hel_wq2_hist[i]->SetXTitle("W (GeV)");
+		_Ratio_Hel_wq2_hist[i]->SetYTitle("Q2 (GeV^2)");
+		sprintf(hname,"Pos/Neg Helicity Ratio %s",Rname[i]);
+		_Ratio_Hel_wq2_hist[i]->SetNameTitle(hname,hname);
+		_Ratio_Hel_wq2_hist[i]->Write();
+	}
+}
+	
+void Histogram::Golden_Make(std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Sim()){ return;}
+	if(!flags_->Flags::Golden_Run()){ return ;}
+	char hname[100];
+	sprintf(hname,"Normalized Integrated Faraday Cup Charge by Run E1-6");
+	_Golden_Run1 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	sprintf(hname,"Normalized Integrated Faraday Cup Charge Distribution E1-6");
+	_Golden_Run2 = new TH1D(hname,hname,90,0.0,10.0);
+
+	sprintf(hname,"Integrated Faraday Cup Charge by Run E1-6");
+	_Golden_Run_Charge = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"Integrated Faraday Cup Charge by Run E1-6 Pos");
+	_Golden_Run_Charge_pos = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"Integrated Faraday Cup Charge by Run E1-6 Neg");
+	_Golden_Run_Charge_neg = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"Integrated Faraday Cup Charge by Run E1-6 None");
+	_Golden_Run_Charge_none = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	sprintf(hname,"Integrated Faraday Cup Events by Run E1-6");
+	_Golden_Run_Events = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"Integrated Faraday Cup Events by Run E1-6 Pos");
+	_Golden_Run_Events_pos = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"Integrated Faraday Cup Events by Run E1-6 Neg");
+	_Golden_Run_Events_neg = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"Integrated Faraday Cup Events by Run E1-6 None");
+	_Golden_Run_Events_none = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	
+
+	sprintf(hname,"2 Integrated Faraday Cup Charge by Run E1-6 ");
+	_Golden_Run_Charge2 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"2 Integrated Faraday Cup Charge by Run E1-6 Pos");
+	_Golden_Run_Charge_pos2 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"2 Integrated Faraday Cup Charge by Run E1-6 Neg");
+	_Golden_Run_Charge_neg2 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"2 Integrated Faraday Cup Charge by Run E1-6 None");
+	_Golden_Run_Charge_none2 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	sprintf(hname,"2 Integrated Faraday Cup Events by Run E1-6");
+	_Golden_Run_Events2 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"2 Integrated Faraday Cup Events by Run E1-6 Pos");
+	_Golden_Run_Events_pos2 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"2 Integrated Faraday Cup Events by Run E1-6 Neg");
+	_Golden_Run_Events_neg2 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"2 Integrated Faraday Cup Events by Run E1-6 None");
+	_Golden_Run_Events_none2 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	sprintf(hname,"3 Integrated Faraday Cup Charge by Run E1-6 ");
+	_Golden_Run_Charge3 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"3 Integrated Faraday Cup Charge by Run E1-6 Pos");
+	_Golden_Run_Charge_pos3 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"3 Integrated Faraday Cup Charge by Run E1-6 Neg");
+	_Golden_Run_Charge_neg3 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"3 Integrated Faraday Cup Charge by Run E1-6 None");
+	_Golden_Run_Charge_none3 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	sprintf(hname,"3 Integrated Faraday Cup Events by Run E1-6");
+	_Golden_Run_Events3 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"3 Integrated Faraday Cup Events by Run E1-6 Pos");
+	_Golden_Run_Events_pos3 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"3 Integrated Faraday Cup Events by Run E1-6 Neg");
+	_Golden_Run_Events_neg3 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"3 Integrated Faraday Cup Events by Run E1-6 None");
+	_Golden_Run_Events_none3 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+
+	sprintf(hname,"4 Integrated Faraday Cup Charge by Run E1-6 ");
+	_Golden_Run_Charge4 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"4 Integrated Faraday Cup Charge by Run E1-6 Pos");
+	_Golden_Run_Charge_pos4 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"4 Integrated Faraday Cup Charge by Run E1-6 Neg");
+	_Golden_Run_Charge_neg4 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"4 Integrated Faraday Cup Charge by Run E1-6 None");
+	_Golden_Run_Charge_none4 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	sprintf(hname,"4 Integrated Faraday Cup Events by Run E1-6");
+	_Golden_Run_Events4 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"4 Integrated Faraday Cup Events by Run E1-6 Pos");
+	_Golden_Run_Events_pos4 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"4 Integrated Faraday Cup Events by Run E1-6 Neg");
+	_Golden_Run_Events_neg4 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"4 Integrated Faraday Cup Events by Run E1-6 None");
+	_Golden_Run_Events_none4 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	sprintf(hname,"5 Integrated Faraday Cup Charge by Run E1-6 ");
+	_Golden_Run_Charge5 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"5 Integrated Faraday Cup Charge by Run E1-6 Pos");
+	_Golden_Run_Charge_pos5 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"5 Integrated Faraday Cup Charge by Run E1-6 Neg");
+	_Golden_Run_Charge_neg5 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"5 Integrated Faraday Cup Charge by Run E1-6 None");
+	_Golden_Run_Charge_none5 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	sprintf(hname,"5 Integrated Faraday Cup Events by Run E1-6");
+	_Golden_Run_Events5 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"5 Integrated Faraday Cup Events by Run E1-6 Pos");
+	_Golden_Run_Events_pos5 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"5 Integrated Faraday Cup Events by Run E1-6 Neg");
+	_Golden_Run_Events_neg5 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"5 Integrated Faraday Cup Events by Run E1-6 None");
+	_Golden_Run_Events_none5 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+
+	sprintf(hname,"6 Integrated Faraday Cup Charge by Run E1-6 ");
+	_Golden_Run_Charge6 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"6 Integrated Faraday Cup Charge by Run E1-6 Pos");
+	_Golden_Run_Charge_pos6 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"6 Integrated Faraday Cup Charge by Run E1-6 Neg");
+	_Golden_Run_Charge_neg6 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"6 Integrated Faraday Cup Charge by Run E1-6 None");
+	_Golden_Run_Charge_none6 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+	sprintf(hname,"6 Integrated Faraday Cup Events by Run E1-6");
+	_Golden_Run_Events6 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"6 Integrated Faraday Cup Events by Run E1-6 Pos");
+	_Golden_Run_Events_pos6 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"6 Integrated Faraday Cup Events by Run E1-6 Neg");
+	_Golden_Run_Events_neg6 = new TH1D(hname,hname,945,30539.5,31484.5);
+	sprintf(hname,"6 Integrated Faraday Cup Events by Run E1-6 None");
+	_Golden_Run_Events_none6 = new TH1D(hname,hname,945,30539.5,31484.5);
+
+
+
+}
+void Histogram::Golden_Fill(int run_num_, float q_sum_, int run_evts_){
+	_Golden_Run1->Fill(run_num_,q_sum_/(float)run_evts_);
+	_Golden_Run2->Fill(q_sum_/(float)run_evts_);
+
+	if(q_sum_/(float)run_evts_ > 10.0){
+		std::cout<<"Amount Exceeded for run " <<run_num_ <<" with " <<q_sum_/(float)run_evts_ <<"\n";
+	}
+}
+
+void Histogram::Golden_Indiv_Fill(int run_num_, float delta_q_, float hel_){
+	if(hel_ != 0.0){
+		if(hel_ == 1.0){
+			_Golden_Run_Charge_pos->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_pos->Fill(run_num_);
+		}else if(hel_ == -1.0){
+			_Golden_Run_Charge_neg->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_neg->Fill(run_num_);
+		}else{
+			_Golden_Run_Charge_none->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_none->Fill(run_num_);
+		}
+	}else{
+		_Golden_Run_Charge_none->Fill(run_num_,delta_q_);
+		_Golden_Run_Events_none->Fill(run_num_);
+	}
+	_Golden_Run_Charge->Fill(run_num_,delta_q_);
+	_Golden_Run_Events->Fill(run_num_);
+}
+void Histogram::Golden_Indiv_Fill2(int run_num_, float delta_q_, float hel_){
+	if(hel_ != 0.0){
+		if(hel_ == 1.0){
+			_Golden_Run_Charge_pos2->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_pos2->Fill(run_num_);
+		}else if(hel_ == -1.0){
+			_Golden_Run_Charge_neg2->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_neg2->Fill(run_num_);
+		}else{
+			_Golden_Run_Charge_none2->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_none2->Fill(run_num_);
+		}
+	}else{
+		_Golden_Run_Charge_none2->Fill(run_num_,delta_q_);
+		_Golden_Run_Events_none2->Fill(run_num_);
+	}
+	_Golden_Run_Charge2->Fill(run_num_,delta_q_);
+	_Golden_Run_Events2->Fill(run_num_);
+}
+
+void Histogram::Golden_Indiv_Fill3(int run_num_, float delta_q_, float hel_){
+	if(hel_ != 0.0){
+		if(hel_ == 1.0){
+			_Golden_Run_Charge_pos3->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_pos3->Fill(run_num_);
+		}else if(hel_ == -1.0){
+			_Golden_Run_Charge_neg3->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_neg3->Fill(run_num_);
+		}else{
+			_Golden_Run_Charge_none3->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_none3->Fill(run_num_);
+		}
+	}else{
+		_Golden_Run_Charge_none3->Fill(run_num_,delta_q_);
+		_Golden_Run_Events_none3->Fill(run_num_);
+	}
+	_Golden_Run_Charge3->Fill(run_num_,delta_q_);
+	_Golden_Run_Events3->Fill(run_num_);
+}
+
+void Histogram::Golden_Indiv_Fill4(int run_num_, float delta_q_, float hel_){
+	if(hel_ != 0.0){
+		if(hel_ == 1.0){
+			_Golden_Run_Charge_pos4->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_pos4->Fill(run_num_);
+		}else if(hel_ == -1.0){
+			_Golden_Run_Charge_neg4->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_neg4->Fill(run_num_);
+		}else{
+			_Golden_Run_Charge_none4->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_none4->Fill(run_num_);
+		}
+	}else{
+		_Golden_Run_Charge_none4->Fill(run_num_,delta_q_);
+		_Golden_Run_Events_none4->Fill(run_num_);
+	}
+	_Golden_Run_Charge4->Fill(run_num_,delta_q_);
+	_Golden_Run_Events4->Fill(run_num_);
+}
+void Histogram::Golden_Indiv_Fill5(int run_num_, float delta_q_, float hel_){
+	if(hel_ != 0.0){
+		if(hel_ == 1.0){
+			_Golden_Run_Charge_pos5->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_pos5->Fill(run_num_);
+		}else if(hel_ == -1.0){
+			_Golden_Run_Charge_neg5->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_neg5->Fill(run_num_);
+		}else{
+			_Golden_Run_Charge_none5->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_none5->Fill(run_num_);
+		}
+	}else{
+		_Golden_Run_Charge_none5->Fill(run_num_,delta_q_);
+		_Golden_Run_Events_none5->Fill(run_num_);
+	}
+	_Golden_Run_Charge5->Fill(run_num_,delta_q_);
+	_Golden_Run_Events5->Fill(run_num_);
+}
+void Histogram::Golden_Indiv_Fill6(int run_num_, float delta_q_, float hel_){
+	if(hel_ != 0.0){
+		if(hel_ == 1.0){
+			_Golden_Run_Charge_pos6->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_pos6->Fill(run_num_);
+		}else if(hel_ == -1.0){
+			_Golden_Run_Charge_neg6->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_neg6->Fill(run_num_);
+		}else{
+			_Golden_Run_Charge_none6->Fill(run_num_,delta_q_);
+			_Golden_Run_Events_none6->Fill(run_num_);
+		}
+	}else{
+		_Golden_Run_Charge_none6->Fill(run_num_,delta_q_);
+		_Golden_Run_Events_none6->Fill(run_num_);
+	}
+	_Golden_Run_Charge6->Fill(run_num_,delta_q_);
+	_Golden_Run_Events6->Fill(run_num_);
+}
+
+void Histogram::Golden_Write(std::shared_ptr<Flags> flags_){
+	if(flags_->Flags::Sim()){ return;}
+	if(!flags_->Flags::Golden_Run()){ return ;}
+	char dir_name[100];
+	char hname[100];
+	//std::cout<<"Making Large Directory:";
+	TDirectory* dir_gold= _RootOutputFile->mkdir("Golden Run Determination");
+	dir_gold->cd();
+	_Golden_Run1->SetXTitle("Run Number");
+	_Golden_Run1->SetYTitle("Normalized Faraday Cup Charge");
+	_Golden_Run1->Write();
+
+	_Golden_Run2->SetXTitle("Normalized Faraday Cup Charge");
+	_Golden_Run2->SetYTitle("Number of Runs");
+	_Golden_Run2->Write();
+
+	_Golden_Run_Charge->SetXTitle("Run Number");
+	_Golden_Run_Charge->SetYTitle("Faraday Cup Charge");
+	_Golden_Run_Charge->Write();
+
+	_Golden_Run_Events->SetXTitle("Run Number");
+	_Golden_Run_Events->SetYTitle("Events");
+	_Golden_Run_Events->Write();
+
+	_Golden_Run_Charge2->SetXTitle("Run Number");
+	_Golden_Run_Charge2->SetYTitle("Faraday Cup Charge");
+	_Golden_Run_Charge2->Write();
+
+	_Golden_Run_Events2->SetXTitle("Run Number");
+	_Golden_Run_Events2->SetYTitle("Events");
+	_Golden_Run_Events2->Write();
+
+	_Golden_Run_Charge3->SetXTitle("Run Number");
+	_Golden_Run_Charge3->SetYTitle("Faraday Cup Charge");
+	_Golden_Run_Charge3->Write();
+
+	_Golden_Run_Events3->SetXTitle("Run Number");
+	_Golden_Run_Events3->SetYTitle("Events");
+	_Golden_Run_Events3->Write();
+
+	_Golden_Run_Charge4->SetXTitle("Run Number");
+	_Golden_Run_Charge4->SetYTitle("Faraday Cup Charge");
+	_Golden_Run_Charge4->Write();
+
+	_Golden_Run_Events4->SetXTitle("Run Number");
+	_Golden_Run_Events4->SetYTitle("Events");
+	_Golden_Run_Events4->Write();
+
+	_Golden_Run_Charge5->SetXTitle("Run Number");
+	_Golden_Run_Charge5->SetYTitle("Faraday Cup Charge");
+	_Golden_Run_Charge5->Write();
+
+	_Golden_Run_Events5->SetXTitle("Run Number");
+	_Golden_Run_Events5->SetYTitle("Events");
+	_Golden_Run_Events5->Write();
+
+	_Golden_Run_Charge6->SetXTitle("Run Number");
+	_Golden_Run_Charge6->SetYTitle("Faraday Cup Charge");
+	_Golden_Run_Charge6->Write();
+
+	_Golden_Run_Events6->SetXTitle("Run Number");
+	_Golden_Run_Events6->SetYTitle("Events");
+	_Golden_Run_Events6->Write();
+
+	if(flags_->Flags::Helicity()){
+		_Golden_Run_Charge_pos->SetXTitle("Run Number");
+		_Golden_Run_Charge_pos->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_pos->Write();
+
+		_Golden_Run_Events_pos->SetXTitle("Run Number");
+		_Golden_Run_Events_pos->SetYTitle("Events");
+		_Golden_Run_Events_pos->Write();
+
+		_Golden_Run_Charge_neg->SetXTitle("Run Number");
+		_Golden_Run_Charge_neg->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_neg->Write();
+
+		_Golden_Run_Events_neg->SetXTitle("Run Number");
+		_Golden_Run_Events_neg->SetYTitle("Events");
+		_Golden_Run_Events_neg->Write();
+
+		_Golden_Run_Charge_none->SetXTitle("Run Number");
+		_Golden_Run_Charge_none->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_none->Write();
+
+		_Golden_Run_Events_none->SetXTitle("Run Number");
+		_Golden_Run_Events_none->SetYTitle("Events");
+		_Golden_Run_Events_none->Write();
+
+
+		_Golden_Run_Charge_pos2->SetXTitle("Run Number");
+		_Golden_Run_Charge_pos2->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_pos2->Write();
+
+		_Golden_Run_Events_pos2->SetXTitle("Run Number");
+		_Golden_Run_Events_pos2->SetYTitle("Events");
+		_Golden_Run_Events_pos2->Write();
+
+		_Golden_Run_Charge_neg2->SetXTitle("Run Number");
+		_Golden_Run_Charge_neg2->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_neg2->Write();
+
+		_Golden_Run_Events_neg2->SetXTitle("Run Number");
+		_Golden_Run_Events_neg2->SetYTitle("Events");
+		_Golden_Run_Events_neg2->Write();
+
+		_Golden_Run_Charge_none2->SetXTitle("Run Number");
+		_Golden_Run_Charge_none2->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_none2->Write();
+
+		_Golden_Run_Events_none2->SetXTitle("Run Number");
+		_Golden_Run_Events_none2->SetYTitle("Events");
+		_Golden_Run_Events_none2->Write();
+
+		
+		_Golden_Run_Charge_pos3->SetXTitle("Run Number");
+		_Golden_Run_Charge_pos3->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_pos3->Write();
+
+		_Golden_Run_Events_pos3->SetXTitle("Run Number");
+		_Golden_Run_Events_pos3->SetYTitle("Events");
+		_Golden_Run_Events_pos3->Write();
+
+		_Golden_Run_Charge_neg3->SetXTitle("Run Number");
+		_Golden_Run_Charge_neg3->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_neg3->Write();
+
+		_Golden_Run_Events_neg3->SetXTitle("Run Number");
+		_Golden_Run_Events_neg3->SetYTitle("Events");
+		_Golden_Run_Events_neg3->Write();
+
+		_Golden_Run_Charge_none3->SetXTitle("Run Number");
+		_Golden_Run_Charge_none3->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_none3->Write();
+
+		_Golden_Run_Events_none3->SetXTitle("Run Number");
+		_Golden_Run_Events_none3->SetYTitle("Events");
+		_Golden_Run_Events_none3->Write();
+
+		_Golden_Run_Charge_pos4->SetXTitle("Run Number");
+		_Golden_Run_Charge_pos4->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_pos4->Write();
+
+		_Golden_Run_Events_pos4->SetXTitle("Run Number");
+		_Golden_Run_Events_pos4->SetYTitle("Events");
+		_Golden_Run_Events_pos4->Write();
+
+		_Golden_Run_Charge_neg4->SetXTitle("Run Number");
+		_Golden_Run_Charge_neg4->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_neg4->Write();
+
+		_Golden_Run_Events_neg4->SetXTitle("Run Number");
+		_Golden_Run_Events_neg4->SetYTitle("Events");
+		_Golden_Run_Events_neg4->Write();
+
+		_Golden_Run_Charge_none4->SetXTitle("Run Number");
+		_Golden_Run_Charge_none4->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_none4->Write();
+
+		_Golden_Run_Events_none4->SetXTitle("Run Number");
+		_Golden_Run_Events_none4->SetYTitle("Events");
+		_Golden_Run_Events_none4->Write();
+
+		_Golden_Run_Charge_pos5->SetXTitle("Run Number");
+		_Golden_Run_Charge_pos5->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_pos5->Write();
+
+		_Golden_Run_Events_pos5->SetXTitle("Run Number");
+		_Golden_Run_Events_pos5->SetYTitle("Events");
+		_Golden_Run_Events_pos5->Write();
+
+		_Golden_Run_Charge_neg5->SetXTitle("Run Number");
+		_Golden_Run_Charge_neg5->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_neg5->Write();
+
+		_Golden_Run_Events_neg5->SetXTitle("Run Number");
+		_Golden_Run_Events_neg5->SetYTitle("Events");
+		_Golden_Run_Events_neg5->Write();
+
+		_Golden_Run_Charge_none5->SetXTitle("Run Number");
+		_Golden_Run_Charge_none5->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_none5->Write();
+
+		_Golden_Run_Events_none5->SetXTitle("Run Number");
+		_Golden_Run_Events_none5->SetYTitle("Events");
+		_Golden_Run_Events_none5->Write();
+
+		_Golden_Run_Charge_pos6->SetXTitle("Run Number");
+		_Golden_Run_Charge_pos6->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_pos6->Write();
+
+		_Golden_Run_Events_pos6->SetXTitle("Run Number");
+		_Golden_Run_Events_pos6->SetYTitle("Events");
+		_Golden_Run_Events_pos6->Write();
+
+		_Golden_Run_Charge_neg6->SetXTitle("Run Number");
+		_Golden_Run_Charge_neg6->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_neg6->Write();
+
+		_Golden_Run_Events_neg6->SetXTitle("Run Number");
+		_Golden_Run_Events_neg6->SetYTitle("Events");
+		_Golden_Run_Events_neg6->Write();
+
+		_Golden_Run_Charge_none6->SetXTitle("Run Number");
+		_Golden_Run_Charge_none6->SetYTitle("Faraday Cup Charge");
+		_Golden_Run_Charge_none6->Write();
+
+		_Golden_Run_Events_none6->SetXTitle("Run Number");
+		_Golden_Run_Events_none6->SetYTitle("Events");
+		_Golden_Run_Events_none6->Write();
+
 	}
 }

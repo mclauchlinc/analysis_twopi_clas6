@@ -133,9 +133,9 @@ void Flags::ID_Flag(std::string argi){
 		}else if(str.substr(0,7) == _num_cores_){
 			_num_cores = stoi(str.substr(7,str_len));
 		}else if(str.substr(0,7) == _loose_cut_){
-			_loose_cut = stoi(str.substr(7,str_len));
+			_loose_cut = str.substr(7,str_len);
 		}else if(str.substr(0,7) == _tight_cut_){
-			_tight_cut = stoi(str.substr(7,str_len));
+			_tight_cut = str.substr(7,str_len);
 		}
 	}if(str_len > 8){
 		if(str.substr(0,8) == _make_friend_){
@@ -418,6 +418,10 @@ void Flags::Plot_Flag(std::string str, bool include){
 			std::cout<<"Will Plot Isolated Event Selection\n";
 			_plot_isolated = true;
 		}
+		if(str == _plot_gold_){
+			std::cout<<"Will Plot Golden Runs\n";
+			_plot_gold = true;
+		}
 	}
 	if(!include && _plot_all){
 		if(str == _plot_wq2_){
@@ -499,6 +503,9 @@ void Flags::Plot_Flag(std::string str, bool include){
 		}
 		if(str == _plot_isolated_){
 			_plot_isolated = false;
+		}
+		if(str == _plot_gold_){
+			_plot_gold = false;
 		}
 
 	}
@@ -781,6 +788,10 @@ bool Flags::Plot_Top_Check(int i_){
 
 bool Flags::Plot_Isolated(){
 	return _plot_isolated;
+}
+
+bool Flags::Golden_Run(){
+	return _plot_gold; 
 }
 
 //Histogram Separation

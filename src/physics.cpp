@@ -238,7 +238,9 @@ float physics::vert_e(float d, float t){
 
 float physics::vert_h(float p, float d, float t, float m){
 	return t-((d/_c_special_)*sqrt(1.0 + m*m/(p*p)));
+	//return t-((d/_c_special_)*sqrt((p*p)/(p*p + m*m)));
 }
+
 
 float physics::delta_t(int part, float p, float d, float t, float d0, float t0){
 	float mass = -99; 
@@ -386,14 +388,40 @@ void physics::Rotate_4Vec(float theta, float phi, float phie, TLorentzVector &p1
 	p1.RotateZ(-phie);
 } //Rotate Four vectors along the theta and phi angles
 
+void physics::Rotate_4Vec_New(float t1_, float t2_, TLorentzVector &p1){
+	p1.RotateZ(t1_);
+	p1.RotateY(t2_);
+}
+
 void physics::Boost_4Vec(float beta, TLorentzVector &p1 ){
 	p1.Boost(0.0,0.0,beta);
 }// Boost a four vector in the z direction 
 
 void physics::COM_gp(int set, TLorentzVector &p0, TLorentzVector &p1, TLorentzVector &p2, TLorentzVector &p3){
+	//std::cout<<"Using this COM_gp\n";
+	
 	TLorentzVector k_mu = physics::Set_k_mu(set);//Establish set
 	TLorentzVector q_mu = k_mu - p0;//Four vector for virtual particle
 	TLorentzVector nstar_mu = _p_mu_ + q_mu; //Combined photon-target system
+	
+	//New
+	float t1 = -TMath::ATan2(q_mu[1],q_mu[0]);
+	std::cout<<"before rotate q_mu: " <<q_mu[0] <<" " <<q_mu[1] <<" " <<q_mu[2] <<" " <<q_mu[3] <<"\n";
+	q_mu.RotateZ(-t1);
+	std::cout<<"after rotate q_mu: " <<q_mu[0] <<" " <<q_mu[1] <<" " <<q_mu[2] <<" " <<q_mu[3] <<"\n";
+	float t2 = -TMath::ATan2(q_mu[2],q_mu[0]);
+	physics::Rotate_4Vec_New(t1,t2,p0);
+	physics::Rotate_4Vec_New(t1,t2,p1);
+	physics::Rotate_4Vec_New(t1,t2,p2);
+	physics::Rotate_4Vec_New(t1,t2,p3);
+	float b = nstar_mu.Beta();//Get the beta to boost to the rest frame for the center of mass
+	physics::Boost_4Vec(-b,p0);
+	physics::Boost_4Vec(-b,p1);
+	physics::Boost_4Vec(-b,p2);
+	physics::Boost_4Vec(-b,p3);
+
+	/*
+	//Old
 	float phigp = TMath::ATan2(nstar_mu[1],nstar_mu[0]);//Phi angle out of the x-plane
 	nstar_mu.RotateZ(-phigp);//Get all horizontal momentum on x axis by roating around z axis
 	float thgp = TMath::ATan2(nstar_mu[0],nstar_mu[2]); //Theta angle away from z-axis
@@ -416,6 +444,7 @@ void physics::COM_gp(int set, TLorentzVector &p0, TLorentzVector &p1, TLorentzVe
 	physics::Boost_4Vec(-b,p1);
 	physics::Boost_4Vec(-b,p2);
 	physics::Boost_4Vec(-b,p3);
+	*/
 } //Bring four vectors into the COM reference frame for excited nucleon 
 
 void COM_gp(TLorentzVector &k0, TLorentzVector &p0, TLorentzVector &p1, TLorentzVector &p2, TLorentzVector &p3){
@@ -478,6 +507,57 @@ void COM_gp(TLorentzVector &k0, TLorentzVector &p0, TLorentzVector &p1, TLorentz
 }
 
 TLorentzVector physics::COM_gp(int par, TLorentzVector k0, TLorentzVector p0, TLorentzVector p1, TLorentzVector p2, TLorentzVector p3){
+	//New
+	//std::cout<<"using this COM_gp\n";
+	TLorentzVector output;
+	switch(par){
+		case 0: output = p0; break;
+		case 1: output = p1; break;
+		case 2: output = p2; break;
+		case 3: output = p3; break;
+		case 4: output = k0; break;
+		case 5: output = _p_mu_; break;
+	}
+	TLorentzVector q_mu = k0 - p0;//Four vector for virtual particle
+	TLorentzVector nstar_mu = _p_mu_ + q_mu; //Combined photon-target system
+	
+	//New
+	//std::cout<<"before rotate kp_mu: " <<p0[0] <<" " <<p0[1] <<" " <<p0[2] <<" " <<p0[3] <<"\n";
+
+	float t1 = TMath::ATan2(q_mu[1],-q_mu[0]);
+	//std::cout<<"before rotate q_mu: " <<q_mu[0] <<" " <<q_mu[1] <<" " <<q_mu[2] <<" " <<q_mu[3] <<"\n";
+	q_mu.RotateZ(t1);
+	//std::cout<<"after rotate q_mu: " <<q_mu[0] <<" " <<q_mu[1] <<" " <<q_mu[2] <<" " <<q_mu[3] <<"\n";
+	//std::cout<<q_mu[2] <<"," <<q_mu[0] <<"\n";
+	float t2 = TMath::ATan2(-q_mu[0],q_mu[2]);
+	physics::Rotate_4Vec_New(t1,t2,output);
+	
+	float b = nstar_mu.Beta();//Get the beta to boost to the rest frame for the center of mass
+	physics::Boost_4Vec(-b,output);
+
+	//std::cout<<"t1:" <<t1 <<"   t2:" <<t2 <<"\n";
+
+	//check:
+	/*
+	TVector3 check_v = Cross_Product(k0,p0);
+	std::cout<<"\nbefore rotate check_v: " <<check_v[0] <<" " <<check_v[1] <<" " <<check_v[2] <<"\n";
+	check_v.RotateZ(t1);
+	std::cout<<"after rotate1 check_v: " <<check_v[0] <<" " <<check_v[1] <<" " <<check_v[2] <<"\n";
+	check_v.RotateY(t2);
+	std::cout<<"after rotate2 check_v: " <<check_v[0] <<" " <<check_v[1] <<" " <<check_v[2] <<"\n";
+
+	TVector3 check_v2 = V4_to_V3(k0-p0);
+	std::cout<<"\nbefore rotate check_v2: " <<check_v2[0] <<" " <<check_v2[1] <<" " <<check_v2[2] <<"\n";
+	check_v2.RotateZ(t1);
+	std::cout<<"after rotate1 check_v2: " <<check_v2[0] <<" " <<check_v2[1] <<" " <<check_v2[2] <<"\n";
+	check_v2.RotateY(t2);
+	std::cout<<"after rotate2 check_v2: " <<check_v2[0] <<" " <<check_v2[1] <<" " <<check_v2[2] <<"\n";
+	*/
+
+
+	return output;
+	
+	
 	/*if(par==4){
 		std::cout<<"\tMoving " <<"beam electron" <<" to the COM\n";
 	}else if(par==5){
@@ -485,7 +565,8 @@ TLorentzVector physics::COM_gp(int par, TLorentzVector k0, TLorentzVector p0, TL
 	}else{
 		std::cout<<"\tMoving " <<_species_[par] <<" to the COM\n";
 	}*/
-	
+	//Old
+	/*
 	//std::cout<<"Beam 4_vec: " <<k0[0] <<" " <<k0[1] <<" " <<k0[2] <<" " <<k0[3];
 	float tolerance = 0.0000001;
 	TLorentzVector output;
@@ -533,7 +614,7 @@ TLorentzVector physics::COM_gp(int par, TLorentzVector k0, TLorentzVector p0, TL
 		std::cout<<"\n\tFinished COM for " <<_species_[par] <<"\n";
 	}*/
 	
-	return output;
+	//return output;*/
 }
 
 float physics::alpha(int top, TLorentzVector p1, TLorentzVector p2, TLorentzVector p3, TLorentzVector p4, int set){

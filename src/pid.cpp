@@ -40,9 +40,10 @@
 			pass &= pid::sf(idx_,data_,flags_);
 			pass &= pid::min_ec(idx_,data_,flags_);
 			//pass &= pid::sc_eff(0, idx_, data_, flags_);
+			pass &= pid::vertex_e(idx_,data_,flags_);
 			if(!flags_->Flags::Sim()){
 				pass &= pid::min_cc(idx_,data_,flags_);
-				pass &= pid::vertex_e(idx_,data_,flags_);
+				
 			}
 			
 			//pass &= pid::id_bank(idx_,data_,flags_,_ele_);

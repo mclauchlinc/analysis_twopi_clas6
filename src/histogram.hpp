@@ -409,6 +409,8 @@ protected:
 
 	//Elastic Peak
 	TH1F* _Elastic_Peak_hist[6][3];//[sector][no corr, e_theta corr, all e corr]
+	TH2F* _Elastic_Theta_hist[7]; 
+
 
 	//Proton Energy Loss Correction
 	TH1F_ptr_3d _Proton_ELoss_hist;
@@ -449,6 +451,68 @@ protected:
 	TH1D_ptr_6d _Bin_Center2_hist3;//[W][Q2][Var Set][Xij][Bin Xij][Phi Bin][W,Q2,Xij,Phi projection]
 	TH1D_ptr_6d _Bin_Center2_hist4;//[W][Q2][Var Set][Xij][Bin Xij][Phi Bin][W,Q2,Xij,Phi projection]
 
+	TH1D* _Sim_Vertex_Runs;
+
+	TH2D* _Pos_Hel_wq2_hist[2];//[raw,event]
+	TH2D* _Neg_Hel_wq2_hist[2];//[raw,event]
+	TH2D* _Ratio_Hel_wq2_hist[2];//[raw,event]
+
+	TH1D* _Golden_Run1;//Norm Charge vs. Run
+	TH1D* _Golden_Run2;//Yields of Norm Charge
+
+	TH1D* _Golden_Run_Charge;//Norm Charge vs. Run
+	TH1D* _Golden_Run_Events;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_pos;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_neg;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_none;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_pos;//Yields of Norm Events
+	TH1D* _Golden_Run_Events_neg;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_none;//Yields of Norm Events
+
+	TH1D* _Golden_Run_Charge2;//Norm Charge vs. Run
+	TH1D* _Golden_Run_Events2;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_pos2;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_neg2;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_none2;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_pos2;//Yields of Norm Events
+	TH1D* _Golden_Run_Events_neg2;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_none2;//Yields of Norm Events
+
+	TH1D* _Golden_Run_Charge3;//Norm Charge vs. Run
+	TH1D* _Golden_Run_Events3;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_pos3;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_neg3;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_none3;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_pos3;//Yields of Norm Events
+	TH1D* _Golden_Run_Events_neg3;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_none3;//Yields of Norm Events
+
+	TH1D* _Golden_Run_Charge4;//Norm Charge vs. Run
+	TH1D* _Golden_Run_Events4;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_pos4;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_neg4;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_none4;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_pos4;//Yields of Norm Events
+	TH1D* _Golden_Run_Events_neg4;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_none4;//Yields of Norm Events
+
+	TH1D* _Golden_Run_Charge5;//Norm Charge vs. Run
+	TH1D* _Golden_Run_Events5;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_pos5;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_neg5;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_none5;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_pos5;//Yields of Norm Events
+	TH1D* _Golden_Run_Events_neg5;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_none5;//Yields of Norm Events
+
+	TH1D* _Golden_Run_Charge6;//Norm Charge vs. Run
+	TH1D* _Golden_Run_Events6;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_pos6;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_neg6;//Yields of Norm Charge
+	TH1D* _Golden_Run_Charge_none6;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_pos6;//Yields of Norm Events
+	TH1D* _Golden_Run_Events_neg6;//Yields of Norm Charge
+	TH1D* _Golden_Run_Events_none6;//Yields of Norm Events
 
 public:
 	Histogram(std::shared_ptr<Flags> flags_);
@@ -563,6 +627,7 @@ public:
 	void PCorr_Check_Make(std::shared_ptr<Flags> flags_);
 	std::vector<int> PCorr_Check_idx(int sector_, const char* top_, const char* corr_, std::shared_ptr<Flags> flags_);
 	void PCorr_Check_Fill(float MM2_, int sector_, const char* top_, const char* corr_, std::shared_ptr<Flags> flags_);
+	void PCorr_Elast_Theta_Fill(float theta_e, float theta_p, int sector, std::shared_ptr<Flags> flags_);
 	void PCorr_Check_Write(std::shared_ptr<Flags> flags_);
 	//*-------------------------------End PCorr Check Plot----------------------------*
 	//*------------------------------Start Bin Centering Corrections------------------*
@@ -659,6 +724,29 @@ public:
 	std::vector<int> Kin_Eff_SC_Seg_idx(const char* species_, const char* sector_, int seg_, std::shared_ptr<Flags> flags_);
 	void Kin_Eff_SC_Seg_Fill(float p_, float theta_, float weight_, const char* species_, const char* sector_, int seg_, std::shared_ptr<Flags> flags_);
 	void Kin_Eff_SC_Seg_Write(std::shared_ptr<Flags> flags_);
+
+	//*----------- Sim Vertex Determination ------ 
+	void Sim_Vertex_Make(std::shared_ptr<Flags> flags_);
+	void Sim_Vertex_Fill(int run_num_, std::shared_ptr<Flags> flags_);
+	void Sim_Vertex_Write(std::shared_ptr<Flags> flags_);
+
+
+	//*---------- Helicity Ratio --------
+	void Hel_Ratio_Make(std::shared_ptr<Flags> flags_);
+	void Hel_Ratio_Fill(float weight_, int hel_idx_, float W_, float Q2_, int event_stat_, std::shared_ptr<Flags> flags_);
+	void Hel_Ratio_Write(std::shared_ptr<Flags> flags_);
+
+
+	//* ---------- Golden Run Stuff --------
+	void Golden_Make(std::shared_ptr<Flags> flags_);
+	void Golden_Fill(int run_num_, float q_sum_, int run_evts_);
+	void Golden_Indiv_Fill(int run_num_, float delta_q_, float hel_);
+	void Golden_Indiv_Fill2(int run_num_, float delta_q_, float hel_);
+	void Golden_Indiv_Fill3(int run_num_, float delta_q_, float hel_);
+	void Golden_Indiv_Fill4(int run_num_, float delta_q_, float hel_);
+	void Golden_Indiv_Fill5(int run_num_, float delta_q_, float hel_);
+	void Golden_Indiv_Fill6(int run_num_, float delta_q_, float hel_);
+	void Golden_Write(std::shared_ptr<Flags> flags_);
 };	
 
 

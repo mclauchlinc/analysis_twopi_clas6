@@ -20,6 +20,7 @@
 #include "physics.hpp"
 #include "TLatex.h"
 #include "flags.hpp"
+#include "string.h"
 
 using Sparse_5d = std::vector<std::vector<std::vector<std::vector<std::vector<THnSparseD>>>>>;
 using Sparse_4d = std::vector<std::vector<std::vector<std::vector<THnSparseD>>>>;
@@ -312,6 +313,9 @@ protected:
 	TH2D * _global_sf_pos_rel_err;
 	TH2D * _global_sf_neg_rel_err;
 
+	TH1D * _exp_acc_corr_rel_err[29][5];
+	TH1D * _sim_acc_corr_rel_err[29][5];
+
 	double _value_global_sf[29][5];
 	double _value_global_sf_pos[29][5];
 	double _value_global_sf_neg[29][5];
@@ -339,6 +343,12 @@ protected:
 	TH2D * _frac_bins_holes_to_exp;
 	TH2D * _frac_events_holes_to_exp;
 
+	TH2D * _frac_bins_holes_to_exp_pos;
+	TH2D * _frac_events_holes_to_exp_pos;
+
+	TH2D * _frac_bins_holes_to_exp_neg;
+	TH2D * _frac_events_holes_to_exp_neg;
+
 	TH2D * _frac_bins_holes_to_exp_old;
 	TH2D * _frac_events_holes_to_exp_old;
 
@@ -363,9 +373,9 @@ protected:
 	
 public:
 	//Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
-    Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
+    Histogram(TFile* exp_tree_, TFile* sim_tree_, Flags flags_);
 	//void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
-    void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
+    void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, Flags flags_);
 	//void Extract_Bin_Info(Flags flags_);//Extract binning information for 7 and 5d histograms
 	//void Sparse_7to5(Flags flags_);//Convert 7d histograms to 5d histograms
     //void Rad_Corr();

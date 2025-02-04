@@ -16,7 +16,7 @@ namespace plot{
 	void plot_pim(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
 	//Individual Plotting
 	void plot_thrown(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
-	void plot_no_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_);
+	void plot_no_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_, int hel_idx_ = -1);
 	void plot_sanity_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_);
 	void plot_vertex_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_);
 	void plot_fid_cut(Particle particle_, std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_, int par_);

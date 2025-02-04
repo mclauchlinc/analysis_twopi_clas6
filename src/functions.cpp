@@ -168,6 +168,25 @@ int fun::extract_run_number(std::string file_name_, std::shared_ptr<Flags> flags
   return result;
 }
 
+int fun::extract_run_number_sim(std::string file_name_, std::shared_ptr<Flags> flags_){
+  int result = 0;
+  //std::cout<<"File name: " <<file_name_ <<std::endl;
+  //std::cout<<"Base: " <<flags_->Flags::Base() <<"\n";
+  //std::cout<<"\tbase is: " <<flags_->Flags::Base() <<"\n";
+  //std::cout<<"\tsize is: " <<flags_->Flags::Base().size() <<"\n";
+  std::string tmp_string = "";
+  for(int i=0; i<20; i++){
+    std::stringstream nametmp(file_name_.std::string::substr(flags_->Flags::Base().size()+i,1));
+    //std::cout<<"Interval: " <<flags_->Flags::Base().size()+i <<" to " <<flags_->Flags::Base().size()+(1+i) <<"\n";
+    //std::cout<<"interval check " <<i <<" is " <<nametmp.str() <<"\n";
+    if(nametmp.str() == "_"){
+      std::stringstream name(file_name_.std::string::substr(flags_->Flags::Base().size(),i));
+      name >> result;
+      return result;
+    } 
+  }
+}
+
 float fun::extract_run_number_float(std::string file_name, bool cluster){
   float result;
   std::string inter_1 = file_name;
@@ -608,14 +627,24 @@ bool fun::correct_run(int run_num_, std::shared_ptr<Flags> flags_){
   bool correct = false;
   if(flags_->Run()==_e16_){//e16
     if(flags_->Fill()){//
-      for(int i=0; i<(sizeof(_beam_e16_)/sizeof(_beam_e16_[0])); i++){
+      /*for(int i=0; i<(sizeof(_beam_e16_)/sizeof(_beam_e16_[0])); i++){
         if(run_num_ == _beam_e16_[i]){
+          return true;
+        }
+      }*/
+      for(int i=0; i<(sizeof(_good_beam_e16_)/sizeof(_good_beam_e16_[0])); i++){
+        if(run_num_ == _good_beam_e16_[i]){
           return true;
         }
       }
     }else{
-      for(int i=0; i<(sizeof(_empty_e16_)/sizeof(_empty_e16_[0])); i++){
+      /*for(int i=0; i<(sizeof(_empty_e16_)/sizeof(_empty_e16_[0])); i++){
         if(run_num_ == _empty_e16_[i]){
+          return true;
+        }
+      }*/
+      for(int i=0; i<(sizeof(_good_empty_e16_)/sizeof(_good_empty_e16_[0])); i++){
+        if(run_num_ == _good_empty_e16_[i]){
           return true;
         }
       }
@@ -781,4 +810,62 @@ bool fun::idx_in_vector_of_idx(std::vector<int> vec_, int idx_){
     }
   }
   return false;
+}
+
+bool fun::Half_Wave(int run_num_, std::shared_ptr<Flags> flags_){
+	bool plate_in = false;
+	int above = 0;
+	int below = 0;
+	bool at = false; 
+	if(flags_->Run()==_e16_){
+		for(int i=0; i<sizeof(_plate_swap_e16_); i++){
+			if(run_num_ > _plate_swap_e16_[i]){
+				below +=1; 
+			}else if(run_num_ == _plate_swap_e16_[i]){
+				at = true; 
+			}else if(run_num_ < _plate_swap_e16_[i]){
+				above += 1; 
+			}
+		}
+	}else if(flags_->Run()==_e1f_){
+		for(int i=0; i<sizeof(_plate_swap_e1f_); i++){
+			if(run_num_ > _plate_swap_e1f_[i]){
+				below +=1; 
+			}else if(run_num_ == _plate_swap_e1f_[i]){
+				at = true; 
+			}else if(run_num_ < _plate_swap_e1f_[i]){
+				above += 1; 
+			}
+		}
+	}
+	if(at){
+		if(below%2 == 0){
+			plate_in = true;
+		}else{
+			plate_in = false;
+		}
+	}else{
+		if(below%2 == 0){
+			plate_in = false;
+		}else{
+			plate_in = true;
+		}
+	}
+	return plate_in;
+}
+
+
+//Correct Helicity accoridng to half wave plate status
+float fun::Corr_Helicity(float helicity_, int run_num_, std::shared_ptr<Flags> flags_){
+	
+	int eh = 0; 
+	if(helicity_ >= 1000) eh = 1; 
+	if(helicity_ <= -1000) eh = -1; 
+	if(helicity_ < 1000 && helicity_ > -1000) eh = 0; 
+	//if(plate_stat == 0 ) eh = 1; 
+	if(fun::Half_Wave(run_num_,flags_)){
+		return eh*-1;
+	}else{
+		return  eh;
+	}
 }

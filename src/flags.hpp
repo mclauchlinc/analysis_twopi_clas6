@@ -98,6 +98,7 @@ static std::string _plot_top_check_[4] = {"plot_check_pro","plot_check_pip","plo
 static std::string _plot_isolated_ = "isolated";
 static std::string _loose_cut_ = "-loose=";
 static std::string _tight_cut_ = "-tight=";
+static std::string _plot_gold_ = "golden";
 //Histogram Separation
 //Will have space for this
 //THnSparse
@@ -189,6 +190,7 @@ private:
 	bool _plot_ecorr_mag = false;
 	bool _plot_top_check[4] = {false,false,false,false};
 	bool _plot_isolated = false;
+	bool _plot_gold = false;
 
 	std::string _loose_cut = "";
 	std::string _tight_cut = "";
@@ -276,6 +278,7 @@ public:
 	bool Plot_Electron_Mag_Corr();
 	bool Plot_Top_Check(int i_);	
 	bool Plot_Isolated();	
+	bool Golden_Run();
 	//Portions of Histograms
 	//bool Ele_Cut(const char * ecut_);
 

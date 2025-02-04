@@ -213,6 +213,27 @@ Flags::Flags(){}
 				std::cout<<"\tIDed: Sim No Rad File2 is " <<_sim_no_rad_loc2 <<"\n"; 
 			}
 		}
+		if(str_len > 12){
+			/*if(str.substr(0,9) == _weight_file_){
+				_weight_loc2 = str.substr(9,str_len);
+				_has_weight = true;
+				std::cout<<"\tIDed: weight file2 is " <<_weight_loc2 <<"\n"; 
+			}*/
+			if(str.substr(0,12) == _plot_holes_){
+				if(str.substr(12,str_len) == _plot_raw_){
+					_raw = true;
+				}else if(str.substr(12,str_len) == _plot_local_){
+					_local = true;
+				}else if(str.substr(12,str_len) == _plot_global_){
+					_global = true;
+				}else if(str.substr(12,str_len) == _plot_local_holes2_){
+					_local_holes = true;
+				}else if(str.substr(12,str_len) == _plot_global_holes2_){
+					_global_holes = true;
+				}
+				std::cout<<"\tIDed: Hole Plotting " <<str.substr(12,str_len) <<"\n"; 
+			}
+		}
         if(str_len >= 13){
             if(str.substr(0,13) == _no_loc_holes_){
 				_has_localized_holes = false;
@@ -345,6 +366,21 @@ Flags::Flags(){}
 		return (_plot_all || _plot_acceptance);
 	}
 
+	bool Flags::Plot_Raw(){
+		return _raw;
+	}
+	bool Flags::Plot_Local(){
+		return _local;
+	}
+	bool Flags::Plot_Global(){
+		return _global;
+	}
+	bool Flags::Plot_Local_Holes(){
+		return _local_holes;
+	}
+	bool Flags::Plot_Global_Holes(){
+		return _global_holes;
+	}
 	//File Names
 	std::string Flags::Sim_File(){
 		return _sim_loc;
@@ -436,9 +472,20 @@ Flags::Flags(){}
 	std::string Flags::Top(){
 		return _real_top;
 	}
+
+	std::string Flags::Read_Top(){
+		return _input_top;
+	}
 	int Flags::Top_idx(){
 		for(int i=0; i<5; i++){
 			if(_top_[i] == _real_top){
+				return i;
+			}
+		}
+	}
+	int Flags::Read_Top_idx(){
+		for(int i=0; i<5; i++){
+			if(_top_[i] == _input_top){
 				return i;
 			}
 		}
@@ -474,8 +521,9 @@ Flags::Flags(){}
 		}*/
 	}
 
-	bool Flags::Plot_Polarization(int i_){
-		switch(i_){
+	bool Flags::Plot_Polarization(){
+		return _plot_polarization;
+		/*switch(i_){
 			case 0:
 				return _plot_pol_mm1;
 			break;
@@ -492,7 +540,7 @@ Flags::Flags(){}
 				std::cout<<"Not a valid polarization part\n";
 				return false;
 			break;
-		}
+		}*/
 	}
 
 	bool Flags::Error(){

@@ -58,9 +58,18 @@ static std::string _empty_file2_ = "-empty2=";
 
 static std::string _sim_no_rad_file2_ = "-no_rad2=";
 static std::string _loc_holes1_ = "-holes=";
+
 static std::string _loc_holes2_ = "-holes2=";
+
+static std::string _plot_holes_ = "-plot_holes=";
 static std::string _no_loc_holes_ = "-nolocalholes";
 static std::string _nonlocal_holes_ = "-nonlocalholes";
+
+static std::string _plot_raw_ = "raw";
+static std::string _plot_local_ = "local";
+static std::string _plot_global_ = "global";
+static std::string _plot_local_holes2_ = "local_holes";
+static std::string _plot_global_holes2_ = "global_holes";
 //static std::string _exp_pos_file_ = "expp=";
 //static std::string _exp_pos_file2_ = "expp2=";
 //static std::string _exp_neg_file_ = "expn=";
@@ -172,10 +181,16 @@ private:
 	double _charge2=NAN;
 
 
-	float _Qr = NAN; //Integrated Charge Ratio between filled and empty target 
+	float _Qr = 17.164; //Integrated Charge Ratio between filled and empty target 
 	float _Qr2 = NAN;
 
 	int _acc_rel_cut = 3;
+
+	bool _raw = false;
+	bool _local = false;
+	bool _global = false;
+	bool _local_holes = false;
+	bool _global_holes = false;
 	
 public:
 	Flags();
@@ -194,6 +209,11 @@ public:
 	bool Plot_Err();
 	bool Plot_WQ2();
 	bool Plot_Acceptance();
+	bool Plot_Raw();
+	bool Plot_Local();
+	bool Plot_Global();
+	bool Plot_Local_Holes();
+	bool Plot_Global_Holes();
 	//File Names
 	std::string Sim_File();
 	std::string Exp_File();
@@ -220,20 +240,23 @@ public:
 	int Var_idx();
 	std::string Var_Set();
 	std::string Top();
+	std::string Read_Top();
 	int Top_idx();
+	int Read_Top_idx();
 	bool Helicity();
 	bool Rad_Corr();
 	bool Flux_Included();
 	float Qr();//Charge Ratio for exp target vs. no target
 	float Qr2();
 	double L(int i_);
-	bool Plot_Polarization(int i_);
+	bool Plot_Polarization();
 	bool Error();
 	bool Localized_Holes();
 	bool Plot_Localized_Holes();
 	bool Has_Localized_Holes();
 	bool Nonlocal_Holes();
 	int Acc_Rel_Error_Cut();
+
 };
 
 

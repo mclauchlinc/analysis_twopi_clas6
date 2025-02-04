@@ -39,6 +39,15 @@ private:
 	std::vector<std::vector<int>> _idx_mpim;
 	std::vector<std::vector<int>> _idx_mzero;
 
+	long _number_of_events = 0;
+	long _number_of_recon = 0;
+
+	long _number_of_events_pos = 0;
+	long _number_of_recon_pos = 0;
+
+	long _number_of_events_neg = 0;
+	long _number_of_recon_neg = 0;
+
 	int _hel = 0;
 
 	std::vector<Particle> _tParticle; //Just 4
@@ -93,7 +102,7 @@ public:
 	float Corr_Helicity(float helicity_, int run_num_, std::shared_ptr<Flags> flags_);
 	void Plot_Particles(std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
 	void Plot_Events(std::shared_ptr<Histogram> hist_, std::shared_ptr<Flags> flags_);
-	
+	bool Valid_Event();
 
 
 

@@ -191,6 +191,38 @@ protected:
 	THnSparseD *_N_5d_global_holes[29][5];
 	THnSparseD *_N_5d_raw_yield[29][5];
 
+	THnSparseD *_exp_data_5d_pos[29][5];
+	THnSparseD *_empty_5d_pos[29][5];
+	THnSparseD *_N_5d_local_holes_pos[29][5];
+	THnSparseD *_N_5d_global_holes_pos[29][5];
+	THnSparseD *_N_5d_raw_yield_pos[29][5];
+	THnSparseD *_N_local_holes_5d_pos[29][5];
+	THnSparseD *_N_global_holes_5d_pos[29][5];
+	THnSparseD *_exp_data_5d_neg[29][5];
+	THnSparseD *_empty_5d_neg[29][5];
+	THnSparseD *_N_5d_local_holes_neg[29][5];
+	THnSparseD *_N_5d_global_holes_neg[29][5];
+	THnSparseD *_N_5d_raw_yield_neg[29][5];
+	THnSparseD *_N_local_holes_5d_neg[29][5];
+	THnSparseD *_N_global_holes_5d_neg[29][5];
+
+	THnSparseD *_N_5d_local_holes_sum[29][5];
+	THnSparseD *_N_5d_global_holes_sum[29][5];
+	THnSparseD *_N_5d_raw_yield_sum[29][5];
+	THnSparseD *_N_local_holes_5d_sum[29][5];
+	THnSparseD *_N_global_holes_5d_sum[29][5];
+
+	THnSparseD *_N_5d_local_holes_diff[29][5];
+	THnSparseD *_N_5d_global_holes_diff[29][5];
+	THnSparseD *_N_5d_raw_yield_diff[29][5];
+	THnSparseD *_N_local_holes_5d_diff[29][5];
+	THnSparseD *_N_global_holes_5d_diff[29][5];
+
+	THnSparseD *_N_5d_local_holes_ratio[29][5];
+	THnSparseD *_N_5d_global_holes_ratio[29][5];
+	THnSparseD *_N_5d_raw_yield_ratio[29][5];
+	THnSparseD *_N_local_holes_5d_ratio[29][5];
+	THnSparseD *_N_global_holes_5d_ratio[29][5];
 
 
 	TH1D_1d_star _X_bin_sizes; //Size of individual bins for non-phi variables {MM1,MM2,theta,alpha}
@@ -221,15 +253,21 @@ protected:
 	TH1D *_acceptance_rel_err_hist[29][5];//W,Q2
 	
 public:
-	Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
-    Histogram(TFile* exp_tree_, TFile* sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
-	void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, TFile *holes_, Flags flags_);
-    void Extract_5d_Histograms(TFile *exp_tree_, TFile *sim_tree_, TFile *empty_tree_, TFile *nr_sim_tree_, Flags flags_);
+	//Histogram(std::unique_ptr<TFile>& exp_tree_, std::unique_ptr<TFile>& sim_tree_, std::unique_ptr<TFile>& empty_tree_, std::unique_ptr<TFile>& nr_sim_tree_, std::unique_ptr<TFile>& holes_, Flags flags_);
+    //Histogram(std::unique_ptr<TFile>& exp_tree_, std::unique_ptr<TFile>& sim_tree_, std::unique_ptr<TFile>& empty_tree_, std::unique_ptr<TFile>& nr_sim_tree_, Flags flags_);
+	Histogram(std::unique_ptr<TFile>& exp_tree_, std::unique_ptr<TFile>& sim_tree_, std::unique_ptr<TFile>& empty_tree_, std::unique_ptr<TFile>& holes_, Flags flags_);
+    Histogram(std::unique_ptr<TFile>& exp_tree_, std::unique_ptr<TFile>& sim_tree_, std::unique_ptr<TFile>& empty_tree_, Flags flags_);
+	//void Extract_5d_Histograms(std::unique_ptr<TFile>& exp_tree_, std::unique_ptr<TFile>& sim_tree_, std::unique_ptr<TFile>& empty_tree_, std::unique_ptr<TFile>& nr_sim_tree_, std::unique_ptr<TFile>& holes_, Flags flags_);
+    //void Extract_5d_Histograms(std::unique_ptr<TFile>& exp_tree_, std::unique_ptr<TFile>& sim_tree_, std::unique_ptr<TFile>& empty_tree_, std::unique_ptr<TFile>& nr_sim_tree_, Flags flags_);
+	void Extract_5d_Histograms(std::unique_ptr<TFile>& exp_tree_, std::unique_ptr<TFile>& sim_tree_, std::unique_ptr<TFile>& empty_tree_, std::unique_ptr<TFile>& holes_, Flags flags_);
+    void Extract_5d_Histograms(std::unique_ptr<TFile>& exp_tree_, std::unique_ptr<TFile>& sim_tree_, std::unique_ptr<TFile>& empty_tree_, Flags flags_);
 	//void Extract_Bin_Info(Flags flags_);//Extract binning information for 7 and 5d histograms
 	//void Sparse_7to5(Flags flags_);//Convert 7d histograms to 5d histograms
-    void Rad_Corr();
-	void Polarization(Flags flags_);
+    //void Rad_Corr();
+	
 	void Single_Diff(Flags flags_);
+	void Polarization(Flags flags_);
+	void Beam_Spin(Flags flags_);
     float W_low(int i_);
     float W_top(int i_);
     float Q2_low(int i_);

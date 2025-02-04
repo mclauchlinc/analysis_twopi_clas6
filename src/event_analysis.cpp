@@ -163,6 +163,17 @@ void Analysis::PID(std::shared_ptr<Branches> data_, std::shared_ptr<Histogram> h
 	//std::cout<<"\t****IDing Possible Particle Events******\n";
 	for(int j=0; j<_npart; j++){
 		_rParticle.push_back(Particle(j,data_,flags_));//Fill and ID Particle
+		if(flags_->Flags::Helicity()){
+			if(j==0){
+				if(_hel==1){
+					hist_->Histogram::Hel_Ratio_Fill(1.0,0,Particle(j,data_,flags_).Particle::W(),Particle(j,data_,flags_).Particle::Q2(),0,flags_);
+				}else if(_hel == -1){
+					hist_->Histogram::Hel_Ratio_Fill(1.0,1,Particle(j,data_,flags_).Particle::W(),Particle(j,data_,flags_).Particle::Q2(),0,flags_);
+				}
+				
+			}
+			plot::plot_pid(_rParticle[j],hist_,flags_);//Plot on relevant PID Plots
+		}
 		plot::plot_pid(_rParticle[j],hist_,flags_);//Plot on relevant PID Plots
 		if(_rParticle[0].Particle::Is_Elec()){
 			for(int k=1; k<4; k++){//Figuring out which particles we have
@@ -872,3 +883,6 @@ void Analysis::Plot_Events(std::shared_ptr<Histogram> hist_, std::shared_ptr<Fla
 	}
 }
 
+bool Analysis::Valid_Event(){
+	return _iEvent.size()==1;
+}

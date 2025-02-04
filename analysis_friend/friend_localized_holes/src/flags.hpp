@@ -95,6 +95,7 @@ static std::string _acc_rel_cut_ = "-acc_rel_cut=";
 static std::string _tight_ = "tight";
 static std::string _mid_ = "mid";
 static std::string _loose_ = "loose";
+static std::string _none_ = "none";
 
 
 

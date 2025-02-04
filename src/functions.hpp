@@ -45,6 +45,7 @@ void loadChain(std::shared_ptr<TChain> chain_, std::string file_, int thread_id_
 
 
 int extract_run_number(std::string file_name_, std::shared_ptr<Flags> flags_);
+int extract_run_number_sim(std::string file_name_, std::shared_ptr<Flags> flags_);
 
 float extract_run_number_float(std::string file_name, bool cluster);
 void print_vector_idx(std::vector<int> vec_);
@@ -90,7 +91,9 @@ int cut_width(const char* species_, const char* cut_, std::shared_ptr<Flags> fla
 int geo_det_idx(const char* detector_);
 bool vector_in_vector_of_vectors(std::vector<std::vector<int>> vov_, std::vector<int> vec_);
 bool idx_in_vector_of_idx(std::vector<int> vec_, int idx_);
-
+bool Half_Wave(int run_num_, std::shared_ptr<Flags> flags_);
+//Correct Helicity accoridng to half wave plate status
+float Corr_Helicity(float helicity_, int run_num_, std::shared_ptr<Flags> flags_);
 
 }
 
